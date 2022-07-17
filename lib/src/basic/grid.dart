@@ -125,6 +125,7 @@ class TRow extends StatelessWidget {
     return LayoutBuilder(builder: (context, constraints) {
       var maxWidth = constraints.maxWidth + g;
       var list = <Widget>[];
+      children.sort((a, b) => a.order - b.order);
       for (int i = 0; i < children.length; i++) {
         var child = children[i];
         var span = child.span.getSpan(context);
@@ -167,7 +168,7 @@ class TRow extends StatelessWidget {
 }
 
 /// 栅格列间隔格数
-class TSpan {
+class TColSpan {
   /// < 768
   final int? xs;
   /// < 992
@@ -182,7 +183,7 @@ class TSpan {
   final int? xxl;
 
   /// 设置其中一个栅格间隔格数
-  const TSpan.only({this.xs, this.sm, this.md, this.lg, this.xl, this.xxl})
+  const TColSpan.only({this.xs, this.sm, this.md, this.lg, this.xl, this.xxl})
       : assert(xs == null || xs <= 12, 'xs的最大值为12'),
         assert(sm == null || sm <= 12, 'sm的最大值为12'),
         assert(md == null || md <= 12, 'md的最大值为12'),
@@ -191,7 +192,7 @@ class TSpan {
         assert(xxl == null || xxl <= 12, 'xxl的最大值为12');
 
   /// 全部设置为统一的栅格间隔格数
-  const TSpan.span(int span)
+  const TColSpan.span(int span)
       : assert(span <= 12, 'span的最大值为12'),
         xs = span,
         sm = span,
@@ -236,17 +237,21 @@ class TCol extends StatelessWidget {
     Key? key,
     required this.child,
     required this.span,
-    this.offset = const TSpan.span(0),
+    this.offset = const TColSpan.span(0),
+    this.order = 0,
   }) : super(key: key);
 
   /// 子布局
   final Widget child;
 
   /// 栅格格数
-  final TSpan span;
+  final TColSpan span;
 
   /// 栅格左侧的间隔格数
-  final TSpan offset;
+  final TColSpan offset;
+
+  /// 顺序
+  final int order;
 
   @override
   Widget build(BuildContext context) {
