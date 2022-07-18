@@ -92,6 +92,24 @@ class _MyHomePageState extends State<MyHomePage> {
                         onPressed: () {},
                         enabled: true,
                         themeStyle: TButtonThemeStyle.danger,
+                        child: const Text('填充按钮'),
+                      ),
+                      TButton(
+                        onPressed: () {},
+                        enabled: true,
+                        themeStyle: TButtonThemeStyle.warning,
+                        child: const Text('填充按钮'),
+                      ),
+                      TButton(
+                        onPressed: () {},
+                        enabled: true,
+                        themeStyle: TButtonThemeStyle.success,
+                        child: const Text('填充按钮'),
+                      ),
+                      TButton(
+                        onPressed: () {},
+                        enabled: true,
+                        themeStyle: TButtonThemeStyle.danger,
                         variant: TButtonVariant.outline,
                         child: const Text('描边按钮'),
                       ),
@@ -153,6 +171,7 @@ class _MyHomePageState extends State<MyHomePage> {
               TCol(
                 span: const TColSpan.span(12),
                 child: Container(
+                  color: Colors.black,
                   alignment: Alignment.centerLeft,
                   child: Row(
                     children: [
@@ -182,7 +201,6 @@ class _MyHomePageState extends State<MyHomePage> {
                       TButton(
                         onPressed: () {},
                         enabled: true,
-                        themeStyle: TButtonThemeStyle.success,
                         variant: TButtonVariant.text,
                         ghost: true,
                         child: const Text('幽灵按钮'),

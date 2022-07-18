@@ -167,11 +167,10 @@ class TRoundedRectangleBorder extends RoundedRectangleBorder {
           canvas.drawRRect(borderRadius.resolve(textDirection).toRRect(rect), side.toPaint());
         } else {
           final RRect outer = borderRadius.resolve(textDirection).toRRect(rect);
-          final RRect inner = outer.deflate(width);
-          final Paint paint = Paint()..color = side.color..style = PaintingStyle.stroke;
+          final RRect inner = outer.deflate(width * 0.75);
+          final Paint paint = Paint()..color = side.color..style = PaintingStyle.stroke..strokeWidth = width;
 
-
-          var path = Path()..addRRect(outer);
+          var path = Path()..addRRect(inner);
           if(side is TBorderSide && (side as TBorderSide).dashed) {
             path = dashPath(path, 3, 2);
           }

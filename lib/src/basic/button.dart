@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tdesign_desktop_ui/src/basic/ink_bevel_angle.dart';
+import 'package:tdesign_desktop_ui/src/theme/color_scheme.dart';
 
 import '../../tdesign_desktop_ui.dart';
 import '../theme/button_theme.dart';
@@ -97,20 +98,93 @@ class _TButton extends ButtonStyleButton {
   final bool? ghost;
 
   /// 按钮高度
-  double btnHeight(TComponentSize size) {
+  double _btnHeight(TComponentSize size) {
     return size.sizeOf(small: 28, medium: 36, large: 44);
   }
 
-  double btnFontSize(TComponentSize size) {
+  /// 字体大小
+  double _btnFontSize(TComponentSize size) {
     return size.sizeOf(small: fontSizeS, medium: fontSizeBase, large: fontSizeL);
   }
 
-  double btnIconSize(TComponentSize size) {
+  /// icon大小
+  double _btnIconSize(TComponentSize size) {
     return size.sizeOf(small: fontSizeBase, medium: fontSizeL, large: fontSizeXL);
   }
 
-  double btnPaddingHorizontal(TComponentSize size) {
+  /// padding大小
+  double _btnPaddingHorizontal(TComponentSize size) {
     return size.sizeOf(small: spacer, medium: spacer * 2, large: spacer * 3);
+  }
+
+  /// 定义按钮颜色变量
+  static Map<String, Color> _variables(TColorScheme scheme) {
+    return {
+      // 状态色 - 主色
+      'btn-color-primary': scheme.brandColor,
+      'btn-color-primary-hover': scheme.brandColorHover,
+      'btn-color-primary-active': scheme.brandColorActive,
+      'btn-color-primary-disabled': scheme.brandColorDisabled,
+      // 状态色 - 成功
+      'btn-color-success': scheme.successColor,
+      'btn-color-success-hover': scheme.successColorHover,
+      'btn-color-success-active': scheme.successColorActive,
+      'btn-color-success-disabled': scheme.successColorDisabled,
+      // 状态色 - 警告
+      'btn-color-warning': scheme.warningColor,
+      'btn-color-warning-hover': scheme.warningColorHover,
+      'btn-color-warning-active': scheme.warningColorActive,
+      'btn-color-warning-disabled': scheme.warningColorDisabled,
+      // 状态色 - 危险
+      'btn-color-danger': scheme.errorColor,
+      'btn-color-danger-hover': scheme.errorColorHover,
+      'btn-color-danger-active': scheme.errorColorActive,
+      'btn-color-danger-disabled': scheme.errorColorDisabled,
+      // 状态色 - 白 背景
+      // input 输入框需要在浅色主题下有默认白色背景，而在暗色等其他主题下 transparent 适配背景色，因此不使用通用背景 token
+      'btn-color-white-bg': scheme.bgColorSpecialComponent,
+      'btn-color-white-bg-hover': scheme.bgColorSpecialComponent,
+      'btn-color-white-bg-active': scheme.bgColorContainerActive,
+      'btn-color-white-bg-disabled': scheme.bgColorComponentDisabled,
+      // 状态色 - 白 ghost
+      'btn-color-white-ghost': scheme.textColorAnti,
+      'btn-color-white-ghost-hover': scheme.brandColorHover,
+      'btn-color-white-ghost-active': scheme.brandColorActive,
+      'btn-color-white-ghost-disabled': scheme.borderLevel2Color,
+      // 状态色 - 灰 背景
+      'btn-color-gray-bg': scheme.bgColorComponent,
+      'btn-color-gray-bg-hover': scheme.bgColorComponentHover,
+      'btn-color-gray-bg-active': scheme.bgColorComponentActive,
+      'btn-color-gray-bg-disabled': scheme.bgColorComponentDisabled,
+      // 状态色 - 无框背景 - 既文字背景
+      'btn-color-text-bg': Colors.transparent,
+      'btn-color-text-bg-hover': scheme.bgColorContainerHover,
+      'btn-color-text-bg-active': scheme.bgColorContainerActive,
+      'btn-color-text-bg-disabled': Colors.transparent,
+      // 状态色 - border 灰
+      'btn-color-border-gray': scheme.borderLevel2Color,
+      'btn-color-border-gray-hover': scheme.brandColorHover,
+      'btn-color-border-gray-active': scheme.brandColorActive,
+      'btn-color-border-gray-disabled': scheme.borderLevel2Color,
+      // 状态色 - 文字 for 描边
+      'btn-color-text': scheme.textColorPrimary,
+      'btn-color-text-hover': scheme.brandColorHover,
+      'btn-color-text-active': scheme.brandColorActive,
+      'btn-color-text-disabled': scheme.textColorDisabled,
+      // 状态色 - 灰字 for base default | 灰色文字按钮
+      'btn-color-text-gray': scheme.textColorPrimary,
+      'btn-color-text-gray-hover': scheme.textColorPrimary,
+      'btn-color-text-gray-active': scheme.textColorPrimary,
+      'btn-color-text-gray-disabled': scheme.textColorDisabled,
+
+      'btn-color-none': Colors.transparent,
+      'btn-color-none-hover': Colors.transparent,
+      'btn-color-none-active': Colors.transparent,
+      'btn-color-none-disabled': Colors.transparent,
+
+      // 文本
+      'btn-text-variant-base-color': scheme.textColorAnti
+    };
   }
 
   @override
@@ -122,171 +196,259 @@ class _TButton extends ButtonStyleButton {
     TComponentSize defaultSize = size ?? buttonTheme.size ?? ttheme.size;
     var buttonThemeStyle = themeStyle ?? buttonTheme.themeStyle ?? TButtonThemeStyle.defaultStyle;
     var isGhost = ghost ?? buttonTheme.ghost ?? ttheme.brightness == Brightness.dark;
+    var variables = _variables(colorScheme);
 
-    // 文本
-    final MaterialStateProperty<TextStyle?> textStyle = MaterialStateProperty.resolveWith((states) {
-      var odt = buttonThemeStyle.valueOf(
-        defaultStyle: colorScheme.textColorPrimary,
-        primary: colorScheme.brandColor,
-        danger: colorScheme.errorColor,
-        warning: colorScheme.warningColor,
-        success: colorScheme.successColor,
-      );
-      if (states.contains(MaterialState.disabled)) {
-        odt = buttonThemeStyle.valueOf(
-          defaultStyle: colorScheme.textColorDisabled,
-          primary: colorScheme.brandColorDisabled,
-          danger: colorScheme.errorColorDisabled,
-          warning: colorScheme.warningColorDisabled,
-          success: colorScheme.successColorDisabled,
-        );
-      }
-      if (states.contains(MaterialState.hovered) && variant.contain(outline: true, dashed: true)) {
-        odt = buttonThemeStyle.valueOf(
-          defaultStyle: colorScheme.brandColorHover,
-          primary: colorScheme.brandColorHover,
-          danger: colorScheme.errorColorHover,
-          warning: colorScheme.warningColorHover,
-          success: colorScheme.successColorHover,
-        );
-      }
-      if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed) && variant == TButtonVariant.outline) {
-        odt = buttonThemeStyle.valueOf(
-          defaultStyle: colorScheme.brandColorActive,
-          primary: colorScheme.brandColorActive,
-          danger: colorScheme.errorColorActive,
-          warning: colorScheme.warningColorActive,
-          success: colorScheme.successColorActive,
-        );
-      }
-      return TextStyle(
-        fontFamily: ttheme.fontFamily,
-        fontSize: btnFontSize(defaultSize),
-        color: variant.variantOf<Color?>(
-          base: buttonThemeStyle.isDefaultOf(
-            defaultStyle: odt,
-            other: colorScheme.textColorAnti,
-          ),
-          outline: odt,
-          dashed: odt,
-          text: odt,
-        ),
-      );
-    });
+    late MaterialStateProperty<TextStyle?> textStyle;
+    late MaterialStateProperty<TBorderSide?> borderSide;
+    late MaterialStateProperty<Color?> backgroundColor;
 
-    // 边框
-    final MaterialStateProperty<TBorderSide?> borderSide = MaterialStateProperty.resolveWith((states) {
-      var themeStyleColor = buttonThemeStyle.valueOf(
-        defaultStyle: colorScheme.borderLevel2Color,
-        primary: colorScheme.brandColor,
-        danger: colorScheme.errorColor,
-        warning: colorScheme.warningColor,
-        success: colorScheme.successColor,
-      );
-      if (states.contains(MaterialState.disabled)) {
-        themeStyleColor = buttonThemeStyle.valueOf(
-          defaultStyle: colorScheme.textColorDisabled,
-          primary: colorScheme.brandColorDisabled,
-          danger: colorScheme.errorColorDisabled,
-          warning: colorScheme.warningColorDisabled,
-          success: colorScheme.successColorDisabled,
-        );
-      }
+    Color? resolve(String theme, Set<MaterialState> states, {bool ghost = false, String? defaultColor}) {
       if (states.contains(MaterialState.hovered)) {
-        themeStyleColor = buttonThemeStyle.valueOf(
-          defaultStyle: colorScheme.brandColorHover,
-          primary: colorScheme.brandColorHover,
-          danger: colorScheme.errorColorHover,
-          warning: colorScheme.warningColorHover,
-          success: colorScheme.successColorHover,
-        );
+        return variables['btn-color-$theme-hover'];
       }
-      if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
-        themeStyleColor = buttonThemeStyle.valueOf(
-          defaultStyle: colorScheme.brandColorActive,
-          primary: colorScheme.brandColorActive,
-          danger: colorScheme.errorColorActive,
-          warning: colorScheme.warningColorActive,
-          success: colorScheme.successColorActive,
-        );
+      if ((states.contains(MaterialState.focused) || states.contains(MaterialState.pressed))) {
+        return variables['btn-color-$theme-active'];
       }
-      return TBorderSide(
-        width: 1,
-        color: variant.variantOf(
-          base: Colors.transparent,
-          outline: themeStyleColor,
-          dashed: themeStyleColor,
-          text: Colors.transparent,
-        ),
-        dashed: variant == TButtonVariant.dashed,
-      );
-    });
+      if (states.contains(MaterialState.disabled)) {
+        return variables['btn-color-$theme-disabled'];
+      }
+      return variables[defaultColor] ?? variables['btn-color-$theme'];
+    }
+
+    MaterialStateProperty<TextStyle?> textStyleResolve(String theme, {bool ghost = false, String? defaultColor}) {
+      return MaterialStateProperty.resolveWith((states) => TextStyle(
+            fontFamily: ttheme.fontFamily,
+            fontSize: _btnFontSize(defaultSize),
+            color: resolve(theme, states, ghost: ghost, defaultColor: defaultColor),
+          ));
+    }
+
+    MaterialStateProperty<TextStyle?> textStyleFixedResolve(String color, {bool ghost = false}) {
+      return MaterialStateProperty.resolveWith((states) => TextStyle(
+            fontFamily: ttheme.fontFamily,
+            fontSize: _btnFontSize(defaultSize),
+            color: variables[color],
+          ));
+    }
+
+    MaterialStateProperty<TBorderSide?> borderSideResolve(String theme, {bool ghost = false}) {
+      return MaterialStateProperty.resolveWith((states) => TBorderSide(
+            width: 1,
+            color: resolve(theme, states, ghost: ghost) ?? Colors.transparent,
+            dashed: variant == TButtonVariant.dashed,
+          ));
+    }
+
+    MaterialStateProperty<Color?> backgroundColorResolve(String theme, {bool ghost = false}) {
+      return MaterialStateProperty.resolveWith((states) => resolve(theme, states, ghost: ghost));
+    }
+
+    switch (variant) {
+      // 填充按钮
+      case TButtonVariant.base:
+        textStyle = textStyleResolve('text-gray');
+        backgroundColor = backgroundColorResolve('gray-bg');
+        borderSide = borderSideResolve('gray-bg');
+        switch (buttonThemeStyle) {
+          case TButtonThemeStyle.defaultStyle:
+            break;
+          case TButtonThemeStyle.primary:
+            if (isGhost) {
+              textStyle = textStyleResolve('primary', ghost: true);
+              borderSide = borderSideResolve('primary', ghost: true);
+            } else {
+              textStyle = textStyleFixedResolve('btn-text-variant-base-color');
+              backgroundColor = backgroundColorResolve('primary');
+              borderSide = borderSideResolve('primary');
+            }
+            break;
+          case TButtonThemeStyle.danger:
+            if (isGhost) {
+              textStyle = textStyleResolve('danger', ghost: true);
+              borderSide = borderSideResolve('danger', ghost: true);
+            } else {
+              textStyle = textStyleFixedResolve('btn-text-variant-base-color');
+              backgroundColor = backgroundColorResolve('danger');
+              borderSide = borderSideResolve('danger');
+            }
+            break;
+          case TButtonThemeStyle.warning:
+            if (isGhost) {
+              textStyle = textStyleResolve('warning', ghost: true);
+              borderSide = borderSideResolve('warning', ghost: true);
+            } else {
+              textStyle = textStyleFixedResolve('btn-text-variant-base-color');
+              backgroundColor = backgroundColorResolve('warning');
+              borderSide = borderSideResolve('warning');
+            }
+            break;
+          case TButtonThemeStyle.success:
+            if (isGhost) {
+              textStyle = textStyleResolve('success', ghost: true);
+              borderSide = borderSideResolve('success', ghost: true);
+            } else {
+              textStyle = textStyleFixedResolve('btn-text-variant-base-color');
+              backgroundColor = backgroundColorResolve('success');
+              borderSide = borderSideResolve('success');
+            }
+            break;
+        }
+        if (isGhost) {
+          backgroundColor = MaterialStateProperty.resolveWith((states) => Colors.transparent);
+        }
+        break;
+      // 描边按钮
+      case TButtonVariant.outline:
+        if (isGhost) {
+          backgroundColor = backgroundColorResolve('none', ghost: true);
+          textStyle = textStyleResolve('white-ghost', ghost: true);
+          borderSide = borderSideResolve('white-ghost', ghost: true);
+        } else {
+          textStyle = textStyleResolve('text');
+          backgroundColor = backgroundColorResolve('white-bg');
+          borderSide = borderSideResolve('border-gray');
+        }
+        switch (buttonThemeStyle) {
+          case TButtonThemeStyle.defaultStyle:
+            break;
+          case TButtonThemeStyle.primary:
+            if (isGhost) {
+              textStyle = textStyleResolve('primary', ghost: true);
+              borderSide = borderSideResolve('primary', ghost: true);
+            } else {
+              textStyle = textStyleResolve('primary');
+              borderSide = borderSideResolve('primary');
+            }
+            break;
+          case TButtonThemeStyle.danger:
+            if (isGhost) {
+              textStyle = textStyleResolve('danger', ghost: true);
+              borderSide = borderSideResolve('danger', ghost: true);
+            } else {
+              textStyle = textStyleResolve('danger');
+              borderSide = borderSideResolve('danger');
+            }
+            break;
+          case TButtonThemeStyle.warning:
+            if (isGhost) {
+              textStyle = textStyleResolve('warning', ghost: true);
+              borderSide = borderSideResolve('warning', ghost: true);
+            } else {
+              textStyle = textStyleResolve('warning');
+              borderSide = borderSideResolve('warning');
+            }
+            break;
+          case TButtonThemeStyle.success:
+            if (isGhost) {
+              textStyle = textStyleResolve('success', ghost: true);
+              borderSide = borderSideResolve('success', ghost: true);
+            } else {
+              textStyle = textStyleResolve('success');
+              borderSide = borderSideResolve('success');
+            }
+            break;
+        }
+        break;
+      // 虚框按钮
+      case TButtonVariant.dashed:
+        if (isGhost) {
+          backgroundColor = backgroundColorResolve('none', ghost: true);
+          textStyle = textStyleResolve('white-ghost', ghost: true);
+          borderSide = borderSideResolve('white-ghost', ghost: true);
+        } else {
+          textStyle = textStyleResolve('text');
+          backgroundColor = backgroundColorResolve('white-bg');
+          borderSide = borderSideResolve('border-gray');
+        }
+        switch (buttonThemeStyle) {
+          case TButtonThemeStyle.defaultStyle:
+            break;
+          case TButtonThemeStyle.primary:
+            if (isGhost) {
+              textStyle = textStyleResolve('primary', ghost: true);
+              borderSide = borderSideResolve('primary', ghost: true);
+            } else {
+              textStyle = textStyleResolve('primary');
+              borderSide = borderSideResolve('primary');
+            }
+            break;
+          case TButtonThemeStyle.danger:
+            if (isGhost) {
+              textStyle = textStyleResolve('danger', ghost: true);
+              borderSide = borderSideResolve('danger', ghost: true);
+            } else {
+              textStyle = textStyleResolve('danger');
+              borderSide = borderSideResolve('danger');
+            }
+            break;
+          case TButtonThemeStyle.warning:
+            if (isGhost) {
+              textStyle = textStyleResolve('warning', ghost: true);
+              borderSide = borderSideResolve('warning', ghost: true);
+            } else {
+              textStyle = textStyleResolve('warning');
+              borderSide = borderSideResolve('warning');
+            }
+            break;
+          case TButtonThemeStyle.success:
+            if (isGhost) {
+              textStyle = textStyleResolve('success', ghost: true);
+              borderSide = borderSideResolve('success', ghost: true);
+            } else {
+              textStyle = textStyleResolve('success');
+              borderSide = borderSideResolve('success');
+            }
+            break;
+        }
+        break;
+      // 文字按钮
+      case TButtonVariant.text:
+        textStyle = textStyleResolve('text-gray');
+        backgroundColor = backgroundColorResolve('text-bg');
+        borderSide = borderSideResolve('none');
+        if (isGhost) {
+          backgroundColor = backgroundColorResolve('none', ghost: true);
+          textStyle = textStyleResolve('white-ghost');
+          borderSide = borderSideResolve('text-bg');
+        }
+        switch (buttonThemeStyle) {
+          case TButtonThemeStyle.defaultStyle:
+            break;
+          case TButtonThemeStyle.primary:
+            if (isGhost) {
+              textStyle = textStyleResolve('primary', ghost: true);
+            } else {
+              textStyle = textStyleResolve('primary');
+            }
+            break;
+          case TButtonThemeStyle.danger:
+            if (isGhost) {
+              textStyle = textStyleResolve('danger', ghost: true);
+            } else {
+              textStyle = textStyleResolve('danger');
+            }
+            break;
+          case TButtonThemeStyle.warning:
+            if (isGhost) {
+              textStyle = textStyleResolve('warning', ghost: true);
+            } else {
+              textStyle = textStyleResolve('warning');
+            }
+            break;
+          case TButtonThemeStyle.success:
+            if (isGhost) {
+              textStyle = textStyleResolve('success', ghost: true);
+            } else {
+              textStyle = textStyleResolve('success');
+            }
+            break;
+        }
+        break;
+    }
 
     // 前景色
     final MaterialStateProperty<Color?> foregroundColor = MaterialStateProperty.resolveWith((states) {
       return null;
-    });
-
-    // 背景色
-    final MaterialStateProperty<Color?> backgroundColor = MaterialStateProperty.resolveWith((states) {
-      if (states.contains(MaterialState.disabled)) {
-        colorBy(Color base) => variant.variantOf<Color?>(
-              base: base,
-              outline: colorScheme.bgColorComponentDisabled,
-              dashed: colorScheme.bgColorComponentDisabled,
-              text: Colors.transparent,
-            );
-        return buttonThemeStyle.valueOf(
-          defaultStyle: colorBy(colorScheme.bgColorComponentDisabled),
-          primary: colorBy(colorScheme.brandColorDisabled),
-          danger: colorBy(colorScheme.errorColorDisabled),
-          warning: colorBy(colorScheme.warningColorDisabled),
-          success: colorBy(colorScheme.successColorDisabled),
-        );
-      }
-      if (states.contains(MaterialState.hovered)) {
-        colorBy(Color base) => variant.variantOf<Color?>(
-              base: base,
-              outline: colorScheme.bgColorSpecialComponent,
-              dashed: colorScheme.bgColorSpecialComponent,
-              text: colorScheme.bgColorContainerHover,
-            );
-        return buttonThemeStyle.valueOf(
-          defaultStyle: colorBy(colorScheme.bgColorComponentHover),
-          primary: colorBy(colorScheme.brandColorHover),
-          danger: colorBy(colorScheme.errorColorHover),
-          warning: colorBy(colorScheme.warningColorHover),
-          success: colorBy(colorScheme.successColorHover),
-        );
-      }
-      if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
-        colorBy(Color base) => variant.variantOf<Color?>(
-              base: base,
-              outline: colorScheme.bgColorContainerActive,
-              dashed: colorScheme.bgColorContainerActive,
-              text: colorScheme.bgColorContainerActive,
-            );
-        return buttonThemeStyle.valueOf(
-          defaultStyle: colorBy(colorScheme.bgColorComponentActive),
-          primary: colorBy(colorScheme.brandColorActive),
-          danger: colorBy(colorScheme.errorColorActive),
-          warning: colorBy(colorScheme.warningColorActive),
-          success: colorBy(colorScheme.successColorActive),
-        );
-      }
-      colorBy(Color base) => variant.variantOf<Color?>(
-            base: base,
-            outline: colorScheme.bgColorSpecialComponent,
-            dashed: colorScheme.bgColorSpecialComponent,
-            text: Colors.transparent,
-          );
-      return buttonThemeStyle.valueOf(
-        defaultStyle: colorBy(colorScheme.bgColorComponent),
-        primary: colorBy(colorScheme.brandColor),
-        danger: colorBy(colorScheme.errorColor),
-        warning: colorBy(colorScheme.warningColor),
-        success: colorBy(colorScheme.successColor),
-      );
     });
 
     // 覆盖色
@@ -295,8 +457,22 @@ class _TButton extends ButtonStyleButton {
         return Colors.transparent;
       }
       if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
-        var color = backgroundColor.resolve(states);
-        return color;
+        if (isGhost) {
+          return colorScheme.gray10;
+        }
+        if (variant.contain(base: true)) {
+          buttonThemeStyle.valueOf(
+            defaultStyle: variables['btn-color-gray-bg-active'],
+            primary: variables['btn-color-primary-active'],
+            danger: variables['btn-color-danger-active'],
+            warning: variables['btn-color-warning-active'],
+            success: variables['btn-color-success-active'],
+          );
+        } else {
+          if (!states.contains(MaterialState.disabled)) {
+            return variables['btn-color-white-bg-active'];
+          }
+        }
       }
       return null;
     });
@@ -318,17 +494,12 @@ class _TButton extends ButtonStyleButton {
       surfaceTintColor: ButtonStyleButton.allOrNull<Color>(Colors.transparent),
       elevation: ButtonStyleButton.allOrNull<double>(0),
       padding: ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(_scaledPadding(context, defaultSize)),
-      minimumSize: ButtonStyleButton.allOrNull<Size>(Size(btnHeight(defaultSize), btnHeight(defaultSize))),
+      minimumSize: ButtonStyleButton.allOrNull<Size>(Size(_btnHeight(defaultSize), _btnHeight(defaultSize))),
       fixedSize: ButtonStyleButton.allOrNull<Size>(null),
       maximumSize: ButtonStyleButton.allOrNull<Size>(Size.infinite),
       side: borderSide,
-      shape: ButtonStyleButton.allOrNull<TRoundedRectangleBorder>(TRoundedRectangleBorder(
-        side: TBorderSide(
-          width: 1,
-          color: colorScheme.borderLevel2Color,
-          dashed: variant == TButtonVariant.dashed,
-        ),
-        borderRadius: const BorderRadius.all(Radius.circular(borderRadius)),
+      shape: ButtonStyleButton.allOrNull<TRoundedRectangleBorder>(const TRoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(borderRadius)),
       )),
       mouseCursor: mouseCursor,
       visualDensity: theme.visualDensity,
@@ -341,7 +512,7 @@ class _TButton extends ButtonStyleButton {
   }
 
   EdgeInsetsGeometry _scaledPadding(BuildContext context, TComponentSize size) {
-    var horizontal = btnPaddingHorizontal(size);
+    var horizontal = _btnPaddingHorizontal(size);
     return ButtonStyleButton.scaledPadding(
       EdgeInsets.symmetric(horizontal: horizontal),
       EdgeInsets.symmetric(horizontal: horizontal),
