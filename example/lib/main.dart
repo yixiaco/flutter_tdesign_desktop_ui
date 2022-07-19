@@ -68,7 +68,14 @@ class _MyHomePageState extends State<MyHomePage> {
                   alignment: Alignment.centerLeft,
                   child: Row(
                     children: [
-                      TButton(onPressed: () {}, enabled: true, child: const Text('填充按钮')),
+                      TButton(
+                        onPressed: () {},
+                        enabled: true,
+                        child: const Icon(
+                          TIcons.books,
+                          color: Colors.green,
+                        ),
+                      ),
                       TButton(onPressed: () {}, enabled: true, variant: TButtonVariant.outline, child: const Text('描边按钮')),
                       TButton(onPressed: () {}, enabled: true, variant: TButtonVariant.dashed, child: const Text('虚框按钮')),
                       TButton(onPressed: () {}, enabled: true, variant: TButtonVariant.text, child: const Text('文字按钮')),

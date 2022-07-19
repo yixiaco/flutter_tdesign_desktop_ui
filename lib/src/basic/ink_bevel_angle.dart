@@ -62,7 +62,7 @@ class InkBevelAngle extends InteractiveInkFeature {
   InkBevelAngle({
     required MaterialInkController controller,
     required RenderBox referenceBox,
-    required Offset position,
+    required this.position,
     required Color color,
     required TextDirection textDirection,
     bool containedInkWell = false,
@@ -72,11 +72,10 @@ class InkBevelAngle extends InteractiveInkFeature {
     double? radius,
     VoidCallback? onRemoved,
   })
-      : _position = position,
-        _borderRadius = borderRadius ?? BorderRadius.zero,
+      : _borderRadius = borderRadius ?? BorderRadius.zero,
         _customBorder = customBorder,
         _textDirection = textDirection,
-        _targetRadius = radius ?? _getTargetRadius(referenceBox, containedInkWell, rectCallback, position),
+        targetRadius = radius ?? _getTargetRadius(referenceBox, containedInkWell, rectCallback, position),
         _clipCallback = _getClipCallback(referenceBox, containedInkWell, rectCallback),
         super(controller: controller, referenceBox: referenceBox, color: color, onRemoved: onRemoved) {
     _angle = AnimationController(duration: const Duration(milliseconds: 200), vsync: controller.vsync)
@@ -106,10 +105,10 @@ class InkBevelAngle extends InteractiveInkFeature {
 
   static const InteractiveInkFeatureFactory splashFactory = _InkBevelAngleFactory();
 
-  final Offset _position;
+  final Offset position;
   final BorderRadius _borderRadius;
   final ShapeBorder? _customBorder;
-  final double _targetRadius;
+  final double targetRadius;
   final RectCallback? _clipCallback;
   final TextDirection _textDirection;
 

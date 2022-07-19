@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:tdesign_desktop_ui/src/basic/ink_bevel_angle.dart';
-import 'package:tdesign_desktop_ui/src/theme/color_scheme.dart';
 
 import '../../tdesign_desktop_ui.dart';
-import '../theme/button_theme.dart';
-import 'borders.dart';
 
 /// 按钮组件风格
 enum TButtonThemeStyle {
@@ -196,6 +192,7 @@ class _TButton extends ButtonStyleButton {
     TComponentSize defaultSize = size ?? buttonTheme.size ?? ttheme.size;
     var buttonThemeStyle = themeStyle ?? buttonTheme.themeStyle ?? TButtonThemeStyle.defaultStyle;
     var isGhost = ghost ?? buttonTheme.ghost ?? ttheme.brightness == Brightness.dark;
+    var media = MediaQuery.of(context);
     var variables = _variables(colorScheme);
 
     late MaterialStateProperty<TextStyle?> textStyle;
@@ -233,7 +230,7 @@ class _TButton extends ButtonStyleButton {
 
     MaterialStateProperty<TBorderSide?> borderSideResolve(String theme, {bool ghost = false}) {
       return MaterialStateProperty.resolveWith((states) => TBorderSide(
-            width: 1,
+            width: 1 / media.devicePixelRatio,
             color: resolve(theme, states, ghost: ghost) ?? Colors.transparent,
             dashed: variant == TButtonVariant.dashed,
           ));
@@ -461,7 +458,7 @@ class _TButton extends ButtonStyleButton {
           return colorScheme.gray10;
         }
         if (variant.contain(base: true)) {
-          buttonThemeStyle.valueOf(
+          return buttonThemeStyle.valueOf(
             defaultStyle: variables['btn-color-gray-bg-active'],
             primary: variables['btn-color-primary-active'],
             danger: variables['btn-color-danger-active'],

@@ -22,7 +22,11 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
-
+  uses-material-design: true
+  fonts:
+    - family: t
+      fonts:
+        - asset: assets/fonts/t.ttf
   # To add assets to your package, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg
