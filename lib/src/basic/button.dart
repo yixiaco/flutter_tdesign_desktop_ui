@@ -2,6 +2,83 @@ import 'package:flutter/material.dart';
 
 import '../../tdesign_desktop_ui.dart';
 
+///按钮变体枚举
+enum TButtonVariant {
+  /// 填充按钮
+  base,
+
+  /// 描边按钮
+  outline,
+
+  /// 虚框按钮
+  dashed,
+
+  /// 文字按钮
+  text;
+
+  /// 判断是否包含类型
+  bool contain({
+    bool base = false,
+    bool outline = false,
+    bool dashed = false,
+    bool text = false,
+  }) {
+    switch (this) {
+      case TButtonVariant.base:
+        return base;
+      case TButtonVariant.outline:
+        return outline;
+      case TButtonVariant.dashed:
+        return dashed;
+      case TButtonVariant.text:
+        return text;
+    }
+  }
+
+  /// 根据按钮形式，返回对应的值
+  T variantOf<T>({required T base, required T outline, required T dashed, required T text}) {
+    switch (this) {
+      case TButtonVariant.base:
+        return base;
+      case TButtonVariant.outline:
+        return outline;
+      case TButtonVariant.dashed:
+        return dashed;
+      case TButtonVariant.text:
+        return text;
+    }
+  }
+}
+
+/// 预定义的一组形状
+enum TButtonShape {
+  /// 长方形
+  rectangle,
+
+  /// 正方形
+  square,
+
+  /// 圆角长方形
+  round,
+
+  /// 圆形
+  circle;
+
+  /// 根据按钮形状，返回对应的值
+  T valueOf<T>({required T rectangle, required T square, required T round, required T circle}) {
+    switch (this) {
+      case TButtonShape.rectangle:
+        return rectangle;
+      case TButtonShape.square:
+        return square;
+      case TButtonShape.round:
+        return round;
+      case TButtonShape.circle:
+        return circle;
+    }
+  }
+}
+
 /// 按钮组件风格
 enum TButtonThemeStyle {
   /// 默认色
@@ -62,11 +139,12 @@ class _TButton extends ButtonStyleButton {
     FocusNode? focusNode,
     bool autofocus = false,
     Clip clipBehavior = Clip.none,
-    required Widget child,
+    Widget? child,
     this.size,
     required this.variant,
     this.themeStyle,
     this.ghost,
+    required this.shape,
   }) : super(
           key: key,
           onPressed: onPressed,
@@ -93,6 +171,10 @@ class _TButton extends ButtonStyleButton {
   /// 是否为幽灵按钮（镂空按钮）
   final bool? ghost;
 
+  /// 预定义的一组按钮形状，可以通过[style.shape]进行覆盖
+  /// 有 4 种：长方形、正方形、圆角长方形、圆形。可选项：rectangle/square/round/circle
+  final TButtonShape shape;
+
   /// 按钮高度
   double _btnHeight(TComponentSize size) {
     return size.sizeOf(small: 28, medium: 36, large: 44);
@@ -101,11 +183,6 @@ class _TButton extends ButtonStyleButton {
   /// 字体大小
   double _btnFontSize(TComponentSize size) {
     return size.sizeOf(small: fontSizeS, medium: fontSizeBase, large: fontSizeL);
-  }
-
-  /// icon大小
-  double _btnIconSize(TComponentSize size) {
-    return size.sizeOf(small: fontSizeBase, medium: fontSizeL, large: fontSizeXL);
   }
 
   /// padding大小
@@ -195,9 +272,12 @@ class _TButton extends ButtonStyleButton {
     var media = MediaQuery.of(context);
     var variables = _variables(colorScheme);
 
-    late MaterialStateProperty<TextStyle?> textStyle;
+    // 边框
     late MaterialStateProperty<TBorderSide?> borderSide;
+    // 背景色
     late MaterialStateProperty<Color?> backgroundColor;
+    // 前景色
+    late MaterialStateProperty<Color?> foregroundColor;
 
     Color? resolve(String theme, Set<MaterialState> states, {bool ghost = false, String? defaultColor}) {
       if (states.contains(MaterialState.hovered)) {
@@ -212,22 +292,17 @@ class _TButton extends ButtonStyleButton {
       return variables[defaultColor] ?? variables['btn-color-$theme'];
     }
 
-    MaterialStateProperty<TextStyle?> textStyleResolve(String theme, {bool ghost = false, String? defaultColor}) {
-      return MaterialStateProperty.resolveWith((states) => TextStyle(
-            fontFamily: ttheme.fontFamily,
-            fontSize: _btnFontSize(defaultSize),
-            color: resolve(theme, states, ghost: ghost, defaultColor: defaultColor),
-          ));
+    // 动态前景色
+    MaterialStateProperty<Color?> foregroundColorResolve(String theme, {bool ghost = false, String? defaultColor}) {
+      return MaterialStateProperty.resolveWith((states) => resolve(theme, states, ghost: ghost, defaultColor: defaultColor));
     }
 
-    MaterialStateProperty<TextStyle?> textStyleFixedResolve(String color, {bool ghost = false}) {
-      return MaterialStateProperty.resolveWith((states) => TextStyle(
-            fontFamily: ttheme.fontFamily,
-            fontSize: _btnFontSize(defaultSize),
-            color: variables[color],
-          ));
+    // 固定前景色
+    MaterialStateProperty<Color?> foregroundColorFixedResolve(String color, {bool ghost = false}) {
+      return MaterialStateProperty.resolveWith((states) => variables[color]);
     }
 
+    // 动态边框
     MaterialStateProperty<TBorderSide?> borderSideResolve(String theme, {bool ghost = false}) {
       return MaterialStateProperty.resolveWith((states) => TBorderSide(
             width: 1 / media.devicePixelRatio,
@@ -236,6 +311,7 @@ class _TButton extends ButtonStyleButton {
           ));
     }
 
+    // 动态背景
     MaterialStateProperty<Color?> backgroundColorResolve(String theme, {bool ghost = false}) {
       return MaterialStateProperty.resolveWith((states) => resolve(theme, states, ghost: ghost));
     }
@@ -243,7 +319,7 @@ class _TButton extends ButtonStyleButton {
     switch (variant) {
       // 填充按钮
       case TButtonVariant.base:
-        textStyle = textStyleResolve('text-gray');
+        foregroundColor = foregroundColorResolve('text-gray');
         backgroundColor = backgroundColorResolve('gray-bg');
         borderSide = borderSideResolve('gray-bg');
         switch (buttonThemeStyle) {
@@ -251,40 +327,40 @@ class _TButton extends ButtonStyleButton {
             break;
           case TButtonThemeStyle.primary:
             if (isGhost) {
-              textStyle = textStyleResolve('primary', ghost: true);
+              foregroundColor = foregroundColorResolve('primary', ghost: true);
               borderSide = borderSideResolve('primary', ghost: true);
             } else {
-              textStyle = textStyleFixedResolve('btn-text-variant-base-color');
+              foregroundColor = foregroundColorFixedResolve('btn-text-variant-base-color');
               backgroundColor = backgroundColorResolve('primary');
               borderSide = borderSideResolve('primary');
             }
             break;
           case TButtonThemeStyle.danger:
             if (isGhost) {
-              textStyle = textStyleResolve('danger', ghost: true);
+              foregroundColor = foregroundColorResolve('danger', ghost: true);
               borderSide = borderSideResolve('danger', ghost: true);
             } else {
-              textStyle = textStyleFixedResolve('btn-text-variant-base-color');
+              foregroundColor = foregroundColorFixedResolve('btn-text-variant-base-color');
               backgroundColor = backgroundColorResolve('danger');
               borderSide = borderSideResolve('danger');
             }
             break;
           case TButtonThemeStyle.warning:
             if (isGhost) {
-              textStyle = textStyleResolve('warning', ghost: true);
+              foregroundColor = foregroundColorResolve('warning', ghost: true);
               borderSide = borderSideResolve('warning', ghost: true);
             } else {
-              textStyle = textStyleFixedResolve('btn-text-variant-base-color');
+              foregroundColor = foregroundColorFixedResolve('btn-text-variant-base-color');
               backgroundColor = backgroundColorResolve('warning');
               borderSide = borderSideResolve('warning');
             }
             break;
           case TButtonThemeStyle.success:
             if (isGhost) {
-              textStyle = textStyleResolve('success', ghost: true);
+              foregroundColor = foregroundColorResolve('success', ghost: true);
               borderSide = borderSideResolve('success', ghost: true);
             } else {
-              textStyle = textStyleFixedResolve('btn-text-variant-base-color');
+              foregroundColor = foregroundColorFixedResolve('btn-text-variant-base-color');
               backgroundColor = backgroundColorResolve('success');
               borderSide = borderSideResolve('success');
             }
@@ -298,10 +374,10 @@ class _TButton extends ButtonStyleButton {
       case TButtonVariant.outline:
         if (isGhost) {
           backgroundColor = backgroundColorResolve('none', ghost: true);
-          textStyle = textStyleResolve('white-ghost', ghost: true);
+          foregroundColor = foregroundColorResolve('white-ghost', ghost: true);
           borderSide = borderSideResolve('white-ghost', ghost: true);
         } else {
-          textStyle = textStyleResolve('text');
+          foregroundColor = foregroundColorResolve('text');
           backgroundColor = backgroundColorResolve('white-bg');
           borderSide = borderSideResolve('border-gray');
         }
@@ -310,37 +386,37 @@ class _TButton extends ButtonStyleButton {
             break;
           case TButtonThemeStyle.primary:
             if (isGhost) {
-              textStyle = textStyleResolve('primary', ghost: true);
+              foregroundColor = foregroundColorResolve('primary', ghost: true);
               borderSide = borderSideResolve('primary', ghost: true);
             } else {
-              textStyle = textStyleResolve('primary');
+              foregroundColor = foregroundColorResolve('primary');
               borderSide = borderSideResolve('primary');
             }
             break;
           case TButtonThemeStyle.danger:
             if (isGhost) {
-              textStyle = textStyleResolve('danger', ghost: true);
+              foregroundColor = foregroundColorResolve('danger', ghost: true);
               borderSide = borderSideResolve('danger', ghost: true);
             } else {
-              textStyle = textStyleResolve('danger');
+              foregroundColor = foregroundColorResolve('danger');
               borderSide = borderSideResolve('danger');
             }
             break;
           case TButtonThemeStyle.warning:
             if (isGhost) {
-              textStyle = textStyleResolve('warning', ghost: true);
+              foregroundColor = foregroundColorResolve('warning', ghost: true);
               borderSide = borderSideResolve('warning', ghost: true);
             } else {
-              textStyle = textStyleResolve('warning');
+              foregroundColor = foregroundColorResolve('warning');
               borderSide = borderSideResolve('warning');
             }
             break;
           case TButtonThemeStyle.success:
             if (isGhost) {
-              textStyle = textStyleResolve('success', ghost: true);
+              foregroundColor = foregroundColorResolve('success', ghost: true);
               borderSide = borderSideResolve('success', ghost: true);
             } else {
-              textStyle = textStyleResolve('success');
+              foregroundColor = foregroundColorResolve('success');
               borderSide = borderSideResolve('success');
             }
             break;
@@ -350,10 +426,10 @@ class _TButton extends ButtonStyleButton {
       case TButtonVariant.dashed:
         if (isGhost) {
           backgroundColor = backgroundColorResolve('none', ghost: true);
-          textStyle = textStyleResolve('white-ghost', ghost: true);
+          foregroundColor = foregroundColorResolve('white-ghost', ghost: true);
           borderSide = borderSideResolve('white-ghost', ghost: true);
         } else {
-          textStyle = textStyleResolve('text');
+          foregroundColor = foregroundColorResolve('text');
           backgroundColor = backgroundColorResolve('white-bg');
           borderSide = borderSideResolve('border-gray');
         }
@@ -362,37 +438,37 @@ class _TButton extends ButtonStyleButton {
             break;
           case TButtonThemeStyle.primary:
             if (isGhost) {
-              textStyle = textStyleResolve('primary', ghost: true);
+              foregroundColor = foregroundColorResolve('primary', ghost: true);
               borderSide = borderSideResolve('primary', ghost: true);
             } else {
-              textStyle = textStyleResolve('primary');
+              foregroundColor = foregroundColorResolve('primary');
               borderSide = borderSideResolve('primary');
             }
             break;
           case TButtonThemeStyle.danger:
             if (isGhost) {
-              textStyle = textStyleResolve('danger', ghost: true);
+              foregroundColor = foregroundColorResolve('danger', ghost: true);
               borderSide = borderSideResolve('danger', ghost: true);
             } else {
-              textStyle = textStyleResolve('danger');
+              foregroundColor = foregroundColorResolve('danger');
               borderSide = borderSideResolve('danger');
             }
             break;
           case TButtonThemeStyle.warning:
             if (isGhost) {
-              textStyle = textStyleResolve('warning', ghost: true);
+              foregroundColor = foregroundColorResolve('warning', ghost: true);
               borderSide = borderSideResolve('warning', ghost: true);
             } else {
-              textStyle = textStyleResolve('warning');
+              foregroundColor = foregroundColorResolve('warning');
               borderSide = borderSideResolve('warning');
             }
             break;
           case TButtonThemeStyle.success:
             if (isGhost) {
-              textStyle = textStyleResolve('success', ghost: true);
+              foregroundColor = foregroundColorResolve('success', ghost: true);
               borderSide = borderSideResolve('success', ghost: true);
             } else {
-              textStyle = textStyleResolve('success');
+              foregroundColor = foregroundColorResolve('success');
               borderSide = borderSideResolve('success');
             }
             break;
@@ -400,12 +476,12 @@ class _TButton extends ButtonStyleButton {
         break;
       // 文字按钮
       case TButtonVariant.text:
-        textStyle = textStyleResolve('text-gray');
+        foregroundColor = foregroundColorResolve('text-gray');
         backgroundColor = backgroundColorResolve('text-bg');
         borderSide = borderSideResolve('none');
         if (isGhost) {
           backgroundColor = backgroundColorResolve('none', ghost: true);
-          textStyle = textStyleResolve('white-ghost');
+          foregroundColor = foregroundColorResolve('white-ghost');
           borderSide = borderSideResolve('text-bg');
         }
         switch (buttonThemeStyle) {
@@ -413,40 +489,35 @@ class _TButton extends ButtonStyleButton {
             break;
           case TButtonThemeStyle.primary:
             if (isGhost) {
-              textStyle = textStyleResolve('primary', ghost: true);
+              foregroundColor = foregroundColorResolve('primary', ghost: true);
             } else {
-              textStyle = textStyleResolve('primary');
+              foregroundColor = foregroundColorResolve('primary');
             }
             break;
           case TButtonThemeStyle.danger:
             if (isGhost) {
-              textStyle = textStyleResolve('danger', ghost: true);
+              foregroundColor = foregroundColorResolve('danger', ghost: true);
             } else {
-              textStyle = textStyleResolve('danger');
+              foregroundColor = foregroundColorResolve('danger');
             }
             break;
           case TButtonThemeStyle.warning:
             if (isGhost) {
-              textStyle = textStyleResolve('warning', ghost: true);
+              foregroundColor = foregroundColorResolve('warning', ghost: true);
             } else {
-              textStyle = textStyleResolve('warning');
+              foregroundColor = foregroundColorResolve('warning');
             }
             break;
           case TButtonThemeStyle.success:
             if (isGhost) {
-              textStyle = textStyleResolve('success', ghost: true);
+              foregroundColor = foregroundColorResolve('success', ghost: true);
             } else {
-              textStyle = textStyleResolve('success');
+              foregroundColor = foregroundColorResolve('success');
             }
             break;
         }
         break;
     }
-
-    // 前景色
-    final MaterialStateProperty<Color?> foregroundColor = MaterialStateProperty.resolveWith((states) {
-      return null;
-    });
 
     // 覆盖色
     final MaterialStateProperty<Color?> overlayColor = MaterialStateProperty.resolveWith((states) {
@@ -482,21 +553,37 @@ class _TButton extends ButtonStyleButton {
       return SystemMouseCursors.click;
     });
 
+    var btnHeight = _btnHeight(defaultSize);
+    var halfHeight = btnHeight / 2;
     return ButtonStyle(
-      textStyle: textStyle,
+      textStyle: ButtonStyleButton.allOrNull<TextStyle>(TextStyle(
+        fontFamily: ttheme.fontFamily,
+        fontSize: _btnFontSize(defaultSize),
+      )),
       backgroundColor: backgroundColor,
       foregroundColor: foregroundColor,
       overlayColor: overlayColor,
       shadowColor: ButtonStyleButton.allOrNull<Color>(Colors.transparent),
       surfaceTintColor: ButtonStyleButton.allOrNull<Color>(Colors.transparent),
       elevation: ButtonStyleButton.allOrNull<double>(0),
-      padding: ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(_scaledPadding(context, defaultSize)),
-      minimumSize: ButtonStyleButton.allOrNull<Size>(Size(_btnHeight(defaultSize), _btnHeight(defaultSize))),
-      fixedSize: ButtonStyleButton.allOrNull<Size>(null),
+      // 内容如果是一个icon，则不要给padding
+      padding: ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(child is Icon ? EdgeInsets.zero : _scaledPadding(context, defaultSize)),
+      minimumSize: ButtonStyleButton.allOrNull<Size>(Size.square(btnHeight)),
+      fixedSize: ButtonStyleButton.allOrNull<Size>(shape.valueOf(
+        rectangle: Size.fromHeight(halfHeight),
+        square: Size.square(halfHeight),
+        round: Size.fromHeight(halfHeight),
+        circle: Size.square(halfHeight),
+      )),
       maximumSize: ButtonStyleButton.allOrNull<Size>(Size.infinite),
       side: borderSide,
-      shape: ButtonStyleButton.allOrNull<TRoundedRectangleBorder>(const TRoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(borderRadius)),
+      shape: ButtonStyleButton.allOrNull<TRoundedRectangleBorder>(TRoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(shape.valueOf(
+          rectangle: borderRadius,
+          square: borderRadius,
+          round: halfHeight,
+          circle: halfHeight,
+        )),
       )),
       mouseCursor: mouseCursor,
       visualDensity: theme.visualDensity,
@@ -524,61 +611,13 @@ class _TButton extends ButtonStyleButton {
   }
 }
 
-///按钮变体枚举
-enum TButtonVariant {
-  /// 填充按钮
-  base,
-
-  /// 描边按钮
-  outline,
-
-  /// 虚框按钮
-  dashed,
-
-  /// 文字按钮
-  text;
-
-  /// 判断是否包含类型
-  bool contain({
-    bool base = false,
-    bool outline = false,
-    bool dashed = false,
-    bool text = false,
-  }) {
-    switch (this) {
-      case TButtonVariant.base:
-        return base;
-      case TButtonVariant.outline:
-        return outline;
-      case TButtonVariant.dashed:
-        return dashed;
-      case TButtonVariant.text:
-        return text;
-    }
-  }
-
-  /// 根据按钮形式，返回对应的值
-  T variantOf<T>({required T base, required T outline, required T dashed, required T text}) {
-    switch (this) {
-      case TButtonVariant.base:
-        return base;
-      case TButtonVariant.outline:
-        return outline;
-      case TButtonVariant.dashed:
-        return dashed;
-      case TButtonVariant.text:
-        return text;
-    }
-  }
-}
-
 /// 按钮
 class TButton extends StatelessWidget {
   const TButton({
     Key? key,
     required this.onPressed,
     this.variant = TButtonVariant.base,
-    this.enabled = true,
+    this.disabled = false,
     this.onLongPress,
     this.onHover,
     this.onFocusChange,
@@ -589,11 +628,14 @@ class TButton extends StatelessWidget {
     this.themeStyle,
     this.ghost,
     this.size,
-    required this.child,
+    this.shape = TButtonShape.rectangle,
+    this.icon,
+    this.loading = false,
+    this.child,
   }) : super(key: key);
 
   ///按钮内容
-  final Widget child;
+  final Widget? child;
 
   ///	点击时触发
   final VoidCallback? onPressed;
@@ -601,20 +643,28 @@ class TButton extends StatelessWidget {
   ///按钮形式，基础、线框、虚线、文字。可选项：base/outline/dashed/text
   final TButtonVariant variant;
 
-  final bool enabled;
+  /// 是否禁用
+  final bool disabled;
 
+  /// 长按
   final VoidCallback? onLongPress;
 
+  /// 鼠标经过
   final ValueChanged<bool>? onHover;
 
+  /// 聚焦变更
   final ValueChanged<bool>? onFocusChange;
 
+  /// 按钮样式
   final ButtonStyle? style;
 
+  /// 焦点
   final FocusNode? focusNode;
 
+  /// 自动聚焦
   final bool autofocus;
 
+  /// 剪辑
   final Clip clipBehavior;
 
   /// 组件风格.
@@ -626,9 +676,53 @@ class TButton extends StatelessWidget {
   /// 组件尺寸。可选项：small/medium/large
   final TComponentSize? size;
 
+  /// 预定义的一组按钮形状，可以通过[style.shape]进行覆盖
+  /// 有 4 种：长方形、正方形、圆角长方形、圆形。可选项：rectangle/square/round/circle
+  final TButtonShape shape;
+
+  /// icon
+  final IconData? icon;
+
+  /// 是否显示为加载状态
+  final bool loading;
+
+  /// icon大小
+  double _btnIconSize(TComponentSize size) {
+    return size.sizeOf(small: fontSizeBase, medium: fontSizeL, large: fontSizeXL);
+  }
+
   @override
   Widget build(BuildContext context) {
-    var pressed = enabled ? onPressed ?? () {} : null;
+    var ttheme = TTheme.of(context);
+    var buttonTheme = TButtonTheme.of(context);
+    TComponentSize defaultSize = size ?? buttonTheme.size ?? ttheme.size;
+
+    Widget? iconWidget;
+    Widget? result;
+    var disabled0 = disabled;
+    var btnIconSize = _btnIconSize(defaultSize);
+    if (loading) {
+      disabled0 = true;
+      // TODO: 实现自定义加载指示器
+      iconWidget = ConstrainedBox(
+        constraints: BoxConstraints.expand(width: btnIconSize / 1.5, height: btnIconSize / 1.5),
+        child: CircularProgressIndicator(
+          strokeWidth: 1.5,
+          valueColor: AlwaysStoppedAnimation<Color>(ttheme.colorScheme.gray7),
+        ),
+      );
+    } else if (icon != null) {
+      iconWidget = Icon(icon, size: btnIconSize);
+    }
+    if (iconWidget != null && child != null) {
+      result = Row(
+        children: [iconWidget, const SizedBox(width: spacer), child!],
+      );
+    } else {
+      result = iconWidget ?? child;
+    }
+    var pressed = disabled0 ? null : onPressed ?? () {};
+
     return _TButton(
       onPressed: pressed,
       onLongPress: onLongPress,
@@ -642,7 +736,8 @@ class TButton extends StatelessWidget {
       themeStyle: themeStyle,
       size: size,
       ghost: ghost,
-      child: child,
+      shape: shape,
+      child: result,
     );
   }
 }

@@ -68,17 +68,20 @@ class _MyHomePageState extends State<MyHomePage> {
                   alignment: Alignment.centerLeft,
                   child: Row(
                     children: [
+                      IconButton(
+                        icon: const Icon(TIcons.books),
+                        onPressed: () {},
+                      ),
                       TButton(
                         onPressed: () {},
-                        enabled: true,
-                        child: const Icon(
-                          TIcons.books,
-                          color: Colors.green,
-                        ),
+                        shape: TButtonShape.circle,
+                        themeStyle: TButtonThemeStyle.danger,
+                        icon: TIcons.cloudUpload,
+                        // child: const Text('描边按钮'),
                       ),
-                      TButton(onPressed: () {}, enabled: true, variant: TButtonVariant.outline, child: const Text('描边按钮')),
-                      TButton(onPressed: () {}, enabled: true, variant: TButtonVariant.dashed, child: const Text('虚框按钮')),
-                      TButton(onPressed: () {}, enabled: true, variant: TButtonVariant.text, child: const Text('文字按钮')),
+                      TButton(onPressed: () {},loading: true, variant: TButtonVariant.outline, child: const Text('描边按钮')),
+                      TButton(onPressed: () {}, variant: TButtonVariant.dashed, child: const Text('虚框按钮')),
+                      TButton(onPressed: () {}, variant: TButtonVariant.text, child: const Text('文字按钮')),
                     ],
                   ),
                 ),
@@ -91,45 +94,38 @@ class _MyHomePageState extends State<MyHomePage> {
                     children: [
                       TButton(
                         onPressed: () {},
-                        enabled: true,
                         themeStyle: TButtonThemeStyle.primary,
                         child: const Text('填充按钮'),
                       ),
                       TButton(
                         onPressed: () {},
-                        enabled: true,
                         themeStyle: TButtonThemeStyle.danger,
                         child: const Text('填充按钮'),
                       ),
                       TButton(
                         onPressed: () {},
-                        enabled: true,
                         themeStyle: TButtonThemeStyle.warning,
                         child: const Text('填充按钮'),
                       ),
                       TButton(
                         onPressed: () {},
-                        enabled: true,
                         themeStyle: TButtonThemeStyle.success,
                         child: const Text('填充按钮'),
                       ),
                       TButton(
                         onPressed: () {},
-                        enabled: true,
                         themeStyle: TButtonThemeStyle.danger,
                         variant: TButtonVariant.outline,
                         child: const Text('描边按钮'),
                       ),
                       TButton(
                         onPressed: () {},
-                        enabled: true,
                         themeStyle: TButtonThemeStyle.warning,
                         variant: TButtonVariant.dashed,
                         child: const Text('虚框按钮'),
                       ),
                       TButton(
                         onPressed: () {},
-                        enabled: true,
                         themeStyle: TButtonThemeStyle.success,
                         variant: TButtonVariant.text,
                         child: const Text('文字按钮'),
@@ -146,27 +142,27 @@ class _MyHomePageState extends State<MyHomePage> {
                     children: [
                       TButton(
                         onPressed: () {},
-                        enabled: false,
+                        disabled: true,
                         themeStyle: TButtonThemeStyle.primary,
                         child: const Text('填充按钮'),
                       ),
                       TButton(
                         onPressed: () {},
-                        enabled: false,
+                        disabled: true,
                         themeStyle: TButtonThemeStyle.danger,
                         variant: TButtonVariant.outline,
                         child: const Text('描边按钮'),
                       ),
                       TButton(
                         onPressed: () {},
-                        enabled: false,
+                        disabled: true,
                         themeStyle: TButtonThemeStyle.warning,
                         variant: TButtonVariant.dashed,
                         child: const Text('虚框按钮'),
                       ),
                       TButton(
                         onPressed: () {},
-                        enabled: false,
+                        disabled: true,
                         themeStyle: TButtonThemeStyle.success,
                         variant: TButtonVariant.text,
                         child: const Text('文字按钮'),
@@ -184,14 +180,12 @@ class _MyHomePageState extends State<MyHomePage> {
                     children: [
                       TButton(
                         onPressed: () {},
-                        enabled: true,
                         themeStyle: TButtonThemeStyle.primary,
                         ghost: true,
                         child: const Text('幽灵按钮'),
                       ),
                       TButton(
                         onPressed: () {},
-                        enabled: true,
                         themeStyle: TButtonThemeStyle.danger,
                         variant: TButtonVariant.outline,
                         ghost: true,
@@ -199,7 +193,6 @@ class _MyHomePageState extends State<MyHomePage> {
                       ),
                       TButton(
                         onPressed: () {},
-                        enabled: true,
                         themeStyle: TButtonThemeStyle.warning,
                         variant: TButtonVariant.dashed,
                         ghost: true,
@@ -207,7 +200,6 @@ class _MyHomePageState extends State<MyHomePage> {
                       ),
                       TButton(
                         onPressed: () {},
-                        enabled: true,
                         variant: TButtonVariant.text,
                         ghost: true,
                         child: const Text('幽灵按钮'),
