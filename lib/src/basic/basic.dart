@@ -4,8 +4,10 @@ import 'package:flutter/widgets.dart';
 enum TComponentSize {
   /// 小
   small,
+
   /// 中等
   medium,
+
   /// 大
   large;
 
@@ -35,9 +37,11 @@ enum TLayoutSize {
 
   /// 1200px-1400px 小尺寸电脑
   lg(1200, 1200, 1400),
-  // 1400px-1880px 中尺寸电脑
+
+  /// 1400px-1880px 中尺寸电脑
   xl(1400, 1400, 1880),
-  // 1880px-N 大尺寸电脑
+
+  /// 1880px-N 大尺寸电脑
   xxl(1880, 1880, double.infinity);
 
   final double breakpoint;

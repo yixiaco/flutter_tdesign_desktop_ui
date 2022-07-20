@@ -57,7 +57,7 @@ double _getTargetRadius(RenderBox referenceBox, bool containedInkWell, RectCallb
   return max(d1, d2) / 2.0;
 }
 
-/// 斜8度水波纹
+/// 斜8度水波纹, 在[InkWell]组件中使用
 class InkBevelAngle extends InteractiveInkFeature {
   InkBevelAngle({
     required MaterialInkController controller,

@@ -132,13 +132,16 @@ class TFooter extends StatelessWidget {
 class TContent extends StatelessWidget {
   const TContent({
     Key? key,
+    this.alignment = Alignment.topLeft,
     required this.child,
   }) : super(key: key);
+
+  final Alignment alignment;
 
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    return child;
+    return Align(alignment: alignment, child: child);
   }
 }

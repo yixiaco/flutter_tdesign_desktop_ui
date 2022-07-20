@@ -1,11 +1,9 @@
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
-import 'package:tdesign_desktop_ui/src/basic/basic.dart';
-import 'package:tdesign_desktop_ui/src/theme/color_scheme.dart';
+import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
-import 'button_theme.dart';
-
+// 边框圆角
 const double borderRadius = 3;
 
 // Font

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import '../../tdesign_desktop_ui.dart';
+import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 ///按钮变体枚举
 enum TButtonVariant {
@@ -575,7 +574,7 @@ class _TButton extends ButtonStyleButton {
         round: Size.fromHeight(halfHeight),
         circle: Size.square(halfHeight),
       )),
-      maximumSize: ButtonStyleButton.allOrNull<Size>(Size.infinite),
+      maximumSize: ButtonStyleButton.allOrNull<Size>(Size.fromHeight(btnHeight)),
       side: borderSide,
       shape: ButtonStyleButton.allOrNull<TRoundedRectangleBorder>(TRoundedRectangleBorder(
         borderRadius: BorderRadius.circular(shape.valueOf(
@@ -615,7 +614,7 @@ class _TButton extends ButtonStyleButton {
 class TButton extends StatelessWidget {
   const TButton({
     Key? key,
-    required this.onPressed,
+    this.onPressed,
     this.variant = TButtonVariant.base,
     this.disabled = false,
     this.onLongPress,

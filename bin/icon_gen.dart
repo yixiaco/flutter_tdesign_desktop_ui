@@ -49,7 +49,7 @@ String toCamelCase(String name, [String symbol = '-']) {
 
 void main() async {
   final File iconsFile = File("bin/t_icon.json");
-  final File out = File("lib/src/basic/t_icons.dart");
+  final File out = File("lib/src/components/icons/t_icons.dart");
   const outClassName = 'TIcons';
   const packageName = 'tdesign_desktop_ui';
 

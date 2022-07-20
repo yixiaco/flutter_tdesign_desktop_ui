@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tdesign_desktop_ui/src/basic/color.dart';
+import 'package:tdesign_desktop_ui/src/theme/color.dart';
 
 /// 配色方案
 class TColorScheme {
