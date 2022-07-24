@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/painting.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 // 边框圆角
@@ -36,15 +37,17 @@ class TThemeData with Diagnosticable {
     required Brightness brightness,
     TColorScheme? colorScheme,
     TComponentSize? size,
-    TButtonThemeData? buttonThemeData,
     String? fontFamily,
+    TButtonThemeData? buttonThemeData,
+    TPopupThemeData? popupThemeData,
   }) {
     return TThemeData.raw(
       brightness: brightness,
-      buttonThemeData: buttonThemeData ?? const TButtonThemeData(),
       colorScheme: colorScheme ?? (brightness == Brightness.light ? TColorScheme.light : TColorScheme.dark),
       size: size ?? TComponentSize.medium,
       fontFamily: fontFamily ?? 'PingFang SC, Microsoft YaHei, Arial Regular',
+      buttonThemeData: buttonThemeData ?? const TButtonThemeData(),
+      popupThemeData: popupThemeData ?? const TPopupThemeData(),
     );
   }
 
@@ -52,8 +55,9 @@ class TThemeData with Diagnosticable {
     required this.brightness,
     required this.colorScheme,
     required this.size,
-    required this.buttonThemeData,
     required this.fontFamily,
+    required this.buttonThemeData,
+    required this.popupThemeData,
   });
 
   /// 描述主题或调色板的对比度。
@@ -65,11 +69,39 @@ class TThemeData with Diagnosticable {
   /// 组件尺寸,默认medium。可选项：small/medium/large
   final TComponentSize size;
 
+  /// 字体
+  final String fontFamily;
+
   /// 按钮主题数据
   final TButtonThemeData buttonThemeData;
 
-  /// 字体
-  final String fontFamily;
+  /// 弹出层主题数据
+  final TPopupThemeData popupThemeData;
+
+  /// 基础/下层 投影 hover 使用的组件包括：表格 /
+  List<BoxShadow> get shadow1 => colorScheme.shadow1;
+
+  /// 中层投影 下拉 使用的组件包括：下拉菜单 / 气泡确认框 / 选择器 /
+  List<BoxShadow> get shadow2 => colorScheme.shadow2;
+
+  /// 上层投影（警示/弹窗）使用的组件包括：全局提示 / 消息通知
+  List<BoxShadow> get shadow3 => colorScheme.shadow3;
+
+  // 内投影 用于弹窗类组件（气泡确认框 / 全局提示 / 消息通知）的内描边
+  BoxShadow get shadowInsetTop => colorScheme.shadowInsetTop;
+
+  BoxShadow get shadowInsetRight => colorScheme.shadowInsetRight;
+
+  BoxShadow get shadowInsetBottom => colorScheme.shadowInsetBottom;
+
+  BoxShadow get shadowInsetLeft => colorScheme.shadowInsetLeft;
+
+  List<BoxShadow> get shadowInset => [shadowInsetTop, shadowInsetRight, shadowInsetBottom, shadowInsetLeft];
+
+  // 融合阴影
+  List<BoxShadow> get shadow2Inset => [...shadow2, ...shadowInset];
+
+  List<BoxShadow> get shadow3Inset => [...shadow3, ...shadowInset];
 
   /// 默认的亮色样式
   factory TThemeData.light() => TThemeData(brightness: Brightness.light);
@@ -77,30 +109,37 @@ class TThemeData with Diagnosticable {
   /// 默认的暗黑样式
   factory TThemeData.dark() => TThemeData(brightness: Brightness.dark);
 
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is TThemeData &&
-          runtimeType == other.runtimeType &&
-          brightness == other.brightness &&
-          colorScheme == other.colorScheme &&
-          size == other.size &&
-          buttonThemeData == other.buttonThemeData);
-
-  @override
-  int get hashCode => brightness.hashCode ^ colorScheme.hashCode ^ size.hashCode ^ buttonThemeData.hashCode;
-
   TThemeData copyWith({
     Brightness? brightness,
     TColorScheme? colorScheme,
     TComponentSize? size,
+    String? fontFamily,
     TButtonThemeData? buttonThemeData,
+    TPopupThemeData? popupThemeData,
   }) {
     return TThemeData(
       brightness: brightness ?? this.brightness,
       colorScheme: colorScheme ?? this.colorScheme,
       size: size ?? this.size,
+      fontFamily: fontFamily ?? this.fontFamily,
       buttonThemeData: buttonThemeData ?? this.buttonThemeData,
+      popupThemeData: popupThemeData ?? this.popupThemeData,
     );
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is TThemeData &&
+          runtimeType == other.runtimeType &&
+          brightness == other.brightness &&
+          colorScheme == other.colorScheme &&
+          size == other.size &&
+          fontFamily == other.fontFamily &&
+          buttonThemeData == other.buttonThemeData &&
+          popupThemeData == other.popupThemeData;
+
+  @override
+  int get hashCode =>
+      brightness.hashCode ^ colorScheme.hashCode ^ size.hashCode ^ fontFamily.hashCode ^ buttonThemeData.hashCode ^ popupThemeData.hashCode;
 }

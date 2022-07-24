@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// 栅格示例
@@ -55,6 +54,6 @@ class GridExample extends StatelessWidget {
           ),
         ),
       ],
-    );;
+    );
   }
 }
