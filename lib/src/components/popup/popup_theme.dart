@@ -71,6 +71,135 @@ enum TPopupPlacement {
 
   /// 右下
   rightBottom;
+
+  /// 是否是垂直方向
+  bool isVertical() {
+    switch (this) {
+      case TPopupPlacement.top:
+        return true;
+      case TPopupPlacement.left:
+        return false;
+      case TPopupPlacement.right:
+        return false;
+      case TPopupPlacement.bottom:
+        return true;
+      case TPopupPlacement.topLeft:
+        return true;
+      case TPopupPlacement.topRight:
+        return true;
+      case TPopupPlacement.bottomLeft:
+        return true;
+      case TPopupPlacement.bottomRight:
+        return true;
+      case TPopupPlacement.leftTop:
+        return false;
+      case TPopupPlacement.leftBottom:
+        return false;
+      case TPopupPlacement.rightTop:
+        return false;
+      case TPopupPlacement.rightBottom:
+        return false;
+    }
+  }
+
+  /// 是否在上方
+  bool isTop() {
+    switch (this) {
+      case TPopupPlacement.top:
+        return true;
+      case TPopupPlacement.topLeft:
+        return true;
+      case TPopupPlacement.topRight:
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  /// 是否在下方
+  bool isBottom() {
+    switch (this) {
+      case TPopupPlacement.bottom:
+        return true;
+      case TPopupPlacement.bottomLeft:
+        return true;
+      case TPopupPlacement.bottomRight:
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  /// 是否在左边
+  bool isLeft() {
+    switch (this) {
+      case TPopupPlacement.left:
+        return true;
+      case TPopupPlacement.leftTop:
+        return true;
+      case TPopupPlacement.leftBottom:
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  /// 是否在右边
+  bool isRight() {
+    switch (this) {
+      case TPopupPlacement.right:
+        return true;
+      case TPopupPlacement.rightTop:
+        return true;
+      case TPopupPlacement.rightBottom:
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  /// 取值的快捷方式
+  T? valueOf<T>({
+    T? top,
+    T? left,
+    T? right,
+    T? bottom,
+    T? topLeft,
+    T? topRight,
+    T? bottomLeft,
+    T? bottomRight,
+    T? leftTop,
+    T? leftBottom,
+    T? rightTop,
+    T? rightBottom,
+  }) {
+    switch (this) {
+      case TPopupPlacement.top:
+        return top;
+      case TPopupPlacement.left:
+        return left;
+      case TPopupPlacement.right:
+        return right;
+      case TPopupPlacement.bottom:
+        return bottom;
+      case TPopupPlacement.topLeft:
+        return topLeft;
+      case TPopupPlacement.topRight:
+        return topRight;
+      case TPopupPlacement.bottomLeft:
+        return bottomLeft;
+      case TPopupPlacement.bottomRight:
+        return bottomRight;
+      case TPopupPlacement.leftTop:
+        return leftTop;
+      case TPopupPlacement.leftBottom:
+        return leftBottom;
+      case TPopupPlacement.rightTop:
+        return rightTop;
+      case TPopupPlacement.rightBottom:
+        return rightBottom;
+    }
+  }
 }
 
 /// 触发浮层出现的方式。可选项：hover/click/focus/context-menu
