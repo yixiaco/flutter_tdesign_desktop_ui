@@ -250,8 +250,6 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
       context,
       debugRequiredFor: widget,
     )!;
-    final RenderBox box = context.findRenderObject()! as RenderBox;
-    final _PopupOffset target = _PopupOffset.boxOf(box, ancestor: overlayState.context.findRenderObject());
     // We create this widget outside of the overlay entry's builder to prevent
     // updated values from happening to leak into the overlay when the overlay
     // rebuilds.
@@ -282,10 +280,8 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
           boxShadow: popupShadow,
           borderRadius: BorderRadius.circular(borderRadius),
         ),
-        target: target,
         offset: _defaultVerticalOffset,
         placement: widget.placement,
-        componentSize: box.size,
         visible: visible,
         builder: (BuildContext context) {
           return widget.content;
@@ -394,6 +390,12 @@ class _PopupPositionDelegate extends SingleChildLayoutDelegate {
   /// 与父组件之间的链接
   final LayerLink layerLink;
 
+  /// 上一次获取到的子组件大小
+  Size? _componentSize;
+
+  /// 上一次获取到的偏移
+  _PopupOffset? _target;
+
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) => constraints.loosen();
 
@@ -403,13 +405,20 @@ class _PopupPositionDelegate extends SingleChildLayoutDelegate {
   /// 默认情况下，将子对象定位在父对象的左上角。
   @override
   Offset getPositionForChild(Size size, Size childSize) {
-    // 包裹的组件的大小
-    Size componentSize = layerLink.leaderSize!;
-    print(layerLink.leader);
-    if(layerLink.leader == null) {
+    _readLeader();
+    if (layerLink.leaderSize == null || layerLink.leader == null) {
+      // 推迟到下一帧更新
+      SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
+        _readLeader();
+      });
     }
+    if (_componentSize == null || _target == null) {
+      return const Offset(0, 0);
+    }
+    // 包裹的组件的大小
+    Size componentSize = _componentSize!;
     // 浮层在组件中的偏移
-    _PopupOffset target = _PopupOffset.linkOf(layerLink);
+    _PopupOffset target = _target!;
     double x, y;
     if (placement.isVertical()) {
       // VERTICAL DIRECTION
@@ -476,6 +485,16 @@ class _PopupPositionDelegate extends SingleChildLayoutDelegate {
     return Offset(x, y);
   }
 
+  /// 读取leader的值
+  void _readLeader() {
+    if (layerLink.leaderSize != null) {
+      _componentSize = layerLink.leaderSize!;
+    }
+    if (layerLink.leader != null) {
+      _target = _PopupOffset.linkOf(layerLink);
+    }
+  }
+
   @override
   bool shouldRelayout(_PopupPositionDelegate oldDelegate) {
     return layerLink != oldDelegate.layerLink || offset != oldDelegate.offset || placement != oldDelegate.placement || margin != oldDelegate.margin;
@@ -489,7 +508,6 @@ class _PopupOverlay extends StatefulWidget {
     this.padding,
     this.margin,
     required this.animation,
-    required this.target,
     required this.offset,
     required this.placement,
     this.onEnter,
@@ -497,7 +515,6 @@ class _PopupOverlay extends StatefulWidget {
     required this.builder,
     this.decoration,
     this.onPointerDown,
-    required this.componentSize,
     required this.visible,
     required this.layerLink,
   }) : super(key: key);
@@ -506,13 +523,9 @@ class _PopupOverlay extends StatefulWidget {
   final EdgeInsetsGeometry? margin;
   final Decoration? decoration;
   final Animation<double> animation;
-  final _PopupOffset target;
 
   /// 与组件之间的偏移量
   final double offset;
-
-  /// 包裹的组件的大小
-  final Size componentSize;
   final TPopupPlacement placement;
   final PointerDownEventListener? onPointerDown;
   final PointerEnterEventListener? onEnter;
@@ -526,14 +539,10 @@ class _PopupOverlay extends StatefulWidget {
 }
 
 class _PopupOverlayState extends State<_PopupOverlay> {
-  late _PopupOffset target;
-  late Size componentSize;
   late ValueNotifier<bool> _visible;
 
   @override
   void initState() {
-    target = widget.target;
-    componentSize = widget.componentSize;
     _visible = ValueNotifier(false);
     _updateIgnore();
     widget.animation.addListener(_updateIgnore);
@@ -593,26 +602,26 @@ class _PopupOverlayState extends State<_PopupOverlay> {
       );
     }
     // 当小部件完全不显示时，忽略所有事件
-    // return Positioned.fill(
-    //   child: CustomSingleChildLayout(
-    //     delegate: _PopupPositionDelegate(
-    //       offset: widget.offset,
-    //       placement: widget.placement,
-    //       margin: 5.0,
-    //       layerLink: widget.layerLink,
-    //     ),
-    //     child: result,
-    //   ),
-    // );
-    return UnconstrainedBox(
-      child: CompositedTransformFollower(
-        link: widget.layerLink,
-        offset: Offset(0, 10),
-        targetAnchor: Alignment.bottomCenter,
-        followerAnchor: Alignment.topCenter,
+    return Positioned.fill(
+      child: CustomSingleChildLayout(
+        delegate: _PopupPositionDelegate(
+          offset: widget.offset,
+          placement: widget.placement,
+          margin: 5.0,
+          layerLink: widget.layerLink,
+        ),
         child: result,
       ),
     );
+    // return UnconstrainedBox(
+    //   child: CompositedTransformFollower(
+    //     link: widget.layerLink,
+    //     offset: const Offset(0, 10),
+    //     targetAnchor: Alignment.bottomCenter,
+    //     followerAnchor: Alignment.topCenter,
+    //     child: result,
+    //   ),
+    // );
   }
 }
 
@@ -671,7 +680,7 @@ class _PopupOffset {
 
   factory _PopupOffset.linkOf(LayerLink layerLink) {
     // 组件大小
-    Size leaderSize = layerLink.leaderSize!;
+    Size leaderSize = layerLink.leaderSize ?? const Size(0, 0);
     // 父坐标系中的位置
     var offset = layerLink.leader?.offset ?? const Offset(0, 0);
     final Offset top = leaderSize.topCenter(offset);
@@ -682,31 +691,6 @@ class _PopupOffset {
     final Offset topRight = leaderSize.topRight(offset);
     final Offset bottomLeft = leaderSize.bottomLeft(offset);
     final Offset bottomRight = leaderSize.bottomRight(offset);
-    return _PopupOffset(
-      top: top,
-      left: left,
-      right: right,
-      bottom: bottom,
-      topLeft: topLeft,
-      topRight: topRight,
-      bottomLeft: bottomLeft,
-      bottomRight: bottomRight,
-      leftTop: topLeft,
-      leftBottom: bottomLeft,
-      rightTop: topRight,
-      rightBottom: bottomRight,
-    );
-  }
-
-  factory _PopupOffset.boxOf(RenderBox box, {RenderObject? ancestor}) {
-    final Offset top = box.localToGlobal(box.size.topCenter(Offset.zero), ancestor: ancestor);
-    final Offset left = box.localToGlobal(box.size.centerLeft(Offset.zero), ancestor: ancestor);
-    final Offset right = box.localToGlobal(box.size.centerRight(Offset.zero), ancestor: ancestor);
-    final Offset bottom = box.localToGlobal(box.size.bottomCenter(Offset.zero), ancestor: ancestor);
-    final Offset topLeft = box.localToGlobal(box.size.topLeft(Offset.zero), ancestor: ancestor);
-    final Offset topRight = box.localToGlobal(box.size.topRight(Offset.zero), ancestor: ancestor);
-    final Offset bottomLeft = box.localToGlobal(box.size.bottomLeft(Offset.zero), ancestor: ancestor);
-    final Offset bottomRight = box.localToGlobal(box.size.bottomRight(Offset.zero), ancestor: ancestor);
     return _PopupOffset(
       top: top,
       left: left,
