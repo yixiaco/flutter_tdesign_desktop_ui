@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// 配合[TRoundedRectangleBorder]实现了虚线边框
 class TBorderSide extends BorderSide {
@@ -172,37 +173,12 @@ class TRoundedRectangleBorder extends RoundedRectangleBorder {
 
           var path = Path()..addRRect(inner);
           if(side is TBorderSide && (side as TBorderSide).dashed) {
-            path = dashPath(path, 3, 2);
+            path = PathUtil.dashPath(path, 3, 2);
           }
           canvas.drawPath(path, paint);
         }
     }
   }
 
-  /// 获取虚线路径
-  /// [path] 路径
-  /// [length] 线条长度
-  /// [gap] 间隙长度
-  /// [distance] 初始偏移
-  static Path dashPath(final Path path, double length, [double? gap, double? distance = 0]) {
-    gap ??= length;
-    PathMetrics pathMetrics = path.computeMetrics();
-    Path dest = Path();
-    for (var metric in pathMetrics) {
-      bool draw = true;
-      while (distance! < metric.length) {
-        if (draw) {
-          dest.addPath(
-            metric.extractPath(distance, distance + length),
-            Offset.zero,
-          );
-          distance += length;
-        } else {
-          distance += gap;
-        }
-        draw = !draw;
-      }
-    }
-    return dest;
-  }
+
 }

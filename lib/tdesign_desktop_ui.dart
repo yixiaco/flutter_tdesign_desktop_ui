@@ -10,6 +10,10 @@ export 'src/theme/color.dart';
 export 'src/basic/basic.dart';
 export 'src/basic/ink_bevel_angle.dart';
 export 'src/basic/borders.dart';
+export 'src/basic/bubble_shape_border.dart';
+
+/// 工具类
+export 'src/util/path_util.dart';
 
 /// 事件
 export 'src/events/allow_tap_listener.dart';

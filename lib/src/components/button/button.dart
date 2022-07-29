@@ -57,12 +57,12 @@ class _TButton extends ButtonStyleButton {
 
   /// 字体大小
   double _btnFontSize(TComponentSize size) {
-    return size.sizeOf(small: fontSizeS, medium: fontSizeBase, large: fontSizeL);
+    return size.sizeOf(small: ThemeDataConstant.fontSizeS, medium: ThemeDataConstant.fontSizeBase, large: ThemeDataConstant.fontSizeL);
   }
 
   /// padding大小
   double _btnPaddingHorizontal(TComponentSize size) {
-    return size.sizeOf(small: spacer, medium: spacer * 2, large: spacer * 3);
+    return size.sizeOf(small: ThemeDataConstant.spacer, medium: ThemeDataConstant.spacer * 2, large: ThemeDataConstant.spacer * 3);
   }
 
   /// 定义按钮颜色变量
@@ -454,8 +454,8 @@ class _TButton extends ButtonStyleButton {
       side: borderSide,
       shape: ButtonStyleButton.allOrNull<TRoundedRectangleBorder>(TRoundedRectangleBorder(
         borderRadius: BorderRadius.circular(shape.valueOf(
-          rectangle: borderRadius,
-          square: borderRadius,
+          rectangle: ThemeDataConstant.borderRadius,
+          square: ThemeDataConstant.borderRadius,
           round: halfHeight,
           circle: halfHeight,
         )),
@@ -563,7 +563,7 @@ class TButton extends StatelessWidget {
 
   /// icon大小
   double _btnIconSize(TComponentSize size) {
-    return size.sizeOf(small: fontSizeBase, medium: fontSizeL, large: fontSizeXL);
+    return size.sizeOf(small: ThemeDataConstant.fontSizeBase, medium: ThemeDataConstant.fontSizeL, large: ThemeDataConstant.fontSizeXL);
   }
 
   @override
@@ -591,7 +591,7 @@ class TButton extends StatelessWidget {
     }
     if (iconWidget != null && child != null) {
       result = Row(
-        children: [iconWidget, const SizedBox(width: spacer), child!],
+        children: [iconWidget, SizedBox(width: ThemeDataConstant.spacer), child!],
       );
     } else {
       result = iconWidget ?? child;

@@ -200,6 +200,37 @@ enum TPopupPlacement {
         return rightBottom;
     }
   }
+
+  /// 取值的快捷方式
+  bool isTrue({
+    bool top = false,
+    bool left = false,
+    bool right = false,
+    bool bottom = false,
+    bool topLeft = false,
+    bool topRight = false,
+    bool bottomLeft = false,
+    bool bottomRight = false,
+    bool leftTop = false,
+    bool leftBottom = false,
+    bool rightTop = false,
+    bool rightBottom = false,
+  }) {
+    return valueOf<bool>(
+      top: top,
+      topLeft: topLeft,
+      topRight: topRight,
+      bottom: bottom,
+      bottomLeft: bottomLeft,
+      bottomRight: bottomRight,
+      left: left,
+      leftTop: leftTop,
+      leftBottom: leftBottom,
+      right: right,
+      rightTop: rightTop,
+      rightBottom: rightBottom,
+    )!;
+  }
 }
 
 /// 触发浮层出现的方式。可选项：hover/click/focus/context-menu

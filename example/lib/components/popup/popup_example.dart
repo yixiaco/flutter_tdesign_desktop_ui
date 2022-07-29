@@ -12,34 +12,51 @@ class PopupExample extends StatefulWidget {
 }
 
 class _PopupExampleState extends State<PopupExample> {
-  var children2 = [
+  ValueNotifier<int> i = ValueNotifier(0);
+  late var children2 = [
     TPopup(
       trigger: TPopupTrigger.hover,
+      placement: TPopupPlacement.leftBottom,
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: const [
-          TButton(child: Text('悬浮式触发')),
-          TButton(child: Text('悬浮式触发')),
+          TButton(themeStyle: TButtonThemeStyle.primary, child: Text('悬浮式触发')),
+          TButton(themeStyle: TButtonThemeStyle.primary, child: Text('悬浮式触发')),
         ],
       ),
       child: TButton(
+        themeStyle: TButtonThemeStyle.primary,
         onPressed: () {
           print('悬浮式触发');
         },
         child: const Text('悬浮式触发'),
       ),
     ),
-    TPopup(
+    TPopup.build(
+      placement: TPopupPlacement.top,
       trigger: TPopupTrigger.click,
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: const [
-          TButton(child: Text('点击时触发')),
-          TButton(child: Text('点击时触发')),
-        ],
-      ),
+      onOpen: () => print('点击打开弹窗'),
+      builderContent: (context) {
+        return ValueListenableBuilder(
+          valueListenable: i,
+          builder: (BuildContext context, int value, Widget? child) {
+            return SizedBox(
+              height: 500,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TButton(themeStyle: TButtonThemeStyle.primary, child: Text('点击时触发$value')),
+                  TButton(themeStyle: TButtonThemeStyle.primary, child: Text('点击时触发$value')),
+                ],
+              ),
+            );
+          },
+        );
+      },
       child: TButton(
+        themeStyle: TButtonThemeStyle.primary,
         onPressed: () {
+          i.value++;
           print('点击时触发');
         },
         child: const Text('点击时触发'),
@@ -51,8 +68,8 @@ class _PopupExampleState extends State<PopupExample> {
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: const [
-          TButton(child: Text('获取焦点时触发')),
-          TButton(child: Text('获取焦点时触发')),
+          TButton(themeStyle: TButtonThemeStyle.primary, child: Text('获取焦点时触发')),
+          TButton(themeStyle: TButtonThemeStyle.primary, child: Text('获取焦点时触发')),
         ],
       ),
       child: Column(
@@ -71,12 +88,13 @@ class _PopupExampleState extends State<PopupExample> {
           mainAxisSize: MainAxisSize.min,
           children: const [
             SizedBox(width: 100, child: TextField()),
-            TButton(child: Text('右击时触发')),
-            TButton(child: Text('右击时触发')),
+            TButton(themeStyle: TButtonThemeStyle.primary, child: Text('右击时触发')),
+            TButton(themeStyle: TButtonThemeStyle.primary, child: Text('右击时触发')),
           ],
         ),
       ),
       child: TButton(
+        themeStyle: TButtonThemeStyle.primary,
         onPressed: () {
           print('右击时触发');
         },
