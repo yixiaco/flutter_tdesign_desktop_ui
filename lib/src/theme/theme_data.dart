@@ -18,7 +18,7 @@ class ThemeDataConstant {
   static double fontSizeXXL = fontSize * 3.6;
 
   // Spacer
-  static double spacer = 8;
+  static double spacer = 6;
   static double spacerS = spacer * .5; // 间距-4
   static double spacerM = spacer * .75; // 间距-6
   static double spacerL = spacer * 1.5; // 间距-12

@@ -17,6 +17,7 @@ class _PopupExampleState extends State<PopupExample> {
     TPopup(
       trigger: TPopupTrigger.hover,
       placement: TPopupPlacement.leftBottom,
+      showArrow: true,
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: const [
@@ -32,23 +33,21 @@ class _PopupExampleState extends State<PopupExample> {
         child: const Text('悬浮式触发'),
       ),
     ),
-    TPopup.build(
-      placement: TPopupPlacement.top,
+    TPopup(
+      placement: TPopupPlacement.topLeft,
       trigger: TPopupTrigger.click,
+      showArrow: true,
       onOpen: () => print('点击打开弹窗'),
       builderContent: (context) {
         return ValueListenableBuilder(
           valueListenable: i,
           builder: (BuildContext context, int value, Widget? child) {
-            return SizedBox(
-              height: 500,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TButton(themeStyle: TButtonThemeStyle.primary, child: Text('点击时触发$value')),
-                  TButton(themeStyle: TButtonThemeStyle.primary, child: Text('点击时触发$value')),
-                ],
-              ),
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TButton(themeStyle: TButtonThemeStyle.primary, child: Text('点击时触发$value')),
+                TButton(themeStyle: TButtonThemeStyle.primary, child: Text('点击时触发$value')),
+              ],
             );
           },
         );
@@ -65,6 +64,7 @@ class _PopupExampleState extends State<PopupExample> {
     TPopup(
       trigger: TPopupTrigger.focus,
       placement: TPopupPlacement.right,
+      showArrow: true,
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: const [
@@ -83,6 +83,7 @@ class _PopupExampleState extends State<PopupExample> {
     TPopup(
       trigger: TPopupTrigger.contextMenu,
       placement: TPopupPlacement.bottom,
+      showArrow: true,
       content: Material(
         child: Column(
           mainAxisSize: MainAxisSize.min,

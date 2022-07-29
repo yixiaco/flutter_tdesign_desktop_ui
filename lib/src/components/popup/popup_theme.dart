@@ -160,45 +160,63 @@ enum TPopupPlacement {
 
   /// 取值的快捷方式
   T? valueOf<T>({
-    T? top,
-    T? left,
-    T? right,
-    T? bottom,
-    T? topLeft,
-    T? topRight,
-    T? bottomLeft,
-    T? bottomRight,
-    T? leftTop,
-    T? leftBottom,
-    T? rightTop,
-    T? rightBottom,
+    T Function()? top,
+    T Function()? left,
+    T Function()? right,
+    T Function()? bottom,
+    T Function()? topLeft,
+    T Function()? topRight,
+    T Function()? bottomLeft,
+    T Function()? bottomRight,
+    T Function()? leftTop,
+    T Function()? leftBottom,
+    T Function()? rightTop,
+    T Function()? rightBottom,
   }) {
     switch (this) {
       case TPopupPlacement.top:
-        return top;
+        return top?.call();
       case TPopupPlacement.left:
-        return left;
+        return left?.call();
       case TPopupPlacement.right:
-        return right;
+        return right?.call();
       case TPopupPlacement.bottom:
-        return bottom;
+        return bottom?.call();
       case TPopupPlacement.topLeft:
-        return topLeft;
+        return topLeft?.call();
       case TPopupPlacement.topRight:
-        return topRight;
+        return topRight?.call();
       case TPopupPlacement.bottomLeft:
-        return bottomLeft;
+        return bottomLeft?.call();
       case TPopupPlacement.bottomRight:
-        return bottomRight;
+        return bottomRight?.call();
       case TPopupPlacement.leftTop:
-        return leftTop;
+        return leftTop?.call();
       case TPopupPlacement.leftBottom:
-        return leftBottom;
+        return leftBottom?.call();
       case TPopupPlacement.rightTop:
-        return rightTop;
+        return rightTop?.call();
       case TPopupPlacement.rightBottom:
-        return rightBottom;
+        return rightBottom?.call();
     }
+  }
+
+  /// 返回四边值的快捷方法
+  T sides<T>({required T top, required T left, required T right, required T bottom}) {
+    return valueOf(
+      top: () => top,
+      topLeft: () => top,
+      topRight: () => top,
+      bottom: () => bottom,
+      bottomLeft: () => bottom,
+      bottomRight: () => bottom,
+      left: () => left,
+      leftTop: () => left,
+      leftBottom: () => left,
+      right: () => right,
+      rightTop: () => right,
+      rightBottom: () => right,
+    )!;
   }
 
   /// 取值的快捷方式
@@ -217,18 +235,18 @@ enum TPopupPlacement {
     bool rightBottom = false,
   }) {
     return valueOf<bool>(
-      top: top,
-      topLeft: topLeft,
-      topRight: topRight,
-      bottom: bottom,
-      bottomLeft: bottomLeft,
-      bottomRight: bottomRight,
-      left: left,
-      leftTop: leftTop,
-      leftBottom: leftBottom,
-      right: right,
-      rightTop: rightTop,
-      rightBottom: rightBottom,
+      top: () => top,
+      topLeft: () => topLeft,
+      topRight: () => topRight,
+      bottom: () => bottom,
+      bottomLeft: () => bottomLeft,
+      bottomRight: () => bottomRight,
+      left: () => left,
+      leftTop: () => leftTop,
+      leftBottom: () => leftBottom,
+      right: () => right,
+      rightTop: () => rightTop,
+      rightBottom: () => rightBottom,
     )!;
   }
 }

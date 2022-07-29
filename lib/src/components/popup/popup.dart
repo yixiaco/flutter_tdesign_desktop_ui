@@ -22,25 +22,9 @@ class TPopup extends StatefulWidget {
     this.onClose,
     this.showDuration = const Duration(milliseconds: 250),
     this.hideDuration = const Duration(milliseconds: 150),
-    this.destroyOnClose = false,
-  })  : builderContent = null,
-        super(key: key);
-
-  const TPopup.build({
-    Key? key,
-    this.placement = TPopupPlacement.top,
-    this.trigger = TPopupTrigger.hover,
-    this.showArrow = false,
-    this.disabled = false,
-    this.visible,
+    this.destroyOnClose = true,
     this.builderContent,
-    required this.child,
-    this.onOpen,
-    this.onClose,
-    this.showDuration = const Duration(milliseconds: 250),
-    this.hideDuration = const Duration(milliseconds: 150),
-    this.destroyOnClose = false,
-  })  : content = null,
+  })  : assert(!(content != null && builderContent != null), 'content和builderContent只能给定一个'),
         super(key: key);
 
   /// 浮层出现位置
@@ -78,7 +62,8 @@ class TPopup extends StatefulWidget {
   /// hover和focus时，隐藏的延迟
   final Duration hideDuration;
 
-  /// 是否在关闭浮层时销毁浮层
+  /// 是否在关闭浮层时销毁浮层，默认为false.
+  /// 因为一般不需要维护浮层内容的状态，这可以显著提升运行速度
   final bool destroyOnClose;
 
   /// 使用build创建浮层
@@ -103,9 +88,6 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
 
   /// 默认淡出持续时间
   static const Duration _fadeOutDuration = Duration(milliseconds: 75);
-
-  /// 默认垂直偏移
-  static const double _defaultVerticalOffset = 6.0;
 
   /// 显示浮层计时器
   Timer? _showTimer;
@@ -246,7 +228,6 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
 
     _entry = OverlayEntry(builder: (BuildContext context) {
       Widget child = _PopupOverlay(
-        padding: EdgeInsets.symmetric(vertical: 4, horizontal: ThemeDataConstant.spacer),
         onPointerDown: (event) {
           if (widget.trigger.isTrue(click: true, contextMenu: true)) {
             _stopPropagation = true;
@@ -267,7 +248,6 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
           parent: _controller,
           curve: Curves.fastOutSlowIn,
         ),
-        offset: _defaultVerticalOffset,
         layerLink: _layerLink,
         popupWidget: _popupWidget,
       );
@@ -356,6 +336,8 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
   }
 }
 
+typedef PopupPositionCallback = void Function(bool isReverse);
+
 /// 用于计算要在全局坐标系中指定的目标上方或下方显示的浮层布局的代理。
 class _PopupPositionDelegate extends SingleChildLayoutDelegate {
   /// 创建用于计算浮层布局的委托。
@@ -366,6 +348,7 @@ class _PopupPositionDelegate extends SingleChildLayoutDelegate {
     required this.placement,
     required this.margin,
     required this.layerLink,
+    this.callback,
   });
 
   /// 与组件之间的偏移量
@@ -379,6 +362,8 @@ class _PopupPositionDelegate extends SingleChildLayoutDelegate {
 
   /// 与父组件之间的链接
   final LayerLink layerLink;
+
+  final PopupPositionCallback? callback;
 
   /// 上一次获取到的偏移
   _PopupOffset? _target;
@@ -395,6 +380,7 @@ class _PopupPositionDelegate extends SingleChildLayoutDelegate {
   /// 默认情况下，将子对象定位在父对象的左上角。
   @override
   Offset getPositionForChild(Size size, Size childSize) {
+    var isReverse = false;
     _readLeader();
     if (layerLink.leaderSize == null || layerLink.leader == null) {
       // 推迟到下一帧更新
@@ -418,14 +404,23 @@ class _PopupPositionDelegate extends SingleChildLayoutDelegate {
       // 是否合适在下方显示
       final bool isBelow = placement.isBottom() ? fitsBelow || !fitsAbove : !(fitsAbove || !fitsBelow);
       if (isBelow) {
+        isReverse = !placement.isBottom();
         y = math.min(target.bottom.dy + offset, size.height - margin);
       } else {
+        isReverse = !placement.isTop();
         y = math.max(target.top.dy - offset - childSize.height, margin);
       }
       if (size.width < childSize.width) {
         // 子组件比窗口大
         var center = (size.width - childSize.width) / 2.0;
-        x = placement.valueOf(topLeft: 0, bottomLeft: 0, top: center, bottom: center, topRight: 0, bottomRight: 0)!;
+        x = placement.valueOf(
+          topLeft: () => 0,
+          bottomLeft: () => 0,
+          top: () => center,
+          bottom: () => center,
+          topRight: () => 0,
+          bottomRight: () => 0,
+        )!;
       } else {
         if (placement.isTrue(topLeft: true, bottomLeft: true)) {
           final double normalizedTargetX = to.dx.clamp(margin, size.width - margin - childSize.width);
@@ -455,15 +450,24 @@ class _PopupPositionDelegate extends SingleChildLayoutDelegate {
       // 是否合适在右方显示
       final bool isRight = placement.isRight() ? fitsRight || !fitsLeft : !(fitsLeft || !fitsRight);
       if (isRight) {
+        isReverse = !placement.isRight();
         x = math.min(target.right.dx + offset, size.width - margin);
       } else {
+        isReverse = !placement.isLeft();
         x = math.min(target.left.dx - offset - childSize.width, size.width - childSize.width - margin);
       }
 
       if (size.height < childSize.height) {
         // 子组件比窗口大
         var center = (size.height - childSize.height) / 2.0;
-        y = placement.valueOf(leftTop: 0, rightTop: 0, top: center, bottom: center, leftBottom: 0, rightBottom: 0)!;
+        y = placement.valueOf(
+          leftTop: () => 0,
+          rightTop: () => 0,
+          top: () => center,
+          bottom: () => center,
+          leftBottom: () => 0,
+          rightBottom: () => 0,
+        )!;
       } else {
         if (placement.isTrue(leftTop: true, rightTop: true)) {
           final double normalizedTargetY = to.dy.clamp(margin, size.height - margin - childSize.height);
@@ -485,12 +489,13 @@ class _PopupPositionDelegate extends SingleChildLayoutDelegate {
       }
     }
     _offset = Offset(x, y);
+    callback?.call(isReverse);
     return _offset!;
   }
 
   /// 读取leader的值
   void _readLeader() {
-    if (layerLink.leader != null) {
+    if (layerLink.leaderSize != null && layerLink.leader != null) {
       _target = _PopupOffset.linkOf(layerLink);
     }
   }
@@ -505,10 +510,7 @@ class _PopupPositionDelegate extends SingleChildLayoutDelegate {
 class _PopupOverlay extends StatefulWidget {
   const _PopupOverlay({
     Key? key,
-    this.padding,
-    this.margin,
     required this.animation,
-    required this.offset,
     this.onEnter,
     this.onExit,
     this.onPointerDown,
@@ -516,12 +518,7 @@ class _PopupOverlay extends StatefulWidget {
     required this.popupWidget,
   }) : super(key: key);
 
-  final EdgeInsetsGeometry? padding;
-  final EdgeInsetsGeometry? margin;
   final Animation<double> animation;
-
-  /// 与组件之间的偏移量
-  final double offset;
   final PointerDownEventListener? onPointerDown;
   final PointerEnterEventListener? onEnter;
   final PointerExitEventListener? onExit;
@@ -534,10 +531,16 @@ class _PopupOverlay extends StatefulWidget {
 
 class _PopupOverlayState extends State<_PopupOverlay> {
   late ValueNotifier<bool> _visible;
+  late ValueNotifier<bool> _isReverse;
+
+  /// 默认垂直偏移
+  static const double _defaultVerticalOffset = 4.0;
+  static double popupContentArrowSpacer = ThemeDataConstant.spacer2;
 
   @override
   void initState() {
     _visible = ValueNotifier(false);
+    _isReverse = ValueNotifier(false);
     _updateIgnore();
     widget.animation.addListener(_updateIgnore);
     super.initState();
@@ -546,6 +549,8 @@ class _PopupOverlayState extends State<_PopupOverlay> {
   @override
   void dispose() {
     widget.animation.removeListener(_updateIgnore);
+    _visible.dispose();
+    _isReverse.dispose();
     super.dispose();
   }
 
@@ -566,13 +571,13 @@ class _PopupOverlayState extends State<_PopupOverlay> {
     var colorScheme = theme.colorScheme;
     var popupShadow = theme.shadow2Inset;
     var popupTopArrowShadow = [theme.shadowInsetLeft, theme.shadowInsetBottom];
-    // var popupLeftArrowShadow = [theme.shadowInsetLeft, theme.shadowInsetTop];
-    // var popupBottomArrowShadow = [theme.shadowInsetTop, theme.shadowInsetRight];
-    // var popupRightArrowShadow = [theme.shadowInsetRight, theme.shadowInsetBottom];
+    var popupLeftArrowShadow = [theme.shadowInsetLeft, theme.shadowInsetTop];
+    var popupBottomArrowShadow = [theme.shadowInsetTop, theme.shadowInsetRight];
+    var popupRightArrowShadow = [theme.shadowInsetRight, theme.shadowInsetBottom];
 
     // 当小部件完全不显示时，忽略所有事件
     return ValueListenableBuilder(
-      builder: (BuildContext context, value, Widget? child) {
+      builder: (BuildContext context, TPopup popup, Widget? child) {
         Widget result = ValueListenableBuilder<bool>(
           builder: (BuildContext context, value, Widget? child) {
             return DefaultTextStyle(
@@ -587,19 +592,52 @@ class _PopupOverlayState extends State<_PopupOverlay> {
           valueListenable: _visible,
           child: FadeTransition(
             opacity: widget.animation,
-            child: Container(
-              decoration: ShapeDecoration(
-                color: colorScheme.bgColorContainer,
-                shadows: [...popupShadow, ...popupTopArrowShadow],
-                shape: BubbleShapeBorder(
-                    arrowAngle: 6,
-                    arrowHeight: 6,
-                    direction: BubbleDirection.bottom,
-                    radius: BorderRadius.circular(ThemeDataConstant.borderRadius),
-                    position: const BubblePosition.end(8)),
-              ),
-              padding: widget.padding,
-              child: widget.popupWidget.value.content ?? widget.popupWidget.value.builderContent?.call(context),
+            child: ValueListenableBuilder(
+              valueListenable: _isReverse,
+              builder: (BuildContext context, bool value, Widget? child) {
+                return Container(
+                  decoration: ShapeDecoration(
+                    color: colorScheme.bgColorContainer,
+                    shadows: popup.placement.sides(
+                      top: [...popupShadow, ...popupTopArrowShadow],
+                      left: [...popupShadow, ...popupLeftArrowShadow],
+                      right: [...popupShadow, ...popupRightArrowShadow],
+                      bottom: [...popupShadow, ...popupBottomArrowShadow],
+                    ),
+                    shape: BubbleShapeBorder(
+                        smooth: 2,
+                        arrowQuadraticBezierLength: 2,
+                        arrowAngle: 6,
+                        arrowHeight: 6,
+                        direction: popup.showArrow
+                            ? popup.placement.sides(
+                                top: value ? BubbleDirection.top : BubbleDirection.bottom,
+                                left: value ? BubbleDirection.left : BubbleDirection.right,
+                                right: value ? BubbleDirection.right : BubbleDirection.left,
+                                bottom: value ? BubbleDirection.bottom : BubbleDirection.top,
+                              )
+                            : BubbleDirection.none,
+                        radius: BorderRadius.circular(ThemeDataConstant.borderRadius),
+                        position: popup.placement.valueOf(
+                          topLeft: () => BubblePosition.start(popupContentArrowSpacer),
+                          top: () => const BubblePosition.center(0),
+                          topRight: () => BubblePosition.end(popupContentArrowSpacer),
+                          rightTop: () => BubblePosition.start(popupContentArrowSpacer),
+                          right: () => const BubblePosition.center(0),
+                          rightBottom: () => BubblePosition.end(popupContentArrowSpacer),
+                          bottomLeft: () => BubblePosition.start(popupContentArrowSpacer),
+                          bottom: () => const BubblePosition.center(0),
+                          bottomRight: () => BubblePosition.end(popupContentArrowSpacer),
+                          leftTop: () => BubblePosition.start(popupContentArrowSpacer),
+                          left: () => const BubblePosition.center(0),
+                          leftBottom: () => BubblePosition.end(popupContentArrowSpacer),
+                        )!),
+                  ),
+                  padding: EdgeInsets.symmetric(vertical: 4, horizontal: ThemeDataConstant.spacer),
+                  child: child,
+                );
+              },
+              child: popup.content ?? popup.builderContent?.call(context),
             ),
           ),
         );
@@ -620,10 +658,15 @@ class _PopupOverlayState extends State<_PopupOverlay> {
         return Positioned.fill(
           child: CustomSingleChildLayout(
             delegate: _PopupPositionDelegate(
-              offset: widget.offset,
-              placement: widget.popupWidget.value.placement,
+              offset: _defaultVerticalOffset,
+              placement: popup.placement,
               margin: 5.0,
               layerLink: widget.layerLink,
+              callback: (isReverse) {
+                SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+                  _isReverse.value = isReverse;
+                });
+              },
             ),
             child: result,
           ),
