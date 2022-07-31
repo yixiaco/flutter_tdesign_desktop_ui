@@ -27,6 +27,9 @@ export 'src/components/button/button.dart';
 export 'src/components/button/button_theme.dart';
 /// 图标
 export 'src/components/icons/t_icons.dart';
+/// 输入框
+export 'src/components/input/input.dart';
+export 'src/components/input/input_theme.dart';
 /// 弹出层
 export 'src/components/popup/popup.dart';
 export 'src/components/popup/popup_theme.dart';

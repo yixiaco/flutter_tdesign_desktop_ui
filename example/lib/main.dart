@@ -1,7 +1,6 @@
+import 'package:example/components/input/input_example.dart';
 import 'package:flutter/material.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
-
-import 'components/popup/popup_example.dart';
 
 void main() {
   runApp(const MyApp());
@@ -47,7 +46,7 @@ class _MyHomePageState extends State<MyHomePage> {
         header: const THeader(child: Text('Header')),
         footer: const TFooter(child: Text('Footer')),
         content: const TContent(
-          child: PopupExample(),
+          child: InputExample(),
         ),
       ),
     );
