@@ -123,6 +123,14 @@ class TInput extends StatefulWidget {
 }
 
 class _TInputState extends State<TInput> {
+  var formFieldState = GlobalKey<FormFieldState<TextFormField>>();
+
+  FocusNode? _focusNode;
+
+  FocusNode get effectiveFocusNode => widget.focusNode ?? (_focusNode ??= FocusNode());
+
+  bool isFocused = false;
+
   @override
   void initState() {
     super.initState();
@@ -130,24 +138,49 @@ class _TInputState extends State<TInput> {
 
   @override
   void dispose() {
+    _focusNode?.dispose();
     super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(TInput oldWidget) {
+    super.didUpdateWidget(oldWidget);
   }
 
   /// 默认装饰器
   InputDecoration defaultDecoration() {
     var theme = TTheme.of(context);
     var colorScheme = theme.colorScheme;
+
+    var onePx = 1 / MediaQuery.of(context).devicePixelRatio;
+
+    var border = MaterialStateOutlineInputBorder.resolveWith((states) {
+      var color = colorScheme.borderLevel2Color;
+      if (states.contains(MaterialState.hovered)) {
+        color = colorScheme.brandColor;
+      }
+      if ((states.contains(MaterialState.focused) || states.contains(MaterialState.pressed))) {
+        color = colorScheme.brandColor;
+      }
+      if (states.contains(MaterialState.disabled)) {
+        color = colorScheme.borderLevel2Color;
+      }
+      if (states.contains(MaterialState.error)) {
+        color = colorScheme.errorColor;
+      }
+      return inputBorder(onePx, color);
+    });
     return InputDecoration(
       hintText: widget.placeholder,
-      border: OutlineInputBorder(borderSide: BorderSide(width: 1, color: colorScheme.borderLevel2Color)),
-      focusedBorder: OutlineInputBorder(borderSide: BorderSide(width: 1, color: colorScheme.brandColor)),
-      errorBorder: OutlineInputBorder(borderSide: BorderSide(width: 1, color: colorScheme.errorColor)),
-      focusColor: colorScheme.warningColor,
-      hoverColor: colorScheme.warningColor,
-      // isCollapsed: true,
-      contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+      border: border,
+      contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
       isDense: true,
     );
+  }
+
+  OutlineInputBorder inputBorder(double width, Color color) {
+    return OutlineInputBorder(
+        borderSide: BorderSide(width: width, color: color), borderRadius: BorderRadius.circular(ThemeDataConstant.borderRadius));
   }
 
   @override
@@ -156,11 +189,12 @@ class _TInputState extends State<TInput> {
     var colorScheme = theme.colorScheme;
 
     return TextFormField(
+      key: formFieldState,
       controller: widget.controller,
       initialValue: widget.initialValue,
       autofocus: widget.autofocus,
       readOnly: widget.readonly,
-      focusNode: widget.focusNode,
+      focusNode: effectiveFocusNode,
       decoration: defaultDecoration(),
       cursorColor: colorScheme.textColorPrimary,
       cursorWidth: 1,

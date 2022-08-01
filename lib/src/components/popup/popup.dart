@@ -75,7 +75,10 @@ class TPopup extends StatefulWidget {
 
 class TPopupState extends State<TPopup> with TickerProviderStateMixin {
   /// 显隐值
-  late ValueNotifier<bool> visible;
+  ValueNotifier<bool>? _visible;
+
+  /// 有效显隐值
+  ValueNotifier<bool> get effectiveVisible => widget.visible ?? (_visible ??= ValueNotifier(false));
 
   /// 区域焦点节点
   FocusScopeNode? _node;
@@ -111,15 +114,13 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
 
   @override
   void initState() {
-    visible = widget.visible ?? ValueNotifier(false);
     _controller = AnimationController(
       duration: _fadeInDuration,
       reverseDuration: _fadeOutDuration,
       vsync: this,
     )..addStatusListener(_handleStatusChanged);
 
-    visible.removeListener(_showHidePopup);
-    visible.addListener(_showHidePopup);
+    effectiveVisible.addListener(_showHidePopup);
     // 初始化显隐
     _showHidePopup();
     if (widget.trigger == TPopupTrigger.focus) {
@@ -149,18 +150,17 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
 
   @override
   void dispose() {
-    if (widget.visible == null) {
-      visible.dispose();
-    }
+    effectiveVisible.removeListener(_showHidePopup);
+    _visible?.dispose();
     // 销毁浮层
     _removeEntry(force: true);
     super.dispose();
   }
 
-  /// 判断[visible.value]状态，显示和隐藏浮层
+  /// 判断[effectiveVisible.value]状态，显示和隐藏浮层
   void _showHidePopup({bool? immediately}) {
     immediately = immediately ?? widget.trigger != TPopupTrigger.hover;
-    if (visible.value) {
+    if (effectiveVisible.value) {
       _showPopup(immediately: immediately);
     } else {
       _hidePopup(immediately: immediately);
@@ -300,7 +300,7 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
 
   /// 更新显示状态
   void _updateVisible([bool? visible]) {
-    this.visible.value = visible ?? !this.visible.value;
+    effectiveVisible.value = visible ?? !effectiveVisible.value;
   }
 
   @override
@@ -314,6 +314,10 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
     } else {
       _node?.dispose();
       _node = null;
+    }
+    if(widget.visible != oldWidget.visible) {
+      (oldWidget.visible ?? _visible)?.removeListener(_showHidePopup);
+      (widget.visible ?? _visible)?.addListener(_showHidePopup);
     }
     // 在下一帧时，更新这个持有对象
     SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
@@ -329,9 +333,9 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
 
   void _focusVisible() {
     if (_node!.hasFocus) {
-      visible.value = true;
+      effectiveVisible.value = true;
     } else {
-      visible.value = false;
+      effectiveVisible.value = false;
     }
   }
 }
