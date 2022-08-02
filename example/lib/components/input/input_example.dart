@@ -6,8 +6,29 @@ class InputExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const TInput(
-      placeholder: 'xxx',
+    return Column(
+      children: const [
+        TInput(
+          status: TInputStatus.defaultStatus,
+          placeholder: 'brand',
+          disabled: true,
+        ),
+        SizedBox(height: 8),
+        TInput(
+          status: TInputStatus.success,
+          placeholder: 'success',
+        ),
+        SizedBox(height: 8),
+        TInput(
+          status: TInputStatus.warning,
+          placeholder: 'warning',
+        ),
+        SizedBox(height: 8),
+        TInput(
+          status: TInputStatus.error,
+          placeholder: 'error',
+        ),
+      ],
     );
   }
 }

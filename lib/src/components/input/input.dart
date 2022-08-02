@@ -33,6 +33,7 @@ class TInput extends StatefulWidget {
     this.onEnter,
     this.onFocus,
     this.onKeyDown,
+    this.align = TextAlign.start,
   }) : super(key: key);
 
   /// 控制正在编辑的文本。
@@ -118,6 +119,9 @@ class TInput extends StatefulWidget {
   /// 键盘按下时触发
   final InputCallBack? onKeyDown;
 
+  /// 文本对齐方式
+  final TextAlign align;
+
   @override
   State<TInput> createState() => _TInputState();
 }
@@ -175,12 +179,15 @@ class _TInputState extends State<TInput> {
       border: border,
       contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
       isDense: true,
+      enabled: !widget.disabled,
     );
   }
 
   OutlineInputBorder inputBorder(double width, Color color) {
     return OutlineInputBorder(
-        borderSide: BorderSide(width: width, color: color), borderRadius: BorderRadius.circular(ThemeDataConstant.borderRadius));
+      borderSide: BorderSide(width: width, color: color),
+      borderRadius: BorderRadius.circular(ThemeDataConstant.borderRadius),
+    );
   }
 
   @override
@@ -188,6 +195,11 @@ class _TInputState extends State<TInput> {
     var theme = TTheme.of(context);
     var colorScheme = theme.colorScheme;
 
+    var fontSize = theme.size.sizeOf(
+      small: ThemeDataConstant.fontSizeS,
+      medium: ThemeDataConstant.fontSizeBase,
+      large: ThemeDataConstant.fontSizeL,
+    );
     return TextFormField(
       key: formFieldState,
       controller: widget.controller,
@@ -198,6 +210,15 @@ class _TInputState extends State<TInput> {
       decoration: defaultDecoration(),
       cursorColor: colorScheme.textColorPrimary,
       cursorWidth: 1,
+      style: TextStyle(
+        fontSize: fontSize,
+      ),
+      textAlign: widget.align,
+      mouseCursor: widget.readonly
+          ? SystemMouseCursors.click
+          : widget.disabled
+              ? SystemMouseCursors.noDrop
+              : null,
     );
   }
 }
