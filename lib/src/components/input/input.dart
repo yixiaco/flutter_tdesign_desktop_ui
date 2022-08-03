@@ -235,7 +235,31 @@ class _TInputState extends State<TInput> {
       );
     }
 
-    const iconConstraints = BoxConstraints.expand(width: 25, height: 15);
+    // label
+    if (widget.label != null) {
+      var fontSize = getFontSize(size);
+
+      var label = Text(
+        '价格：',
+        style: TextStyle(
+          fontFamily: theme.fontFamily,
+          fontSize: fontSize,
+          color: widget.disabled ? colorScheme.textColorDisabled : colorScheme.textColorPrimary,
+        ),
+      );
+      if (prefixIcon == null) {
+        prefixIcon = label;
+      } else {
+        prefixIcon = Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            prefixIcon,
+            const SizedBox(width: 2),
+            label,
+          ],
+        );
+      }
+    }
     return InputDecoration(
       hintStyle: TextStyle(
         fontFamily: theme.fontFamily,
@@ -259,10 +283,26 @@ class _TInputState extends State<TInput> {
         color: tipsColor,
         height: 0.5, // 通过压缩字体的高度，实现tips的高度缩小
       ),
-      prefixIcon: prefixIcon,
-      prefixIconConstraints: iconConstraints,
-      suffixIcon: suffixIcon,
-      suffixIconConstraints: iconConstraints,
+      prefixIcon: Padding(
+        padding: const EdgeInsets.only(left: 8, right: 2),
+        child: prefixIcon,
+      ),
+      prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
+      suffixIcon: Padding(
+        padding: const EdgeInsets.only(right: 8.0),
+        child: widget.suffixIcon ?? suffixIcon,
+      ),
+      suffixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
+      suffix: widget.suffix,
+    );
+  }
+
+  /// 获取字体大小
+  double getFontSize(TComponentSize size) {
+    return size.sizeOf(
+      small: ThemeDataConstant.fontSizeS,
+      medium: ThemeDataConstant.fontSizeBase,
+      large: ThemeDataConstant.fontSizeL,
     );
   }
 
@@ -280,11 +320,7 @@ class _TInputState extends State<TInput> {
     var colorScheme = theme.colorScheme;
     var size = widget.size ?? inputTheme.size ?? theme.size;
 
-    var fontSize = size.sizeOf(
-      small: ThemeDataConstant.fontSizeS,
-      medium: ThemeDataConstant.fontSizeBase,
-      large: ThemeDataConstant.fontSizeL,
-    );
+    var fontSize = getFontSize(size);
     MouseCursor? cursor;
     if (widget.disabled) {
       cursor = SystemMouseCursors.noDrop;
@@ -304,6 +340,7 @@ class _TInputState extends State<TInput> {
       style: TextStyle(
         fontFamily: theme.fontFamily,
         fontSize: fontSize,
+        textBaseline: TextBaseline.alphabetic,
         color: widget.disabled ? colorScheme.textColorDisabled : colorScheme.textColorPrimary,
       ),
       textAlign: widget.align,
@@ -311,6 +348,7 @@ class _TInputState extends State<TInput> {
       keyboardAppearance: theme.brightness,
       maxLength: widget.maxLength ?? inputTheme.maxLength,
       obscureText: widget.type == TInputType.password && !look,
+      textAlignVertical: TextAlignVertical.center,
     );
   }
 }

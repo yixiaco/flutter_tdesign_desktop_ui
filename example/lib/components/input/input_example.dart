@@ -37,6 +37,7 @@ class InputExample extends StatelessWidget {
           ),
           SizedBox(height: 8),
           TInput(
+            label: '价格：',
             initialValue: '错误状态',
             status: TInputStatus.error,
             placeholder: 'error',
@@ -47,6 +48,7 @@ class InputExample extends StatelessWidget {
           TInput(
             type: TInputType.password,
             placeholder: '密码框',
+            label: '价格：',
             maxLength: 10,
           ),
         ],
