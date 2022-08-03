@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:tdesign_desktop_ui/src/basic/functions.dart';
 import 'package:tdesign_desktop_ui/src/theme/theme.dart';
 
 /// 弹出层主题数据
@@ -160,18 +161,18 @@ enum TPopupPlacement {
 
   /// 取值的快捷方式
   T? valueOf<T>({
-    T Function()? top,
-    T Function()? left,
-    T Function()? right,
-    T Function()? bottom,
-    T Function()? topLeft,
-    T Function()? topRight,
-    T Function()? bottomLeft,
-    T Function()? bottomRight,
-    T Function()? leftTop,
-    T Function()? leftBottom,
-    T Function()? rightTop,
-    T Function()? rightBottom,
+    TSupplier<T>? top,
+    TSupplier<T>? left,
+    TSupplier<T>? right,
+    TSupplier<T>? bottom,
+    TSupplier<T>? topLeft,
+    TSupplier<T>? topRight,
+    TSupplier<T>? bottomLeft,
+    TSupplier<T>? bottomRight,
+    TSupplier<T>? leftTop,
+    TSupplier<T>? leftBottom,
+    TSupplier<T>? rightTop,
+    TSupplier<T>? rightBottom,
   }) {
     switch (this) {
       case TPopupPlacement.top:

@@ -6,29 +6,51 @@ class InputExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: const [
-        TInput(
-          status: TInputStatus.defaultStatus,
-          placeholder: 'brand',
-          disabled: true,
-        ),
-        SizedBox(height: 8),
-        TInput(
-          status: TInputStatus.success,
-          placeholder: 'success',
-        ),
-        SizedBox(height: 8),
-        TInput(
-          status: TInputStatus.warning,
-          placeholder: 'warning',
-        ),
-        SizedBox(height: 8),
-        TInput(
-          status: TInputStatus.error,
-          placeholder: 'error',
-        ),
-      ],
+    return TInputTheme(
+      data: const TInputThemeData(size: TComponentSize.medium),
+      child: Column(
+        children: const [
+          TInput(
+            status: TInputStatus.success,
+            placeholder: 'brand',
+            disabled: true,
+          ),
+          SizedBox(height: 8),
+          TInput(
+            status: TInputStatus.defaultStatus,
+            placeholder: 'brand',
+            maxLength: 5,
+          ),
+          SizedBox(height: 8),
+          TInput(
+            status: TInputStatus.success,
+            placeholder: 'success',
+            tips: '校验通过文本提示',
+            maxLength: 5,
+          ),
+          SizedBox(height: 8),
+          TInput(
+            status: TInputStatus.warning,
+            placeholder: 'warning',
+            tips: '校验不通过文本提示',
+            maxLength: 5,
+          ),
+          SizedBox(height: 8),
+          TInput(
+            initialValue: '错误状态',
+            status: TInputStatus.error,
+            placeholder: 'error',
+            tips: '校验存在严重问题文本提示',
+            maxLength: 5,
+          ),
+          SizedBox(height: 8),
+          TInput(
+            type: TInputType.password,
+            placeholder: '密码框',
+            maxLength: 10,
+          ),
+        ],
+      ),
     );
   }
 }

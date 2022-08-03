@@ -18,7 +18,7 @@ class ThemeDataConstant {
   static double fontSizeXXL = fontSize * 3.6;
 
   // Spacer
-  static double spacer = 6;
+  static double spacer = 8;
   static double spacerS = spacer * .5; // 间距-4
   static double spacerM = spacer * .75; // 间距-6
   static double spacerL = spacer * 1.5; // 间距-12
@@ -42,14 +42,16 @@ class TThemeData with Diagnosticable {
     TComponentSize? size,
     String? fontFamily,
     TButtonThemeData? buttonThemeData,
+    TInputThemeData? inputThemeData,
     TPopupThemeData? popupThemeData,
   }) {
     return TThemeData.raw(
       brightness: brightness,
       colorScheme: colorScheme ?? (brightness == Brightness.light ? TColorScheme.light : TColorScheme.dark),
       size: size ?? TComponentSize.medium,
-      fontFamily: fontFamily ?? 'PingFang SC, Microsoft YaHei, Arial Regular',
+      fontFamily: fontFamily ?? 'Microsoft YaHei',
       buttonThemeData: buttonThemeData ?? const TButtonThemeData(),
+      inputThemeData: inputThemeData ?? const TInputThemeData(),
       popupThemeData: popupThemeData ?? const TPopupThemeData(),
     );
   }
@@ -60,6 +62,7 @@ class TThemeData with Diagnosticable {
     required this.size,
     required this.fontFamily,
     required this.buttonThemeData,
+    required this.inputThemeData,
     required this.popupThemeData,
   });
 
@@ -77,6 +80,9 @@ class TThemeData with Diagnosticable {
 
   /// 按钮主题数据
   final TButtonThemeData buttonThemeData;
+
+  /// 输入框主题数据
+  final TInputThemeData inputThemeData;
 
   /// 弹出层主题数据
   final TPopupThemeData popupThemeData;
@@ -118,6 +124,7 @@ class TThemeData with Diagnosticable {
     TComponentSize? size,
     String? fontFamily,
     TButtonThemeData? buttonThemeData,
+    TInputThemeData? inputThemeData,
     TPopupThemeData? popupThemeData,
   }) {
     return TThemeData(
@@ -126,6 +133,7 @@ class TThemeData with Diagnosticable {
       size: size ?? this.size,
       fontFamily: fontFamily ?? this.fontFamily,
       buttonThemeData: buttonThemeData ?? this.buttonThemeData,
+      inputThemeData: inputThemeData ?? this.inputThemeData,
       popupThemeData: popupThemeData ?? this.popupThemeData,
     );
   }
@@ -140,9 +148,16 @@ class TThemeData with Diagnosticable {
           size == other.size &&
           fontFamily == other.fontFamily &&
           buttonThemeData == other.buttonThemeData &&
+          inputThemeData == other.inputThemeData &&
           popupThemeData == other.popupThemeData;
 
   @override
   int get hashCode =>
-      brightness.hashCode ^ colorScheme.hashCode ^ size.hashCode ^ fontFamily.hashCode ^ buttonThemeData.hashCode ^ popupThemeData.hashCode;
+      brightness.hashCode ^
+      colorScheme.hashCode ^
+      size.hashCode ^
+      fontFamily.hashCode ^
+      buttonThemeData.hashCode ^
+      inputThemeData.hashCode ^
+      popupThemeData.hashCode;
 }

@@ -51,10 +51,10 @@ class TPopup extends StatefulWidget {
   final Widget? content;
 
   /// 打开事件
-  final void Function()? onOpen;
+  final TCallback? onOpen;
 
   /// 关闭事件
-  final void Function()? onClose;
+  final TCallback? onClose;
 
   /// hover和focus时，显示的延迟
   final Duration showDuration;

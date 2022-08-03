@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
-typedef InputCallBack = void Function(String value);
+typedef InputCallBack = TConsumer<String>;
 
 /// 输入框
 class TInput extends StatefulWidget {
@@ -15,7 +15,6 @@ class TInput extends StatefulWidget {
     this.clearable = false,
     this.disabled = false,
     this.label,
-    this.maxCharacter,
     this.maxLength,
     this.name,
     this.placeholder,
@@ -63,11 +62,14 @@ class TInput extends StatefulWidget {
   /// 左侧文本
   final String? label;
 
-  /// 用户最多可以输入的字符个数，一个中文汉字表示两个字符长度。[maxCharacter] 和 [maxlength] 二选一使用
-  final int? maxCharacter;
-
-  /// 用户最多可以输入的文本长度，一个中文等于一个计数长度。值小于等于 0 的时候，则表示不限制输入长度。
-  /// [maxCharacter] 和 [maxLength] 二选一使用
+  /// 用户最多可以输入的最大字符数（Unicode 标量值）。
+  /// 如果设置，字符计数器将显示在字段下方，显示已输入的字符数。如果设置为大于 0 的数字，它还将显示允许的最大数字。
+  /// 如果设置为[TextField.noMaxLength]则仅显示当前字符数。
+  /// 输入[maxLength]个字符后，将忽略其他输入，除非将[maxLengthEnforcement]设置为[MaxLengthEnforcement.none] 。
+  /// 文本字段使用[LengthLimitingTextInputFormatter]强制执行长度，该长度在提供的inputFormatters （如果有）之后进行评估。
+  /// 此值必须为 null、 TextField.noMaxLength或大于 0。如果为 null（默认值），则可以输入的字符数没有限制。如果设置为[TextField.noMaxLength] ，则不会强制执行任何限制，但仍会显示输入的字符数。
+  /// 空白字符（例如换行符、空格、制表符）包含在字符计数中。
+  /// 如果[maxLengthEnforcement]为[MaxLengthEnforcement.none] ，则可以输入超过[maxLength]个字符，但是当超出限制时，错误计数器和分隔符将切换到[decoration]的[InputDecoration.errorStyle]
   final int? maxLength;
 
   /// 名称
@@ -108,7 +110,7 @@ class TInput extends StatefulWidget {
   final InputCallBack? onChange;
 
   /// 清空按钮点击时触发
-  final Function()? onClear;
+  final TCallback? onClear;
 
   /// 回车键按下时触发
   final InputCallBack? onEnter;
@@ -135,51 +137,132 @@ class _TInputState extends State<TInput> {
 
   bool isFocused = false;
 
+  /// 是否临时查看密码
+  bool look = false;
+
   @override
   void initState() {
+    effectiveFocusNode.addListener(_focusChange);
     super.initState();
   }
 
   @override
   void dispose() {
-    _focusNode?.dispose();
+    effectiveFocusNode.dispose();
     super.dispose();
+  }
+
+  /// 焦点变更事件
+  void _focusChange() {
+    setState(() {
+      isFocused = effectiveFocusNode.hasFocus;
+    });
   }
 
   @override
   void didUpdateWidget(TInput oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (widget.focusNode != oldWidget.focusNode) {
+      (oldWidget.focusNode ?? _focusNode)?.removeListener(_focusChange);
+      (widget.focusNode ?? _focusNode)?.addListener(_focusChange);
+    }
   }
 
+  static double inputHeightS = ThemeDataConstant.spacer * 0.8;
+  static double inputHeightDefault = ThemeDataConstant.spacer * 1.2;
+  static double inputHeightL = ThemeDataConstant.spacer * 2.5;
+
   /// 默认装饰器
-  InputDecoration defaultDecoration() {
+  InputDecoration defaultDecoration(TComponentSize size) {
     var theme = TTheme.of(context);
     var colorScheme = theme.colorScheme;
 
     var onePx = 1 / MediaQuery.of(context).devicePixelRatio;
 
+    // 边框样式
     var border = MaterialStateOutlineInputBorder.resolveWith((states) {
-      var color = colorScheme.borderLevel2Color;
-      if (states.contains(MaterialState.hovered)) {
-        color = colorScheme.brandColor;
-      }
-      if ((states.contains(MaterialState.focused) || states.contains(MaterialState.pressed))) {
-        color = colorScheme.brandColor;
-      }
-      if (states.contains(MaterialState.disabled)) {
-        color = colorScheme.borderLevel2Color;
-      }
-      if (states.contains(MaterialState.error)) {
-        color = colorScheme.errorColor;
-      }
+      Color color = widget.status.lazyValueOf(
+        defaultStatus: () {
+          if (states.contains(MaterialState.hovered) || states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
+            return colorScheme.brandColor;
+          }
+          if (states.contains(MaterialState.disabled)) {
+            return colorScheme.borderLevel2Color;
+          }
+          return colorScheme.borderLevel2Color;
+        },
+        success: () {
+          return colorScheme.successColor;
+        },
+        warning: () {
+          return colorScheme.warningColor;
+        },
+        error: () {
+          return colorScheme.errorColor;
+        },
+      );
       return inputBorder(onePx, color);
     });
+
+    // 填充背景色
+    var fillColor = widget.disabled ? colorScheme.bgColorComponentDisabled : colorScheme.bgColorSpecialComponent;
+    // tips颜色
+    var tipsColor = widget.status.lazyValueOf(
+      defaultStatus: () => colorScheme.textColorPlaceholder,
+      success: () => colorScheme.successColor,
+      warning: () => colorScheme.warningColor,
+      error: () => colorScheme.errorColor,
+    );
+    // icon颜色
+    var iconColor = widget.status.lazyValueOf(
+      defaultStatus: () => isFocused ? colorScheme.brandColor : colorScheme.borderLevel2Color,
+      success: () => colorScheme.successColor,
+      warning: () => colorScheme.warningColor,
+      error: () => colorScheme.errorColor,
+    );
+    Widget? prefixIcon;
+    Widget? suffixIcon;
+    if (widget.type == TInputType.password) {
+      prefixIcon = Icon(TIcons.lockOn, size: 15, color: iconColor);
+      suffixIcon = MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: GestureDetector(
+          onTap: () => setState(() {
+            look = !look;
+          }),
+          child: Icon(look ? TIcons.browse : TIcons.browseOff, size: 15, color: colorScheme.borderLevel2Color),
+        ),
+      );
+    }
+
+    const iconConstraints = BoxConstraints.expand(width: 25, height: 15);
     return InputDecoration(
+      hintStyle: TextStyle(
+        fontFamily: theme.fontFamily,
+        color: widget.disabled ? colorScheme.textColorDisabled : colorScheme.textColorPlaceholder,
+      ),
       hintText: widget.placeholder,
       border: border,
-      contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+      contentPadding: EdgeInsets.symmetric(
+        vertical: size.sizeOf(small: inputHeightS, medium: inputHeightDefault, large: inputHeightL),
+        horizontal: 8,
+      ),
       isDense: true,
       enabled: !widget.disabled,
+      fillColor: fillColor,
+      hoverColor: fillColor,
+      filled: true,
+      helperText: widget.tips,
+      helperStyle: TextStyle(
+        fontFamily: theme.fontFamily,
+        fontSize: ThemeDataConstant.fontSizeS,
+        color: tipsColor,
+        height: 0.5, // 通过压缩字体的高度，实现tips的高度缩小
+      ),
+      prefixIcon: prefixIcon,
+      prefixIconConstraints: iconConstraints,
+      suffixIcon: suffixIcon,
+      suffixIconConstraints: iconConstraints,
     );
   }
 
@@ -193,13 +276,21 @@ class _TInputState extends State<TInput> {
   @override
   Widget build(BuildContext context) {
     var theme = TTheme.of(context);
+    var inputTheme = TInputTheme.of(context);
     var colorScheme = theme.colorScheme;
+    var size = widget.size ?? inputTheme.size ?? theme.size;
 
-    var fontSize = theme.size.sizeOf(
+    var fontSize = size.sizeOf(
       small: ThemeDataConstant.fontSizeS,
       medium: ThemeDataConstant.fontSizeBase,
       large: ThemeDataConstant.fontSizeL,
     );
+    MouseCursor? cursor;
+    if (widget.disabled) {
+      cursor = SystemMouseCursors.noDrop;
+    } else if (widget.readonly) {
+      cursor = SystemMouseCursors.click;
+    }
     return TextFormField(
       key: formFieldState,
       controller: widget.controller,
@@ -207,18 +298,19 @@ class _TInputState extends State<TInput> {
       autofocus: widget.autofocus,
       readOnly: widget.readonly,
       focusNode: effectiveFocusNode,
-      decoration: defaultDecoration(),
+      decoration: inputTheme.decoration ?? defaultDecoration(size),
       cursorColor: colorScheme.textColorPrimary,
       cursorWidth: 1,
       style: TextStyle(
+        fontFamily: theme.fontFamily,
         fontSize: fontSize,
+        color: widget.disabled ? colorScheme.textColorDisabled : colorScheme.textColorPrimary,
       ),
       textAlign: widget.align,
-      mouseCursor: widget.readonly
-          ? SystemMouseCursors.click
-          : widget.disabled
-              ? SystemMouseCursors.noDrop
-              : null,
+      mouseCursor: cursor,
+      keyboardAppearance: theme.brightness,
+      maxLength: widget.maxLength ?? inputTheme.maxLength,
+      obscureText: widget.type == TInputType.password && !look,
     );
   }
 }

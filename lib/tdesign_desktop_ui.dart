@@ -11,6 +11,7 @@ export 'src/basic/basic.dart';
 export 'src/basic/ink_bevel_angle.dart';
 export 'src/basic/borders.dart';
 export 'src/basic/bubble_shape_border.dart';
+export 'src/basic/functions.dart';
 
 /// 工具类
 export 'src/util/path_util.dart';
