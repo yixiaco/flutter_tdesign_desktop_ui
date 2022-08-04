@@ -1,4 +1,4 @@
-import 'package:example/components/input/input_example.dart';
+import 'package:example/components/space/space_example.dart';
 import 'package:example/state/theme_state.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -60,7 +60,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
         ),
         footer: const TFooter(child: Text('Footer')),
         content: const TContent(
-          child: InputExample(),
+          child: SpaceExample(),
         ),
       ),
     );

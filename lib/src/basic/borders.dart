@@ -16,10 +16,14 @@ class TBorderSide extends BorderSide {
     super.width = 1.0,
     super.style = BorderStyle.solid,
     this.dashed = false,
+    this.antiAlias = false,
   }) : assert(width >= 0.0);
 
   /// 虚线
   final bool dashed;
+
+  /// 是否对画布上绘制的线条和图像应用抗锯齿
+  final bool antiAlias;
 
   /// A hairline black border that is not rendered.
   static const TBorderSide none = TBorderSide(width: 0.0, style: BorderStyle.none);
@@ -42,12 +46,10 @@ class TBorderSide extends BorderSide {
   ///
   /// The arguments must not be null.
   static bool canMerge(TBorderSide a, TBorderSide b) {
-    if ((a.style == BorderStyle.none && a.width == 0.0) ||
-        (b.style == BorderStyle.none && b.width == 0.0)) {
+    if ((a.style == BorderStyle.none && a.width == 0.0) || (b.style == BorderStyle.none && b.width == 0.0)) {
       return true;
     }
-    return a.style == b.style
-        && a.color == b.color && a.dashed == b.dashed;
+    return a.style == b.style && a.color == b.color && a.dashed == b.dashed;
   }
 
   /// Linearly interpolate between two border sides.
@@ -66,12 +68,14 @@ class TBorderSide extends BorderSide {
     if (width < 0.0) {
       return TBorderSide.none;
     }
-    if (a.style == b.style && a.dashed == b.dashed) {
+    if (a.style == b.style && a.dashed == b.dashed && a.antiAlias == b.antiAlias) {
       return TBorderSide(
         color: Color.lerp(a.color, b.color, t)!,
         width: width,
-        style: a.style, // == b.style
+        style: a.style,
+        // == b.style
         dashed: a.dashed,
+        antiAlias: a.antiAlias,
       );
     }
     Color colorA, colorB;
@@ -95,6 +99,7 @@ class TBorderSide extends BorderSide {
       color: Color.lerp(colorA, colorB, t)!,
       width: width,
       dashed: b.dashed,
+      antiAlias: b.antiAlias,
     );
   }
 
@@ -104,6 +109,7 @@ class TBorderSide extends BorderSide {
     double? width,
     BorderStyle? style,
     bool? dashed,
+    bool? antiAlias,
   }) {
     assert(width == null || width >= 0.0);
     return TBorderSide(
@@ -111,6 +117,7 @@ class TBorderSide extends BorderSide {
       width: width ?? this.width,
       style: style ?? this.style,
       dashed: dashed ?? this.dashed,
+      antiAlias: antiAlias ?? this.antiAlias,
     );
   }
 
@@ -122,14 +129,19 @@ class TBorderSide extends BorderSide {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is TBorderSide && other.color == color && other.width == width && other.style == style && other.dashed == dashed;
+    return other is TBorderSide &&
+        other.color == color &&
+        other.width == width &&
+        other.style == style &&
+        other.dashed == dashed &&
+        other.antiAlias == antiAlias;
   }
 
   @override
-  int get hashCode => Object.hash(color, width, style, dashed);
+  int get hashCode => Object.hash(color, width, style, dashed, antiAlias);
 
   @override
-  String toString() => '${objectRuntimeType(this, 'TBorderSide')}($color, ${width.toStringAsFixed(1)}, $style, $dashed)';
+  String toString() => '${objectRuntimeType(this, 'TBorderSide')}($color, ${width.toStringAsFixed(1)}, $style, $dashed, $antiAlias)';
 }
 
 class TRoundedRectangleBorder extends RoundedRectangleBorder {
@@ -168,17 +180,23 @@ class TRoundedRectangleBorder extends RoundedRectangleBorder {
           canvas.drawRRect(borderRadius.resolve(textDirection).toRRect(rect), side.toPaint());
         } else {
           final RRect outer = borderRadius.resolve(textDirection).toRRect(rect);
-          final RRect inner = outer.deflate(width * 0.75);
-          final Paint paint = Paint()..color = side.color..style = PaintingStyle.stroke..strokeWidth = width;
+          final RRect inner = outer.deflate(width * 0.5);
+          final Paint paint = Paint()
+            ..color = side.color
+            ..style = PaintingStyle.stroke
+            ..isAntiAlias = false
+            ..strokeWidth = width;
 
           var path = Path()..addRRect(inner);
-          if(side is TBorderSide && (side as TBorderSide).dashed) {
-            path = PathUtil.dashPath(path, 3, 2);
+          if (side is TBorderSide) {
+            var borderSide = (side as TBorderSide);
+            if(borderSide.dashed) {
+              path = PathUtil.dashPath(path, 3, 2);
+            }
+            paint.isAntiAlias = borderSide.antiAlias;
           }
           canvas.drawPath(path, paint);
         }
     }
   }
-
-
 }

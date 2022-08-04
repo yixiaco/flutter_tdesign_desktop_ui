@@ -6,6 +6,8 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// 主题常量
 class ThemeDataConstant {
+  const ThemeDataConstant._();
+
   // 边框圆角
   static double borderRadius = 3;
 
