@@ -28,6 +28,8 @@ export 'src/components/button/button.dart';
 export 'src/components/button/button_theme.dart';
 /// 图标
 export 'src/components/icons/t_icons.dart';
+/// 间距
+export 'src/components/space/TSpace.dart';
 /// 输入框
 export 'src/components/input/input.dart';
 export 'src/components/input/input_theme.dart';

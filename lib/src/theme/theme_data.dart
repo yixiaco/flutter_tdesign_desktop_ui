@@ -40,6 +40,7 @@ class TThemeData with Diagnosticable {
     required Brightness brightness,
     TColorScheme? colorScheme,
     TComponentSize? size,
+    TextDirection? textDirection,
     String? fontFamily,
     TButtonThemeData? buttonThemeData,
     TInputThemeData? inputThemeData,
@@ -49,6 +50,7 @@ class TThemeData with Diagnosticable {
       brightness: brightness,
       colorScheme: colorScheme ?? (brightness == Brightness.light ? TColorScheme.light : TColorScheme.dark),
       size: size ?? TComponentSize.medium,
+      textDirection: textDirection ?? TextDirection.ltr,
       fontFamily: fontFamily ?? 'Microsoft YaHei',
       buttonThemeData: buttonThemeData ?? const TButtonThemeData(),
       inputThemeData: inputThemeData ?? const TInputThemeData(),
@@ -60,6 +62,7 @@ class TThemeData with Diagnosticable {
     required this.brightness,
     required this.colorScheme,
     required this.size,
+    required this.textDirection,
     required this.fontFamily,
     required this.buttonThemeData,
     required this.inputThemeData,
@@ -74,6 +77,9 @@ class TThemeData with Diagnosticable {
 
   /// 组件尺寸,默认medium。可选项：small/medium/large
   final TComponentSize size;
+
+  /// 文本方向
+  final TextDirection textDirection;
 
   /// 字体
   final String fontFamily;
@@ -122,6 +128,7 @@ class TThemeData with Diagnosticable {
     Brightness? brightness,
     TColorScheme? colorScheme,
     TComponentSize? size,
+    TextDirection? textDirection,
     String? fontFamily,
     TButtonThemeData? buttonThemeData,
     TInputThemeData? inputThemeData,
@@ -131,6 +138,7 @@ class TThemeData with Diagnosticable {
       brightness: brightness ?? this.brightness,
       colorScheme: colorScheme ?? this.colorScheme,
       size: size ?? this.size,
+      textDirection: textDirection ?? this.textDirection,
       fontFamily: fontFamily ?? this.fontFamily,
       buttonThemeData: buttonThemeData ?? this.buttonThemeData,
       inputThemeData: inputThemeData ?? this.inputThemeData,
@@ -146,6 +154,7 @@ class TThemeData with Diagnosticable {
           brightness == other.brightness &&
           colorScheme == other.colorScheme &&
           size == other.size &&
+          textDirection == other.textDirection &&
           fontFamily == other.fontFamily &&
           buttonThemeData == other.buttonThemeData &&
           inputThemeData == other.inputThemeData &&
@@ -156,6 +165,7 @@ class TThemeData with Diagnosticable {
       brightness.hashCode ^
       colorScheme.hashCode ^
       size.hashCode ^
+      textDirection.hashCode ^
       fontFamily.hashCode ^
       buttonThemeData.hashCode ^
       inputThemeData.hashCode ^

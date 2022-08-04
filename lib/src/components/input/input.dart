@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 typedef InputCallBack = TConsumer<String>;
+typedef InputKeyEvent = TBiConsumer<String, KeyEvent>;
 
 /// 输入框
 class TInput extends StatefulWidget {
@@ -33,6 +35,9 @@ class TInput extends StatefulWidget {
     this.onFocus,
     this.onKeyDown,
     this.align = TextAlign.start,
+    this.onMouseenter,
+    this.onMouseleave,
+    this.scrollController,
   }) : super(key: key);
 
   /// 控制正在编辑的文本。
@@ -119,10 +124,19 @@ class TInput extends StatefulWidget {
   final InputCallBack? onFocus;
 
   /// 键盘按下时触发
-  final InputCallBack? onKeyDown;
+  final InputKeyEvent? onKeyDown;
 
   /// 文本对齐方式
   final TextAlign align;
+
+  /// 鼠标进入事件
+  final PointerEnterEventListener? onMouseenter;
+
+  /// 鼠标离开事件
+  final PointerExitEventListener? onMouseleave;
+
+  /// 滚动控制器
+  final ScrollController? scrollController;
 
   @override
   State<TInput> createState() => _TInputState();
@@ -135,20 +149,44 @@ class _TInputState extends State<TInput> {
 
   FocusNode get effectiveFocusNode => widget.focusNode ?? (_focusNode ??= FocusNode());
 
+  TextEditingController? _controller;
+
+  /// 有效文本控制器
+  TextEditingController get effectiveController => widget.controller ?? (_controller ??= TextEditingController(text: widget.initialValue));
+
+  /// 是否拥有焦点
   bool isFocused = false;
+
+  /// 是否悬停
+  bool isHover = false;
 
   /// 是否临时查看密码
   bool look = false;
 
+  late ValueNotifier<bool> showClearIcon;
+
   @override
   void initState() {
+    showClearIcon = ValueNotifier(false);
+    effectiveFocusNode.onKeyEvent = _onKeyEvent;
     effectiveFocusNode.addListener(_focusChange);
+    effectiveController.addListener(_textChange);
     super.initState();
+  }
+
+  KeyEventResult _onKeyEvent(FocusNode node, KeyEvent event) {
+    widget.onKeyDown?.call(effectiveController.text, event);
+    return KeyEventResult.ignored;
   }
 
   @override
   void dispose() {
-    effectiveFocusNode.dispose();
+    showClearIcon.dispose();
+    effectiveFocusNode.onKeyEvent = null;
+    effectiveFocusNode.removeListener(_focusChange);
+    effectiveController.removeListener(_textChange);
+    _focusNode?.dispose();
+    _controller?.dispose();
     super.dispose();
   }
 
@@ -157,6 +195,21 @@ class _TInputState extends State<TInput> {
     setState(() {
       isFocused = effectiveFocusNode.hasFocus;
     });
+    if (effectiveFocusNode.hasFocus) {
+      widget.onFocus?.call(effectiveController.text);
+    } else {
+      widget.onBlur?.call(effectiveController.text);
+    }
+  }
+
+  /// 文本发生变化时触发
+  void _textChange() {
+    if (!widget.showClearIconOnEmpty && effectiveController.text.isEmpty) {
+      showClearIcon.value = false;
+    } else if (isHover) {
+      showClearIcon.value = true;
+    }
+    widget.onChange?.call(effectiveController.text);
   }
 
   @override
@@ -166,6 +219,11 @@ class _TInputState extends State<TInput> {
       (oldWidget.focusNode ?? _focusNode)?.removeListener(_focusChange);
       (widget.focusNode ?? _focusNode)?.addListener(_focusChange);
     }
+    if (widget.controller != oldWidget.controller) {
+      (oldWidget.controller ?? _controller)?.removeListener(_textChange);
+      (widget.controller ?? _controller)?.addListener(_textChange);
+    }
+    effectiveFocusNode.onKeyEvent = _onKeyEvent;
   }
 
   static double inputHeightS = ThemeDataConstant.spacer * 0.8;
@@ -220,45 +278,83 @@ class _TInputState extends State<TInput> {
       warning: () => colorScheme.warningColor,
       error: () => colorScheme.errorColor,
     );
+
+    List<Widget?> prefixIconList = [];
+    List<Widget?> suffixIconList = [];
     Widget? prefixIcon;
     Widget? suffixIcon;
+
+    // 可清理icon
+    if (widget.clearable) {
+      suffixIconList.add(
+        MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: GestureDetector(
+            onTap: () => effectiveController.clear(),
+            child: ValueListenableBuilder<bool>(
+              valueListenable: showClearIcon,
+              builder: (context, value, child) {
+                return Visibility(
+                  visible: value,
+                  child: Icon(TIcons.closeCircleFilled, size: 16, color: colorScheme.textColorPlaceholder),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    if (widget.prefixIcon != null) {
+      prefixIconList.add(widget.prefixIcon);
+    }
+    // 密码框icon
     if (widget.type == TInputType.password) {
-      prefixIcon = Icon(TIcons.lockOn, size: 15, color: iconColor);
-      suffixIcon = MouseRegion(
-        cursor: SystemMouseCursors.click,
-        child: GestureDetector(
-          onTap: () => setState(() {
-            look = !look;
-          }),
-          child: Icon(look ? TIcons.browse : TIcons.browseOff, size: 15, color: colorScheme.borderLevel2Color),
+      if (widget.prefixIcon == null) {
+        prefixIconList.add(Icon(TIcons.lockOn, size: 16, color: iconColor));
+      }
+      suffixIconList.add(
+        MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: GestureDetector(
+            onTap: () => setState(() {
+              look = !look;
+            }),
+            child: Icon(look ? TIcons.browse : TIcons.browseOff, size: 16, color: colorScheme.textColorPlaceholder),
+          ),
         ),
       );
     }
 
     // label
     if (widget.label != null) {
-      var fontSize = getFontSize(size);
-
-      var label = Text(
-        '价格：',
+      prefixIconList.add(Text(
+        widget.label!,
         style: TextStyle(
           fontFamily: theme.fontFamily,
-          fontSize: fontSize,
+          fontSize: getFontSize(size),
           color: widget.disabled ? colorScheme.textColorDisabled : colorScheme.textColorPrimary,
         ),
+      ));
+    }
+    if (prefixIconList.isNotEmpty) {
+      prefixIcon = Padding(
+        padding: const EdgeInsets.only(left: 8, right: 2),
+        child: TSpace(spacing: 2, children: prefixIconList),
       );
-      if (prefixIcon == null) {
-        prefixIcon = label;
-      } else {
-        prefixIcon = Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            prefixIcon,
-            const SizedBox(width: 2),
-            label,
-          ],
-        );
-      }
+    }
+
+    suffixIconList.add(widget.suffixIcon);
+    suffixIconList.add(widget.suffix);
+
+    if (suffixIconList.isNotEmpty) {
+      suffixIcon = Padding(
+        padding: const EdgeInsets.only(right: 8.0),
+        child: TSpace(
+          spacing: 2,
+          children: suffixIconList.reversed.toList(),
+        ),
+      );
     }
     return InputDecoration(
       hintStyle: TextStyle(
@@ -283,17 +379,18 @@ class _TInputState extends State<TInput> {
         color: tipsColor,
         height: 0.5, // 通过压缩字体的高度，实现tips的高度缩小
       ),
-      prefixIcon: Padding(
-        padding: const EdgeInsets.only(left: 8, right: 2),
-        child: prefixIcon,
-      ),
+      prefixIcon: prefixIcon,
       prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
-      suffixIcon: Padding(
-        padding: const EdgeInsets.only(right: 8.0),
-        child: widget.suffixIcon ?? suffixIcon,
-      ),
+      prefixIconColor: MaterialStateColor.resolveWith((states) {
+        return widget.status.lazyValueOf(
+          defaultStatus: () => states.contains(MaterialState.focused) ? colorScheme.brandColor : colorScheme.borderLevel2Color,
+          success: () => colorScheme.successColor,
+          warning: () => colorScheme.warningColor,
+          error: () => colorScheme.errorColor,
+        );
+      }),
+      suffixIcon: suffixIcon,
       suffixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
-      suffix: widget.suffix,
     );
   }
 
@@ -327,28 +424,41 @@ class _TInputState extends State<TInput> {
     } else if (widget.readonly) {
       cursor = SystemMouseCursors.click;
     }
-    return TextFormField(
-      key: formFieldState,
-      controller: widget.controller,
-      initialValue: widget.initialValue,
-      autofocus: widget.autofocus,
-      readOnly: widget.readonly,
-      focusNode: effectiveFocusNode,
-      decoration: inputTheme.decoration ?? defaultDecoration(size),
-      cursorColor: colorScheme.textColorPrimary,
-      cursorWidth: 1,
-      style: TextStyle(
-        fontFamily: theme.fontFamily,
-        fontSize: fontSize,
-        textBaseline: TextBaseline.alphabetic,
-        color: widget.disabled ? colorScheme.textColorDisabled : colorScheme.textColorPrimary,
+    return MouseRegion(
+      onEnter: (event) {
+        isHover = true;
+        showClearIcon.value = widget.showClearIconOnEmpty || effectiveController.text.isNotEmpty;
+        widget.onMouseenter?.call(event);
+      },
+      onExit: (event) {
+        isHover = false;
+        showClearIcon.value = false;
+        widget.onMouseleave?.call(event);
+      },
+      child: TextFormField(
+        key: formFieldState,
+        controller: effectiveController,
+        autofocus: widget.autofocus,
+        readOnly: widget.readonly,
+        focusNode: effectiveFocusNode,
+        decoration: inputTheme.decoration ?? defaultDecoration(size),
+        cursorColor: colorScheme.textColorPrimary,
+        cursorWidth: 1,
+        style: TextStyle(
+          fontFamily: theme.fontFamily,
+          fontSize: fontSize,
+          textBaseline: TextBaseline.alphabetic,
+          color: widget.disabled ? colorScheme.textColorDisabled : colorScheme.textColorPrimary,
+        ),
+        textAlign: widget.align,
+        mouseCursor: cursor,
+        keyboardAppearance: theme.brightness,
+        maxLength: widget.maxLength ?? inputTheme.maxLength,
+        obscureText: widget.type == TInputType.password && !look,
+        textAlignVertical: TextAlignVertical.center,
+        onFieldSubmitted: (value) => widget.onEnter?.call(value),
+        scrollController: widget.scrollController,
       ),
-      textAlign: widget.align,
-      mouseCursor: cursor,
-      keyboardAppearance: theme.brightness,
-      maxLength: widget.maxLength ?? inputTheme.maxLength,
-      obscureText: widget.type == TInputType.password && !look,
-      textAlignVertical: TextAlignVertical.center,
     );
   }
 }
