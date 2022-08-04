@@ -3,59 +3,135 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
+enum TDividerAlign {
+  /// 靠左
+  left,
+
+  /// 靠右
+  right,
+
+  /// 居中
+  center;
+}
+
 class TDivider extends StatelessWidget {
-  const TDivider({Key? key}) : super(key: key);
+  const TDivider({
+    Key? key,
+    this.child,
+    this.align = TDividerAlign.center,
+    this.dashed = false,
+    this.layout = Axis.horizontal,
+    this.space,
+    this.thickness,
+  }) : super(key: key);
+
+  /// 文本位置（仅在水平分割线有效）
+  final TDividerAlign align;
+
+  /// 子部件（仅在水平分割线有效）
+  final Widget? child;
+
+  /// 是否虚线
+  final bool dashed;
+
+  /// 分隔线类型有两种：水平和垂直
+  final Axis layout;
+
+  /// 线条宽（）/高
+  final double? space;
+
+  /// 线条厚度
+  final double? thickness;
 
   @override
   Widget build(BuildContext context) {
     var theme = TTheme.of(context);
+    var colorScheme = theme.colorScheme;
     var fontSize = theme.size.sizeOf(
       small: ThemeDataConstant.fontSizeS,
       medium: ThemeDataConstant.fontSizeBase,
       large: ThemeDataConstant.fontSizeL,
     );
 
-    var d = 1 / MediaQuery.of(context).devicePixelRatio;
-    return CustomPaint(
-      size: Size(d, fontSize * 0.9),
-      painter: MyCustomPainter(),
-    );
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        var data = MediaQuery.of(context);
+        var size = data.size;
+        var d = 1 / data.devicePixelRatio;
+        var maxWidth = constraints.maxWidth == double.infinity ? size.width : constraints.maxWidth;
+        double width;
+        double height;
+        EdgeInsetsGeometry margin;
+        if(layout == Axis.horizontal) {
+          width = space ?? maxWidth;
+          height = thickness ?? d;
+          margin = EdgeInsets.symmetric(vertical: ThemeDataConstant.spacer2);
+        } else {
+          width = thickness ?? d;
+          height = space ?? fontSize * 0.9;
+          margin = EdgeInsets.symmetric(horizontal: ThemeDataConstant.spacer * 1.5);
+        }
 
-    // return SizedBox(
-    //   width: 1,
-    //   height: fontSize * 0.9,
-    //   child: Center(
-    //     child: Container(
-    //       width: 1,
-    //       margin: EdgeInsetsDirectional.only(top: 10, bottom: 0),
-    //       decoration: BoxDecoration(
-    //         border: Border(
-    //           left: Divider.createBorderSide(context, color: Colors.black, width: 1),
-    //         ),
-    //       ),
-    //     ),
-    //   ),
-    // );
+        return Padding(
+          padding: margin,
+          child: DefaultTextStyle(
+            style: TextStyle(color: colorScheme.textColorPrimary),
+            child: CustomPaint(
+              size: Size(width, height),
+              painter: TDividerCustomPainter(
+                color: colorScheme.borderLevel1Color,
+                dashed: dashed,
+                direction: layout,
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 }
 
-class MyCustomPainter extends CustomPainter {
+class TDividerCustomPainter extends CustomPainter {
+  const TDividerCustomPainter({
+    required this.color,
+    required this.dashed,
+    required this.direction,
+  });
+
+  /// 线条颜色
+  final Color color;
+
+  /// 是否是虚线
+  final bool dashed;
+
+  /// 方向
+  final Axis direction;
 
   @override
   void paint(Canvas canvas, Size size) {
     Paint paint = Paint()
-      ..color = Colors.black
+      ..color = color
       ..style = PaintingStyle.stroke
-      ..isAntiAlias = false
-      ..strokeWidth = size.width;
+      ..isAntiAlias = false;
     var path = Path();
-    path.lineTo(0, size.height);
+
+    if (direction == Axis.vertical) {
+      path.lineTo(0, size.height);
+      paint.strokeWidth = size.width;
+    } else {
+      path.lineTo(size.width, 0);
+      paint.strokeWidth = size.height;
+    }
+
+    if (dashed) {
+      path = PathUtil.dashPath(path, 3, 2);
+    }
+
     canvas.drawPath(path, paint);
-    // canvas.drawLine(Offset(0, 0), Offset(0, size.height), paint);
   }
 
   @override
-  bool shouldRepaint(MyCustomPainter oldDelegate) {
+  bool shouldRepaint(TDividerCustomPainter oldDelegate) {
     return this != oldDelegate;
   }
 }

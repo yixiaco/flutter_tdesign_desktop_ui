@@ -26,7 +26,7 @@ class TSpace extends StatelessWidget {
   /// 主轴对齐方式
   final WrapAlignment align;
 
-  /// 主轴
+  /// run的对齐方式。run可以理解为新的行或者列，如果在水平方向布局的话，run可以理解为新的一行
   final WrapAlignment runAlign;
 
   /// 子组件
@@ -75,17 +75,24 @@ class TSpace extends StatelessWidget {
       list.removeLast();
     }
 
-    return Wrap(
-      alignment: align,
-      direction: direction,
-      crossAxisAlignment: crossAxisAlignment,
-      clipBehavior: clipBehavior,
-      runAlignment: runAlign,
-      runSpacing: runSpacing ?? spacer,
-      spacing: spacing ?? spacer,
-      textDirection: textDirection ?? theme.textDirection,
-      verticalDirection: verticalDirection,
-      children: list,
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        return ConstrainedBox(
+          constraints: constraints,
+          child: Wrap(
+            alignment: align,
+            direction: direction,
+            crossAxisAlignment: crossAxisAlignment,
+            clipBehavior: clipBehavior,
+            runAlignment: runAlign,
+            runSpacing: runSpacing ?? spacer,
+            spacing: spacing ?? spacer,
+            textDirection: textDirection ?? theme.textDirection,
+            verticalDirection: verticalDirection,
+            children: list,
+          ),
+        );
+      },
     );
   }
 }
