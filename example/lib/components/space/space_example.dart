@@ -7,10 +7,10 @@ class SpaceExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TSpace(
+    return const TSpace(
       direction: Axis.vertical,
       children: [
-        const TSpace(
+        TSpace(
           separator: TDivider(
             dashed: true,
             layout: Axis.horizontal,
@@ -29,42 +29,42 @@ class SpaceExample extends StatelessWidget {
             Text('6'),
           ],
         ),
-        LayoutBuilder(
-          builder: (BuildContext context, BoxConstraints constraints) {
-            print(constraints);
-            return const TSpace(
-              separator: SizedBox(height: 10, child: VerticalDivider(width: 1, color: Colors.black)),
-              children: [
-                TButton(variant: TButtonVariant.text, child: Text('1')),
-                TButton(variant: TButtonVariant.text, child: Text('2')),
-                TButton(variant: TButtonVariant.text, child: Text('3')),
-                TButton(variant: TButtonVariant.text, child: Text('4')),
-                TButton(variant: TButtonVariant.text, child: Text('5')),
-                TButton(variant: TButtonVariant.text, child: Text('6')),
-                TButton(variant: TButtonVariant.text, child: Text('6')),
-                TButton(variant: TButtonVariant.text, child: Text('6')),
-                TButton(variant: TButtonVariant.text, child: Text('6')),
-                TButton(variant: TButtonVariant.text, child: Text('6')),
-                TButton(variant: TButtonVariant.text, child: Text('6')),
-                TButton(variant: TButtonVariant.text, child: Text('6')),
-                TButton(variant: TButtonVariant.text, child: Text('6')),
-                TButton(variant: TButtonVariant.text, child: Text('6')),
-                TButton(variant: TButtonVariant.text, child: Text('6')),
-                TButton(variant: TButtonVariant.text, child: Text('6')),
-                TButton(variant: TButtonVariant.text, child: Text('6')),
-                TButton(variant: TButtonVariant.text, child: Text('6')),
-                TButton(variant: TButtonVariant.text, child: Text('6')),
-                TButton(variant: TButtonVariant.text, child: Text('6')),
-                TButton(variant: TButtonVariant.text, child: Text('6')),
-                TButton(variant: TButtonVariant.text, child: Text('6')),
-                TButton(variant: TButtonVariant.text, child: Text('6')),
-                TButton(variant: TButtonVariant.text, child: Text('6')),
-                TButton(variant: TButtonVariant.text, child: Text('6')),
-                TButton(variant: TButtonVariant.text, child: Text('6')),
-                TButton(variant: TButtonVariant.text, child: Text('7')),
-              ],
-            );
-          },
+        TSpace(
+          separator: TDivider(
+            dashed: true,
+            layout: Axis.vertical,
+          ),
+          crossAxisAlignment: CrossAxisAlignment.center,
+          spacing: 0,
+          children: [
+            TButton(variant: TButtonVariant.text, child: Text('1')),
+            TButton(variant: TButtonVariant.text, child: Text('2')),
+            TButton(variant: TButtonVariant.text, child: Text('3')),
+            TButton(variant: TButtonVariant.text, child: Text('4')),
+            TButton(variant: TButtonVariant.text, child: Text('5')),
+            TButton(variant: TButtonVariant.text, child: Text('6')),
+            TButton(variant: TButtonVariant.text, child: Text('6')),
+            TButton(variant: TButtonVariant.text, child: Text('6')),
+            TButton(variant: TButtonVariant.text, child: Text('6')),
+            TButton(variant: TButtonVariant.text, child: Text('6')),
+            TButton(variant: TButtonVariant.text, child: Text('6')),
+            TButton(variant: TButtonVariant.text, child: Text('6')),
+            TButton(variant: TButtonVariant.text, child: Text('6')),
+            TButton(variant: TButtonVariant.text, child: Text('6')),
+            TButton(variant: TButtonVariant.text, child: Text('6')),
+            TButton(variant: TButtonVariant.text, child: Text('6')),
+            TButton(variant: TButtonVariant.text, child: Text('6')),
+            TButton(variant: TButtonVariant.text, child: Text('6')),
+            TButton(variant: TButtonVariant.text, child: Text('6')),
+            TButton(variant: TButtonVariant.text, child: Text('6')),
+            TButton(variant: TButtonVariant.text, child: Text('6')),
+            TButton(variant: TButtonVariant.text, child: Text('6')),
+            TButton(variant: TButtonVariant.text, child: Text('6')),
+            TButton(variant: TButtonVariant.text, child: Text('6')),
+            TButton(variant: TButtonVariant.text, child: Text('6')),
+            TButton(variant: TButtonVariant.text, child: Text('6')),
+            TButton(variant: TButtonVariant.text, child: Text('7')),
+          ],
         ),
       ],
     );
