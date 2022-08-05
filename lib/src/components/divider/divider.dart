@@ -37,7 +37,7 @@ class TDivider extends StatelessWidget {
   /// 分隔线类型有两种：水平和垂直
   final Axis layout;
 
-  /// 线条宽（）/高
+  /// 线条宽（horizontal）/高(vertical)
   final double? space;
 
   /// 线条厚度
@@ -62,10 +62,39 @@ class TDivider extends StatelessWidget {
         double width;
         double height;
         EdgeInsetsGeometry margin;
-        if(layout == Axis.horizontal) {
+        if (layout == Axis.horizontal) {
           width = space ?? maxWidth;
           height = thickness ?? d;
           margin = EdgeInsets.symmetric(vertical: ThemeDataConstant.spacer2);
+          if (child != null) {
+            Widget left;
+            Widget right;
+            switch (align) {
+              case TDividerAlign.left:
+                left = buildCustomPaint(width * 0.05, height, colorScheme);
+                right = Expanded(child: buildCustomPaint(width, height, colorScheme));
+                break;
+              case TDividerAlign.right:
+                left = Expanded(child: buildCustomPaint(width, height, colorScheme));
+                right = buildCustomPaint(width * 0.05, height, colorScheme);
+                break;
+              case TDividerAlign.center:
+                left = Expanded(child: buildCustomPaint(width, height, colorScheme));
+                right = Expanded(child: buildCustomPaint(width, height, colorScheme));
+                break;
+            }
+            return Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                left,
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: fontSize),
+                  child: child!,
+                ),
+                right,
+              ],
+            );
+          }
         } else {
           width = thickness ?? d;
           height = space ?? fontSize * 0.9;
@@ -76,21 +105,26 @@ class TDivider extends StatelessWidget {
           padding: margin,
           child: DefaultTextStyle(
             style: TextStyle(color: colorScheme.textColorPrimary),
-            child: CustomPaint(
-              size: Size(width, height),
-              painter: TDividerCustomPainter(
-                color: colorScheme.borderLevel1Color,
-                dashed: dashed,
-                direction: layout,
-              ),
-            ),
+            child: buildCustomPaint(width, height, colorScheme),
           ),
         );
       },
     );
   }
+
+  CustomPaint buildCustomPaint(double width, double height, TColorScheme colorScheme) {
+    return CustomPaint(
+      size: Size(width, height),
+      painter: TDividerCustomPainter(
+        color: colorScheme.borderLevel1Color,
+        dashed: dashed,
+        direction: layout,
+      ),
+    );
+  }
 }
 
+/// 分割线画笔
 class TDividerCustomPainter extends CustomPainter {
   const TDividerCustomPainter({
     required this.color,
@@ -134,4 +168,16 @@ class TDividerCustomPainter extends CustomPainter {
   bool shouldRepaint(TDividerCustomPainter oldDelegate) {
     return this != oldDelegate;
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is TDividerCustomPainter &&
+          runtimeType == other.runtimeType &&
+          color == other.color &&
+          dashed == other.dashed &&
+          direction == other.direction;
+
+  @override
+  int get hashCode => color.hashCode ^ dashed.hashCode ^ direction.hashCode;
 }
