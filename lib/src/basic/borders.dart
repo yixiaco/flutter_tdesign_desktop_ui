@@ -180,11 +180,10 @@ class TRoundedRectangleBorder extends RoundedRectangleBorder {
           canvas.drawRRect(borderRadius.resolve(textDirection).toRRect(rect), side.toPaint());
         } else {
           final RRect outer = borderRadius.resolve(textDirection).toRRect(rect);
-          final RRect inner = outer.deflate(width * 0.5);
+          final RRect inner = outer.deflate(width * 0.75);
           final Paint paint = Paint()
             ..color = side.color
             ..style = PaintingStyle.stroke
-            ..isAntiAlias = false
             ..strokeWidth = width;
 
           var path = Path()..addRRect(inner);

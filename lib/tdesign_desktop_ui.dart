@@ -31,7 +31,7 @@ export 'src/components/grid/grid.dart';
 /// 布局
 export 'src/components/layout/layout.dart';
 /// 间距
-export 'src/components/space/TSpace.dart';
+export 'src/components/space/space.dart';
 /// 输入框
 export 'src/components/input/input.dart';
 export 'src/components/input/input_theme.dart';

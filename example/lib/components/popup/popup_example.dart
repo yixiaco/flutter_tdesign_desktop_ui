@@ -42,13 +42,7 @@ class _PopupExampleState extends State<PopupExample> {
         return ValueListenableBuilder(
           valueListenable: i,
           builder: (BuildContext context, int value, Widget? child) {
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TButton(themeStyle: TButtonThemeStyle.primary, child: Text('点击时触发$value')),
-                TButton(themeStyle: TButtonThemeStyle.primary, child: Text('点击时触发$value')),
-              ],
-            );
+            return Text('这是一个弹出框$value');
           },
         );
       },
@@ -75,20 +69,22 @@ class _PopupExampleState extends State<PopupExample> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: const [
-          SizedBox(width: 150, child: TextField(decoration: InputDecoration(hintText: '获取焦点时触发1'))),
-          SizedBox(width: 150, child: TextField(decoration: InputDecoration(hintText: '获取焦点时触发2'))),
+          SizedBox(width: 150, child: TInput(placeholder: '获取焦点时触发1')),
+          SizedBox(width: 150, child: TInput(placeholder: '获取焦点时触发2')),
         ],
       ),
     ),
     TPopup(
       trigger: TPopupTrigger.contextMenu,
       placement: TPopupPlacement.bottom,
+      destroyOnClose: false,
       showArrow: true,
       content: Material(
+        color: Colors.transparent,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: const [
-            SizedBox(width: 100, child: TextField()),
+            SizedBox(width: 100, child: TInput()),
             TButton(themeStyle: TButtonThemeStyle.primary, child: Text('右击时触发')),
             TButton(themeStyle: TButtonThemeStyle.primary, child: Text('右击时触发')),
           ],

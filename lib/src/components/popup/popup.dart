@@ -315,7 +315,7 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
       _node?.dispose();
       _node = null;
     }
-    if(widget.visible != oldWidget.visible) {
+    if (widget.visible != oldWidget.visible) {
       (oldWidget.visible ?? _visible)?.removeListener(_showHidePopup);
       (widget.visible ?? _visible)?.addListener(_showHidePopup);
     }
@@ -585,7 +585,11 @@ class _PopupOverlayState extends State<_PopupOverlay> {
         Widget result = ValueListenableBuilder<bool>(
           builder: (BuildContext context, value, Widget? child) {
             return DefaultTextStyle(
-              style: TextStyle(fontSize: ThemeDataConstant.fontSizeBase, fontFamily: theme.fontFamily),
+              style: TextStyle(
+                fontSize: ThemeDataConstant.fontSizeBase,
+                fontFamily: theme.fontFamily,
+                color: colorScheme.textColorPrimary,
+              ),
               child: Visibility(
                 visible: value,
                 maintainState: true,
@@ -600,42 +604,45 @@ class _PopupOverlayState extends State<_PopupOverlay> {
               valueListenable: _isReverse,
               builder: (BuildContext context, bool value, Widget? child) {
                 return Container(
+                  clipBehavior: Clip.antiAlias,
                   decoration: ShapeDecoration(
                     color: colorScheme.bgColorContainer,
-                    shadows: popup.placement.sides(
-                      top: [...popupShadow, ...popupTopArrowShadow],
-                      left: [...popupShadow, ...popupLeftArrowShadow],
-                      right: [...popupShadow, ...popupRightArrowShadow],
-                      bottom: [...popupShadow, ...popupBottomArrowShadow],
-                    ),
+                    // shadows: popup.placement.sides(
+                    //   top: [...popupShadow, ...popupTopArrowShadow],
+                    //   left: [...popupShadow, ...popupLeftArrowShadow],
+                    //   right: [...popupShadow, ...popupRightArrowShadow],
+                    //   bottom: [...popupShadow, ...popupBottomArrowShadow],
+                    // ),
+                    shadows: [...popupShadow, ...popupTopArrowShadow, ...popupRightArrowShadow, ...popupBottomArrowShadow, ...popupLeftArrowShadow],
                     shape: BubbleShapeBorder(
-                        smooth: 2,
-                        arrowQuadraticBezierLength: 2,
-                        arrowAngle: 6,
-                        arrowHeight: 6,
-                        direction: popup.showArrow
-                            ? popup.placement.sides(
-                                top: value ? BubbleDirection.top : BubbleDirection.bottom,
-                                left: value ? BubbleDirection.left : BubbleDirection.right,
-                                right: value ? BubbleDirection.right : BubbleDirection.left,
-                                bottom: value ? BubbleDirection.bottom : BubbleDirection.top,
-                              )
-                            : BubbleDirection.none,
-                        radius: BorderRadius.circular(ThemeDataConstant.borderRadius),
-                        position: popup.placement.valueOf(
-                          topLeft: () => BubblePosition.start(popupContentArrowSpacer),
-                          top: () => const BubblePosition.center(0),
-                          topRight: () => BubblePosition.end(popupContentArrowSpacer),
-                          rightTop: () => BubblePosition.start(popupContentArrowSpacer),
-                          right: () => const BubblePosition.center(0),
-                          rightBottom: () => BubblePosition.end(popupContentArrowSpacer),
-                          bottomLeft: () => BubblePosition.start(popupContentArrowSpacer),
-                          bottom: () => const BubblePosition.center(0),
-                          bottomRight: () => BubblePosition.end(popupContentArrowSpacer),
-                          leftTop: () => BubblePosition.start(popupContentArrowSpacer),
-                          left: () => const BubblePosition.center(0),
-                          leftBottom: () => BubblePosition.end(popupContentArrowSpacer),
-                        )!),
+                      smooth: 0,
+                      arrowQuadraticBezierLength: 0,
+                      arrowAngle: 6,
+                      arrowHeight: 6,
+                      direction: popup.showArrow
+                          ? popup.placement.sides(
+                              top: value ? BubbleDirection.top : BubbleDirection.bottom,
+                              left: value ? BubbleDirection.left : BubbleDirection.right,
+                              right: value ? BubbleDirection.right : BubbleDirection.left,
+                              bottom: value ? BubbleDirection.bottom : BubbleDirection.top,
+                            )
+                          : BubbleDirection.none,
+                      radius: BorderRadius.circular(ThemeDataConstant.borderRadius),
+                      position: popup.placement.valueOf(
+                        topLeft: () => BubblePosition.start(popupContentArrowSpacer),
+                        top: () => const BubblePosition.center(0),
+                        topRight: () => BubblePosition.end(popupContentArrowSpacer),
+                        rightTop: () => BubblePosition.start(popupContentArrowSpacer),
+                        right: () => const BubblePosition.center(0),
+                        rightBottom: () => BubblePosition.end(popupContentArrowSpacer),
+                        bottomLeft: () => BubblePosition.start(popupContentArrowSpacer),
+                        bottom: () => const BubblePosition.center(0),
+                        bottomRight: () => BubblePosition.end(popupContentArrowSpacer),
+                        leftTop: () => BubblePosition.start(popupContentArrowSpacer),
+                        left: () => const BubblePosition.center(0),
+                        leftBottom: () => BubblePosition.end(popupContentArrowSpacer),
+                      )!,
+                    ),
                   ),
                   padding: EdgeInsets.symmetric(vertical: 4, horizontal: ThemeDataConstant.spacer),
                   child: child,
