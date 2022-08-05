@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// 组件大小
 enum TComponentSize {
@@ -20,6 +21,18 @@ enum TComponentSize {
         return medium;
       case TComponentSize.large:
         return large;
+    }
+  }
+
+  /// 根据给定的组件大小，返回对应的值
+  T lazySizeOf<T>({required TSupplier<T> small, required TSupplier<T> medium, required TSupplier<T> large}) {
+    switch (this) {
+      case TComponentSize.small:
+        return small.call();
+      case TComponentSize.medium:
+        return medium.call();
+      case TComponentSize.large:
+        return large.call();
     }
   }
 }

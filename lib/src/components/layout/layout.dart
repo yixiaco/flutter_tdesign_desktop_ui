@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// 布局
 /// 用于组织网页的框架结构
@@ -37,20 +38,26 @@ class TLayout extends StatelessWidget {
     }
 
     Widget child = Column(
+      mainAxisSize: MainAxisSize.min,
       children: children,
     );
 
     if (aside != null) {
       child = Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
           aside!,
           Expanded(child: child),
         ],
       );
     }
-    return FractionallySizedBox(
-      widthFactor: 1,
-      heightFactor: 1,
+    var theme = TTheme.of(context);
+    return DefaultTextStyle(
+      style: TextStyle(
+        fontFamily: theme.fontFamily,
+        color: theme.colorScheme.textColorPrimary,
+        fontSize: theme.fontSize,
+      ),
       child: child,
     );
   }
@@ -73,13 +80,20 @@ class TAside extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: color,
-      child: SizedBox(
-        width: width,
-        height: double.infinity,
-        child: child,
-      ),
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        return Container(
+          color: color,
+          child: SizedBox(
+            width: width,
+            height: constraints.maxHeight,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: width, maxHeight: constraints.maxHeight),
+              child: child,
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -98,10 +112,17 @@ class THeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: height,
-      width: double.infinity,
-      child: child,
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        return SizedBox(
+          height: height,
+          width: constraints.maxWidth,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: constraints.maxWidth, maxHeight: height),
+            child: child,
+          ),
+        );
+      },
     );
   }
 }
@@ -120,10 +141,17 @@ class TFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: height,
-      width: double.infinity,
-      child: child,
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        return SizedBox(
+          height: height,
+          width: constraints.maxWidth,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: constraints.maxWidth, maxHeight: height),
+            child: child,
+          ),
+        );
+      },
     );
   }
 }
@@ -142,6 +170,16 @@ class TContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Align(alignment: alignment, child: child);
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        return Align(
+          alignment: alignment,
+          child: ConstrainedBox(
+            constraints: constraints,
+            child: child,
+          ),
+        );
+      },
+    );
   }
 }

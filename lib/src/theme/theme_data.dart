@@ -4,32 +4,37 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
-// 边框圆角
-const double borderRadius = 3;
+/// 主题常量
+class ThemeDataConstant {
+  const ThemeDataConstant._();
 
-// Font
-const double fontSize = 10;
-const double fontSizeS = fontSize * 1.2;
-const double fontSizeBase = fontSize * 1.4;
-const double fontSizeL = fontSize * 1.6;
-const double fontSizeXL = fontSize * 2;
-const double fontSizeXXL = fontSize * 3.6;
+  // 边框圆角
+  static double borderRadius = 3;
 
-// Spacer
-const double spacer = 8;
-const double spacerS = spacer * .5; // 间距-4
-const double spacerM = spacer * .75; // 间距-6
-const double spacerL = spacer * 1.5; // 间距-12
-const double spacer1 = spacer; // 间距-8
-const double spacer2 = spacer * 2; // 间距-16
-const double spacer3 = spacer * 3; // 间距-24
-const double spacer4 = spacer * 4; // 间距-32
-const double spacer5 = spacer * 5; // 间距-大-40
-const double spacer6 = spacer * 6; // 间距-大-48
-const double spacer7 = spacer * 7; // 间距-大-48
-const double spacer8 = spacer * 8; // 间距-大-48
-const double spacer9 = spacer * 9; // 间距-大-48
-const double spacer10 = spacer * 10; // 间距-大-80
+  // Font
+  static double fontSize = 10;
+  static double fontSizeS = fontSize * 1.2;
+  static double fontSizeBase = fontSize * 1.4;
+  static double fontSizeL = fontSize * 1.6;
+  static double fontSizeXL = fontSize * 2;
+  static double fontSizeXXL = fontSize * 3.6;
+
+  // Spacer
+  static double spacer = 8;
+  static double spacerS = spacer * .5; // 间距-4
+  static double spacerM = spacer * .75; // 间距-6
+  static double spacerL = spacer * 1.5; // 间距-12
+  static double spacer1 = spacer; // 间距-8
+  static double spacer2 = spacer * 2; // 间距-16
+  static double spacer3 = spacer * 3; // 间距-24
+  static double spacer4 = spacer * 4; // 间距-32
+  static double spacer5 = spacer * 5; // 间距-大-40
+  static double spacer6 = spacer * 6; // 间距-大-48
+  static double spacer7 = spacer * 7; // 间距-大-48
+  static double spacer8 = spacer * 8; // 间距-大-48
+  static double spacer9 = spacer * 9; // 间距-大-48
+  static double spacer10 = spacer * 10; // 间距-大-80
+}
 
 /// 颜色主题数据
 class TThemeData with Diagnosticable {
@@ -37,16 +42,20 @@ class TThemeData with Diagnosticable {
     required Brightness brightness,
     TColorScheme? colorScheme,
     TComponentSize? size,
+    TextDirection? textDirection,
     String? fontFamily,
     TButtonThemeData? buttonThemeData,
+    TInputThemeData? inputThemeData,
     TPopupThemeData? popupThemeData,
   }) {
     return TThemeData.raw(
       brightness: brightness,
       colorScheme: colorScheme ?? (brightness == Brightness.light ? TColorScheme.light : TColorScheme.dark),
       size: size ?? TComponentSize.medium,
-      fontFamily: fontFamily ?? 'PingFang SC, Microsoft YaHei, Arial Regular',
+      textDirection: textDirection ?? TextDirection.ltr,
+      fontFamily: fontFamily ?? 'Microsoft YaHei',
       buttonThemeData: buttonThemeData ?? const TButtonThemeData(),
+      inputThemeData: inputThemeData ?? const TInputThemeData(),
       popupThemeData: popupThemeData ?? const TPopupThemeData(),
     );
   }
@@ -55,8 +64,10 @@ class TThemeData with Diagnosticable {
     required this.brightness,
     required this.colorScheme,
     required this.size,
+    required this.textDirection,
     required this.fontFamily,
     required this.buttonThemeData,
+    required this.inputThemeData,
     required this.popupThemeData,
   });
 
@@ -69,11 +80,17 @@ class TThemeData with Diagnosticable {
   /// 组件尺寸,默认medium。可选项：small/medium/large
   final TComponentSize size;
 
+  /// 文本方向
+  final TextDirection textDirection;
+
   /// 字体
   final String fontFamily;
 
   /// 按钮主题数据
   final TButtonThemeData buttonThemeData;
+
+  /// 输入框主题数据
+  final TInputThemeData inputThemeData;
 
   /// 弹出层主题数据
   final TPopupThemeData popupThemeData;
@@ -109,20 +126,31 @@ class TThemeData with Diagnosticable {
   /// 默认的暗黑样式
   factory TThemeData.dark() => TThemeData(brightness: Brightness.dark);
 
+  /// 通用字体大小
+  get fontSize => size.lazySizeOf(
+        small: () => ThemeDataConstant.fontSizeS,
+        medium: () => ThemeDataConstant.fontSizeBase,
+        large: () => ThemeDataConstant.fontSizeL,
+      );
+
   TThemeData copyWith({
     Brightness? brightness,
     TColorScheme? colorScheme,
     TComponentSize? size,
+    TextDirection? textDirection,
     String? fontFamily,
     TButtonThemeData? buttonThemeData,
+    TInputThemeData? inputThemeData,
     TPopupThemeData? popupThemeData,
   }) {
     return TThemeData(
       brightness: brightness ?? this.brightness,
       colorScheme: colorScheme ?? this.colorScheme,
       size: size ?? this.size,
+      textDirection: textDirection ?? this.textDirection,
       fontFamily: fontFamily ?? this.fontFamily,
       buttonThemeData: buttonThemeData ?? this.buttonThemeData,
+      inputThemeData: inputThemeData ?? this.inputThemeData,
       popupThemeData: popupThemeData ?? this.popupThemeData,
     );
   }
@@ -135,11 +163,20 @@ class TThemeData with Diagnosticable {
           brightness == other.brightness &&
           colorScheme == other.colorScheme &&
           size == other.size &&
+          textDirection == other.textDirection &&
           fontFamily == other.fontFamily &&
           buttonThemeData == other.buttonThemeData &&
+          inputThemeData == other.inputThemeData &&
           popupThemeData == other.popupThemeData;
 
   @override
   int get hashCode =>
-      brightness.hashCode ^ colorScheme.hashCode ^ size.hashCode ^ fontFamily.hashCode ^ buttonThemeData.hashCode ^ popupThemeData.hashCode;
+      brightness.hashCode ^
+      colorScheme.hashCode ^
+      size.hashCode ^
+      textDirection.hashCode ^
+      fontFamily.hashCode ^
+      buttonThemeData.hashCode ^
+      inputThemeData.hashCode ^
+      popupThemeData.hashCode;
 }

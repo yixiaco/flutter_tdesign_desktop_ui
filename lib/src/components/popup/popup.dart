@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
@@ -20,8 +22,10 @@ class TPopup extends StatefulWidget {
     this.onClose,
     this.showDuration = const Duration(milliseconds: 250),
     this.hideDuration = const Duration(milliseconds: 150),
-    this.destroyOnClose = false,
-  }) : super(key: key);
+    this.destroyOnClose = true,
+    this.builderContent,
+  })  : assert(!(content != null && builderContent != null), 'content和builderContent只能给定一个'),
+        super(key: key);
 
   /// 浮层出现位置
   final TPopupPlacement placement;
@@ -47,10 +51,10 @@ class TPopup extends StatefulWidget {
   final Widget? content;
 
   /// 打开事件
-  final void Function()? onOpen;
+  final TCallback? onOpen;
 
   /// 关闭事件
-  final void Function()? onClose;
+  final TCallback? onClose;
 
   /// hover和focus时，显示的延迟
   final Duration showDuration;
@@ -58,28 +62,12 @@ class TPopup extends StatefulWidget {
   /// hover和focus时，隐藏的延迟
   final Duration hideDuration;
 
-  /// 是否在关闭浮层时销毁浮层
+  /// 是否在关闭浮层时销毁浮层，默认为false.
+  /// 因为一般不需要维护浮层内容的状态，这可以显著提升运行速度
   final bool destroyOnClose;
 
-  /// 当[trigger]为focus时,传入焦点有助于帮助管理焦点的监听。
-  /// 如果[child]是一个[ButtonStyleButton]、[TextField]、[EditableText]
-  // final FocusNode? focusNode;
-
-  /// 保存所有弹出层
-  static final List<TPopupState> _popups = [];
-
-  /// 关闭其他弹出层
-  static void closeOtherPopup(TPopupState current) {
-    if (_popups.isNotEmpty) {
-      // Avoid concurrent modification.
-      final List<TPopupState> popups = _popups.toList();
-      for (final TPopupState state in popups) {
-        if (state == current) {
-          continue;
-        }
-      }
-    }
-  }
+  /// 使用build创建浮层
+  final WidgetBuilder? builderContent;
 
   @override
   State<TPopup> createState() => TPopupState();
@@ -87,10 +75,13 @@ class TPopup extends StatefulWidget {
 
 class TPopupState extends State<TPopup> with TickerProviderStateMixin {
   /// 显隐值
-  late ValueNotifier<bool> visible;
+  ValueNotifier<bool>? _visible;
+
+  /// 有效显隐值
+  ValueNotifier<bool> get effectiveVisible => widget.visible ?? (_visible ??= ValueNotifier(false));
 
   /// 区域焦点节点
-  late FocusScopeNode node;
+  FocusScopeNode? _node;
 
   /// 动画控制器
   late AnimationController _controller;
@@ -100,10 +91,6 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
 
   /// 默认淡出持续时间
   static const Duration _fadeOutDuration = Duration(milliseconds: 75);
-
-  /// 默认垂直偏移
-  static const double _defaultVerticalOffset = 6.0;
-  static const bool _defaultPreferBelow = true;
 
   /// 显示浮层计时器
   Timer? _showTimer;
@@ -120,28 +107,25 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
   /// 是否存在全局指针路由事件
   bool _existGlobalPointerRoute = false;
 
+  /// 链接浮层与组件
+  final LayerLink _layerLink = LayerLink();
+
+  late final ValueNotifier<TPopup> _popupWidget = ValueNotifier(widget);
+
   @override
   void initState() {
-    visible = widget.visible ?? ValueNotifier(false);
     _controller = AnimationController(
       duration: _fadeInDuration,
       reverseDuration: _fadeOutDuration,
       vsync: this,
     )..addStatusListener(_handleStatusChanged);
 
-    visible.removeListener(_showHidePopup);
-    visible.addListener(_showHidePopup);
+    effectiveVisible.addListener(_showHidePopup);
     // 初始化显隐
     _showHidePopup();
     if (widget.trigger == TPopupTrigger.focus) {
-      node = FocusScopeNode();
-      node.addListener(() {
-        if (node.hasFocus) {
-          visible.value = true;
-        } else {
-          visible.value = false;
-        }
-      });
+      _node = FocusScopeNode();
+      _node!.addListener(_focusVisible);
     }
     super.initState();
   }
@@ -150,7 +134,7 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
   void _globalPointerRoute(event) {
     if (event is PointerUpEvent) {
       if (!_stopPropagation) {
-        _hidePopup(immediately: true);
+        _updateVisible(false);
       }
       _stopPropagation = false;
     }
@@ -166,18 +150,17 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
 
   @override
   void dispose() {
-    if (widget.visible == null) {
-      visible.dispose();
-    }
+    effectiveVisible.removeListener(_showHidePopup);
+    _visible?.dispose();
     // 销毁浮层
     _removeEntry(force: true);
     super.dispose();
   }
 
-  /// 判断[visible.value]状态，显示和隐藏浮层
-  void _showHidePopup() {
-    var immediately = widget.trigger != TPopupTrigger.hover;
-    if (visible.value) {
+  /// 判断[effectiveVisible.value]状态，显示和隐藏浮层
+  void _showHidePopup({bool? immediately}) {
+    immediately = immediately ?? widget.trigger != TPopupTrigger.hover;
+    if (effectiveVisible.value) {
       _showPopup(immediately: immediately);
     } else {
       _hidePopup(immediately: immediately);
@@ -194,10 +177,9 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
       // 阻止冒泡关闭浮层
       _stopPropagation = true;
     }
-    visible.value = true;
     _hideTimer?.cancel();
     _hideTimer = null;
-    if (immediately) {
+    if (immediately || _controller.isAnimating) {
       _ensureVisible();
       return;
     }
@@ -212,7 +194,6 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
       _existGlobalPointerRoute = false;
       _stopPropagation = false;
     }
-    visible.value = false;
     _showTimer?.cancel();
     _showTimer = null;
     if (immediately) {
@@ -229,6 +210,7 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
     if (_entry == null) {
       _createEntry();
     }
+    widget.onOpen?.call();
     _controller.forward();
   }
 
@@ -239,52 +221,37 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
 
   /// 创建浮层对象，以及立即插入浮层.不应该直接使用这个方法，而是使用[_showPopup]
   void _createEntry() {
-    var theme = TTheme.of(context);
     final OverlayState overlayState = Overlay.of(
       context,
       debugRequiredFor: widget,
     )!;
-    final RenderBox box = context.findRenderObject()! as RenderBox;
-    final Offset target = box.localToGlobal(
-      box.size.bottomCenter(Offset.zero),
-      ancestor: overlayState.context.findRenderObject(),
-    );
-
-    // We create this widget outside of the overlay entry's builder to prevent
-    // updated values from happening to leak into the overlay when the overlay
-    // rebuilds.
-    var colorScheme = theme.colorScheme;
-    var popupShadow = theme.shadow2Inset;
-    // var popupTopArrowShadow = [theme.shadowInsetLeft, theme.shadowInsetBottom];
-    // var popupLeftArrowShadow = [theme.shadowInsetLeft, theme.shadowInsetTop];
-    // var popupBottomArrowShadow = [theme.shadowInsetTop, theme.shadowInsetRight];
-    // var popupRightArrowShadow = [theme.shadowInsetRight, theme.shadowInsetBottom];
 
     _entry = OverlayEntry(builder: (BuildContext context) {
-      return _PopupOverlay(
-        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: spacer),
-        onPointerDown: widget.trigger.isTrue(click: true, contextMenu: true) ? (event) => _stopPropagation = true : null,
+      Widget child = _PopupOverlay(
+        onPointerDown: (event) {
+          if (widget.trigger.isTrue(click: true, contextMenu: true)) {
+            _stopPropagation = true;
+          }
+        },
         // margin: _margin,
-        onEnter: widget.trigger.isTrue(hover: true)
-            ? (_) {
-                if (!_controller.isDismissed) _showPopup(immediately: true);
-              }
-            : null,
-        onExit: widget.trigger.isTrue(hover: true) ? (_) => _hidePopup() : null,
+        onEnter: (_) {
+          if (widget.trigger.isTrue(hover: true)) {
+            if (!_controller.isDismissed) _updateVisible(true);
+          }
+        },
+        onExit: (event) {
+          if (widget.trigger.isTrue(hover: true)) {
+            _updateVisible(false);
+          }
+        },
         animation: CurvedAnimation(
           parent: _controller,
           curve: Curves.fastOutSlowIn,
         ),
-        decoration: BoxDecoration(
-          color: colorScheme.bgColorContainer,
-          boxShadow: popupShadow,
-          borderRadius: BorderRadius.circular(borderRadius),
-        ),
-        target: target,
-        verticalOffset: _defaultVerticalOffset,
-        preferBelow: _defaultPreferBelow,
-        child: widget.content,
+        layerLink: _layerLink,
+        popupWidget: _popupWidget,
       );
+      return child;
     });
     overlayState.insert(_entry!);
   }
@@ -296,6 +263,7 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
       _entry?.remove();
       _entry = null;
     }
+    widget.onClose?.call();
   }
 
   @override
@@ -304,114 +272,279 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
     if (widget.trigger == TPopupTrigger.hover) {
       child = MouseRegion(
         hitTestBehavior: HitTestBehavior.translucent,
-        onEnter: (event) => visible.value = true,
-        onExit: (event) => visible.value = false,
+        onEnter: (event) => _updateVisible(true),
+        onExit: (event) => _updateVisible(false),
         child: widget.child,
       );
     } else if (widget.trigger == TPopupTrigger.click) {
       child = AllowTapListener(
-        onTap: () => visible.value = !visible.value,
+        onTap: () => _updateVisible(),
         child: widget.child,
       );
     } else if (widget.trigger == TPopupTrigger.contextMenu) {
       child = AllowTapListener(
-        onSecondaryTap: () => visible.value = !visible.value,
+        onSecondaryTap: () => _updateVisible(),
         child: widget.child,
       );
     } else if (widget.trigger == TPopupTrigger.focus) {
       child = FocusScope(
-        node: node,
+        node: _node,
         child: widget.child,
       );
     }
-    return child;
+    return CompositedTransformTarget(
+      link: _layerLink,
+      child: child,
+    );
+  }
+
+  /// 更新显示状态
+  void _updateVisible([bool? visible]) {
+    effectiveVisible.value = visible ?? !effectiveVisible.value;
+  }
+
+  @override
+  void didUpdateWidget(TPopup oldWidget) {
+    // 替换了widget后，焦点可能丢失
+    if (widget.trigger == TPopupTrigger.focus) {
+      if (_node == null) {
+        _node = FocusScopeNode();
+        _node!.addListener(_focusVisible);
+      }
+    } else {
+      _node?.dispose();
+      _node = null;
+    }
+    if(widget.visible != oldWidget.visible) {
+      (oldWidget.visible ?? _visible)?.removeListener(_showHidePopup);
+      (widget.visible ?? _visible)?.addListener(_showHidePopup);
+    }
+    // 在下一帧时，更新这个持有对象
+    SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+      if (mounted) {
+        _popupWidget.value = widget;
+      }
+    });
+    // 暂时先销毁浮层
+    // _removeEntry(force: true);
+
+    super.didUpdateWidget(oldWidget);
+  }
+
+  void _focusVisible() {
+    if (_node!.hasFocus) {
+      effectiveVisible.value = true;
+    } else {
+      effectiveVisible.value = false;
+    }
   }
 }
 
-/// A delegate for computing the layout of a tooltip to be displayed above or
-/// bellow a target specified in the global coordinate system.
+typedef PopupPositionCallback = void Function(bool isReverse);
+
+/// 用于计算要在全局坐标系中指定的目标上方或下方显示的浮层布局的代理。
 class _PopupPositionDelegate extends SingleChildLayoutDelegate {
-  /// Creates a delegate for computing the layout of a tooltip.
+  /// 创建用于计算浮层布局的委托。
   ///
-  /// The arguments must not be null.
+  /// 参数不能为null。
   _PopupPositionDelegate({
-    required this.target,
-    required this.verticalOffset,
-    required this.preferBelow,
+    required this.offset,
+    required this.placement,
+    required this.margin,
+    required this.layerLink,
+    this.callback,
   });
 
-  /// The offset of the target the tooltip is positioned near in the global
-  /// coordinate system.
-  final Offset target;
+  /// 与组件之间的偏移量
+  final double offset;
 
-  /// The amount of vertical distance between the target and the displayed
-  /// tooltip.
-  final double verticalOffset;
+  /// 浮层的方向
+  final TPopupPlacement placement;
 
-  /// Whether the tooltip is displayed below its widget by default.
-  ///
-  /// If there is insufficient space to display the tooltip in the preferred
-  /// direction, the tooltip will be displayed in the opposite direction.
-  final bool preferBelow;
+  /// 与窗口边界之间的距离
+  final double margin;
+
+  /// 与父组件之间的链接
+  final LayerLink layerLink;
+
+  final PopupPositionCallback? callback;
+
+  /// 上一次获取到的偏移
+  _PopupOffset? _target;
+
+  /// 上一次的位置
+  Offset? _offset;
 
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) => constraints.loosen();
 
+  /// 儿童应放置的位置。
+  /// “size”参数是父对象的大小，如果该大小不满足传递给[getSize]的约束，则可能与[getSize]返回的值不同。
+  /// “childSize”参数是子对象的大小，它将满足[getConstraintsForChild]返回的约束。
+  /// 默认情况下，将子对象定位在父对象的左上角。
   @override
   Offset getPositionForChild(Size size, Size childSize) {
-    return positionDependentBox(
-      size: size,
-      childSize: childSize,
-      target: target,
-      verticalOffset: verticalOffset,
-      preferBelow: preferBelow,
-    );
+    var isReverse = false;
+    _readLeader();
+    if (layerLink.leaderSize == null || layerLink.leader == null) {
+      // 推迟到下一帧更新
+      SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
+        _readLeader();
+      });
+    }
+    if (_target == null) {
+      return _offset ?? const Offset(0, 0);
+    }
+    // 浮层在组件中的偏移
+    _PopupOffset target = _target!;
+    double x, y;
+    if (placement.isVertical()) {
+      // VERTICAL DIRECTION
+      var to = target.placement(placement);
+      // 适合在下方显示
+      final bool fitsBelow = to.dy + offset + childSize.height <= size.height - margin;
+      // 适合在上方显示
+      final bool fitsAbove = to.dy - offset - childSize.height >= margin;
+      // 是否合适在下方显示
+      final bool isBelow = placement.isBottom() ? fitsBelow || !fitsAbove : !(fitsAbove || !fitsBelow);
+      if (isBelow) {
+        isReverse = !placement.isBottom();
+        y = math.min(target.bottom.dy + offset, size.height - margin);
+      } else {
+        isReverse = !placement.isTop();
+        y = math.max(target.top.dy - offset - childSize.height, margin);
+      }
+      if (size.width < childSize.width) {
+        // 子组件比窗口大
+        var center = (size.width - childSize.width) / 2.0;
+        x = placement.valueOf(
+          topLeft: () => 0,
+          bottomLeft: () => 0,
+          top: () => center,
+          bottom: () => center,
+          topRight: () => 0,
+          bottomRight: () => 0,
+        )!;
+      } else {
+        if (placement.isTrue(topLeft: true, bottomLeft: true)) {
+          final double normalizedTargetX = to.dx.clamp(margin, size.width - margin - childSize.width);
+          x = normalizedTargetX;
+        } else if (placement.isTrue(topRight: true, bottomRight: true)) {
+          var normalizedTargetRight = to.dx.clamp(margin, size.width - margin);
+          x = normalizedTargetRight - childSize.width;
+        } else {
+          final double normalizedTargetX = to.dx.clamp(margin, size.width - margin);
+          final double edge = margin + childSize.width / 2.0;
+          if (normalizedTargetX < edge) {
+            x = margin;
+          } else if (normalizedTargetX > size.width - edge) {
+            x = size.width - margin - childSize.width;
+          } else {
+            x = normalizedTargetX - childSize.width / 2.0;
+          }
+        }
+      }
+    } else {
+      // HORIZONTAL DIRECTION
+      var to = target.placement(placement);
+      // 适合在右方显示
+      final bool fitsRight = to.dx + offset + childSize.width <= size.width - margin;
+      // 适合在左方显示
+      final bool fitsLeft = to.dx - offset - childSize.width >= margin;
+      // 是否合适在右方显示
+      final bool isRight = placement.isRight() ? fitsRight || !fitsLeft : !(fitsLeft || !fitsRight);
+      if (isRight) {
+        isReverse = !placement.isRight();
+        x = math.min(target.right.dx + offset, size.width - margin);
+      } else {
+        isReverse = !placement.isLeft();
+        x = math.min(target.left.dx - offset - childSize.width, size.width - childSize.width - margin);
+      }
+
+      if (size.height < childSize.height) {
+        // 子组件比窗口大
+        var center = (size.height - childSize.height) / 2.0;
+        y = placement.valueOf(
+          leftTop: () => 0,
+          rightTop: () => 0,
+          top: () => center,
+          bottom: () => center,
+          leftBottom: () => 0,
+          rightBottom: () => 0,
+        )!;
+      } else {
+        if (placement.isTrue(leftTop: true, rightTop: true)) {
+          final double normalizedTargetY = to.dy.clamp(margin, size.height - margin - childSize.height);
+          y = normalizedTargetY;
+        } else if (placement.isTrue(leftBottom: true, rightBottom: true)) {
+          var normalizedTargetY = to.dy.clamp(margin, size.height - margin);
+          y = normalizedTargetY - childSize.height;
+        } else {
+          final double normalizedTargetY = to.dy.clamp(margin, size.height - margin);
+          final double edge = margin + childSize.height / 2.0;
+          if (normalizedTargetY < edge) {
+            y = margin;
+          } else if (normalizedTargetY > size.height - edge) {
+            y = size.height - margin - childSize.height;
+          } else {
+            y = normalizedTargetY - childSize.height / 2.0;
+          }
+        }
+      }
+    }
+    _offset = Offset(x, y);
+    callback?.call(isReverse);
+    return _offset!;
+  }
+
+  /// 读取leader的值
+  void _readLeader() {
+    if (layerLink.leaderSize != null && layerLink.leader != null) {
+      _target = _PopupOffset.linkOf(layerLink);
+    }
   }
 
   @override
   bool shouldRelayout(_PopupPositionDelegate oldDelegate) {
-    return target != oldDelegate.target || verticalOffset != oldDelegate.verticalOffset || preferBelow != oldDelegate.preferBelow;
+    return layerLink != oldDelegate.layerLink || offset != oldDelegate.offset || placement != oldDelegate.placement || margin != oldDelegate.margin;
   }
 }
 
+/// 浮层内容对象
 class _PopupOverlay extends StatefulWidget {
   const _PopupOverlay({
     Key? key,
-    this.padding,
-    this.margin,
     required this.animation,
-    required this.target,
-    required this.verticalOffset,
-    required this.preferBelow,
     this.onEnter,
     this.onExit,
-    this.child,
-    this.decoration,
     this.onPointerDown,
+    required this.layerLink,
+    required this.popupWidget,
   }) : super(key: key);
 
-  final EdgeInsetsGeometry? padding;
-  final EdgeInsetsGeometry? margin;
-  final Decoration? decoration;
   final Animation<double> animation;
-  final Offset target;
-  final double verticalOffset;
-  final bool preferBelow;
   final PointerDownEventListener? onPointerDown;
   final PointerEnterEventListener? onEnter;
   final PointerExitEventListener? onExit;
-  final Widget? child;
+  final LayerLink layerLink;
+  final ValueNotifier<TPopup> popupWidget;
 
   @override
   State<_PopupOverlay> createState() => _PopupOverlayState();
 }
 
 class _PopupOverlayState extends State<_PopupOverlay> {
-  late ValueNotifier<bool> visible;
+  late ValueNotifier<bool> _visible;
+  late ValueNotifier<bool> _isReverse;
+
+  /// 默认垂直偏移
+  static const double _defaultVerticalOffset = 4.0;
+  static double popupContentArrowSpacer = ThemeDataConstant.spacer2;
 
   @override
   void initState() {
-    visible = ValueNotifier(false);
+    _visible = ValueNotifier(false);
+    _isReverse = ValueNotifier(false);
     _updateIgnore();
     widget.animation.addListener(_updateIgnore);
     super.initState();
@@ -420,66 +553,276 @@ class _PopupOverlayState extends State<_PopupOverlay> {
   @override
   void dispose() {
     widget.animation.removeListener(_updateIgnore);
+    _visible.dispose();
+    _isReverse.dispose();
     super.dispose();
   }
 
   void _updateIgnore() {
     if (widget.animation.value > 0) {
-      visible.value = true;
+      _visible.value = true;
     } else {
-      visible.value = false;
+      _visible.value = false;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     var theme = TTheme.of(context);
-    Widget result = ValueListenableBuilder<bool>(
-      builder: (BuildContext context, value, Widget? child) {
-        return DefaultTextStyle(
-          style: TextStyle(fontSize: fontSizeBase, fontFamily: theme.fontFamily),
-          child: Visibility(
-            visible: value,
-            maintainState: true,
-            child: child ?? Container(),
+    // We create this widget outside of the overlay entry's builder to prevent
+    // updated values from happening to leak into the overlay when the overlay
+    // rebuilds.
+    var colorScheme = theme.colorScheme;
+    var popupShadow = theme.shadow2Inset;
+    var popupTopArrowShadow = [theme.shadowInsetLeft, theme.shadowInsetBottom];
+    var popupLeftArrowShadow = [theme.shadowInsetLeft, theme.shadowInsetTop];
+    var popupBottomArrowShadow = [theme.shadowInsetTop, theme.shadowInsetRight];
+    var popupRightArrowShadow = [theme.shadowInsetRight, theme.shadowInsetBottom];
+
+    // 当小部件完全不显示时，忽略所有事件
+    return ValueListenableBuilder(
+      builder: (BuildContext context, TPopup popup, Widget? child) {
+        Widget result = ValueListenableBuilder<bool>(
+          builder: (BuildContext context, value, Widget? child) {
+            return DefaultTextStyle(
+              style: TextStyle(fontSize: ThemeDataConstant.fontSizeBase, fontFamily: theme.fontFamily),
+              child: Visibility(
+                visible: value,
+                maintainState: true,
+                child: child!,
+              ),
+            );
+          },
+          valueListenable: _visible,
+          child: FadeTransition(
+            opacity: widget.animation,
+            child: ValueListenableBuilder(
+              valueListenable: _isReverse,
+              builder: (BuildContext context, bool value, Widget? child) {
+                return Container(
+                  decoration: ShapeDecoration(
+                    color: colorScheme.bgColorContainer,
+                    shadows: popup.placement.sides(
+                      top: [...popupShadow, ...popupTopArrowShadow],
+                      left: [...popupShadow, ...popupLeftArrowShadow],
+                      right: [...popupShadow, ...popupRightArrowShadow],
+                      bottom: [...popupShadow, ...popupBottomArrowShadow],
+                    ),
+                    shape: BubbleShapeBorder(
+                        smooth: 2,
+                        arrowQuadraticBezierLength: 2,
+                        arrowAngle: 6,
+                        arrowHeight: 6,
+                        direction: popup.showArrow
+                            ? popup.placement.sides(
+                                top: value ? BubbleDirection.top : BubbleDirection.bottom,
+                                left: value ? BubbleDirection.left : BubbleDirection.right,
+                                right: value ? BubbleDirection.right : BubbleDirection.left,
+                                bottom: value ? BubbleDirection.bottom : BubbleDirection.top,
+                              )
+                            : BubbleDirection.none,
+                        radius: BorderRadius.circular(ThemeDataConstant.borderRadius),
+                        position: popup.placement.valueOf(
+                          topLeft: () => BubblePosition.start(popupContentArrowSpacer),
+                          top: () => const BubblePosition.center(0),
+                          topRight: () => BubblePosition.end(popupContentArrowSpacer),
+                          rightTop: () => BubblePosition.start(popupContentArrowSpacer),
+                          right: () => const BubblePosition.center(0),
+                          rightBottom: () => BubblePosition.end(popupContentArrowSpacer),
+                          bottomLeft: () => BubblePosition.start(popupContentArrowSpacer),
+                          bottom: () => const BubblePosition.center(0),
+                          bottomRight: () => BubblePosition.end(popupContentArrowSpacer),
+                          leftTop: () => BubblePosition.start(popupContentArrowSpacer),
+                          left: () => const BubblePosition.center(0),
+                          leftBottom: () => BubblePosition.end(popupContentArrowSpacer),
+                        )!),
+                  ),
+                  padding: EdgeInsets.symmetric(vertical: 4, horizontal: ThemeDataConstant.spacer),
+                  child: child,
+                );
+              },
+              child: popup.content ?? popup.builderContent?.call(context),
+            ),
+          ),
+        );
+        if (widget.onEnter != null || widget.onExit != null) {
+          result = MouseRegion(
+            onEnter: widget.onEnter,
+            onExit: widget.onExit,
+            child: result,
+          );
+        }
+        if (widget.onPointerDown != null) {
+          result = Listener(
+            onPointerDown: widget.onPointerDown,
+            child: result,
+          );
+        }
+
+        return Positioned.fill(
+          child: CustomSingleChildLayout(
+            delegate: _PopupPositionDelegate(
+              offset: _defaultVerticalOffset,
+              placement: popup.placement,
+              margin: 5.0,
+              layerLink: widget.layerLink,
+              callback: (isReverse) {
+                SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+                  _isReverse.value = isReverse;
+                });
+              },
+            ),
+            child: result,
           ),
         );
       },
-      valueListenable: visible,
-      child: FadeTransition(
-        opacity: widget.animation,
-        child: Container(
-          decoration: widget.decoration,
-          padding: widget.padding,
-          margin: widget.margin,
-          child: widget.child,
-        ),
-      ),
-    );
-    if (widget.onEnter != null || widget.onExit != null) {
-      result = MouseRegion(
-        onEnter: widget.onEnter,
-        onExit: widget.onExit,
-        child: result,
-      );
-    }
-    if (widget.onPointerDown != null) {
-      result = Listener(
-        onPointerDown: widget.onPointerDown,
-        child: result,
-      );
-    }
-
-    // 当小部件完全不显示时，忽略所有事件
-    return Positioned.fill(
-      child: CustomSingleChildLayout(
-        delegate: _PopupPositionDelegate(
-          target: widget.target,
-          verticalOffset: widget.verticalOffset,
-          preferBelow: widget.preferBelow,
-        ),
-        child: result,
-      ),
+      valueListenable: widget.popupWidget,
     );
   }
+}
+
+/// 浮层偏移对象
+class _PopupOffset {
+  /// 上
+  Offset top;
+
+  /// 左
+  Offset left;
+
+  /// 右
+  Offset right;
+
+  /// 下
+  Offset bottom;
+
+  /// 上左
+  Offset topLeft;
+
+  /// 上右
+  Offset topRight;
+
+  /// 下左
+  Offset bottomLeft;
+
+  /// 下右
+  Offset bottomRight;
+
+  /// 左上
+  Offset leftTop;
+
+  /// 左下
+  Offset leftBottom;
+
+  /// 右上
+  Offset rightTop;
+
+  /// 右下
+  Offset rightBottom;
+
+  _PopupOffset({
+    required this.top,
+    required this.left,
+    required this.right,
+    required this.bottom,
+    required this.topLeft,
+    required this.topRight,
+    required this.bottomLeft,
+    required this.bottomRight,
+    required this.leftTop,
+    required this.leftBottom,
+    required this.rightTop,
+    required this.rightBottom,
+  });
+
+  factory _PopupOffset.linkOf(LayerLink layerLink) {
+    // 组件大小
+    Size leaderSize = layerLink.leaderSize ?? const Size(0, 0);
+    // 父坐标系中的位置
+    var offset = layerLink.leader?.offset ?? const Offset(0, 0);
+    final Offset top = leaderSize.topCenter(offset);
+    final Offset left = leaderSize.centerLeft(offset);
+    final Offset right = leaderSize.centerRight(offset);
+    final Offset bottom = leaderSize.bottomCenter(offset);
+    final Offset topLeft = leaderSize.topLeft(offset);
+    final Offset topRight = leaderSize.topRight(offset);
+    final Offset bottomLeft = leaderSize.bottomLeft(offset);
+    final Offset bottomRight = leaderSize.bottomRight(offset);
+    return _PopupOffset(
+      top: top,
+      left: left,
+      right: right,
+      bottom: bottom,
+      topLeft: topLeft,
+      topRight: topRight,
+      bottomLeft: bottomLeft,
+      bottomRight: bottomRight,
+      leftTop: topLeft,
+      leftBottom: bottomLeft,
+      rightTop: topRight,
+      rightBottom: bottomRight,
+    );
+  }
+
+  /// 根据浮层出现位置，返回相应的[Offset]
+  Offset placement(TPopupPlacement placement) {
+    switch (placement) {
+      case TPopupPlacement.top:
+        return top;
+      case TPopupPlacement.left:
+        return left;
+      case TPopupPlacement.right:
+        return right;
+      case TPopupPlacement.bottom:
+        return bottom;
+      case TPopupPlacement.topLeft:
+        return topLeft;
+      case TPopupPlacement.topRight:
+        return topRight;
+      case TPopupPlacement.bottomLeft:
+        return bottomLeft;
+      case TPopupPlacement.bottomRight:
+        return bottomRight;
+      case TPopupPlacement.leftTop:
+        return leftTop;
+      case TPopupPlacement.leftBottom:
+        return leftBottom;
+      case TPopupPlacement.rightTop:
+        return rightTop;
+      case TPopupPlacement.rightBottom:
+        return rightBottom;
+    }
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is _PopupOffset &&
+          runtimeType == other.runtimeType &&
+          top == other.top &&
+          left == other.left &&
+          right == other.right &&
+          bottom == other.bottom &&
+          topLeft == other.topLeft &&
+          topRight == other.topRight &&
+          bottomLeft == other.bottomLeft &&
+          bottomRight == other.bottomRight &&
+          leftTop == other.leftTop &&
+          leftBottom == other.leftBottom &&
+          rightTop == other.rightTop &&
+          rightBottom == other.rightBottom;
+
+  @override
+  int get hashCode =>
+      top.hashCode ^
+      left.hashCode ^
+      right.hashCode ^
+      bottom.hashCode ^
+      topLeft.hashCode ^
+      topRight.hashCode ^
+      bottomLeft.hashCode ^
+      bottomRight.hashCode ^
+      leftTop.hashCode ^
+      leftBottom.hashCode ^
+      rightTop.hashCode ^
+      rightBottom.hashCode;
 }
