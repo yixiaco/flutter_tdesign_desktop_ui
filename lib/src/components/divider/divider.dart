@@ -62,11 +62,12 @@ class TDivider extends StatelessWidget {
         double width;
         double height;
         EdgeInsetsGeometry margin;
+        Widget? child;
         if (layout == Axis.horizontal) {
           width = space ?? maxWidth;
           height = thickness ?? d;
           margin = EdgeInsets.symmetric(vertical: ThemeDataConstant.spacer2);
-          if (child != null) {
+          if (this.child != null) {
             Widget left;
             Widget right;
             switch (align) {
@@ -83,13 +84,13 @@ class TDivider extends StatelessWidget {
                 right = Expanded(child: buildCustomPaint(width, height, colorScheme));
                 break;
             }
-            return Row(
+            child = Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 left,
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: fontSize),
-                  child: child!,
+                  child: this.child!,
                 ),
                 right,
               ],
@@ -104,8 +105,12 @@ class TDivider extends StatelessWidget {
         return Padding(
           padding: margin,
           child: DefaultTextStyle(
-            style: TextStyle(color: colorScheme.textColorPrimary),
-            child: buildCustomPaint(width, height, colorScheme),
+            style: TextStyle(
+              fontFamily: theme.fontFamily,
+              color: colorScheme.textColorPrimary,
+              fontSize: theme.fontSize,
+            ),
+            child: child ?? buildCustomPaint(width, height, colorScheme),
           ),
         );
       },

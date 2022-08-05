@@ -126,6 +126,13 @@ class TThemeData with Diagnosticable {
   /// 默认的暗黑样式
   factory TThemeData.dark() => TThemeData(brightness: Brightness.dark);
 
+  /// 通用字体大小
+  get fontSize => size.lazySizeOf(
+        small: () => ThemeDataConstant.fontSizeS,
+        medium: () => ThemeDataConstant.fontSizeBase,
+        large: () => ThemeDataConstant.fontSizeL,
+      );
+
   TThemeData copyWith({
     Brightness? brightness,
     TColorScheme? colorScheme,
