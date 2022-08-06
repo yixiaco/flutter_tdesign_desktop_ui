@@ -32,6 +32,18 @@ class TInputThemeData with Diagnosticable {
       decoration: decoration ?? this.decoration,
     );
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is TInputThemeData &&
+          runtimeType == other.runtimeType &&
+          maxLength == other.maxLength &&
+          size == other.size &&
+          decoration == other.decoration;
+
+  @override
+  int get hashCode => maxLength.hashCode ^ size.hashCode ^ decoration.hashCode;
 }
 
 /// 弹出层主题

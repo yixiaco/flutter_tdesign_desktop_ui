@@ -20,7 +20,8 @@ class TSpace extends StatelessWidget {
     this.clipBehavior = Clip.none,
     this.separator,
     this.size,
-    this.breakLine = true,
+    this.breakLine = false,
+    this.textBaseline,
   }) : super(key: key);
 
   /// 间距方向
@@ -65,6 +66,11 @@ class TSpace extends StatelessWidget {
 
   /// 是否自动换行
   final bool breakLine;
+
+  /// 如果根据它们的基线对齐项目，则使用哪个基线。
+  /// 如果使用基线对齐，则必须设置此项。没有默认值，因为框架无法先验地知道正确的基线
+  /// [breakLine]为true时无效，因为没有一个有效的[CrossAxisAlignment.baseline]
+  final TextBaseline? textBaseline;
 
   @override
   Widget build(BuildContext context) {
@@ -135,6 +141,7 @@ class TSpace extends StatelessWidget {
             textDirection: textDirection,
             verticalDirection: verticalDirection,
             clipBehavior: clipBehavior,
+            textBaseline: textBaseline,
             children: children,
           );
         }
