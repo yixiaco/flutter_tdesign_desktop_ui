@@ -67,12 +67,12 @@ class TLayout extends StatelessWidget {
 class TAside extends StatelessWidget {
   const TAside({
     Key? key,
-    required this.child,
+    this.child,
     this.width = 232,
     this.color,
   }) : super(key: key);
 
-  final Widget child;
+  final Widget? child;
 
   final double width;
 
@@ -82,14 +82,17 @@ class TAside extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        return Container(
-          color: color,
-          child: SizedBox(
-            width: width,
-            height: constraints.maxHeight,
-            child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: width, maxHeight: constraints.maxHeight),
-              child: child,
+        return Semantics(
+          container: true,
+          child: Container(
+            color: color,
+            child: SizedBox(
+              width: width,
+              height: constraints.maxHeight,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: width, maxHeight: constraints.maxHeight),
+                child: child,
+              ),
             ),
           ),
         );
@@ -102,11 +105,11 @@ class TAside extends StatelessWidget {
 class THeader extends StatelessWidget {
   const THeader({
     Key? key,
-    required this.child,
+    this.child,
     this.height = 64,
   }) : super(key: key);
 
-  final Widget child;
+  final Widget? child;
 
   final double height;
 
@@ -114,12 +117,15 @@ class THeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        return SizedBox(
-          height: height,
-          width: constraints.maxWidth,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: constraints.maxWidth, maxHeight: height),
-            child: child,
+        return Semantics(
+          container: true,
+          child: SizedBox(
+            height: height,
+            width: constraints.maxWidth,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: constraints.maxWidth, maxHeight: height),
+              child: child,
+            ),
           ),
         );
       },
@@ -131,11 +137,11 @@ class THeader extends StatelessWidget {
 class TFooter extends StatelessWidget {
   const TFooter({
     Key? key,
-    required this.child,
+    this.child,
     this.height = 24,
   }) : super(key: key);
 
-  final Widget child;
+  final Widget? child;
 
   final double height;
 
@@ -143,12 +149,15 @@ class TFooter extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        return SizedBox(
-          height: height,
-          width: constraints.maxWidth,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: constraints.maxWidth, maxHeight: height),
-            child: child,
+        return Semantics(
+          container: true,
+          child: SizedBox(
+            height: height,
+            width: constraints.maxWidth,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: constraints.maxWidth, maxHeight: height),
+              child: child,
+            ),
           ),
         );
       },
@@ -161,22 +170,25 @@ class TContent extends StatelessWidget {
   const TContent({
     Key? key,
     this.alignment = Alignment.topLeft,
-    required this.child,
+    this.child,
   }) : super(key: key);
 
   final Alignment alignment;
 
-  final Widget child;
+  final Widget? child;
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        return Align(
-          alignment: alignment,
-          child: ConstrainedBox(
-            constraints: constraints,
-            child: child,
+        return Semantics(
+          container: true,
+          child: Align(
+            alignment: alignment,
+            child: ConstrainedBox(
+              constraints: constraints,
+              child: child,
+            ),
           ),
         );
       },

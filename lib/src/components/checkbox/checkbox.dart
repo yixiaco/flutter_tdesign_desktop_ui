@@ -96,7 +96,7 @@ class _TCheckboxState extends State<TCheckbox> with SingleTickerProviderStateMix
       if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
         color = colorScheme.brandColor;
       }
-      return TBorderSide(color: color, width: 1, antiAlias: false);
+      return TBorderSide(color: color, width: 1);
     });
 
     return Semantics(
@@ -124,18 +124,12 @@ class _TCheckboxState extends State<TCheckbox> with SingleTickerProviderStateMix
                     borderRadius: BorderRadius.circular(ThemeDataConstant.borderRadius),
                   ),
                 ),
-                child: Container(
-                  width: 5,
-                  height: 9,
-                  decoration: BoxDecoration(
-                    border: Border(
-                      top: const BorderSide(color: Colors.transparent),
-                      left: const BorderSide(color: Colors.transparent),
-                      right: BorderSide(color: colorScheme.textColorAnti, width: 2),
-                      bottom: BorderSide(color: colorScheme.textColorAnti, width: 2),
-                    ),
+                child: CustomPaint(
+                  size: const Size(16, 16),
+                  painter: _TCheckboxPaint(
+                    color: colorScheme.textColorAnti,
+                    strokeWidth: 2,
                   ),
-                  transform: Matrix4.rotationZ(45),
                 ),
               ),
               Padding(
@@ -188,6 +182,7 @@ class _TCheckboxState extends State<TCheckbox> with SingleTickerProviderStateMix
               break;
           }
           context.findRenderObject()!.sendSemanticsEvent(const TapSemanticEvent());
+          return null;
         },
       ),
     };
@@ -200,5 +195,40 @@ class _TCheckboxState extends State<TCheckbox> with SingleTickerProviderStateMix
 
   void _handleFocusHighlightChanged(bool value) {
     setMaterialState(MaterialState.focused, value);
+  }
+}
+
+class _TCheckboxPaint extends CustomPainter {
+  const _TCheckboxPaint({
+    required this.color,
+    required this.strokeWidth,
+  });
+
+  final Color color;
+  final double strokeWidth;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    var paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..color = color
+      ..strokeWidth = strokeWidth * .8;
+    var width = size.width;
+    var height = size.height;
+    final Offset origin = size / 2.0 - Size.square(width) / 2.0 as Offset;
+
+    final Path path = Path();
+    Offset start = Offset(width * 0.2, height * 0.5);
+    Offset mid = Offset(width * 0.4, height * 0.7);
+    Offset end = Offset(width * 0.8, height * 0.25);
+    path.moveTo(origin.dx + start.dx, origin.dy + start.dy);
+    path.lineTo(origin.dx + mid.dx, origin.dy + mid.dy);
+    path.lineTo(origin.dx + end.dx, origin.dy + end.dy);
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(_TCheckboxPaint oldDelegate) {
+    return this != oldDelegate;
   }
 }

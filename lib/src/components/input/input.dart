@@ -106,22 +106,22 @@ class TInput extends StatefulWidget {
   final TInputType type;
 
   /// 失去焦点时触发
-  final InputCallBack? onBlur;
+  final TInputCallBack? onBlur;
 
   /// 输入框值发生变化时触发
-  final InputCallBack? onChange;
+  final TInputCallBack? onChange;
 
   /// 清空按钮点击时触发
   final TCallback? onClear;
 
   /// 回车键按下时触发
-  final InputCallBack? onEnter;
+  final TInputCallBack? onEnter;
 
   /// 获得焦点时触发
-  final InputCallBack? onFocus;
+  final TInputCallBack? onFocus;
 
   /// 键盘按下时触发
-  final InputKeyEvent? onKeyDown;
+  final TInputKeyEvent? onKeyDown;
 
   /// 文本对齐方式
   final TextAlign align;

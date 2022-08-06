@@ -22,7 +22,7 @@ typedef TBiFunction<T, U, R> = R Function(T t, U u);
 typedef TCheckValueChange<T> = void Function(bool? checked, bool indeterminate, T? value);
 
 /// 输入事件
-typedef InputKeyEvent = void Function(String text, KeyEvent event);
+typedef TInputKeyEvent = void Function(String text, KeyEvent event);
 
 /// 输入回调
-typedef InputCallBack = void Function(String text);
+typedef TInputCallBack = void Function(String text);
