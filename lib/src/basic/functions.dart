@@ -19,7 +19,7 @@ typedef TBiConsumer<T, U> = void Function(T t, U u);
 typedef TBiFunction<T, U, R> = R Function(T t, U u);
 
 /// 选中状态
-typedef TCheckValueChange<T> = void Function(bool? checked, bool indeterminate, T? value);
+typedef TCheckValueChange<T> = void Function(bool checked, bool indeterminate, T value);
 
 /// 输入事件
 typedef TInputKeyEvent = void Function(String text, KeyEvent event);

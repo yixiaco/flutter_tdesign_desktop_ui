@@ -1,5 +1,4 @@
 import 'package:example/components/checkbox/checkbox_example.dart';
-import 'package:example/components/space/space_example.dart';
 import 'package:example/state/semantics_state.dart';
 import 'package:example/state/theme_state.dart';
 import 'package:flutter/material.dart';

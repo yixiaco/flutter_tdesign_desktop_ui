@@ -5,36 +5,21 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 /// 弹出层主题数据
 class TCheckboxThemeData with Diagnosticable {
   const TCheckboxThemeData({
-    this.disabled,
-    this.indeterminate,
     this.label,
-    this.readonly,
   });
-
-  /// 是否禁用
-  final bool? disabled;
-
-  /// 是否半选
-  final bool? indeterminate;
 
   /// 主文案
   final Widget? label;
-
-  /// 是否只读
-  final bool? readonly;
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is TCheckboxThemeData &&
           runtimeType == other.runtimeType &&
-          disabled == other.disabled &&
-          indeterminate == other.indeterminate &&
-          label == other.label &&
-          readonly == other.readonly;
+          label == other.label;
 
   @override
-  int get hashCode => disabled.hashCode ^ indeterminate.hashCode ^ label.hashCode ^ readonly.hashCode;
+  int get hashCode => label.hashCode;
 }
 
 /// 弹出层主题

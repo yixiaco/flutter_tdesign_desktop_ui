@@ -6,11 +6,11 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 class TCheckbox<T> extends StatefulWidget {
   const TCheckbox({
     Key? key,
-    this.checked,
-    this.disabled,
-    this.indeterminate,
+    this.checked = false,
+    this.disabled = false,
+    this.indeterminate = false,
     this.label,
-    this.readonly,
+    this.readonly = false,
     this.prop,
     this.value,
     this.onChange,
@@ -19,19 +19,19 @@ class TCheckbox<T> extends StatefulWidget {
   }) : super(key: key);
 
   /// 是否选中
-  final bool? checked;
+  final bool checked;
 
   /// 是否禁用
-  final bool? disabled;
+  final bool disabled;
 
   /// 是否半选
-  final bool? indeterminate;
+  final bool indeterminate;
 
   /// 主文案
   final Widget? label;
 
   /// 是否只读
-  final bool? readonly;
+  final bool readonly;
 
   /// 多选框的值
   final T? value;
@@ -40,7 +40,7 @@ class TCheckbox<T> extends StatefulWidget {
   final String? prop;
 
   /// 值变化时触发
-  final TCheckValueChange<T>? onChange;
+  final TCheckValueChange<T?>? onChange;
 
   /// 焦点
   final FocusNode? focusNode;
@@ -49,38 +49,65 @@ class TCheckbox<T> extends StatefulWidget {
   final bool autofocus;
 
   @override
-  State<TCheckbox> createState() => _TCheckboxState();
+  State<TCheckbox<T>> createState() => _TCheckboxState<T>();
 }
 
-class _TCheckboxState extends State<TCheckbox> with SingleTickerProviderStateMixin, MaterialStateMixin {
+class _TCheckboxState<T> extends State<TCheckbox<T>> with SingleTickerProviderStateMixin, MaterialStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _fadeAnimation;
+
+  /// 默认淡入持续时间
+  static const Duration _fadeInDuration = Duration(milliseconds: 150);
+
+  /// 默认淡出持续时间
+  static const Duration _fadeOutDuration = Duration(milliseconds: 75);
+
   @override
   void initState() {
+    _controller = AnimationController(
+      vsync: this,
+      duration: _fadeInDuration,
+      reverseDuration: _fadeOutDuration,
+    )..addStatusListener((status) { });
+
+    _fadeAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.fastOutSlowIn,
+    );
+
+    setMaterialState(MaterialState.disabled, widget.disabled);
     super.initState();
   }
 
   @override
-  void didUpdateWidget(TCheckbox oldWidget) {
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(TCheckbox<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
+    setMaterialState(MaterialState.disabled, widget.disabled);
   }
 
   get states => materialStates;
+
+  bool get _checked {
+    return widget.indeterminate ? true : widget.checked;
+  }
 
   @override
   Widget build(BuildContext context) {
     var theme = TTheme.of(context);
     var colorScheme = theme.colorScheme;
     var themeData = TCheckboxTheme.of(context);
-    bool disabled = widget.disabled ?? themeData.disabled ?? false;
-    var indeterminate = widget.indeterminate ?? themeData.indeterminate ?? false;
-    var readonly = widget.readonly ?? themeData.readonly ?? false;
-    if (disabled) {
-      states.add(MaterialState.disabled);
-    } else {
-      states.remove(MaterialState.disabled);
-    }
+    Widget? label = widget.label ?? themeData.label;
 
-    Map<Type, Action<Intent>> actionMap = activeMap(indeterminate, context);
+    // 快捷键
+    Map<Type, Action<Intent>> actionMap = activeMap(context);
 
+    // 鼠标
     final MaterialStateProperty<MouseCursor> effectiveMouseCursor = MaterialStateProperty.resolveWith<MouseCursor>((states) {
       if (states.contains(MaterialState.disabled)) {
         return SystemMouseCursors.noDrop;
@@ -88,99 +115,121 @@ class _TCheckboxState extends State<TCheckbox> with SingleTickerProviderStateMix
       return SystemMouseCursors.click;
     });
 
+    // 边框
     final MaterialStateProperty<TBorderSide> effectiveBorderSide = MaterialStateProperty.resolveWith((states) {
-      Color color = widget.checked ?? indeterminate ? colorScheme.brandColor : colorScheme.borderLevel2Color;
+      Color color = _checked ? colorScheme.brandColor : colorScheme.borderLevel2Color;
       if (states.contains(MaterialState.hovered)) {
         color = colorScheme.brandColor;
       }
       if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
         color = colorScheme.brandColor;
       }
+      if (states.contains(MaterialState.disabled)) {
+        color = colorScheme.borderLevel2Color;
+      }
       return TBorderSide(color: color, width: 1);
     });
 
+    // 背景填充颜色
+    final bgColor = MaterialStateProperty.resolveWith((states) {
+      Color? color = _checked ? colorScheme.brandColor : null;
+      if (states.contains(MaterialState.disabled)) {
+        color = colorScheme.bgColorComponentDisabled;
+      }
+      return color;
+    });
+
+    // 选中的线条颜色
+    final checkColor = MaterialStateProperty.resolveWith((states) {
+      Color color = colorScheme.textColorAnti;
+      if (states.contains(MaterialState.disabled)) {
+        color = colorScheme.textColorDisabled;
+      }
+      return color;
+    });
+
+    if (label != null) {
+      label = Padding(
+        padding: EdgeInsets.symmetric(horizontal: ThemeDataConstant.spacer),
+        child: DefaultTextStyle(
+          style: TextStyle(
+            fontSize: ThemeDataConstant.fontSizeBase,
+            color: widget.disabled ? colorScheme.textColorDisabled : colorScheme.textColorPrimary,
+          ),
+          child: label,
+        ),
+      );
+    }
+
     return Semantics(
-      checked: widget.checked ?? false,
+      checked: widget.checked,
       child: FocusableActionDetector(
-        enabled: !disabled,
+        enabled: !widget.disabled,
         actions: actionMap,
         focusNode: widget.focusNode,
         autofocus: widget.autofocus,
         mouseCursor: effectiveMouseCursor.resolve(states),
         onShowFocusHighlight: _handleFocusHighlightChanged,
         onShowHoverHighlight: _handleHoverChanged,
-        child: SizedBox(
-          height: 22,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 16,
-                height: 16,
-                decoration: ShapeDecoration(
-                  color: widget.checked ?? indeterminate ? colorScheme.brandColor : null,
-                  shape: TRoundedRectangleBorder(
-                    side: effectiveBorderSide.resolve(states),
-                    borderRadius: BorderRadius.circular(ThemeDataConstant.borderRadius),
+        child: GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () {
+            _handleTap();
+          },
+          child: SizedBox(
+            height: 22,
+            child: TSpace(
+              spacing: 0,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              breakLine: false,
+              children: [
+                Container(
+                  width: 16,
+                  height: 16,
+                  decoration: ShapeDecoration(
+                    color: bgColor.resolve(states),
+                    shape: TRoundedRectangleBorder(
+                      side: effectiveBorderSide.resolve(states),
+                      borderRadius: BorderRadius.circular(ThemeDataConstant.borderRadius),
+                    ),
+                  ),
+                  child: CustomPaint(
+                    size: const Size.square(16),
+                    painter: _TCheckboxPaint(
+                      color: checkColor.resolve(states),
+                      strokeWidth: 2,
+                      checked: widget.checked,
+                      indeterminate: widget.indeterminate,
+                    ),
                   ),
                 ),
-                child: CustomPaint(
-                  size: const Size(16, 16),
-                  painter: _TCheckboxPaint(
-                    color: colorScheme.textColorAnti,
-                    strokeWidth: 2,
-                  ),
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: ThemeDataConstant.spacer),
-                child: widget.label,
-              )
-            ],
+                label,
+              ],
+            ),
           ),
         ),
       ),
     );
-
-    // return Semantics(
-    //   checked: widget.value ?? false,
-    //   child: buildToggleable(
-    //       mouseCursor: effectiveMouseCursor,
-    //       focusNode: widget.focusNode,
-    //       autofocus: widget.autofocus,
-    //       size: size,
-    //       painter: _painter
-    //         ..position = position
-    //         ..reaction = reaction
-    //         ..reactionFocusFade = reactionFocusFade
-    //         ..reactionHoverFade = reactionHoverFade
-    //         ..hoverColor = colorScheme.bgColorContainer
-    //         ..focusColor = colorScheme.bgColorContainer
-    //         ..downPosition = downPosition
-    //         ..isFocused = states.contains(MaterialState.focused)
-    //         ..isHovered = states.contains(MaterialState.hovered)
-    //         ..activeColor = colorScheme.brandColor
-    //         ..inactiveColor = colorScheme.bgColorComponentDisabled
-    //         .._side = effectiveBorderSide.resolve(states)),
-    // );
   }
 
-  Map<Type, Action<Intent>> activeMap(bool indeterminate, BuildContext context) {
+  /// 处理选中事件
+  void _handleTap() {
+    if (!widget.readonly && !widget.disabled) {
+      if (widget.indeterminate) {
+        // 半选=>选中
+        widget.onChange?.call(true, !widget.indeterminate, widget.value);
+      } else {
+        // 选中=>未选中
+        widget.onChange?.call(!widget.checked, false, widget.value);
+      }
+    }
+  }
+
+  Map<Type, Action<Intent>> activeMap(BuildContext context) {
     final Map<Type, Action<Intent>> actionMap = <Type, Action<Intent>>{
       ActivateIntent: CallbackAction<ActivateIntent>(
         onInvoke: (intent) {
-          if (indeterminate) return;
-          switch (widget.checked) {
-            case false:
-              widget.onChange?.call(true, widget.value, indeterminate);
-              break;
-            case true:
-              widget.onChange?.call(false, widget.value, indeterminate);
-              break;
-            case null:
-              widget.onChange?.call(null, widget.value, indeterminate);
-              break;
-          }
+          _handleTap();
           context.findRenderObject()!.sendSemanticsEvent(const TapSemanticEvent());
           return null;
         },
@@ -202,10 +251,21 @@ class _TCheckboxPaint extends CustomPainter {
   const _TCheckboxPaint({
     required this.color,
     required this.strokeWidth,
+    required this.checked,
+    required this.indeterminate,
   });
 
+  /// 线条颜色
   final Color color;
+
+  /// 线条宽度
   final double strokeWidth;
+
+  /// 是否选中
+  final bool checked;
+
+  /// 是否半选
+  final bool indeterminate;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -215,16 +275,23 @@ class _TCheckboxPaint extends CustomPainter {
       ..strokeWidth = strokeWidth * .8;
     var width = size.width;
     var height = size.height;
-    final Offset origin = size / 2.0 - Size.square(width) / 2.0 as Offset;
 
     final Path path = Path();
-    Offset start = Offset(width * 0.2, height * 0.5);
-    Offset mid = Offset(width * 0.4, height * 0.7);
-    Offset end = Offset(width * 0.8, height * 0.25);
-    path.moveTo(origin.dx + start.dx, origin.dy + start.dy);
-    path.lineTo(origin.dx + mid.dx, origin.dy + mid.dy);
-    path.lineTo(origin.dx + end.dx, origin.dy + end.dy);
-    canvas.drawPath(path, paint);
+    if (indeterminate) {
+      path.moveTo(width * 0.2, height * 0.5);
+      path.lineTo(width * 0.8, height * 0.5);
+      canvas.drawPath(path, paint);
+    } else if (checked) {
+      const Offset origin = Offset(0, 0);
+
+      Offset start = Offset(width * 0.2, height * 0.5);
+      Offset mid = Offset(width * 0.4, height * 0.7);
+      Offset end = Offset(width * 0.8, height * 0.25);
+      path.moveTo(origin.dx + start.dx, origin.dy + start.dy);
+      path.lineTo(origin.dx + mid.dx, origin.dy + mid.dy);
+      path.lineTo(origin.dx + end.dx, origin.dy + end.dy);
+      canvas.drawPath(path, paint);
+    }
   }
 
   @override

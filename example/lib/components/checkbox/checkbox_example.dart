@@ -10,6 +10,7 @@ class CheckboxExample extends StatefulWidget {
 
 class _CheckboxExampleState extends State<CheckboxExample> {
   bool check = false;
+  bool indeterminate = false;
   String? radio = '';
 
   @override
@@ -20,9 +21,25 @@ class _CheckboxExampleState extends State<CheckboxExample> {
           checked: check,
           value: '哈哈',
           label: const Text('基础多选框'),
+          indeterminate: indeterminate,
+          disabled: true,
           onChange: (checked, indeterminate, value) {
             setState(() {
-              check = checked ?? false;
+              check = checked;
+              this.indeterminate = indeterminate;
+            });
+            print('半选：$indeterminate，value：$value');
+          },
+        ),
+        TCheckbox<String>(
+          checked: check,
+          value: '哈哈',
+          label: const Text('基础多选框'),
+          indeterminate: indeterminate,
+          onChange: (checked, indeterminate, value) {
+            setState(() {
+              check = checked;
+              this.indeterminate = indeterminate;
             });
             print('半选：$indeterminate，value：$value');
           },
@@ -41,23 +58,23 @@ class _CheckboxExampleState extends State<CheckboxExample> {
           splashRadius: 0,
           tristate: true,
         ),
-        Radio(
+        Radio<String>(
           value: 'groupValue',
           toggleable: true,
           groupValue: radio,
           onChanged: (value) {
             setState(() {
-              radio = value as String?;
+              radio = value;
             });
           },
         ),
-        Radio(
+        Radio<String>(
           value: 'groupValue1',
           toggleable: true,
           groupValue: radio,
           onChanged: (value) {
             setState(() {
-              radio = value as String?;
+              radio = value;
             });
           },
         )
