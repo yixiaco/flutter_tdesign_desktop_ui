@@ -32,6 +32,10 @@ export 'src/components/grid/grid.dart';
 export 'src/components/layout/layout.dart';
 /// 间距
 export 'src/components/space/space.dart';
+/// 复选框
+export 'src/components/checkbox/checkbox.dart';
+export 'src/components/checkbox/checkbox_group.dart';
+export 'src/components/checkbox/checkbox_theme.dart';
 /// 输入框
 export 'src/components/input/input.dart';
 export 'src/components/input/input_theme.dart';

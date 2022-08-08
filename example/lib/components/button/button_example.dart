@@ -30,10 +30,6 @@ class ButtonExample extends StatelessWidget {
             alignment: Alignment.centerLeft,
             child: Row(
               children: [
-                IconButton(
-                  icon: const Icon(TIcons.books),
-                  onPressed: () {},
-                ),
                 TButton(
                   onPressed: () {},
                   shape: TButtonShape.circle,

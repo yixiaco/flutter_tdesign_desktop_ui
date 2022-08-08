@@ -45,6 +45,7 @@ class TThemeData with Diagnosticable {
     TextDirection? textDirection,
     String? fontFamily,
     TButtonThemeData? buttonThemeData,
+    TCheckboxThemeData? checkboxThemeData,
     TInputThemeData? inputThemeData,
     TPopupThemeData? popupThemeData,
   }) {
@@ -55,6 +56,7 @@ class TThemeData with Diagnosticable {
       textDirection: textDirection ?? TextDirection.ltr,
       fontFamily: fontFamily ?? 'Microsoft YaHei',
       buttonThemeData: buttonThemeData ?? const TButtonThemeData(),
+      checkboxThemeData: checkboxThemeData ?? const TCheckboxThemeData(),
       inputThemeData: inputThemeData ?? const TInputThemeData(),
       popupThemeData: popupThemeData ?? const TPopupThemeData(),
     );
@@ -67,6 +69,7 @@ class TThemeData with Diagnosticable {
     required this.textDirection,
     required this.fontFamily,
     required this.buttonThemeData,
+    required this.checkboxThemeData,
     required this.inputThemeData,
     required this.popupThemeData,
   });
@@ -88,6 +91,9 @@ class TThemeData with Diagnosticable {
 
   /// 按钮主题数据
   final TButtonThemeData buttonThemeData;
+
+  /// 复选框主题数据
+  final TCheckboxThemeData checkboxThemeData;
 
   /// 输入框主题数据
   final TInputThemeData inputThemeData;
@@ -140,6 +146,7 @@ class TThemeData with Diagnosticable {
     TextDirection? textDirection,
     String? fontFamily,
     TButtonThemeData? buttonThemeData,
+    TCheckboxThemeData? checkboxThemeData,
     TInputThemeData? inputThemeData,
     TPopupThemeData? popupThemeData,
   }) {
@@ -150,6 +157,7 @@ class TThemeData with Diagnosticable {
       textDirection: textDirection ?? this.textDirection,
       fontFamily: fontFamily ?? this.fontFamily,
       buttonThemeData: buttonThemeData ?? this.buttonThemeData,
+      checkboxThemeData: checkboxThemeData ?? this.checkboxThemeData,
       inputThemeData: inputThemeData ?? this.inputThemeData,
       popupThemeData: popupThemeData ?? this.popupThemeData,
     );
@@ -166,6 +174,7 @@ class TThemeData with Diagnosticable {
           textDirection == other.textDirection &&
           fontFamily == other.fontFamily &&
           buttonThemeData == other.buttonThemeData &&
+          checkboxThemeData == other.checkboxThemeData &&
           inputThemeData == other.inputThemeData &&
           popupThemeData == other.popupThemeData;
 
@@ -177,6 +186,7 @@ class TThemeData with Diagnosticable {
       textDirection.hashCode ^
       fontFamily.hashCode ^
       buttonThemeData.hashCode ^
+      checkboxThemeData.hashCode ^
       inputThemeData.hashCode ^
       popupThemeData.hashCode;
 }

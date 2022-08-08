@@ -1,4 +1,5 @@
-import 'package:example/components/space/space_example.dart';
+import 'package:example/components/checkbox/checkbox_example.dart';
+import 'package:example/state/semantics_state.dart';
 import 'package:example/state/theme_state.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -44,7 +45,9 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     var theme = ref.watch(themeProvider);
-    return Scaffold(
+    var semantics = ref.watch(semanticsProvider);
+
+    Widget child = Scaffold(
       backgroundColor: theme.brightness == Brightness.light ? Colors.white : Colors.black,
       appBar: AppBar(
         title: Text(widget.title),
@@ -52,17 +55,30 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
       body: TLayout(
         aside: TAside(color: Colors.blueAccent.withOpacity(0.5), child: const Text('Aside')),
         header: THeader(
-          child: Row(
+          child: TSpace(
             children: [
-              TButton(onPressed: () => ref.read(themeProvider.notifier).toggle(), child: Text(theme.brightness == Brightness.light ? '亮' : '暗')),
+              TButton(
+                onPressed: () => ref.read(themeProvider.notifier).toggle(),
+                child: Text(theme.brightness == Brightness.light ? '亮' : '暗'),
+              ),
+              TButton(
+                onPressed: () => ref.read(semanticsProvider.notifier).update((state) => !state),
+                child: Text(semantics ? '显示语义' : '隐藏语义'),
+              ),
             ],
           ),
         ),
         footer: const TFooter(child: Text('Footer')),
         content: const TContent(
-          child: SpaceExample(),
+          child: CheckboxExample(),
         ),
       ),
     );
+    if (semantics) {
+      return SemanticsDebugger(
+        child: child,
+      );
+    }
+    return child;
   }
 }

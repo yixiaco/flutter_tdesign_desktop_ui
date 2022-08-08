@@ -4,7 +4,6 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// 配合[TRoundedRectangleBorder]实现了虚线边框
 class TBorderSide extends BorderSide {
@@ -16,14 +15,10 @@ class TBorderSide extends BorderSide {
     super.width = 1.0,
     super.style = BorderStyle.solid,
     this.dashed = false,
-    this.antiAlias = false,
   }) : assert(width >= 0.0);
 
   /// 虚线
   final bool dashed;
-
-  /// 是否对画布上绘制的线条和图像应用抗锯齿
-  final bool antiAlias;
 
   /// A hairline black border that is not rendered.
   static const TBorderSide none = TBorderSide(width: 0.0, style: BorderStyle.none);
@@ -46,10 +41,12 @@ class TBorderSide extends BorderSide {
   ///
   /// The arguments must not be null.
   static bool canMerge(TBorderSide a, TBorderSide b) {
-    if ((a.style == BorderStyle.none && a.width == 0.0) || (b.style == BorderStyle.none && b.width == 0.0)) {
+    if ((a.style == BorderStyle.none && a.width == 0.0) ||
+        (b.style == BorderStyle.none && b.width == 0.0)) {
       return true;
     }
-    return a.style == b.style && a.color == b.color && a.dashed == b.dashed;
+    return a.style == b.style
+        && a.color == b.color && a.dashed == b.dashed;
   }
 
   /// Linearly interpolate between two border sides.
@@ -68,14 +65,12 @@ class TBorderSide extends BorderSide {
     if (width < 0.0) {
       return TBorderSide.none;
     }
-    if (a.style == b.style && a.dashed == b.dashed && a.antiAlias == b.antiAlias) {
+    if (a.style == b.style && a.dashed == b.dashed) {
       return TBorderSide(
         color: Color.lerp(a.color, b.color, t)!,
         width: width,
-        style: a.style,
-        // == b.style
+        style: a.style, // == b.style
         dashed: a.dashed,
-        antiAlias: a.antiAlias,
       );
     }
     Color colorA, colorB;
@@ -99,7 +94,6 @@ class TBorderSide extends BorderSide {
       color: Color.lerp(colorA, colorB, t)!,
       width: width,
       dashed: b.dashed,
-      antiAlias: b.antiAlias,
     );
   }
 
@@ -109,7 +103,6 @@ class TBorderSide extends BorderSide {
     double? width,
     BorderStyle? style,
     bool? dashed,
-    bool? antiAlias,
   }) {
     assert(width == null || width >= 0.0);
     return TBorderSide(
@@ -117,7 +110,6 @@ class TBorderSide extends BorderSide {
       width: width ?? this.width,
       style: style ?? this.style,
       dashed: dashed ?? this.dashed,
-      antiAlias: antiAlias ?? this.antiAlias,
     );
   }
 
@@ -129,19 +121,14 @@ class TBorderSide extends BorderSide {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is TBorderSide &&
-        other.color == color &&
-        other.width == width &&
-        other.style == style &&
-        other.dashed == dashed &&
-        other.antiAlias == antiAlias;
+    return other is TBorderSide && other.color == color && other.width == width && other.style == style && other.dashed == dashed;
   }
 
   @override
-  int get hashCode => Object.hash(color, width, style, dashed, antiAlias);
+  int get hashCode => Object.hash(color, width, style, dashed);
 
   @override
-  String toString() => '${objectRuntimeType(this, 'TBorderSide')}($color, ${width.toStringAsFixed(1)}, $style, $dashed, $antiAlias)';
+  String toString() => '${objectRuntimeType(this, 'TBorderSide')}($color, ${width.toStringAsFixed(1)}, $style, $dashed)';
 }
 
 class TRoundedRectangleBorder extends RoundedRectangleBorder {
@@ -179,23 +166,52 @@ class TRoundedRectangleBorder extends RoundedRectangleBorder {
         if (width == 0.0) {
           canvas.drawRRect(borderRadius.resolve(textDirection).toRRect(rect), side.toPaint());
         } else {
-          final RRect outer = borderRadius.resolve(textDirection).toRRect(rect);
-          final RRect inner = outer.deflate(width * 0.75);
-          final Paint paint = Paint()
-            ..color = side.color
-            ..style = PaintingStyle.stroke
-            ..strokeWidth = width;
+          if(side is TBorderSide && (side as TBorderSide).dashed) {
+            final RRect outer = borderRadius.resolve(textDirection).toRRect(rect);
+            final RRect inner = outer.deflate(width * 0.75);
+            final Paint paint = Paint()
+              ..color = side.color
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = width;
 
-          var path = Path()..addRRect(inner);
-          if (side is TBorderSide) {
-            var borderSide = (side as TBorderSide);
-            if(borderSide.dashed) {
-              path = PathUtil.dashPath(path, 3, 2);
-            }
-            paint.isAntiAlias = borderSide.antiAlias;
+            var path = Path()..addRRect(inner);
+            path = dashPath(path, 3, 2);
+            canvas.drawPath(path, paint);
+          } else {
+            final RRect outer = borderRadius.resolve(textDirection).toRRect(rect);
+            final RRect inner = outer.deflate(width);
+            final Paint paint = Paint()
+              ..color = side.color;
+            canvas.drawDRRect(outer, inner, paint);
           }
-          canvas.drawPath(path, paint);
         }
     }
+  }
+
+  /// 获取虚线路径
+  /// [path] 路径
+  /// [length] 线条长度
+  /// [gap] 间隙长度
+  /// [distance] 初始偏移
+  static Path dashPath(final Path path, double length, [double? gap, double? distance = 0]) {
+    gap ??= length;
+    PathMetrics pathMetrics = path.computeMetrics();
+    Path dest = Path();
+    for (var metric in pathMetrics) {
+      bool draw = true;
+      while (distance! < metric.length) {
+        if (draw) {
+          dest.addPath(
+            metric.extractPath(distance, distance + length),
+            Offset.zero,
+          );
+          distance += length;
+        } else {
+          distance += gap;
+        }
+        draw = !draw;
+      }
+    }
+    return dest;
   }
 }
