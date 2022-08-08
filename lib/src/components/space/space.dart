@@ -22,6 +22,7 @@ class TSpace extends StatelessWidget {
     this.size,
     this.breakLine = false,
     this.textBaseline,
+    this.mainAxisSize = MainAxisSize.min,
   }) : super(key: key);
 
   /// 间距方向
@@ -71,6 +72,9 @@ class TSpace extends StatelessWidget {
   /// 如果使用基线对齐，则必须设置此项。没有默认值，因为框架无法先验地知道正确的基线
   /// [breakLine]为true时无效，因为没有一个有效的[CrossAxisAlignment.baseline]
   final TextBaseline? textBaseline;
+
+  /// [breakLine]为false时生效
+  final MainAxisSize mainAxisSize;
 
   @override
   Widget build(BuildContext context) {
@@ -123,7 +127,7 @@ class TSpace extends StatelessWidget {
         } else {
           var children = list;
           // 间距
-          if (space > 0){
+          if (space > 0) {
             Widget sizedBox;
             if (direction == Axis.horizontal) {
               sizedBox = SizedBox(width: space);
@@ -136,7 +140,7 @@ class TSpace extends StatelessWidget {
           return Flex(
             direction: direction,
             mainAxisAlignment: align,
-            mainAxisSize: MainAxisSize.min,
+            mainAxisSize: mainAxisSize,
             crossAxisAlignment: crossAxisAlignment,
             textDirection: textDirection,
             verticalDirection: verticalDirection,

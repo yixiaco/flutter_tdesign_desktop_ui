@@ -64,9 +64,12 @@ class _TCheckboxState<T> extends State<TCheckbox<T>> with SingleTickerProviderSt
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 200),
+      value: _checked ? 1 : 0,
     )..addListener(() {
         _painter.t = _fadeAnimation.value;
       });
+
+    _painter.t = _checked ? 1 : 0;
 
     _fadeAnimation = CurvedAnimation(
       parent: _controller,
@@ -101,9 +104,6 @@ class _TCheckboxState<T> extends State<TCheckbox<T>> with SingleTickerProviderSt
     if (checked) {
       _controller.forward();
     } else {
-      if(_controller.value == 0){
-        _painter._t ??= 0;
-      }
       _controller.reverse();
     }
   }

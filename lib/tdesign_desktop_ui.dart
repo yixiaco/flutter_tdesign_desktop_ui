@@ -34,6 +34,7 @@ export 'src/components/layout/layout.dart';
 export 'src/components/space/space.dart';
 /// 复选框
 export 'src/components/checkbox/checkbox.dart';
+export 'src/components/checkbox/checkbox_group.dart';
 export 'src/components/checkbox/checkbox_theme.dart';
 /// 输入框
 export 'src/components/input/input.dart';

@@ -12,11 +12,31 @@ class _CheckboxExampleState extends State<CheckboxExample> {
   bool check = false;
   bool indeterminate = true;
   String? radio = '';
+  List<String> value = [];
 
   @override
   Widget build(BuildContext context) {
     return TSpace(
+      breakLine: true,
       children: [
+        TSpace(
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            TCheckboxGroup<String>(
+              options: [
+                ...TCheckboxOption.strings(labels: ['选项一', '选项二', '选项三']),
+                TCheckboxOption.string(label: '选项四', disabled: true)
+              ],
+              value: value,
+              onChange: (checked, current, options) {
+                print('checked: $checked, current: $current, options: $options');
+                setState(() {
+                  value = options;
+                });
+              },
+            )
+          ],
+        ),
         TCheckbox<String>(
           checked: check,
           value: '哈哈',
