@@ -53,42 +53,59 @@ class TCheckbox<T> extends StatefulWidget {
 }
 
 class _TCheckboxState<T> extends State<TCheckbox<T>> with SingleTickerProviderStateMixin, MaterialStateMixin {
+  final _TCheckboxPaint _painter = _TCheckboxPaint();
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
 
-  /// 默认淡入持续时间
-  static const Duration _fadeInDuration = Duration(milliseconds: 150);
-
-  /// 默认淡出持续时间
-  static const Duration _fadeOutDuration = Duration(milliseconds: 75);
-
   @override
   void initState() {
+    super.initState();
+
     _controller = AnimationController(
       vsync: this,
-      duration: _fadeInDuration,
-      reverseDuration: _fadeOutDuration,
-    )..addStatusListener((status) { });
+      duration: const Duration(milliseconds: 200),
+    )..addListener(() {
+        _painter.t = _fadeAnimation.value;
+      });
 
     _fadeAnimation = CurvedAnimation(
       parent: _controller,
-      curve: Curves.fastOutSlowIn,
+      curve: const Cubic(0.82, 0, 1, 0.9),
     );
 
     setMaterialState(MaterialState.disabled, widget.disabled);
-    super.initState();
   }
 
   @override
   void dispose() {
-    _controller.dispose();
     super.dispose();
+    _controller.dispose();
   }
 
   @override
   void didUpdateWidget(TCheckbox<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
     setMaterialState(MaterialState.disabled, widget.disabled);
+    var oldChecked = oldWidget.checked || oldWidget.indeterminate;
+    var checked = widget.checked || widget.indeterminate;
+    if (checked != oldChecked) {
+      _painter
+        ..checked = widget.checked
+        ..indeterminate = widget.indeterminate;
+      animationTo();
+    }
+  }
+
+  void animationTo() {
+    var checked = widget.checked || widget.indeterminate;
+    if (checked) {
+      _controller.forward();
+    } else {
+      if(_controller.value == 0){
+        _painter._t ??= 0;
+      }
+      _controller.reverse();
+    }
   }
 
   get states => materialStates;
@@ -132,7 +149,7 @@ class _TCheckboxState<T> extends State<TCheckbox<T>> with SingleTickerProviderSt
 
     // 背景填充颜色
     final bgColor = MaterialStateProperty.resolveWith((states) {
-      Color? color = _checked ? colorScheme.brandColor : null;
+      Color color = _checked ? colorScheme.brandColor : Colors.transparent;
       if (states.contains(MaterialState.disabled)) {
         color = colorScheme.bgColorComponentDisabled;
       }
@@ -187,7 +204,6 @@ class _TCheckboxState<T> extends State<TCheckbox<T>> with SingleTickerProviderSt
                   width: 16,
                   height: 16,
                   decoration: ShapeDecoration(
-                    color: bgColor.resolve(states),
                     shape: TRoundedRectangleBorder(
                       side: effectiveBorderSide.resolve(states),
                       borderRadius: BorderRadius.circular(ThemeDataConstant.borderRadius),
@@ -195,12 +211,11 @@ class _TCheckboxState<T> extends State<TCheckbox<T>> with SingleTickerProviderSt
                   ),
                   child: CustomPaint(
                     size: const Size.square(16),
-                    painter: _TCheckboxPaint(
-                      color: checkColor.resolve(states),
-                      strokeWidth: 2,
-                      checked: widget.checked,
-                      indeterminate: widget.indeterminate,
-                    ),
+                    painter: _painter
+                      ..backgroundColor = bgColor.resolve(states)
+                      ..checked = widget.checked
+                      ..indeterminate = widget.indeterminate
+                      ..checkColor = checkColor.resolve(states),
                   ),
                 ),
                 label,
@@ -247,35 +262,87 @@ class _TCheckboxState<T> extends State<TCheckbox<T>> with SingleTickerProviderSt
   }
 }
 
-class _TCheckboxPaint extends CustomPainter {
-  const _TCheckboxPaint({
-    required this.color,
-    required this.strokeWidth,
-    required this.checked,
-    required this.indeterminate,
-  });
+class _TCheckboxPaint extends ChangeNotifier implements CustomPainter {
+  /// 线条宽度
+  static const double strokeWidth = 2;
 
   /// 线条颜色
-  final Color color;
+  Color get checkColor => _checkColor!;
+  Color? _checkColor;
 
-  /// 线条宽度
-  final double strokeWidth;
+  set checkColor(Color value) {
+    if (_checkColor == value) {
+      return;
+    }
+    _checkColor = value;
+    notifyListeners();
+  }
+
+  /// 背景颜色
+  Color get backgroundColor => _backgroundColor!;
+  Color? _backgroundColor;
+
+  set backgroundColor(Color value) {
+    if (_backgroundColor == value) {
+      return;
+    }
+    _backgroundColor = value;
+    notifyListeners();
+  }
 
   /// 是否选中
-  final bool checked;
+  bool get checked => _checked!;
+  bool? _checked;
+
+  set checked(bool value) {
+    if (_checked == value) {
+      return;
+    }
+    _checked = value;
+    notifyListeners();
+  }
 
   /// 是否半选
-  final bool indeterminate;
+  bool get indeterminate => _indeterminate!;
+  bool? _indeterminate;
+
+  set indeterminate(bool value) {
+    if (_indeterminate == value) {
+      return;
+    }
+    _indeterminate = value;
+    notifyListeners();
+  }
+
+  /// 时间曲度
+  double get t => _t ?? (indeterminate || checked ? 1 : 0);
+  double? _t;
+
+  set t(double value) {
+    if (_t == value) {
+      return;
+    }
+    _t = value;
+    notifyListeners();
+  }
 
   @override
   void paint(Canvas canvas, Size size) {
+    var opacity2 = checkColor.opacity;
     var paint = Paint()
       ..style = PaintingStyle.stroke
-      ..color = color
+      ..color = checkColor.withOpacity(opacity2 * t)
       ..strokeWidth = strokeWidth * .8;
     var width = size.width;
     var height = size.height;
 
+    drawBackground(canvas, size);
+
+    drawDash(width, height, canvas, paint);
+  }
+
+  /// 绘制线条
+  void drawDash(double width, double height, Canvas canvas, Paint paint) {
     final Path path = Path();
     if (indeterminate) {
       path.moveTo(width * 0.2, height * 0.5);
@@ -294,8 +361,29 @@ class _TCheckboxPaint extends CustomPainter {
     }
   }
 
+  /// 绘制背景
+  void drawBackground(Canvas canvas, Size size) {
+    if (indeterminate || checked) {
+      var opacity = backgroundColor.opacity;
+
+      canvas.drawRect(
+        const Offset(0, 0) & size,
+        Paint()..color = backgroundColor.withOpacity(opacity * t),
+      );
+    }
+  }
+
   @override
   bool shouldRepaint(_TCheckboxPaint oldDelegate) {
     return this != oldDelegate;
   }
+
+  @override
+  bool? hitTest(Offset position) => null;
+
+  @override
+  SemanticsBuilderCallback? get semanticsBuilder => null;
+
+  @override
+  bool shouldRebuildSemantics(covariant CustomPainter oldDelegate) => false;
 }

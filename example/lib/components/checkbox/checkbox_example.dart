@@ -10,7 +10,7 @@ class CheckboxExample extends StatefulWidget {
 
 class _CheckboxExampleState extends State<CheckboxExample> {
   bool check = false;
-  bool indeterminate = false;
+  bool indeterminate = true;
   String? radio = '';
 
   @override
@@ -28,7 +28,7 @@ class _CheckboxExampleState extends State<CheckboxExample> {
               check = checked;
               this.indeterminate = indeterminate;
             });
-            print('半选：$indeterminate，value：$value');
+            print('选中: $checked,半选：$indeterminate,value：$value');
           },
         ),
         TCheckbox<String>(
@@ -41,7 +41,7 @@ class _CheckboxExampleState extends State<CheckboxExample> {
               check = checked;
               this.indeterminate = indeterminate;
             });
-            print('半选：$indeterminate，value：$value');
+            print('选中: $checked,半选：$indeterminate,value：$value');
           },
         ),
         Checkbox(
