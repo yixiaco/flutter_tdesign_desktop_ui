@@ -10,7 +10,7 @@ class RadioExample extends StatefulWidget {
 
 class _RadioExampleState extends State<RadioExample> {
   String? radio = 'groupValue2';
-  bool checked = true;
+  bool? checked = true;
 
   @override
   Widget build(BuildContext context) {
@@ -22,10 +22,15 @@ class _RadioExampleState extends State<RadioExample> {
           children: [
             TRadio(
               checked: checked,
+              // allowUncheck: true,
               label: const Text('选项一'),
+              value: 'sss',
+              onClick: () {
+                print('点击');
+              },
               onChange: (checked, value) {
                 setState(() {
-                  this.checked = checked ?? false;
+                  this.checked = checked;
                 });
                 print('checked:$checked,value:$value');
               },
@@ -34,7 +39,6 @@ class _RadioExampleState extends State<RadioExample> {
         ),
         Radio<String>(
           value: 'groupValue',
-          toggleable: true,
           groupValue: radio,
           onChanged: (value) {
             setState(() {

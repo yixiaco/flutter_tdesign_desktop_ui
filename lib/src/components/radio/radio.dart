@@ -41,6 +41,8 @@ class TRadio<T> extends StatefulWidget {
 
   final bool autofocus;
 
+  bool get _checked => checked == true;
+
   @override
   State<TRadio<T>> createState() => _TRadioState<T>();
 }
@@ -68,9 +70,15 @@ class _TRadioState<T> extends State<TRadio<T>> with TickerProviderStateMixin, TT
   @override
   void didUpdateWidget(covariant TRadio<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.checked != oldWidget.checked) {
+    if (widget._checked != oldWidget._checked) {
       animateToValue();
     }
+  }
+
+  @override
+  void handleTap([Intent? _]) {
+    super.handleTap(_);
+    widget.onClick?.call();
   }
 
   @override
@@ -184,15 +192,17 @@ class _TRadioState<T> extends State<TRadio<T>> with TickerProviderStateMixin, TT
   }
 
   @override
-  ValueChanged<bool?>? get onChanged => (value) => widget.onChange?.call(value, widget.value);
+  ValueChanged<bool?>? get onChanged {
+    return (value) => !widget.allowUncheck && widget._checked ? null : widget.onChange?.call(value ?? false, widget.value);
+  }
 
-  /// 果为 true，则value可以为 true、false 或 null，否则value必须为 true 或 false。
+  /// 如果为 true，则value可以为 true、false 或 null，否则value必须为 true 或 false。
   /// 当tristate为 true 且value为 null 时，控件被认为处于其第三个或“不确定”状态
   @override
   bool get tristate => widget.allowUncheck;
 
   @override
-  bool? get value => widget.checked;
+  bool? get value => widget.checked ?? false;
 
   @override
   bool get isInteractive => !widget.disabled;
