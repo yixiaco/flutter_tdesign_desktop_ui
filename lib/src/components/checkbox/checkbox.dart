@@ -73,7 +73,7 @@ class _TCheckboxState<T> extends State<TCheckbox<T>> with SingleTickerProviderSt
 
     _fadeAnimation = CurvedAnimation(
       parent: _controller,
-      curve: const Cubic(0.82, 0, 1, 0.9),
+      curve: ThemeDataConstant.animTimeFnEaseIn,
     );
 
     setMaterialState(MaterialState.disabled, widget.disabled);
@@ -149,7 +149,7 @@ class _TCheckboxState<T> extends State<TCheckbox<T>> with SingleTickerProviderSt
 
     // 背景填充颜色
     final bgColor = MaterialStateProperty.resolveWith((states) {
-      Color color = _checked ? colorScheme.brandColor : Colors.transparent;
+      Color color = _checked ? colorScheme.brandColor : colorScheme.bgColorContainer;
       if (states.contains(MaterialState.disabled)) {
         color = colorScheme.bgColorComponentDisabled;
       }

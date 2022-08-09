@@ -1,4 +1,4 @@
-import 'package:example/components/checkbox/checkbox_example.dart';
+import 'package:example/components/radio/radio_example.dart';
 import 'package:example/state/semantics_state.dart';
 import 'package:example/state/theme_state.dart';
 import 'package:flutter/material.dart';
@@ -70,7 +70,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
         ),
         footer: const TFooter(child: Text('Footer')),
         content: const TContent(
-          child: CheckboxExample(),
+          child: RadioExample(),
         ),
       ),
     );

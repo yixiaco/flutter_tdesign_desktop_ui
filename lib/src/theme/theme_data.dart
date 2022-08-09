@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
@@ -34,6 +35,14 @@ class ThemeDataConstant {
   static double spacer8 = spacer * 8; // 间距-大-48
   static double spacer9 = spacer * 9; // 间距-大-48
   static double spacer10 = spacer * 10; // 间距-大-80
+
+  // 动画
+  static Curve animTimeFnEasing = const Cubic(.38, 0, .24, 1);
+  static Curve animTimeFnEaseOut = const Cubic(0, 0, .15, 1);
+  static Curve animTimeFnEaseIn = const Cubic(.82, 0, 1, .9);
+  static Duration animDurationBase = const Duration(milliseconds: 200);
+  static Duration animDurationModerate = const Duration(milliseconds: 240);
+  static Duration animDurationSlow = const Duration(milliseconds: 280);
 }
 
 /// 颜色主题数据

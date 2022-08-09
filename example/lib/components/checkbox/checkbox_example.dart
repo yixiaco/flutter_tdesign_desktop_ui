@@ -11,7 +11,6 @@ class CheckboxExample extends StatefulWidget {
 class _CheckboxExampleState extends State<CheckboxExample> {
   bool check = false;
   bool indeterminate = true;
-  String? radio = '';
   List<String> value = [];
 
   @override
@@ -78,26 +77,6 @@ class _CheckboxExampleState extends State<CheckboxExample> {
           splashRadius: 0,
           tristate: true,
         ),
-        Radio<String>(
-          value: 'groupValue',
-          toggleable: true,
-          groupValue: radio,
-          onChanged: (value) {
-            setState(() {
-              radio = value;
-            });
-          },
-        ),
-        Radio<String>(
-          value: 'groupValue1',
-          toggleable: true,
-          groupValue: radio,
-          onChanged: (value) {
-            setState(() {
-              radio = value;
-            });
-          },
-        )
       ],
     );
   }
