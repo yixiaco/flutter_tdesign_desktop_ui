@@ -11,11 +11,12 @@ class RadioExample extends StatefulWidget {
 
 class _RadioExampleState extends State<RadioExample> {
   bool? checked = true;
-  String? value;
+  String? value = '选项一';
+  bool disabled = false;
 
   @override
   Widget build(BuildContext context) {
-    var options = TRadioOption.strings(labels: ['选项一', '选项二', '选项三', '选项四', '选项五']);
+    var options = TRadioOption.strings(labels: ['选项一', '选项二', '选项三', '选项四四四四四四四', '选项五']);
     return TSpace(
       breakLine: true,
       children: [
@@ -43,6 +44,7 @@ class _RadioExampleState extends State<RadioExample> {
               options: options,
               value: value,
               allowUncheck: true,
+              disabled: disabled,
               onChange: (value) {
                 print(value);
                 setState(() {
@@ -60,6 +62,7 @@ class _RadioExampleState extends State<RadioExample> {
               options: options,
               value: value,
               allowUncheck: true,
+              disabled: disabled,
               onChange: (value) {
                 print(value);
                 setState(() {
@@ -77,6 +80,7 @@ class _RadioExampleState extends State<RadioExample> {
               options: options,
               value: value,
               allowUncheck: true,
+              disabled: disabled,
               onChange: (value) {
                 print(value);
                 setState(() {

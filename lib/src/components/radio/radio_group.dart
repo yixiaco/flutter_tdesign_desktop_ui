@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
@@ -111,7 +109,11 @@ class _TRadioGroupState<T> extends State<TRadioGroup<T>> with SingleTickerProvid
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: TVar.animDurationBase);
+    _controller = AnimationController(
+      vsync: this,
+      duration: TVar.animDurationBase,
+      value: widget._index != -1 ? 1 : 0,
+    );
     _position = CurvedAnimation(
       parent: _controller,
       curve: TVar.animTimeFnEasing,
@@ -139,7 +141,11 @@ class _TRadioGroupState<T> extends State<TRadioGroup<T>> with SingleTickerProvid
     }
     if (widget.options.length != _optionKeys.length || widget.value != oldWidget.value) {
       _indicatorPainter._oldRect = _indicatorPainter._currentRect;
-      _controller.forward();
+      if (widget._index != -1) {
+        _controller.forward(from: 0);
+      } else {
+        _controller.reverse();
+      }
     }
   }
 
@@ -158,34 +164,54 @@ class _TRadioGroupState<T> extends State<TRadioGroup<T>> with SingleTickerProvid
   Container filled(BuildContext context) {
     var theme = TTheme.of(context);
     var colorScheme = theme.colorScheme;
-    late Color hoverColor;
-    late Color activeColor;
-    late Color inactiveColor;
-    late Color disabledColor;
+    late Color blockColor;
+    late Color textColor;
     var padding = const EdgeInsets.all(2);
     if (widget.variant == TRadioVariant.primaryFilled) {
-      hoverColor = colorScheme.textColorPrimary;
-      activeColor = colorScheme.textColorAnti;
-      inactiveColor = colorScheme.textColorSecondary;
-      disabledColor = colorScheme.textColorDisabled;
+      textColor = MaterialStateColor.resolveWith((states) {
+        if (states.contains(MaterialState.selected)) {
+          return colorScheme.textColorAnti;
+        }
+        if (states.contains(MaterialState.disabled)) {
+          return colorScheme.textColorDisabled;
+        }
+        if (states.contains(MaterialState.hovered) || states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
+          return colorScheme.textColorPrimary;
+        }
+        return colorScheme.textColorSecondary;
+      });
     } else if (widget.variant == TRadioVariant.defaultFilled) {
-      hoverColor = colorScheme.textColorPrimary;
-      activeColor = colorScheme.textColorPrimary;
-      inactiveColor = colorScheme.textColorSecondary;
-      disabledColor = colorScheme.textColorDisabled;
+      textColor = MaterialStateColor.resolveWith((states) {
+        if (states.contains(MaterialState.selected) && states.contains(MaterialState.disabled)) {
+          return colorScheme.textColorDisabled;
+        }
+        if (states.contains(MaterialState.selected)) {
+          return colorScheme.textColorPrimary;
+        }
+        if (states.contains(MaterialState.disabled)) {
+          return colorScheme.textColorDisabled;
+        }
+        if (states.contains(MaterialState.hovered) || states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
+          return colorScheme.textColorPrimary;
+        }
+        return colorScheme.textColorSecondary;
+      });
     }
     var box = List<Widget>.generate(widget.options.length, (index) {
       var option = widget.options[index];
+      var disabled = widget.disabled ? true : option.disabled;
+      if (widget.variant == TRadioVariant.primaryFilled) {
+        blockColor = disabled ? colorScheme.brandColorDisabled : colorScheme.brandColor;
+      } else if (widget.variant == TRadioVariant.defaultFilled) {
+        blockColor = disabled ? colorScheme.bgColorComponentDisabled : colorScheme.bgColorContainerSelect;
+      }
       return KeyedSubtree(
         key: _optionKeys[index],
         child: _TRadioButton<T>(
           label: option.label,
           value: option.value,
-          activeColor: activeColor,
-          inactiveColor: inactiveColor,
-          hoverColor: hoverColor,
-          disabledColor: disabledColor,
-          disabled: widget.disabled ? true : option.disabled,
+          textColor: textColor,
+          disabled: disabled,
           allowUncheck: widget.allowUncheck ? true : option.allowUncheck,
           checked: widget.value == option.value,
           size: widget.size,
@@ -196,14 +222,14 @@ class _TRadioGroupState<T> extends State<TRadioGroup<T>> with SingleTickerProvid
     return Container(
       padding: padding,
       decoration: BoxDecoration(
-        color: widget.disabled ? colorScheme.bgColorComponentDisabled : colorScheme.bgColorComponent,
+        color: colorScheme.bgColorComponent,
         borderRadius: BorderRadius.circular(TVar.borderRadius),
       ),
       child: CustomPaint(
         painter: _indicatorPainter
           ..t = _position
           ..optionKeys = _optionKeys
-          ..color = colorScheme.bgColorContainerSelect
+          ..color = blockColor
           ..index = widget._index,
         child: TSpace(
           breakLine: false,
@@ -247,13 +273,33 @@ class _TRadioGroupState<T> extends State<TRadioGroup<T>> with SingleTickerProvid
   Widget outline(BuildContext context) {
     var theme = TTheme.of(context);
     var colorScheme = theme.colorScheme;
-    late Color hoverColor = colorScheme.brandColorHover;
-    late Color activeColor = colorScheme.brandColor;
-    late Color inactiveColor = colorScheme.textColorPrimary;
-    late Color disabledColor = colorScheme.brandColorDisabled;
-    Color? backgroundColor = MaterialStateColor.resolveWith(
-      (states) => states.contains(MaterialState.disabled) ? colorScheme.bgColorSpecialComponent : Colors.transparent,
-    );
+    Color? backgroundColor = MaterialStateColor.resolveWith((states) {
+      if (states.contains(MaterialState.selected) && states.contains(MaterialState.disabled)) {
+        return colorScheme.bgColorSpecialComponent;
+      }
+      if (states.contains(MaterialState.disabled)) {
+        return colorScheme.bgColorComponentDisabled;
+      }
+      return Colors.transparent;
+    });
+
+    Color textColor = MaterialStateColor.resolveWith((states) {
+      if (states.contains(MaterialState.selected) && states.contains(MaterialState.disabled)) {
+        return colorScheme.brandColorDisabled;
+      }
+      if (states.contains(MaterialState.disabled)) {
+        return colorScheme.textColorDisabled;
+      }
+      if (states.contains(MaterialState.selected)) {
+        return colorScheme.brandColor;
+      }
+      if (states.contains(MaterialState.hovered) || states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
+        return colorScheme.brandColorHover;
+      }
+      return colorScheme.textColorPrimary;
+    });
+
+    var devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
 
     var box = List<Widget>.generate(widget.options.length, (index) {
       bool isLast = index == widget.options.length - 1;
@@ -265,7 +311,10 @@ class _TRadioGroupState<T> extends State<TRadioGroup<T>> with SingleTickerProvid
         if (states.contains(MaterialState.selected)) {
           color = colorScheme.brandColor;
         }
-        return Border.all(width: 1, color: color);
+        if (states.contains(MaterialState.selected) && states.contains(MaterialState.disabled)) {
+          color = colorScheme.brandColorDisabled;
+        }
+        return Border.all(width: 1 / devicePixelRatio, color: color);
       });
 
       // 圆角
@@ -284,10 +333,7 @@ class _TRadioGroupState<T> extends State<TRadioGroup<T>> with SingleTickerProvid
       return _TRadioButton<T>(
         label: option.label,
         value: option.value,
-        activeColor: activeColor,
-        inactiveColor: inactiveColor,
-        hoverColor: hoverColor,
-        disabledColor: disabledColor,
+        textColor: textColor,
         backgroundColor: backgroundColor,
         disabled: widget.disabled ? true : option.disabled,
         allowUncheck: widget.allowUncheck ? true : option.allowUncheck,
@@ -345,7 +391,7 @@ class _IndicatorBlockPainter extends AnimationChangeNotifierPainter {
   }
 
   double get offsetX {
-    if(index > 0) {
+    if (index > 0) {
       var box = optionKeys[index].currentContext!.findRenderObject() as RenderBox;
       var dx = box.localToGlobal(const Offset(0, 0)).dx;
       var beforeBox = optionKeys[0].currentContext!.findRenderObject() as RenderBox;
@@ -353,16 +399,19 @@ class _IndicatorBlockPainter extends AnimationChangeNotifierPainter {
       return dx - dx2;
     }
     return 0;
-    // var iterable = optionKeys.sublist(0, index).map((e) => e.currentContext!.size!.width);
-    // if (iterable.isEmpty) {
-    //   return 0;
-    // }
-    // return iterable.reduce((value, element) => value + element);
   }
 
   @override
   void paint(Canvas canvas, Size size) {
+    var paint = Paint()..color = color;
     if (index == -1) {
+      if (_currentRect != null) {
+        var rect = Rect.lerp(_currentRect!.center & Size.zero, _currentRect, t.value);
+        canvas.drawRRect(RRect.fromRectAndRadius(rect!, Radius.circular(TVar.borderRadius)), paint);
+        if (t.value == 0) {
+          _currentRect = null;
+        }
+      }
       return;
     }
     var optionKey = optionKeys[index];
@@ -370,9 +419,10 @@ class _IndicatorBlockPainter extends AnimationChangeNotifierPainter {
     var optionHeight = optionKey.currentContext!.size!.height;
     _currentRect = Rect.fromLTWH(offsetX, 0, optionWidth, optionHeight);
 
-    var paint = Paint()..color = color;
+    var oldRect = _oldRect ?? _currentRect!.center & Size.zero;
+    var rect = Rect.lerp(oldRect, _currentRect, t.value);
 
-    canvas.drawRRect(RRect.fromRectAndRadius(_currentRect!, Radius.circular(TVar.borderRadius)), paint);
+    canvas.drawRRect(RRect.fromRectAndRadius(rect!, Radius.circular(TVar.borderRadius)), paint);
   }
 }
 
@@ -389,10 +439,7 @@ class _TRadioButton<T> extends StatefulWidget {
     this.onClick,
     this.focusNode,
     this.autofocus = false,
-    required this.activeColor,
-    required this.inactiveColor,
-    required this.hoverColor,
-    required this.disabledColor,
+    required this.textColor,
     this.backgroundColor,
     this.size,
     this.border,
@@ -420,17 +467,8 @@ class _TRadioButton<T> extends StatefulWidget {
   /// 点击时触发
   final TCallback? onClick;
 
-  /// 选中颜色
-  final Color activeColor;
-
-  /// 未选中颜色
-  final Color inactiveColor;
-
-  /// 悬浮颜色
-  final Color hoverColor;
-
-  /// 禁选颜色
-  final Color disabledColor;
+  /// 文本颜色
+  final Color textColor;
 
   /// 背景颜色
   final Color? backgroundColor;
@@ -505,18 +543,7 @@ class _TRadioButtonState<T> extends State<_TRadioButton<T>> with TickerProviderS
     });
 
     // 颜色
-    var color = MaterialStateProperty.resolveWith((states) {
-      if (states.contains(MaterialState.disabled)) {
-        return widget.disabledColor;
-      }
-      if (states.contains(MaterialState.selected)) {
-        return widget.activeColor;
-      }
-      if (states.contains(MaterialState.hovered) || states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
-        return widget.hoverColor;
-      }
-      return widget.inactiveColor;
-    });
+    var color = MaterialStateProperty.resolveAs(widget.textColor, states);
 
     return Semantics(
       inMutuallyExclusiveGroup: true,
@@ -548,7 +575,7 @@ class _TRadioButtonState<T> extends State<_TRadioButton<T>> with TickerProviderS
               child: DefaultTextStyle(
                 style: TextStyle(
                   fontSize: theme.fontSize,
-                  color: color.resolve(states),
+                  color: color,
                 ),
                 child: widget.label,
               ),
