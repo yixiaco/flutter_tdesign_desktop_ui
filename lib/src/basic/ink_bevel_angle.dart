@@ -87,7 +87,7 @@ class InkBevelAngle extends InteractiveInkFeature {
     _angleWidth = _angle.drive(Tween<double>(
       begin: 0,
       end: referenceBox.size.width + tan(pi / 22) * referenceBox.size.height,
-    ).chain(CurveTween(curve: ThemeDataConstant.animTimeFnEasing)));
+    ).chain(CurveTween(curve: TVar.animTimeFnEasing)));
 
     _fadeOutController = AnimationController(duration: _kFadeOutDuration, vsync: controller.vsync)
       ..addListener(controller.markNeedsPaint)

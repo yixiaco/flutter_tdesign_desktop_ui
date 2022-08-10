@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
+/// 单选框示例
 class RadioExample extends StatefulWidget {
   const RadioExample({Key? key}) : super(key: key);
 
@@ -9,58 +10,112 @@ class RadioExample extends StatefulWidget {
 }
 
 class _RadioExampleState extends State<RadioExample> {
-  String? radio = 'groupValue2';
   bool? checked = true;
+  String? value;
 
   @override
   Widget build(BuildContext context) {
+    var options = TRadioOption.strings(labels: ['选项一', '选项二', '选项三', '选项四', '选项五']);
     return TSpace(
       breakLine: true,
       children: [
         TSpace(
           mainAxisSize: MainAxisSize.max,
           children: [
-            TRadio(
-              checked: checked,
-              // allowUncheck: true,
-              label: const Text('选项一'),
-              value: 'sss',
-              onClick: () {
-                print('点击');
-              },
-              onChange: (checked, value) {
+            TRadioGroup<String>(
+              options: options,
+              value: value,
+              allowUncheck: true,
+              onChange: (value) {
+                print(value);
                 setState(() {
-                  this.checked = checked;
+                  this.value = value;
                 });
-                print('checked:$checked,value:$value');
               },
             ),
           ],
         ),
-        Radio<String>(
-          value: 'groupValue',
-          groupValue: radio,
-          onChanged: (value) {
+        TSpace(
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            TRadioGroup<String>(
+              variant: TRadioVariant.outline,
+              options: options,
+              value: value,
+              allowUncheck: true,
+              onChange: (value) {
+                print(value);
+                setState(() {
+                  this.value = value;
+                });
+              },
+            ),
+          ],
+        ),
+        TSpace(
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            TRadioGroup<String>(
+              variant: TRadioVariant.defaultFilled,
+              options: options,
+              value: value,
+              allowUncheck: true,
+              onChange: (value) {
+                print(value);
+                setState(() {
+                  this.value = value;
+                });
+              },
+            ),
+          ],
+        ),
+        TSpace(
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            TRadioGroup<String>(
+              variant: TRadioVariant.primaryFilled,
+              options: options,
+              value: value,
+              allowUncheck: true,
+              onChange: (value) {
+                print(value);
+                setState(() {
+                  this.value = value;
+                });
+              },
+            ),
+          ],
+        ),
+        TRadio(
+          checked: checked,
+          allowUncheck: true,
+          disabled: true,
+          label: const Text('选项一'),
+          value: 'sss',
+          onClick: () {
+            print('点击');
+          },
+          onChange: (checked, value) {
             setState(() {
-              radio = value;
+              this.checked = checked;
             });
+            print('checked:$checked,value:$value');
           },
         ),
-        Radio<String>(
-          value: 'groupValue1',
-          toggleable: true,
-          groupValue: radio,
-          onChanged: (value) {
-            setState(() {
-              radio = value;
-            });
+        TRadio(
+          checked: checked,
+          allowUncheck: true,
+          label: const Text('选项一'),
+          value: 'sss',
+          onClick: () {
+            print('点击');
           },
-        ),
-        Radio<String>(
-          value: 'groupValue2',
-          toggleable: true,
-          groupValue: radio,
-          onChanged: null,
+          onChange: (checked, value) {
+            setState(() {
+              this.checked = checked;
+            });
+            print('checked:$checked,value:$value');
+          },
         ),
       ],
     );

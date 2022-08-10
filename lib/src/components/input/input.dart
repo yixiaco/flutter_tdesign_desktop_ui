@@ -223,9 +223,9 @@ class _TInputState extends State<TInput> {
     effectiveFocusNode.onKeyEvent = _onKeyEvent;
   }
 
-  static double inputHeightS = ThemeDataConstant.spacer * 0.8;
-  static double inputHeightDefault = ThemeDataConstant.spacer * 1.2;
-  static double inputHeightL = ThemeDataConstant.spacer * 2.5;
+  static double inputHeightS = TVar.spacer * 0.8;
+  static double inputHeightDefault = TVar.spacer * 1.2;
+  static double inputHeightL = TVar.spacer * 2.5;
 
   /// 默认装饰器
   InputDecoration defaultDecoration(TComponentSize size) {
@@ -372,7 +372,7 @@ class _TInputState extends State<TInput> {
       helperText: widget.tips,
       helperStyle: TextStyle(
         fontFamily: theme.fontFamily,
-        fontSize: ThemeDataConstant.fontSizeS,
+        fontSize: TVar.fontSizeS,
         color: tipsColor,
         height: 0.5, // 通过压缩字体的高度，实现tips的高度缩小
       ),
@@ -394,16 +394,16 @@ class _TInputState extends State<TInput> {
   /// 获取字体大小
   double getFontSize(TComponentSize size) {
     return size.sizeOf(
-      small: ThemeDataConstant.fontSizeS,
-      medium: ThemeDataConstant.fontSizeBase,
-      large: ThemeDataConstant.fontSizeL,
+      small: TVar.fontSizeS,
+      medium: TVar.fontSizeBase,
+      large: TVar.fontSizeL,
     );
   }
 
   OutlineInputBorder inputBorder(double width, Color color) {
     return OutlineInputBorder(
       borderSide: BorderSide(width: width, color: color),
-      borderRadius: BorderRadius.circular(ThemeDataConstant.borderRadius),
+      borderRadius: BorderRadius.circular(TVar.borderRadius),
     );
   }
 

@@ -23,6 +23,7 @@ export 'src/events/allow_tap_listener.dart';
 
 /// 通用
 export 'src/components/common/toggleable.dart';
+export 'src/components/common/animation_change_notifier_painter.dart';
 /// 按钮
 export 'src/components/button/button.dart';
 export 'src/components/button/button_theme.dart';
@@ -42,6 +43,7 @@ export 'src/components/checkbox/checkbox_group.dart';
 export 'src/components/checkbox/checkbox_theme.dart';
 /// 单选框
 export 'src/components/radio/radio.dart';
+export 'src/components/radio/radio_group.dart';
 /// 输入框
 export 'src/components/input/input.dart';
 export 'src/components/input/input_theme.dart';

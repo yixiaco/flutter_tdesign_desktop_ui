@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
+/// 复选框示例
 class CheckboxExample extends StatefulWidget {
   const CheckboxExample({Key? key}) : super(key: key);
 

@@ -51,7 +51,7 @@ class _TRadioState<T> extends State<TRadio<T>> with TickerProviderStateMixin, TT
   final _TRadioPinter _painter = _TRadioPinter();
 
   @override
-  Duration get toggleDuration => ThemeDataConstant.animDurationBase;
+  Duration get toggleDuration => TVar.animDurationBase;
 
   @override
   CurvedAnimation get position => _position;
@@ -62,9 +62,15 @@ class _TRadioState<T> extends State<TRadio<T>> with TickerProviderStateMixin, TT
     super.initState();
     _position = CurvedAnimation(
       parent: positionController,
-      curve: ThemeDataConstant.animTimeFnEaseOut,
-      reverseCurve: ThemeDataConstant.animTimeFnEaseOut.flipped,
+      curve: TVar.animTimeFnEaseOut,
+      reverseCurve: TVar.animTimeFnEaseOut.flipped,
     );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _painter.dispose();
   }
 
   @override
@@ -130,10 +136,10 @@ class _TRadioState<T> extends State<TRadio<T>> with TickerProviderStateMixin, TT
     Widget? label = widget.label;
     if (label != null) {
       label = Padding(
-        padding: EdgeInsets.symmetric(horizontal: ThemeDataConstant.spacer),
+        padding: EdgeInsets.symmetric(horizontal: TVar.spacer),
         child: DefaultTextStyle(
           style: TextStyle(
-            fontSize: ThemeDataConstant.fontSizeBase,
+            fontSize: TVar.fontSizeBase,
             color: widget.disabled ? colorScheme.textColorDisabled : colorScheme.textColorPrimary,
           ),
           child: label,
@@ -158,6 +164,7 @@ class _TRadioState<T> extends State<TRadio<T>> with TickerProviderStateMixin, TT
           onTap: handleTap,
           onTapUp: handleTapEnd,
           onTapCancel: handleTapEnd,
+          behavior: HitTestBehavior.translucent,
           child: Semantics(
             enabled: isInteractive,
             child: SizedBox(

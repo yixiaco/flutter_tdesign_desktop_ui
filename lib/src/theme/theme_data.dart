@@ -6,8 +6,8 @@ import 'package:flutter/painting.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// 主题常量
-class ThemeDataConstant {
-  const ThemeDataConstant._();
+class TVar {
+  const TVar._();
 
   // 边框圆角
   static double borderRadius = 3;
@@ -142,10 +142,10 @@ class TThemeData with Diagnosticable {
   factory TThemeData.dark() => TThemeData(brightness: Brightness.dark);
 
   /// 通用字体大小
-  get fontSize => size.lazySizeOf(
-        small: () => ThemeDataConstant.fontSizeS,
-        medium: () => ThemeDataConstant.fontSizeBase,
-        large: () => ThemeDataConstant.fontSizeL,
+  double get fontSize => size.lazySizeOf(
+        small: () => TVar.fontSizeS,
+        medium: () => TVar.fontSizeBase,
+        large: () => TVar.fontSizeL,
       );
 
   TThemeData copyWith({

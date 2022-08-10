@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
+/// 间距示例
 class SpaceExample extends StatelessWidget {
   const SpaceExample({Key? key}) : super(key: key);
 

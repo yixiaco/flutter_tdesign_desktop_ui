@@ -539,7 +539,7 @@ class _PopupOverlayState extends State<_PopupOverlay> {
 
   /// 默认垂直偏移
   static const double _defaultVerticalOffset = 4.0;
-  static double popupContentArrowSpacer = ThemeDataConstant.spacer2;
+  static double popupContentArrowSpacer = TVar.spacer2;
 
   @override
   void initState() {
@@ -586,7 +586,7 @@ class _PopupOverlayState extends State<_PopupOverlay> {
           builder: (BuildContext context, value, Widget? child) {
             return DefaultTextStyle(
               style: TextStyle(
-                fontSize: ThemeDataConstant.fontSizeBase,
+                fontSize: TVar.fontSizeBase,
                 fontFamily: theme.fontFamily,
                 color: colorScheme.textColorPrimary,
               ),
@@ -627,7 +627,7 @@ class _PopupOverlayState extends State<_PopupOverlay> {
                               bottom: value ? BubbleDirection.bottom : BubbleDirection.top,
                             )
                           : BubbleDirection.none,
-                      radius: BorderRadius.circular(ThemeDataConstant.borderRadius),
+                      radius: BorderRadius.circular(TVar.borderRadius),
                       position: popup.placement.valueOf(
                         topLeft: () => BubblePosition.start(popupContentArrowSpacer),
                         top: () => const BubblePosition.center(0),
@@ -644,7 +644,7 @@ class _PopupOverlayState extends State<_PopupOverlay> {
                       )!,
                     ),
                   ),
-                  padding: EdgeInsets.symmetric(vertical: 4, horizontal: ThemeDataConstant.spacer),
+                  padding: EdgeInsets.symmetric(vertical: 4, horizontal: TVar.spacer),
                   child: child,
                 );
               },

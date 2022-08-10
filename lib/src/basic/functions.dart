@@ -25,7 +25,7 @@ typedef TCheckValueChange<T> = void Function(bool checked, bool indeterminate, T
 /// 复选框组值变化时触发
 typedef TCheckboxGroupChange<T> = void Function(bool checked, TCheckboxOption<T>? current, List<T> options);
 
-typedef TRadioChange<T> = void Function(bool? checked, T? value);
+typedef TRadioChange<T> = void Function(bool checked, T? value);
 
 /// 输入事件
 typedef TInputKeyEvent = void Function(String text, KeyEvent event);
