@@ -73,7 +73,8 @@ class _TCheckboxState<T> extends State<TCheckbox<T>> with SingleTickerProviderSt
 
     _fadeAnimation = CurvedAnimation(
       parent: _controller,
-      curve: const Cubic(0.82, 0, 1, 0.9),
+      curve: TVar.animTimeFnEaseIn,
+      reverseCurve: TVar.animTimeFnEaseIn.flipped,
     );
 
     setMaterialState(MaterialState.disabled, widget.disabled);
@@ -83,6 +84,7 @@ class _TCheckboxState<T> extends State<TCheckbox<T>> with SingleTickerProviderSt
   void dispose() {
     super.dispose();
     _controller.dispose();
+    _painter.dispose();
   }
 
   @override
@@ -149,7 +151,7 @@ class _TCheckboxState<T> extends State<TCheckbox<T>> with SingleTickerProviderSt
 
     // 背景填充颜色
     final bgColor = MaterialStateProperty.resolveWith((states) {
-      Color color = _checked ? colorScheme.brandColor : Colors.transparent;
+      Color color = _checked ? colorScheme.brandColor : colorScheme.bgColorContainer;
       if (states.contains(MaterialState.disabled)) {
         color = colorScheme.bgColorComponentDisabled;
       }
@@ -167,10 +169,10 @@ class _TCheckboxState<T> extends State<TCheckbox<T>> with SingleTickerProviderSt
 
     if (label != null) {
       label = Padding(
-        padding: EdgeInsets.symmetric(horizontal: ThemeDataConstant.spacer),
+        padding: EdgeInsets.symmetric(horizontal: TVar.spacer),
         child: DefaultTextStyle(
           style: TextStyle(
-            fontSize: ThemeDataConstant.fontSizeBase,
+            fontSize: TVar.fontSizeBase,
             color: widget.disabled ? colorScheme.textColorDisabled : colorScheme.textColorPrimary,
           ),
           child: label,
@@ -206,7 +208,7 @@ class _TCheckboxState<T> extends State<TCheckbox<T>> with SingleTickerProviderSt
                   decoration: ShapeDecoration(
                     shape: TRoundedRectangleBorder(
                       side: effectiveBorderSide.resolve(states),
-                      borderRadius: BorderRadius.circular(ThemeDataConstant.borderRadius),
+                      borderRadius: BorderRadius.circular(TVar.borderRadius),
                     ),
                   ),
                   child: CustomPaint(

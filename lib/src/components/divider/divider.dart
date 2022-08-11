@@ -21,6 +21,7 @@ class TDivider extends StatelessWidget {
     this.layout = Axis.horizontal,
     this.space,
     this.thickness,
+    this.margin,
   }) : super(key: key);
 
   /// 文本位置（仅在水平分割线有效）
@@ -41,14 +42,16 @@ class TDivider extends StatelessWidget {
   /// 线条厚度
   final double? thickness;
 
+  final EdgeInsetsGeometry? margin;
+
   @override
   Widget build(BuildContext context) {
     var theme = TTheme.of(context);
     var colorScheme = theme.colorScheme;
     var fontSize = theme.size.sizeOf(
-      small: ThemeDataConstant.fontSizeS,
-      medium: ThemeDataConstant.fontSizeBase,
-      large: ThemeDataConstant.fontSizeL,
+      small: TVar.fontSizeS,
+      medium: TVar.fontSizeBase,
+      large: TVar.fontSizeL,
     );
 
     return LayoutBuilder(
@@ -64,7 +67,7 @@ class TDivider extends StatelessWidget {
         if (layout == Axis.horizontal) {
           width = space ?? maxWidth;
           height = thickness ?? d;
-          margin = EdgeInsets.symmetric(vertical: ThemeDataConstant.spacer2);
+          margin = this.margin ?? EdgeInsets.symmetric(vertical: TVar.spacer2);
           if (this.child != null) {
             Widget left;
             Widget right;
@@ -97,7 +100,7 @@ class TDivider extends StatelessWidget {
         } else {
           width = thickness ?? d;
           height = space ?? fontSize * 0.9;
-          margin = EdgeInsets.symmetric(horizontal: ThemeDataConstant.spacer * 1.5);
+          margin = this.margin ?? EdgeInsets.symmetric(horizontal: TVar.spacer * 1.5);
         }
 
         return Padding(

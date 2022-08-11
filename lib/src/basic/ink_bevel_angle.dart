@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:tdesign_desktop_ui/src/theme/theme_data.dart';
 
 const Duration _kFadeOutDuration = Duration(milliseconds: 400);
 
@@ -86,7 +87,7 @@ class InkBevelAngle extends InteractiveInkFeature {
     _angleWidth = _angle.drive(Tween<double>(
       begin: 0,
       end: referenceBox.size.width + tan(pi / 22) * referenceBox.size.height,
-    ).chain(CurveTween(curve: const Cubic(.38, 0, .24, 1))));
+    ).chain(CurveTween(curve: TVar.animTimeFnEasing)));
 
     _fadeOutController = AnimationController(duration: _kFadeOutDuration, vsync: controller.vsync)
       ..addListener(controller.markNeedsPaint)

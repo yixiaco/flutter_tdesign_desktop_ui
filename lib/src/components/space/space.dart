@@ -81,9 +81,9 @@ class TSpace extends StatelessWidget {
     var theme = TTheme.of(context);
     var componentSize = size ?? theme.size;
     var spacer = componentSize.lazySizeOf(
-      small: () => ThemeDataConstant.spacer,
-      medium: () => ThemeDataConstant.spacer2,
-      large: () => ThemeDataConstant.spacer3,
+      small: () => TVar.spacer,
+      medium: () => TVar.spacer2,
+      large: () => TVar.spacer3,
     );
 
     // 过滤不为空的小部件
