@@ -26,12 +26,9 @@ class _PopupExampleState extends State<PopupExample> {
           TButton(themeStyle: TButtonThemeStyle.primary, child: Text('悬浮式触发')),
         ],
       ),
-      child: TButton(
+      child: const TButton(
         themeStyle: TButtonThemeStyle.primary,
-        onPressed: () {
-          print('悬浮式触发');
-        },
-        child: const Text('悬浮式触发'),
+        child: Text('悬浮式触发'),
       ),
     ),
     ValueListenableBuilder(
@@ -42,7 +39,6 @@ class _PopupExampleState extends State<PopupExample> {
           trigger: TPopupTrigger.click,
           showArrow: true,
           onOpen: () {
-            print('点击打开弹窗');
             backgroundColor.value = Colors.primaries[Random().nextInt(Colors.primaries.length)];
           },
           backgroundColor: backgroundColor.value,
@@ -58,7 +54,6 @@ class _PopupExampleState extends State<PopupExample> {
             themeStyle: TButtonThemeStyle.primary,
             onPressed: () {
               i.value++;
-              print('点击时触发');
             },
             child: const Text('点击时触发'),
           ),
@@ -100,12 +95,9 @@ class _PopupExampleState extends State<PopupExample> {
           ],
         ),
       ),
-      child: TButton(
+      child: const TButton(
         themeStyle: TButtonThemeStyle.primary,
-        onPressed: () {
-          print('右击时触发');
-        },
-        child: const Text('右击时触发'),
+        child: Text('右击时触发'),
       ),
     ),
   ];

@@ -28,7 +28,6 @@ class _RadioExampleState extends State<RadioExample> {
               value: value,
               allowUncheck: true,
               onChange: (value) {
-                print(value);
                 setState(() {
                   this.value = value;
                 });
@@ -46,7 +45,6 @@ class _RadioExampleState extends State<RadioExample> {
               allowUncheck: true,
               disabled: disabled,
               onChange: (value) {
-                print(value);
                 setState(() {
                   this.value = value;
                 });
@@ -64,7 +62,6 @@ class _RadioExampleState extends State<RadioExample> {
               allowUncheck: true,
               disabled: disabled,
               onChange: (value) {
-                print(value);
                 setState(() {
                   this.value = value;
                 });
@@ -82,7 +79,6 @@ class _RadioExampleState extends State<RadioExample> {
               allowUncheck: true,
               disabled: disabled,
               onChange: (value) {
-                print(value);
                 setState(() {
                   this.value = value;
                 });
@@ -96,14 +92,10 @@ class _RadioExampleState extends State<RadioExample> {
           disabled: true,
           label: const Text('选项一'),
           value: 'sss',
-          onClick: () {
-            print('点击');
-          },
           onChange: (checked, value) {
             setState(() {
               this.checked = checked;
             });
-            print('checked:$checked,value:$value');
           },
         ),
         TRadio(
@@ -111,14 +103,10 @@ class _RadioExampleState extends State<RadioExample> {
           allowUncheck: true,
           label: const Text('选项一'),
           value: 'sss',
-          onClick: () {
-            print('点击');
-          },
           onChange: (checked, value) {
             setState(() {
               this.checked = checked;
             });
-            print('checked:$checked,value:$value');
           },
         ),
       ],

@@ -1,5 +1,4 @@
-import 'package:flutter/widgets.dart';
-import 'package:tdesign_desktop_ui/src/basic/basic.dart';
+import 'package:flutter/material.dart';
 import 'package:tdesign_desktop_ui/src/components/tooltip/tooltip.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
@@ -74,12 +73,25 @@ class TJumper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    TButtonVariant buttonVariant;
+    TBorderSide? borderSide;
+    BorderRadiusGeometry? radius;
+    if(variant == TJumperVariant.outline) {
+      buttonVariant = TButtonVariant.outline;
+      borderSide = const TBorderSide(color: Colors.transparent);
+      radius = BorderRadius.zero;
+    } else {
+      buttonVariant = TButtonVariant.text;
+    }
     var children = [
       TTooltip(
         message: tips?.prev,
         child: TButton(
           disabled: disabled,
-          variant: TButtonVariant.text,
+          variant: buttonVariant,
+          shape: TButtonShape.square,
+          side: borderSide,
+          radius: radius,
           icon: layout == Axis.horizontal ? TIcons.chevronLeft : TIcons.chevronUp,
           onPressed: () => onChange?.call(TJumperTrigger.prev),
         ),
@@ -90,7 +102,10 @@ class TJumper extends StatelessWidget {
           message: tips?.current,
           child: TButton(
             disabled: disabled,
-            variant: TButtonVariant.text,
+            variant: buttonVariant,
+            shape: TButtonShape.square,
+            side: borderSide,
+            radius: radius,
             icon: TIcons.round,
             onPressed: () => onChange?.call(TJumperTrigger.current),
           ),
@@ -100,7 +115,10 @@ class TJumper extends StatelessWidget {
         message: tips?.next,
         child: TButton(
           disabled: disabled,
-          variant: TButtonVariant.text,
+          variant: buttonVariant,
+          shape: TButtonShape.square,
+          side: borderSide,
+          radius: radius,
           icon: layout == Axis.horizontal ? TIcons.chevronRight : TIcons.chevronDown,
           onPressed: () => onChange?.call(TJumperTrigger.next),
         ),

@@ -6,7 +6,7 @@ class THollowChild {
     required this.child,
     this.color,
     this.checked = false,
-    this.disabled = false,
+    this.disabled,
     this.cursor,
   });
 
@@ -20,7 +20,7 @@ class THollowChild {
   final bool checked;
 
   /// 是否禁用
-  final bool disabled;
+  final bool? disabled;
 
   /// 鼠标手,可以指定[SystemMouseCursors]或[MaterialStateMouseCursor]
   final MouseCursor? cursor;
@@ -34,6 +34,9 @@ class THollow extends StatefulWidget {
     required this.children,
     this.onChange,
     this.breakLine = false,
+    this.disabled,
+    this.radius,
+    this.strokeWidth,
   }) : super(key: key);
 
   /// 颜色,可以指定[Color]或者[MaterialStateColor]
@@ -44,6 +47,15 @@ class THollow extends StatefulWidget {
 
   /// 是否换行
   final bool breakLine;
+
+  /// 是否禁用
+  final bool? disabled;
+
+  /// 圆角
+  final double? radius;
+
+  /// 线条宽度
+  final double? strokeWidth;
 
   /// 点击事件变更
   final void Function(int index, bool checked, THollowChild child)? onChange;
@@ -102,7 +114,7 @@ class _THollowState extends State<THollow> {
     return <MaterialState>{
       if (isHovered == index) MaterialState.hovered,
       if (isFocused == index) MaterialState.focused,
-      if (child.disabled) MaterialState.disabled,
+      if ((child.disabled ?? widget.disabled) == true) MaterialState.disabled,
       if (child.checked) MaterialState.selected,
     };
   }
@@ -111,7 +123,6 @@ class _THollowState extends State<THollow> {
   Widget build(BuildContext context) {
     var theme = TTheme.of(context);
     var colorScheme = theme.colorScheme;
-    var devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
     // Cursor
     final effectiveCursor = MaterialStateProperty.resolveWith((states) {
       if (states.contains(MaterialState.disabled)) {
@@ -121,17 +132,21 @@ class _THollowState extends State<THollow> {
     });
 
     List<Color> colors = [];
-    List<bool> priority = [];
-    var strokeWidth = 1 / devicePixelRatio;
+    List<int> priority = [];
+    var strokeWidth = widget.strokeWidth ?? 1 / MediaQuery.of(context).devicePixelRatio;
 
     // List
     var list = List.generate(widget.children.length, (index) {
       var child = widget.children[index];
       var states = state(index, child);
 
-      // 边框
-      final border = MaterialStateProperty.resolveWith((states) {
-        Color color = colorScheme.borderLevel2Color;
+      // 边框颜色
+      final effectiveBorderColor = MaterialStateProperty.resolveWith((states) {
+        Color? color = MaterialStateProperty.resolveAs(child.color ?? widget.color, states);
+        if (color != null) {
+          return color;
+        }
+        color = colorScheme.borderLevel2Color;
         if (states.contains(MaterialState.selected)) {
           color = colorScheme.brandColor;
         }
@@ -143,19 +158,25 @@ class _THollowState extends State<THollow> {
         }
         return color;
       });
-      if (states.contains(MaterialState.selected) || states.contains(MaterialState.hovered) || states.contains(MaterialState.focused)) {
-        priority.add(false);
+      if (states.contains(MaterialState.selected)) {
+        priority.add(0);
+      } else if (states.contains(MaterialState.disabled)) {
+        priority.add(1);
+      } else if (states.contains(MaterialState.hovered)) {
+        priority.add(2);
+      } else if (states.contains(MaterialState.focused)) {
+        priority.add(3);
       } else {
-        priority.add(true);
+        priority.add(4);
       }
-      colors.add(border.resolve(states));
+      colors.add(effectiveBorderColor.resolve(states));
 
       // 圆角
       EdgeInsetsGeometry? padding;
       padding ??= EdgeInsets.only(left: strokeWidth, top: strokeWidth, bottom: strokeWidth);
 
       return FocusableActionDetector(
-        enabled: !child.disabled,
+        enabled: (child.disabled ?? widget.disabled) != true,
         autofocus: false,
         mouseCursor: MaterialStateProperty.resolveAs(child.cursor ?? effectiveCursor.resolve(states), states),
         onShowFocusHighlight: (value) => _handleFocus(index, value),
@@ -176,12 +197,13 @@ class _THollowState extends State<THollow> {
     return CustomPaint(
       foregroundPainter: _HollowPainter(
         keys: _keys,
-        radius: TVar.borderRadius,
+        radius: widget.radius ?? TVar.borderRadius,
         strokeWidth: strokeWidth,
         colors: colors,
         priority: priority,
       ),
       child: TSpace(
+        breakLine: widget.breakLine,
         spacing: 0,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: list,
@@ -190,6 +212,7 @@ class _THollowState extends State<THollow> {
   }
 }
 
+/// 镂空格子绘制器
 class _HollowPainter extends CustomPainter {
   const _HollowPainter({
     required this.keys,
@@ -199,6 +222,7 @@ class _HollowPainter extends CustomPainter {
     required this.priority,
   });
 
+  /// keys
   final List<GlobalKey> keys;
 
   /// 圆角
@@ -211,30 +235,26 @@ class _HollowPainter extends CustomPainter {
   final List<Color> colors;
 
   /// 优先
-  final List<bool> priority;
+  final List<int> priority;
 
   static const origin = Offset(0, 0);
 
   @override
   void paint(Canvas canvas, Size size) {
-    var paint = Paint()
-      ..strokeWidth = strokeWidth;
+    var paint = Paint()..strokeWidth = strokeWidth;
 
     var renderBox = keys[0].currentContext!.findRenderObject() as RenderBox;
     Offset leftTop = renderBox.localToGlobal(origin);
-    for (int i = 0; i < keys.length; i++) {
-      if (priority[i]) {
-        drawBorder(i, leftTop, paint, canvas);
-      }
-    }
-    for (int i = 0; i < keys.length; i++) {
-      if (!priority[i]) {
-        drawBorder(i, leftTop, paint, canvas);
+    for (int p = 4; p >= 0; p--) {
+      for (int i = 0; i < keys.length; i++) {
+        if (priority[i] == p) {
+          _drawBorder(i, leftTop, paint, canvas);
+        }
       }
     }
   }
 
-  void drawBorder(int i, Offset leftTop, Paint paint, Canvas canvas) {
+  void _drawBorder(int i, Offset leftTop, Paint paint, Canvas canvas) {
     var renderBox = keys[i].currentContext!.findRenderObject() as RenderBox;
 
     var localOffset = origin - renderBox.globalToLocal(leftTop);
@@ -255,28 +275,25 @@ class _HollowPainter extends CustomPainter {
 
     paint.color = colors[i];
 
-    var outer = RRect.fromRectAndCorners(
-      localOffset & childSize,
-      topLeft: topLeft,
-      topRight: topRight,
-      bottomLeft: bottomLeft,
-      bottomRight: bottomRight,
-    );
-    RRect inner;
-    if (isLast) {
-      inner = outer.deflate(strokeWidth);
+    RRect outer;
+    if (!isLast) {
+      outer = RRect.fromRectAndCorners(
+        localOffset & (childSize + const Offset(1, 0)),
+        topLeft: topLeft,
+        topRight: topRight,
+        bottomLeft: bottomLeft,
+        bottomRight: bottomRight,
+      );
     } else {
-      inner = RRect.fromLTRBAndCorners(
-        outer.left + strokeWidth,
-        outer.top + strokeWidth,
-        outer.right,
-        outer.bottom - strokeWidth,
-        topLeft: topLeft - Radius.circular(strokeWidth),
-        topRight: topRight - Radius.circular(strokeWidth),
-        bottomLeft: bottomLeft - Radius.circular(strokeWidth),
-        bottomRight: bottomRight - Radius.circular(strokeWidth),
+      outer = RRect.fromRectAndCorners(
+        localOffset & childSize,
+        topLeft: topLeft,
+        topRight: topRight,
+        bottomLeft: bottomLeft,
+        bottomRight: bottomRight,
       );
     }
+    RRect inner = outer.deflate(strokeWidth);
     canvas.drawDRRect(outer, inner, paint);
   }
 

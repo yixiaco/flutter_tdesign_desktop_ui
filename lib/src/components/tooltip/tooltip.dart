@@ -33,6 +33,7 @@ class TTooltip extends StatefulWidget {
     this.theme = TTooltipTheme.defaultTheme,
     this.message,
     this.trigger = TPopupTrigger.hover,
+    this.padding,
     required this.child,
   }) : super(key: key);
 
@@ -56,6 +57,9 @@ class TTooltip extends StatefulWidget {
 
   /// 触发方式
   final TPopupTrigger trigger;
+
+  /// 内边距
+  final EdgeInsetsGeometry? padding;
 
   /// 子组件
   final Widget child;
@@ -102,12 +106,15 @@ class _TTooltipState extends State<TTooltip> {
         break;
     }
 
+    var padding = widget.padding ?? EdgeInsets.symmetric(horizontal: TVar.spacer, vertical: TVar.spacerS);
+
     return TPopup(
       backgroundColor: backgroundColor,
       showArrow: widget.showArrow,
       placement: widget.placement,
       destroyOnClose: widget.destroyOnClose,
       trigger: widget.trigger,
+      padding: padding,
       content: Text(
         widget.message!,
         style: TextStyle(

@@ -10,28 +10,16 @@ class JumperExample extends StatelessWidget {
       children: [
         TJumper(
           tips: TJumperTips(prev: '前尘忆梦', current: '回到现在', next: '展望未来'),
-          onChange: (trigger) {
-            print(trigger);
-          },
         ),
-        TJumper(
+        const TJumper(
           layout: Axis.vertical,
           variant: TJumperVariant.outline,
-          onChange: (trigger) {
-            print(trigger);
-          },
         ),
-        TJumper(
+        const TJumper(
           showCurrent: false,
-          onChange: (trigger) {
-            print(trigger);
-          },
         ),
-        TJumper(
+        const TJumper(
           disabled: true,
-          onChange: (trigger) {
-            print(trigger);
-          },
         ),
       ],
     );
