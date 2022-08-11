@@ -166,7 +166,6 @@ class _TRadioGroupState<T> extends State<TRadioGroup<T>> with SingleTickerProvid
     var colorScheme = theme.colorScheme;
     late Color blockColor;
     late Color textColor;
-    var padding = const EdgeInsets.all(2);
     if (widget.variant == TRadioVariant.primaryFilled) {
       textColor = MaterialStateColor.resolveWith((states) {
         if (states.contains(MaterialState.selected)) {
@@ -220,7 +219,7 @@ class _TRadioGroupState<T> extends State<TRadioGroup<T>> with SingleTickerProvid
       );
     });
     return Container(
-      padding: padding,
+      padding: const EdgeInsets.all(2),
       decoration: BoxDecoration(
         color: colorScheme.bgColorComponent,
         borderRadius: BorderRadius.circular(TVar.borderRadius),
@@ -233,7 +232,7 @@ class _TRadioGroupState<T> extends State<TRadioGroup<T>> with SingleTickerProvid
           ..index = widget._index,
         child: TSpace(
           breakLine: false,
-          spacing: 2,
+          spacing: 0,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: box,
         ),
@@ -500,6 +499,9 @@ class _TRadioButtonState<T> extends State<_TRadioButton<T>> with TickerProviderS
   CurvedAnimation get position => _position;
   late CurvedAnimation _position;
 
+  Color? oldColor;
+  Color? currentColor;
+
   @override
   void initState() {
     super.initState();
@@ -508,14 +510,25 @@ class _TRadioButtonState<T> extends State<_TRadioButton<T>> with TickerProviderS
       curve: TVar.animTimeFnEaseOut,
       reverseCurve: TVar.animTimeFnEaseOut.flipped,
     );
+    positionController.addListener(() {
+      if (mounted) {
+        setState(() {});
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
   void didUpdateWidget(covariant _TRadioButton<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // if (widget._checked != oldWidget._checked) {
-    //   animateToValue();
-    // }
+    if (widget._checked != oldWidget._checked) {
+      oldColor = currentColor;
+      positionController.forward(from: 0);
+    }
   }
 
   @override
@@ -544,6 +557,7 @@ class _TRadioButtonState<T> extends State<_TRadioButton<T>> with TickerProviderS
 
     // 颜色
     var color = MaterialStateProperty.resolveAs(widget.textColor, states);
+    currentColor = color;
 
     return Semantics(
       inMutuallyExclusiveGroup: true,
@@ -575,7 +589,7 @@ class _TRadioButtonState<T> extends State<_TRadioButton<T>> with TickerProviderS
               child: DefaultTextStyle(
                 style: TextStyle(
                   fontSize: theme.fontSize,
-                  color: color,
+                  color: Color.lerp(oldColor ?? currentColor, currentColor, position.value),
                 ),
                 child: widget.label,
               ),
@@ -595,7 +609,7 @@ class _TRadioButtonState<T> extends State<_TRadioButton<T>> with TickerProviderS
   bool get tristate => widget.allowUncheck;
 
   @override
-  bool? get value => widget.checked ?? false;
+  bool? get value => widget._checked;
 
   @override
   bool get isInteractive => !widget.disabled;
