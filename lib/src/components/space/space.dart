@@ -127,7 +127,7 @@ class TSpace extends StatelessWidget {
         } else {
           var children = list;
           // 间距
-          if (space > 0) {
+          if (children.isNotEmpty && space > 0) {
             Widget sizedBox;
             if (direction == Axis.horizontal) {
               sizedBox = SizedBox(width: space);

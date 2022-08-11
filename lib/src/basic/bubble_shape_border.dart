@@ -163,18 +163,19 @@ class BubbleShapeBorder extends ShapeBorder {
   @override
   EdgeInsetsGeometry get dimensions {
     EdgeInsets margin;
+    var d = 1;
     switch (direction) {
       case BubbleDirection.left:
-        margin = EdgeInsets.only(left: arrowHeight);
+        margin = EdgeInsets.only(left: arrowHeight + d);
         break;
       case BubbleDirection.top:
-        margin = EdgeInsets.only(top: arrowHeight);
+        margin = EdgeInsets.only(top: arrowHeight + d);
         break;
       case BubbleDirection.right:
-        margin = EdgeInsets.only(right: arrowHeight);
+        margin = EdgeInsets.only(right: arrowHeight + d);
         break;
       case BubbleDirection.bottom:
-        margin = EdgeInsets.only(bottom: arrowHeight);
+        margin = EdgeInsets.only(bottom: arrowHeight + d);
         break;
       default:
         margin = EdgeInsets.zero;

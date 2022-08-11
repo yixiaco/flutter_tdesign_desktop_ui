@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
-
 /// 实现了填充按钮、描边按钮、虚框按钮、文字按钮
 class _TButton extends ButtonStyleButton {
   const _TButton({
@@ -20,6 +19,9 @@ class _TButton extends ButtonStyleButton {
     this.themeStyle,
     this.ghost,
     required this.shape,
+    this.side,
+    this.radius,
+    required this.softWrap,
   }) : super(
           key: key,
           onPressed: onPressed,
@@ -49,6 +51,15 @@ class _TButton extends ButtonStyleButton {
   /// 预定义的一组按钮形状，可以通过[style.shape]进行覆盖
   /// 有 4 种：长方形、正方形、圆角长方形、圆形。可选项：rectangle/square/round/circle
   final TButtonShape shape;
+
+  /// 边框
+  final TBorderSide? side;
+
+  /// 圆角
+  final BorderRadiusGeometry? radius;
+
+  /// 是否收紧包装
+  final bool softWrap;
 
   /// 按钮高度
   double _btnHeight(TComponentSize size) {
@@ -143,7 +154,7 @@ class _TButton extends ButtonStyleButton {
     var buttonTheme = TButtonTheme.of(context);
     TComponentSize defaultSize = size ?? buttonTheme.size ?? ttheme.size;
     var buttonThemeStyle = themeStyle ?? buttonTheme.themeStyle ?? TButtonThemeStyle.defaultStyle;
-    var isGhost = ghost ?? buttonTheme.ghost ?? ttheme.brightness == Brightness.dark;
+    var isGhost = ghost ?? buttonTheme.ghost ?? false;
     var media = MediaQuery.of(context);
     var variables = _variables(colorScheme);
 
@@ -442,7 +453,7 @@ class _TButton extends ButtonStyleButton {
       surfaceTintColor: ButtonStyleButton.allOrNull<Color>(Colors.transparent),
       elevation: ButtonStyleButton.allOrNull<double>(0),
       // 内容如果是一个icon，则不要给padding
-      padding: ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(child is Icon ? EdgeInsets.zero : _scaledPadding(context, defaultSize)),
+      padding: ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(softWrap ? EdgeInsets.zero : _scaledPadding(context, defaultSize)),
       minimumSize: ButtonStyleButton.allOrNull<Size>(Size.square(btnHeight)),
       fixedSize: ButtonStyleButton.allOrNull<Size>(shape.valueOf(
         rectangle: Size.fromHeight(halfHeight),
@@ -451,14 +462,15 @@ class _TButton extends ButtonStyleButton {
         circle: Size.square(halfHeight),
       )),
       maximumSize: ButtonStyleButton.allOrNull<Size>(Size.fromHeight(btnHeight)),
-      side: borderSide,
+      side: MaterialStateProperty.resolveWith((states) => MaterialStateProperty.resolveAs(side, states) ?? borderSide.resolve(states)),
       shape: ButtonStyleButton.allOrNull<TRoundedRectangleBorder>(TRoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(shape.valueOf(
-          rectangle: TVar.borderRadius,
-          square: TVar.borderRadius,
-          round: halfHeight,
-          circle: halfHeight,
-        )),
+        borderRadius: radius ??
+            BorderRadius.circular(shape.valueOf(
+              rectangle: TVar.borderRadius,
+              square: TVar.borderRadius,
+              round: halfHeight,
+              circle: halfHeight,
+            )),
       )),
       mouseCursor: mouseCursor,
       visualDensity: theme.visualDensity,
@@ -507,6 +519,9 @@ class TButton extends StatelessWidget {
     this.icon,
     this.loading = false,
     this.child,
+    this.side,
+    this.radius,
+    this.softWrap = false,
   }) : super(key: key);
 
   ///按钮内容
@@ -561,6 +576,15 @@ class TButton extends StatelessWidget {
   /// 是否显示为加载状态
   final bool loading;
 
+  /// 边框
+  final TBorderSide? side;
+
+  /// 圆角
+  final BorderRadiusGeometry? radius;
+
+  /// 是否收紧包装
+  final bool softWrap;
+
   /// icon大小
   double _btnIconSize(TComponentSize size) {
     return size.sizeOf(small: TVar.fontSizeBase, medium: TVar.fontSizeL, large: TVar.fontSizeXL);
@@ -573,11 +597,11 @@ class TButton extends StatelessWidget {
     TComponentSize defaultSize = size ?? buttonTheme.size ?? ttheme.size;
 
     Widget? iconWidget;
-    Widget? result;
-    var disabled0 = disabled;
+    List<Widget?> result = [];
+    var disabled = this.disabled;
     var btnIconSize = _btnIconSize(defaultSize);
     if (loading) {
-      disabled0 = true;
+      disabled = true;
       // TODO: 实现自定义加载指示器
       iconWidget = ConstrainedBox(
         constraints: BoxConstraints.expand(width: btnIconSize / 1.5, height: btnIconSize / 1.5),
@@ -589,14 +613,10 @@ class TButton extends StatelessWidget {
     } else if (icon != null) {
       iconWidget = Icon(icon, size: btnIconSize);
     }
-    if (iconWidget != null && child != null) {
-      result = Row(
-        children: [iconWidget, SizedBox(width: TVar.spacer), child!],
-      );
-    } else {
-      result = iconWidget ?? child;
-    }
-    var pressed = disabled0 ? null : onPressed ?? () {};
+    var softWrap = iconWidget != null || this.softWrap;
+    result.add(iconWidget);
+    result.add(child);
+    var pressed = disabled ? null : onPressed ?? () {};
 
     return _TButton(
       onPressed: pressed,
@@ -612,7 +632,14 @@ class TButton extends StatelessWidget {
       size: size,
       ghost: ghost,
       shape: shape,
-      child: result,
+      side: side,
+      radius: radius,
+      softWrap: softWrap,
+      child: TSpace(
+        spacing: TVar.spacer,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: result,
+      ),
     );
   }
 }

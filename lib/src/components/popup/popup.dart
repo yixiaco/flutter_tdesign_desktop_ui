@@ -24,6 +24,8 @@ class TPopup extends StatefulWidget {
     this.hideDuration = const Duration(milliseconds: 150),
     this.destroyOnClose = true,
     this.builderContent,
+    this.backgroundColor,
+    this.padding,
   })  : assert(!(content != null && builderContent != null), 'content和builderContent只能给定一个'),
         super(key: key);
 
@@ -69,6 +71,12 @@ class TPopup extends StatefulWidget {
   /// 使用build创建浮层
   final WidgetBuilder? builderContent;
 
+  /// 浮层背景色
+  final Color? backgroundColor;
+
+  /// 浮层内边距
+  final EdgeInsetsGeometry? padding;
+
   @override
   State<TPopup> createState() => TPopupState();
 }
@@ -110,7 +118,8 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
   /// 链接浮层与组件
   final LayerLink _layerLink = LayerLink();
 
-  late final ValueNotifier<TPopup> _popupWidget = ValueNotifier(widget);
+  /// 弹出层key
+  final GlobalKey<_PopupOverlayState> _overlayKey = GlobalKey();
 
   @override
   void initState() {
@@ -228,6 +237,7 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
 
     _entry = OverlayEntry(builder: (BuildContext context) {
       Widget child = _PopupOverlay(
+        key: _overlayKey,
         onPointerDown: (event) {
           if (widget.trigger.isTrue(click: true, contextMenu: true)) {
             _stopPropagation = true;
@@ -249,7 +259,7 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
           curve: Curves.fastOutSlowIn,
         ),
         layerLink: _layerLink,
-        popupWidget: _popupWidget,
+        popupState: this,
       );
       return child;
     });
@@ -322,7 +332,7 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
     // 在下一帧时，更新这个持有对象
     SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
       if (mounted) {
-        _popupWidget.value = widget;
+        _overlayKey.currentState?.setState(() {});
       }
     });
     // 暂时先销毁浮层
@@ -519,7 +529,7 @@ class _PopupOverlay extends StatefulWidget {
     this.onExit,
     this.onPointerDown,
     required this.layerLink,
-    required this.popupWidget,
+    required this.popupState,
   }) : super(key: key);
 
   final Animation<double> animation;
@@ -527,7 +537,7 @@ class _PopupOverlay extends StatefulWidget {
   final PointerEnterEventListener? onEnter;
   final PointerExitEventListener? onExit;
   final LayerLink layerLink;
-  final ValueNotifier<TPopup> popupWidget;
+  final TPopupState popupState;
 
   @override
   State<_PopupOverlay> createState() => _PopupOverlayState();
@@ -568,10 +578,8 @@ class _PopupOverlayState extends State<_PopupOverlay> {
 
   @override
   Widget build(BuildContext context) {
-    var theme = TTheme.of(context);
-    // We create this widget outside of the overlay entry's builder to prevent
-    // updated values from happening to leak into the overlay when the overlay
-    // rebuilds.
+    var theme = TTheme.of(widget.popupState.context);
+    var popupTheme = TPopupTheme.of(widget.popupState.context);
     var colorScheme = theme.colorScheme;
     var popupShadow = theme.shadow2Inset;
     var popupTopArrowShadow = [theme.shadowInsetLeft, theme.shadowInsetBottom];
@@ -579,111 +587,107 @@ class _PopupOverlayState extends State<_PopupOverlay> {
     var popupBottomArrowShadow = [theme.shadowInsetTop, theme.shadowInsetRight];
     var popupRightArrowShadow = [theme.shadowInsetRight, theme.shadowInsetBottom];
 
-    // 当小部件完全不显示时，忽略所有事件
-    return ValueListenableBuilder(
-      builder: (BuildContext context, TPopup popup, Widget? child) {
-        Widget result = ValueListenableBuilder<bool>(
-          builder: (BuildContext context, value, Widget? child) {
-            return DefaultTextStyle(
-              style: TextStyle(
-                fontSize: TVar.fontSizeBase,
-                fontFamily: theme.fontFamily,
-                color: colorScheme.textColorPrimary,
-              ),
-              child: Visibility(
-                visible: value,
-                maintainState: true,
-                child: child!,
-              ),
-            );
-          },
-          valueListenable: _visible,
-          child: FadeTransition(
-            opacity: widget.animation,
-            child: ValueListenableBuilder(
-              valueListenable: _isReverse,
-              builder: (BuildContext context, bool value, Widget? child) {
-                return Container(
-                  clipBehavior: Clip.antiAlias,
-                  decoration: ShapeDecoration(
-                    color: colorScheme.bgColorContainer,
-                    // shadows: popup.placement.sides(
-                    //   top: [...popupShadow, ...popupTopArrowShadow],
-                    //   left: [...popupShadow, ...popupLeftArrowShadow],
-                    //   right: [...popupShadow, ...popupRightArrowShadow],
-                    //   bottom: [...popupShadow, ...popupBottomArrowShadow],
-                    // ),
-                    shadows: [...popupShadow, ...popupTopArrowShadow, ...popupRightArrowShadow, ...popupBottomArrowShadow, ...popupLeftArrowShadow],
-                    shape: BubbleShapeBorder(
-                      smooth: 0,
-                      arrowQuadraticBezierLength: 0,
-                      arrowAngle: 6,
-                      arrowHeight: 6,
-                      direction: popup.showArrow
-                          ? popup.placement.sides(
-                              top: value ? BubbleDirection.top : BubbleDirection.bottom,
-                              left: value ? BubbleDirection.left : BubbleDirection.right,
-                              right: value ? BubbleDirection.right : BubbleDirection.left,
-                              bottom: value ? BubbleDirection.bottom : BubbleDirection.top,
-                            )
-                          : BubbleDirection.none,
-                      radius: BorderRadius.circular(TVar.borderRadius),
-                      position: popup.placement.valueOf(
-                        topLeft: () => BubblePosition.start(popupContentArrowSpacer),
-                        top: () => const BubblePosition.center(0),
-                        topRight: () => BubblePosition.end(popupContentArrowSpacer),
-                        rightTop: () => BubblePosition.start(popupContentArrowSpacer),
-                        right: () => const BubblePosition.center(0),
-                        rightBottom: () => BubblePosition.end(popupContentArrowSpacer),
-                        bottomLeft: () => BubblePosition.start(popupContentArrowSpacer),
-                        bottom: () => const BubblePosition.center(0),
-                        bottomRight: () => BubblePosition.end(popupContentArrowSpacer),
-                        leftTop: () => BubblePosition.start(popupContentArrowSpacer),
-                        left: () => const BubblePosition.center(0),
-                        leftBottom: () => BubblePosition.end(popupContentArrowSpacer),
-                      )!,
-                    ),
-                  ),
-                  padding: EdgeInsets.symmetric(vertical: 4, horizontal: TVar.spacer),
-                  child: child,
-                );
-              },
-              child: popup.content ?? popup.builderContent?.call(context),
-            ),
-          ),
-        );
-        if (widget.onEnter != null || widget.onExit != null) {
-          result = MouseRegion(
-            onEnter: widget.onEnter,
-            onExit: widget.onExit,
-            child: result,
-          );
-        }
-        if (widget.onPointerDown != null) {
-          result = Listener(
-            onPointerDown: widget.onPointerDown,
-            child: result,
-          );
-        }
+    TPopup currentPopupWidget = widget.popupState.widget;
 
-        return Positioned.fill(
-          child: CustomSingleChildLayout(
-            delegate: _PopupPositionDelegate(
-              offset: _defaultVerticalOffset,
-              placement: popup.placement,
-              margin: 5.0,
-              layerLink: widget.layerLink,
-              callback: (isReverse) {
-                SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
-                  _isReverse.value = isReverse;
-                });
-              },
-            ),
-            child: result,
+    // 浮层背景色
+    var bgColorContainer = currentPopupWidget.backgroundColor ?? popupTheme.backgroundColor ?? colorScheme.bgColorContainer;
+    // 浮层内边距
+    var padding = currentPopupWidget.padding ?? popupTheme.padding ?? EdgeInsets.symmetric(vertical: 4, horizontal: TVar.spacer);
+
+    // 当小部件完全不显示时，忽略所有事件
+    Widget result = ValueListenableBuilder<bool>(
+      builder: (BuildContext context, value, Widget? child) {
+        return DefaultTextStyle(
+          style: TextStyle(
+            fontSize: TVar.fontSizeBase,
+            fontFamily: theme.fontFamily,
+            color: colorScheme.textColorPrimary,
+          ),
+          child: Visibility(
+            visible: value,
+            maintainState: true,
+            child: child!,
           ),
         );
       },
-      valueListenable: widget.popupWidget,
+      valueListenable: _visible,
+      child: FadeTransition(
+        opacity: widget.animation,
+        child: ValueListenableBuilder(
+          valueListenable: _isReverse,
+          builder: (BuildContext context, bool value, Widget? child) {
+            return Container(
+              clipBehavior: Clip.antiAlias,
+              decoration: ShapeDecoration(
+                color: bgColorContainer,
+                shadows: [...popupShadow, ...popupTopArrowShadow, ...popupRightArrowShadow, ...popupBottomArrowShadow, ...popupLeftArrowShadow],
+                shape: BubbleShapeBorder(
+                  smooth: 0,
+                  arrowQuadraticBezierLength: 0,
+                  arrowAngle: 6,
+                  arrowHeight: 6,
+                  direction: currentPopupWidget.showArrow
+                      ? currentPopupWidget.placement.sides(
+                          top: value ? BubbleDirection.top : BubbleDirection.bottom,
+                          left: value ? BubbleDirection.left : BubbleDirection.right,
+                          right: value ? BubbleDirection.right : BubbleDirection.left,
+                          bottom: value ? BubbleDirection.bottom : BubbleDirection.top,
+                        )
+                      : BubbleDirection.none,
+                  radius: BorderRadius.circular(TVar.borderRadius),
+                  position: currentPopupWidget.placement.valueOf(
+                    topLeft: () => BubblePosition.start(popupContentArrowSpacer),
+                    top: () => const BubblePosition.center(0),
+                    topRight: () => BubblePosition.end(popupContentArrowSpacer),
+                    rightTop: () => BubblePosition.start(popupContentArrowSpacer),
+                    right: () => const BubblePosition.center(0),
+                    rightBottom: () => BubblePosition.end(popupContentArrowSpacer),
+                    bottomLeft: () => BubblePosition.start(popupContentArrowSpacer),
+                    bottom: () => const BubblePosition.center(0),
+                    bottomRight: () => BubblePosition.end(popupContentArrowSpacer),
+                    leftTop: () => BubblePosition.start(popupContentArrowSpacer),
+                    left: () => const BubblePosition.center(0),
+                    leftBottom: () => BubblePosition.end(popupContentArrowSpacer),
+                  )!,
+                ),
+              ),
+              padding: padding,
+              child: child,
+            );
+          },
+          child: currentPopupWidget.content ?? currentPopupWidget.builderContent?.call(context),
+        ),
+      ),
+    );
+    if (widget.onEnter != null || widget.onExit != null) {
+      result = MouseRegion(
+        onEnter: widget.onEnter,
+        onExit: widget.onExit,
+        child: result,
+      );
+    }
+    if (widget.onPointerDown != null) {
+      result = Listener(
+        onPointerDown: widget.onPointerDown,
+        child: result,
+      );
+    }
+
+    return Positioned.fill(
+      child: CustomSingleChildLayout(
+        delegate: _PopupPositionDelegate(
+          offset: _defaultVerticalOffset,
+          placement: currentPopupWidget.placement,
+          margin: 5.0,
+          layerLink: widget.layerLink,
+          callback: (isReverse) {
+            SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+              _isReverse.value = isReverse;
+            });
+          },
+        ),
+        child: result,
+      ),
     );
   }
 }

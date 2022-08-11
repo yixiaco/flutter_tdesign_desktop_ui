@@ -5,7 +5,34 @@ import 'package:tdesign_desktop_ui/src/theme/theme.dart';
 
 /// 弹出层主题数据
 class TPopupThemeData with Diagnosticable {
-  const TPopupThemeData();
+  const TPopupThemeData({
+    this.backgroundColor,
+    this.padding,
+  });
+
+  /// 浮层背景色
+  final Color? backgroundColor;
+
+  /// 浮层padding
+  final EdgeInsetsGeometry? padding;
+
+  TPopupThemeData copyWith({
+    Color? backgroundColor,
+    EdgeInsetsGeometry? padding,
+  }) {
+    return TPopupThemeData(
+      backgroundColor: backgroundColor ?? this.backgroundColor,
+      padding: padding ?? this.padding,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is TPopupThemeData && runtimeType == other.runtimeType && backgroundColor == other.backgroundColor && padding == other.padding;
+
+  @override
+  int get hashCode => backgroundColor.hashCode ^ padding.hashCode;
 }
 
 /// 弹出层主题

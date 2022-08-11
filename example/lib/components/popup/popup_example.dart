@@ -13,6 +13,7 @@ class PopupExample extends StatefulWidget {
 
 class _PopupExampleState extends State<PopupExample> {
   ValueNotifier<int> i = ValueNotifier(0);
+  ValueNotifier<Color> backgroundColor = ValueNotifier(Colors.blue);
   late var children2 = [
     TPopup(
       trigger: TPopupTrigger.hover,
@@ -25,35 +26,39 @@ class _PopupExampleState extends State<PopupExample> {
           TButton(themeStyle: TButtonThemeStyle.primary, child: Text('悬浮式触发')),
         ],
       ),
-      child: TButton(
+      child: const TButton(
         themeStyle: TButtonThemeStyle.primary,
-        onPressed: () {
-          print('悬浮式触发');
-        },
-        child: const Text('悬浮式触发'),
+        child: Text('悬浮式触发'),
       ),
     ),
-    TPopup(
-      placement: TPopupPlacement.topLeft,
-      trigger: TPopupTrigger.click,
-      showArrow: true,
-      onOpen: () => print('点击打开弹窗'),
-      builderContent: (context) {
-        return ValueListenableBuilder(
-          valueListenable: i,
-          builder: (BuildContext context, int value, Widget? child) {
-            return Text('这是一个弹出框$value');
+    ValueListenableBuilder(
+      valueListenable: backgroundColor,
+      builder: (BuildContext context, Color value, Widget? child) {
+        return TPopup(
+          placement: TPopupPlacement.topLeft,
+          trigger: TPopupTrigger.click,
+          showArrow: true,
+          onOpen: () {
+            backgroundColor.value = Colors.primaries[Random().nextInt(Colors.primaries.length)];
           },
+          backgroundColor: backgroundColor.value,
+          builderContent: (context) {
+            return ValueListenableBuilder(
+              valueListenable: i,
+              builder: (BuildContext context, int value, Widget? child) {
+                return Text('这是一个弹出框$value');
+              },
+            );
+          },
+          child: TButton(
+            themeStyle: TButtonThemeStyle.primary,
+            onPressed: () {
+              i.value++;
+            },
+            child: const Text('点击时触发'),
+          ),
         );
       },
-      child: TButton(
-        themeStyle: TButtonThemeStyle.primary,
-        onPressed: () {
-          i.value++;
-          print('点击时触发');
-        },
-        child: const Text('点击时触发'),
-      ),
     ),
     TPopup(
       trigger: TPopupTrigger.focus,
@@ -90,12 +95,9 @@ class _PopupExampleState extends State<PopupExample> {
           ],
         ),
       ),
-      child: TButton(
+      child: const TButton(
         themeStyle: TButtonThemeStyle.primary,
-        onPressed: () {
-          print('右击时触发');
-        },
-        child: const Text('右击时触发'),
+        child: Text('右击时触发'),
       ),
     ),
   ];

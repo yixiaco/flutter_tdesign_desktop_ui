@@ -89,10 +89,10 @@ class TRow extends StatelessWidget {
   /// 文本基线。用于对齐文本的水平线
   final TextBaseline? textBaseline;
 
-  /// 栅格间隔，示例：{ xs: 8, sm: 16, md: 24}。当数据类型为 Number 和 Object 时，用于指定横向间隔。
+  /// 栅格间隔，示例：{ xs: 8, sm: 16, md: 24}。用于指定横向间隔。
   final TGutter gutter;
 
-  /// 垂直方向栅格间隔，当数据类型为 Number 和 Object 时，用于指定横向间隔。
+  /// 垂直方向栅格间隔。
   final TGutter runGutter;
 
   /// {@macro flutter.material.Material.clipBehavior}

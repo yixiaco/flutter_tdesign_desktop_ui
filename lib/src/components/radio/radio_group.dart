@@ -82,7 +82,7 @@ class TRadioGroup<T> extends StatefulWidget {
   final T? value;
 
   /// 值变化时触发
-  final void Function(T? value)? onChange;
+  final TValueChange<T?>? onChange;
 
   /// 组件尺寸
   final TComponentSize? size;
@@ -298,54 +298,40 @@ class _TRadioGroupState<T> extends State<TRadioGroup<T>> with SingleTickerProvid
       return colorScheme.textColorPrimary;
     });
 
-    var devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
-
-    var box = List<Widget>.generate(widget.options.length, (index) {
-      bool isLast = index == widget.options.length - 1;
-      var option = widget.options[index];
-
-      // 边框
-      MaterialStateProperty<BoxBorder>? border = MaterialStateProperty.resolveWith((states) {
-        Color color = colorScheme.borderLevel2Color;
-        if (states.contains(MaterialState.selected)) {
-          color = colorScheme.brandColor;
-        }
-        if (states.contains(MaterialState.selected) && states.contains(MaterialState.disabled)) {
-          color = colorScheme.brandColorDisabled;
-        }
-        return Border.all(width: 1 / devicePixelRatio, color: color);
-      });
-
-      // 圆角
-      BorderRadius? radius;
-      if (index == 0) {
-        radius = BorderRadius.only(
-          topLeft: Radius.circular(TVar.borderRadius),
-          bottomLeft: Radius.circular(TVar.borderRadius),
-        );
-      } else if (isLast) {
-        radius = BorderRadius.only(
-          topRight: Radius.circular(TVar.borderRadius),
-          bottomRight: Radius.circular(TVar.borderRadius),
-        );
+    // 边框颜色
+    final MaterialStateColor effectiveBorderColor = MaterialStateColor.resolveWith((states) {
+      Color color = colorScheme.borderLevel2Color;
+      if (states.contains(MaterialState.selected)) {
+        color = colorScheme.brandColor;
       }
-      return _TRadioButton<T>(
-        label: option.label,
-        value: option.value,
-        textColor: textColor,
-        backgroundColor: backgroundColor,
+      if (states.contains(MaterialState.selected) && states.contains(MaterialState.disabled)) {
+        color = colorScheme.brandColorDisabled;
+      }
+      return color;
+    });
+
+    var box = List<THollowChild>.generate(widget.options.length, (index) {
+      var option = widget.options[index];
+      return THollowChild(
+        child: _TRadioButton<T>(
+          label: option.label,
+          value: option.value,
+          textColor: textColor,
+          backgroundColor: backgroundColor,
+          disabled: widget.disabled ? true : option.disabled,
+          allowUncheck: widget.allowUncheck ? true : option.allowUncheck,
+          checked: widget.value == option.value,
+          size: widget.size,
+          onChange: _valueChange,
+        ),
         disabled: widget.disabled ? true : option.disabled,
-        allowUncheck: widget.allowUncheck ? true : option.allowUncheck,
         checked: widget.value == option.value,
-        size: widget.size,
-        border: border,
-        radius: radius,
-        onChange: _valueChange,
       );
     });
-    return TSpace(
-      spacing: 0,
-      crossAxisAlignment: CrossAxisAlignment.center,
+    return THollow(
+      breakLine: true,
+      radius: TVar.borderRadius,
+      color: effectiveBorderColor,
       children: box,
     );
   }

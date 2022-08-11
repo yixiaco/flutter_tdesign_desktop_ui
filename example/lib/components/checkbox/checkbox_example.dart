@@ -29,7 +29,6 @@ class _CheckboxExampleState extends State<CheckboxExample> {
               ],
               value: value,
               onChange: (checked, current, options) {
-                print('checked: $checked, current: $current, options: $options');
                 setState(() {
                   value = options;
                 });
@@ -48,7 +47,6 @@ class _CheckboxExampleState extends State<CheckboxExample> {
               check = checked;
               this.indeterminate = indeterminate;
             });
-            print('选中: $checked,半选：$indeterminate,value：$value');
           },
         ),
         TCheckbox<String>(
@@ -61,7 +59,6 @@ class _CheckboxExampleState extends State<CheckboxExample> {
               check = checked;
               this.indeterminate = indeterminate;
             });
-            print('选中: $checked,半选：$indeterminate,value：$value');
           },
         ),
         Checkbox(

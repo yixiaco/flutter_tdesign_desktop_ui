@@ -19,12 +19,19 @@ typedef TBiConsumer<T, U> = void Function(T t, U u);
 /// 表示接受两个参数并产生结果的函数
 typedef TBiFunction<T, U, R> = R Function(T t, U u);
 
+/// 值回调
+typedef TValueChange<T> = void Function(T value);
+
+/// 跳转触发
+typedef TJumperChange = void Function(TJumperTrigger trigger);
+
 /// 复选框值变化时触发
 typedef TCheckValueChange<T> = void Function(bool checked, bool indeterminate, T value);
 
 /// 复选框组值变化时触发
 typedef TCheckboxGroupChange<T> = void Function(bool checked, TCheckboxOption<T>? current, List<T> options);
 
+/// 单选框值变化触发
 typedef TRadioChange<T> = void Function(bool checked, T? value);
 
 /// 输入事件
