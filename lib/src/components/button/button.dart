@@ -143,7 +143,7 @@ class _TButton extends ButtonStyleButton {
     var buttonTheme = TButtonTheme.of(context);
     TComponentSize defaultSize = size ?? buttonTheme.size ?? ttheme.size;
     var buttonThemeStyle = themeStyle ?? buttonTheme.themeStyle ?? TButtonThemeStyle.defaultStyle;
-    var isGhost = ghost ?? buttonTheme.ghost ?? ttheme.brightness == Brightness.dark;
+    var isGhost = ghost ?? buttonTheme.ghost ?? false;
     var media = MediaQuery.of(context);
     var variables = _variables(colorScheme);
 

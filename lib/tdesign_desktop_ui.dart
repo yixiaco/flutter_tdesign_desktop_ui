@@ -24,6 +24,7 @@ export 'src/events/allow_tap_listener.dart';
 /// 通用
 export 'src/components/common/toggleable.dart';
 export 'src/components/common/animation_change_notifier_painter.dart';
+export 'src/components/common/hollow.dart';
 /// 按钮
 export 'src/components/button/button.dart';
 export 'src/components/button/button_theme.dart';
@@ -37,6 +38,8 @@ export 'src/components/grid/grid.dart';
 export 'src/components/layout/layout.dart';
 /// 间距
 export 'src/components/space/space.dart';
+/// 跳转
+export 'src/components/jumper/jumper.dart';
 /// 复选框
 export 'src/components/checkbox/checkbox.dart';
 export 'src/components/checkbox/checkbox_group.dart';

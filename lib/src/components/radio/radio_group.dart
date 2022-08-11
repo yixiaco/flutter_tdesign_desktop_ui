@@ -82,7 +82,7 @@ class TRadioGroup<T> extends StatefulWidget {
   final T? value;
 
   /// 值变化时触发
-  final void Function(T? value)? onChange;
+  final TValueChange<T?>? onChange;
 
   /// 组件尺寸
   final TComponentSize? size;
@@ -305,7 +305,7 @@ class _TRadioGroupState<T> extends State<TRadioGroup<T>> with SingleTickerProvid
       var option = widget.options[index];
 
       // 边框
-      MaterialStateProperty<BoxBorder>? border = MaterialStateProperty.resolveWith((states) {
+      final MaterialStateProperty<BoxBorder> border = MaterialStateProperty.resolveWith((states) {
         Color color = colorScheme.borderLevel2Color;
         if (states.contains(MaterialState.selected)) {
           color = colorScheme.brandColor;
