@@ -49,6 +49,7 @@ export 'src/components/radio/radio.dart';
 export 'src/components/radio/radio_group.dart';
 /// 输入框
 export 'src/components/input/input.dart';
+export 'src/components/input/custom_outline_input_border.dart';
 export 'src/components/input/input_theme.dart';
 /// 弹出层
 export 'src/components/popup/popup.dart';

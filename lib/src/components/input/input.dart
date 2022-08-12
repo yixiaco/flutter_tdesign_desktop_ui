@@ -236,27 +236,44 @@ class _TInputState extends State<TInput> {
 
     // 边框样式
     var border = MaterialStateOutlineInputBorder.resolveWith((states) {
+      List<BoxShadow> shadows = [];
       Color color = widget.status.lazyValueOf(
         defaultStatus: () {
-          if (states.contains(MaterialState.hovered) || states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
-            return colorScheme.brandColor;
-          }
           if (states.contains(MaterialState.disabled)) {
             return colorScheme.borderLevel2Color;
+          }
+          if (states.contains(MaterialState.hovered) || states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
+            if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
+              shadows = [BoxShadow(offset: const Offset(0, 0), blurRadius: 0, spreadRadius: 2, color: colorScheme.brandColorFocus)];
+            }
+            return colorScheme.brandColor;
           }
           return colorScheme.borderLevel2Color;
         },
         success: () {
+          if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
+            shadows = [BoxShadow(offset: const Offset(0, 0), blurRadius: 0, spreadRadius: 2, color: colorScheme.successColorFocus)];
+          }
           return colorScheme.successColor;
         },
         warning: () {
+          if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
+            shadows = [BoxShadow(offset: const Offset(0, 0), blurRadius: 0, spreadRadius: 2, color: colorScheme.warningColorFocus)];
+          }
           return colorScheme.warningColor;
         },
         error: () {
+          if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
+            shadows = [BoxShadow(offset: const Offset(0, 0), blurRadius: 0, spreadRadius: 2, color: colorScheme.errorColorFocus)];
+          }
           return colorScheme.errorColor;
         },
       );
-      return inputBorder(onePx, color);
+      return CustomOutlineInputBorder(
+        borderSide: BorderSide(width: onePx, color: color),
+        borderRadius: BorderRadius.circular(TVar.borderRadius),
+        shadows: shadows,
+      );
     });
 
     // 填充背景色
@@ -397,13 +414,6 @@ class _TInputState extends State<TInput> {
       small: TVar.fontSizeS,
       medium: TVar.fontSizeBase,
       large: TVar.fontSizeL,
-    );
-  }
-
-  OutlineInputBorder inputBorder(double width, Color color) {
-    return OutlineInputBorder(
-      borderSide: BorderSide(width: width, color: color),
-      borderRadius: BorderRadius.circular(TVar.borderRadius),
     );
   }
 
