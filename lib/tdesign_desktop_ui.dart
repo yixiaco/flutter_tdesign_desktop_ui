@@ -51,6 +51,10 @@ export 'src/components/radio/radio_group.dart';
 export 'src/components/input/input.dart';
 export 'src/components/input/custom_outline_input_border.dart';
 export 'src/components/input/input_theme.dart';
+/// 标签
+export 'src/components/tag/tag.dart';
+/// 文字提示
+export 'src/components/tooltip/tooltip.dart';
 /// 弹出层
 export 'src/components/popup/popup.dart';
 export 'src/components/popup/popup_theme.dart';

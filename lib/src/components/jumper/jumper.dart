@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:tdesign_desktop_ui/src/components/tooltip/tooltip.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// tips提示信息
