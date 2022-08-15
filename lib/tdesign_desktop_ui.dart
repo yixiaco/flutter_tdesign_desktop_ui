@@ -4,6 +4,7 @@ library tdesign_desktop_ui;
 export 'src/theme/theme.dart';
 export 'src/theme/theme_data.dart';
 export 'src/theme/color_scheme.dart';
+export 'src/theme/font_data.dart';
 export 'src/theme/color.dart';
 
 /// 基础组件
