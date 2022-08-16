@@ -39,6 +39,9 @@ export 'src/components/grid/grid.dart';
 export 'src/components/layout/layout.dart';
 /// 间距
 export 'src/components/space/space.dart';
+/// 下拉菜单
+export 'src/components/dropdown/dropdown.dart';
+export 'src/components/dropdown/dropdown_types.dart';
 /// 跳转
 export 'src/components/jumper/jumper.dart';
 /// 复选框

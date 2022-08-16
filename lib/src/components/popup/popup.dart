@@ -28,6 +28,7 @@ class TPopup extends StatefulWidget {
     this.backgroundColor,
     this.padding,
   })  : assert(!(content != null && builderContent != null), 'content和builderContent只能给定一个'),
+        assert(!(content == null && builderContent == null), 'content或builderContent不能为空'),
         super(key: key);
 
   /// 浮层出现位置
@@ -438,7 +439,7 @@ class _PopupPositionDelegate extends SingleChildLayoutDelegate {
         )!;
       } else {
         if (placement.isTrue(topLeft: true, bottomLeft: true)) {
-          final double normalizedTargetX = to.dx.clamp(margin, size.width - margin - childSize.width);
+          final double normalizedTargetX = to.dx.clamp(margin, (size.width - margin - childSize.width).clamp(margin, size.width));
           x = normalizedTargetX;
         } else if (placement.isTrue(topRight: true, bottomRight: true)) {
           var normalizedTargetRight = to.dx.clamp(margin, size.width - margin);
@@ -485,7 +486,7 @@ class _PopupPositionDelegate extends SingleChildLayoutDelegate {
         )!;
       } else {
         if (placement.isTrue(leftTop: true, rightTop: true)) {
-          final double normalizedTargetY = to.dy.clamp(margin, size.height - margin - childSize.height);
+          final double normalizedTargetY = to.dy.clamp(margin, (size.height - margin - childSize.height).clamp(margin, size.height));
           y = normalizedTargetY;
         } else if (placement.isTrue(leftBottom: true, rightBottom: true)) {
           var normalizedTargetY = to.dy.clamp(margin, size.height - margin);
