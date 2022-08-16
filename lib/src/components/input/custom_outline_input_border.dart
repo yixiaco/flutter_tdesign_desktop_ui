@@ -70,7 +70,7 @@ class CustomOutlineInputBorder extends OutlineInputBorder {
         borderRadius: BorderRadius.lerp(outline.borderRadius, borderRadius, t)!,
         borderSide: BorderSide.lerp(outline.borderSide, borderSide, t),
         gapPadding: outline.gapPadding,
-        shadows: outline.shadows,
+        shadows: Shadow.lerpList(outline.shadows, shadows, t)?.cast<BoxShadow>(),
       );
     }
     return super.lerpFrom(a, t);
@@ -84,7 +84,7 @@ class CustomOutlineInputBorder extends OutlineInputBorder {
         borderRadius: BorderRadius.lerp(borderRadius, outline.borderRadius, t)!,
         borderSide: BorderSide.lerp(borderSide, outline.borderSide, t),
         gapPadding: outline.gapPadding,
-        shadows: outline.shadows,
+        shadows: Shadow.lerpList(shadows, outline.shadows, t)?.cast<BoxShadow>(),
       );
     }
     return super.lerpTo(b, t);

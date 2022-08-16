@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// 单选框
+/// 单选框代表从一组互斥的选项中仅选择一个选项。
 class TRadio<T> extends StatefulWidget {
   const TRadio({
     Key? key,
@@ -37,8 +38,10 @@ class TRadio<T> extends StatefulWidget {
   /// 点击时触发
   final TCallback? onClick;
 
+  /// 焦点
   final FocusNode? focusNode;
 
+  /// 自动聚焦
   final bool autofocus;
 
   bool get _checked => checked == true;

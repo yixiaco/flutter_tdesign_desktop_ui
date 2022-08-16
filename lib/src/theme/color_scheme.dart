@@ -91,15 +91,55 @@ class TColorScheme {
 
   /// 品牌色 & 基础颜色
   final MaterialColor brandColor;
+  Color get brandColor1 => brandColor.shade50;
+  Color get brandColor2 => brandColor.shade100;
+  Color get brandColor3 => brandColor.shade200;
+  Color get brandColor4 => brandColor.shade300;
+  Color get brandColor5 => brandColor.shade400;
+  Color get brandColor6 => brandColor.shade500;
+  Color get brandColor7 => brandColor.shade600;
+  Color get brandColor8 => brandColor.shade700;
+  Color get brandColor9 => brandColor.shade800;
+  Color get brandColor10 => brandColor.shade900;
 
   /// 告警色 & 基础颜色
   final MaterialColor warningColor;
+  Color get warningColor1 => warningColor.shade50;
+  Color get warningColor2 => warningColor.shade100;
+  Color get warningColor3 => warningColor.shade200;
+  Color get warningColor4 => warningColor.shade300;
+  Color get warningColor5 => warningColor.shade400;
+  Color get warningColor6 => warningColor.shade500;
+  Color get warningColor7 => warningColor.shade600;
+  Color get warningColor8 => warningColor.shade700;
+  Color get warningColor9 => warningColor.shade800;
+  Color get warningColor10 => warningColor.shade900;
 
   /// 错误色 & 基础颜色
   final MaterialColor errorColor;
+  Color get errorColor1 => errorColor.shade50;
+  Color get errorColor2 => errorColor.shade100;
+  Color get errorColor3 => errorColor.shade200;
+  Color get errorColor4 => errorColor.shade300;
+  Color get errorColor5 => errorColor.shade400;
+  Color get errorColor6 => errorColor.shade500;
+  Color get errorColor7 => errorColor.shade600;
+  Color get errorColor8 => errorColor.shade700;
+  Color get errorColor9 => errorColor.shade800;
+  Color get errorColor10 => errorColor.shade900;
 
   /// 成功色 & 基础颜色
   final MaterialColor successColor;
+  Color get successColor1 => successColor.shade50;
+  Color get successColor2 => successColor.shade100;
+  Color get successColor3 => successColor.shade200;
+  Color get successColor4 => successColor.shade300;
+  Color get successColor5 => successColor.shade400;
+  Color get successColor6 => successColor.shade500;
+  Color get successColor7 => successColor.shade600;
+  Color get successColor8 => successColor.shade700;
+  Color get successColor9 => successColor.shade800;
+  Color get successColor10 => successColor.shade900;
 
   /// 灰色
   final Color gray1;

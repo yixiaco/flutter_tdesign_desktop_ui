@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// 输入框
+/// 用于承载用户信息录入的文本框，常用于表单、对话框等场景，对不同内容的信息录入，可拓展形成多种信息录入形式
 class TInput extends StatefulWidget {
   const TInput({
     Key? key,

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:tdesign_desktop_ui/src/components/tooltip/tooltip.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// tips提示信息
@@ -38,6 +37,7 @@ enum TJumperTrigger {
 }
 
 /// 跳转
+/// 用于上下翻页，适用于监控视图实例切换等
 class TJumper extends StatelessWidget {
   const TJumper({
     Key? key,

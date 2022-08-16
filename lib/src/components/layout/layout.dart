@@ -2,7 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// 布局
-/// 用于组织网页的框架结构
+/// 用于组织框架结构
 class TLayout extends StatelessWidget {
   const TLayout({
     Key? key,

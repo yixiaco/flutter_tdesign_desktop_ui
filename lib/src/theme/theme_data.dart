@@ -53,6 +53,7 @@ class TThemeData with Diagnosticable {
     TComponentSize? size,
     TextDirection? textDirection,
     String? fontFamily,
+    TFontData? fontData,
     TButtonThemeData? buttonThemeData,
     TCheckboxThemeData? checkboxThemeData,
     TInputThemeData? inputThemeData,
@@ -64,6 +65,7 @@ class TThemeData with Diagnosticable {
       size: size ?? TComponentSize.medium,
       textDirection: textDirection ?? TextDirection.ltr,
       fontFamily: fontFamily ?? 'Microsoft YaHei',
+      fontData: fontData ?? TFontData.defaultFontData(),
       buttonThemeData: buttonThemeData ?? const TButtonThemeData(),
       checkboxThemeData: checkboxThemeData ?? const TCheckboxThemeData(),
       inputThemeData: inputThemeData ?? const TInputThemeData(),
@@ -77,6 +79,7 @@ class TThemeData with Diagnosticable {
     required this.size,
     required this.textDirection,
     required this.fontFamily,
+    required this.fontData,
     required this.buttonThemeData,
     required this.checkboxThemeData,
     required this.inputThemeData,
@@ -97,6 +100,9 @@ class TThemeData with Diagnosticable {
 
   /// 字体
   final String fontFamily;
+
+  /// 字体相关
+  final TFontData fontData;
 
   /// 按钮主题数据
   final TButtonThemeData buttonThemeData;

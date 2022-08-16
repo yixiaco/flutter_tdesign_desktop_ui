@@ -23,6 +23,7 @@ enum TTooltipTheme {
 }
 
 /// 文字提示
+/// 用于文字提示的气泡框
 class TTooltip extends StatefulWidget {
   const TTooltip({
     Key? key,

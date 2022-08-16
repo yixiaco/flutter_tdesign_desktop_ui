@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// 弹出层
+/// 弹出层组件是其他弹窗类组件如气泡确认框实现的基础，当这些组件提供的能力不能满足定制需求时，可以在弹出层组件基础上封装
 class TPopup extends StatefulWidget {
   const TPopup({
     Key? key,

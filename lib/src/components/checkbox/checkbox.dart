@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
-/// 复选框
+/// 多选框
+/// 多选框是一个选择控件，允许用户通过单击在选中和未选中之间切换
 class TCheckbox<T> extends StatefulWidget {
   const TCheckbox({
     Key? key,
