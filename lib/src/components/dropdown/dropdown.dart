@@ -63,6 +63,7 @@ class TDropdown<T> extends StatelessWidget {
         maxHeight: maxHeight,
         options: options,
       ),
+      padding: const EdgeInsets.only(top: 4, bottom: 4, left: 4, right: 0),
       placement: placement,
       trigger: trigger,
       destroyOnClose: false,
@@ -100,9 +101,13 @@ class _TDropdownMenu<T> extends StatefulWidget {
 class _TDropdownMenuState<T> extends State<_TDropdownMenu<T>> {
   @override
   Widget build(BuildContext context) {
+    var theme = TTheme.of(context);
+    var colorScheme = theme.colorScheme;
+
     return DefaultTextStyle(
-      style: const TextStyle(
-        color: Colors.black,
+      style: TextStyle(
+        fontFamily: theme.fontFamily,
+        color: colorScheme.textColorPrimary,
         overflow: TextOverflow.ellipsis,
       ),
       child: ConstrainedBox(
@@ -112,9 +117,9 @@ class _TDropdownMenuState<T> extends State<_TDropdownMenu<T>> {
           maxHeight: widget.maxHeight,
         ),
         child: ScrollConfiguration(
-          behavior: const CupertinoScrollBehavior(),
+          behavior: const TScrollBehavior(),
           child: SingleChildScrollView(
-            padding: const EdgeInsets.only(right: 16),
+            padding: const EdgeInsets.only(right: 0),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -126,16 +131,6 @@ class _TDropdownMenuState<T> extends State<_TDropdownMenu<T>> {
             ),
           ),
         ),
-        // child: ListView.builder(
-        //   shrinkWrap: true,
-        //   addRepaintBoundaries: false,
-        //   itemBuilder: (context, index) {
-        //     return _TDropdownItem<T>(
-        //       option: widget.options[index],
-        //     );
-        //   },
-        //   itemCount: widget.options.length,
-        // ),
       ),
     );
   }
@@ -155,8 +150,34 @@ class _TDropdownItem<T> extends StatefulWidget {
 }
 
 class _TDropdownItemState<T> extends State<_TDropdownItem<T>> {
+  bool _isHovered = false;
+
+  _handleHovered(bool isHovered) {
+    setState(() {
+      _isHovered = isHovered;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return widget.option.content;
+    var theme = TTheme.of(context);
+    var colorScheme = theme.colorScheme;
+
+    return MouseRegion(
+      onEnter: (event) => _handleHovered(true),
+      onExit: (event) => _handleHovered(false),
+      cursor: SystemMouseCursors.click,
+      child: AnimatedContainer(
+        decoration: BoxDecoration(
+          color: _isHovered ? colorScheme.bgColorContainerHover : null,
+          borderRadius: BorderRadius.circular(3),
+        ),
+        margin: EdgeInsets.symmetric(vertical: TVar.spacer * .5, horizontal: TVar.spacer),
+        padding: EdgeInsets.symmetric(vertical: 9, horizontal: TVar.spacer),
+        duration: TVar.animDurationBase,
+        curve: TVar.animTimeFnEaseIn,
+        child: widget.option.content,
+      ),
+    );
   }
 }
