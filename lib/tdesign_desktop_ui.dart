@@ -54,6 +54,7 @@ export 'src/components/input/custom_outline_input_border.dart';
 export 'src/components/input/input_theme.dart';
 /// 标签
 export 'src/components/tag/tag.dart';
+export 'src/components/tag/check_tag.dart';
 /// 文字提示
 export 'src/components/tooltip/tooltip.dart';
 /// 弹出层

@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
-/// 间距组件
+/// 间距组件,控制组件之间的间距
 /// [breakLine]为true时，内部使用[Wrap]实现
 /// [breakLine]为false时，内部使用[Flex]实现
 class TSpace extends StatelessWidget {

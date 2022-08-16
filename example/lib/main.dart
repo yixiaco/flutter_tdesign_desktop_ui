@@ -1,4 +1,3 @@
-import 'package:example/components/input/input_example.dart';
 import 'package:example/components/tag/tag_example.dart';
 import 'package:example/state/semantics_state.dart';
 import 'package:example/state/size_state.dart';

@@ -10,27 +10,33 @@ class TagExample extends StatefulWidget {
 }
 
 class _TagExampleState extends State<TagExample> {
+  bool checked = false;
+
   @override
   Widget build(BuildContext context) {
-    return const TSpace(
+    return TSpace(
       direction: Axis.vertical,
       children: [
-        TSpace(
+        const TSpace(
           children: [
             TTag(
+              icon: Icon(TIcons.discountFilled),
               child: Text('标签'),
             ),
             TTag(
               closable: true,
+              theme: TTagTheme.link,
+              icon: Icon(TIcons.logoWecom),
               child: Text('标签'),
             ),
             TTag(
+              closable: true,
               disabled: true,
               child: Text('标签'),
             ),
           ],
         ),
-        TSpace(
+        const TSpace(
           children: [
             TTag(
               closable: true,
@@ -58,7 +64,7 @@ class _TagExampleState extends State<TagExample> {
             ),
           ],
         ),
-        TSpace(
+        const TSpace(
           children: [
             TTag(
               closable: true,
@@ -86,7 +92,7 @@ class _TagExampleState extends State<TagExample> {
             ),
           ],
         ),
-        TSpace(
+        const TSpace(
           children: [
             TTag(
               closable: true,
@@ -114,7 +120,7 @@ class _TagExampleState extends State<TagExample> {
             ),
           ],
         ),
-        TSpace(
+        const TSpace(
           children: [
             TTag(
               closable: true,
@@ -142,7 +148,7 @@ class _TagExampleState extends State<TagExample> {
             ),
           ],
         ),
-        TSpace(
+        const TSpace(
           children: [
             TTag(
               theme: TTagTheme.primary,
@@ -159,6 +165,24 @@ class _TagExampleState extends State<TagExample> {
               shape: TTagShape.mark,
               child: Text('标签一'),
             )
+          ],
+        ),
+        TSpace(
+          children: [
+            TCheckTag(
+              checked: checked,
+              child: const Text('标签一'),
+              onChange: (value) {
+                setState(() {
+                  checked = value;
+                });
+              },
+            ),
+            TCheckTag(
+              disabled: true,
+              checked: checked,
+              child: const Text('标签一'),
+            ),
           ],
         ),
       ],

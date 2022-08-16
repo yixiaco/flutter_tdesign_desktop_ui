@@ -37,6 +37,7 @@ enum TJumperTrigger {
 }
 
 /// 跳转
+/// 用于上下翻页，适用于监控视图实例切换等
 class TJumper extends StatelessWidget {
   const TJumper({
     Key? key,
