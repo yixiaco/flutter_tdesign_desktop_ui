@@ -12,6 +12,7 @@ class TDropdownExample extends StatefulWidget {
 class _TDropdownExampleState extends State<TDropdownExample> {
   List<TDropdownOption<int>> options = [
     TDropdownOption.text(content: '操作一'),
+    TDropdownOption.text(content: '操作二', disabled: true),
     TDropdownOption.text(content: '操作二'),
     TDropdownOption.text(content: '操作二'),
     TDropdownOption.text(content: '操作二'),
@@ -28,20 +29,33 @@ class _TDropdownExampleState extends State<TDropdownExample> {
     TDropdownOption.text(content: '操作二'),
     TDropdownOption.text(content: '操作二'),
     TDropdownOption.text(content: '操作二'),
-    TDropdownOption.text(content: '操作二'),
-    TDropdownOption.text(content: '操作二操作二操作二'),
+    TDropdownOption.text(content: '操作二操作二'),
+  ];
+
+  List<TDropdownOption<int>> options2 = [
+    TDropdownOption.text(content: '操作一'),
+    TDropdownOption.text(content: '操作二', disabled: true),
   ];
 
   @override
   Widget build(BuildContext context) {
     return TSpace(
-      direction: Axis.vertical,
+      direction: Axis.horizontal,
       children: [
         TDropdown<int>(
+          // maxColumnWidth: 300,
           options: options,
           child: const TButton(
-            themeStyle: TButtonThemeStyle.primary,
-            child: Text('更多'),
+            variant: TButtonVariant.outline,
+            child: Text('下拉菜单'),
+          ),
+        ),
+        TDropdown<int>(
+          // maxColumnWidth: 300,
+          options: options2,
+          minColumnWidth: 90,
+          child: const TButton(
+            child: Text('下拉菜单'),
           ),
         ),
       ],

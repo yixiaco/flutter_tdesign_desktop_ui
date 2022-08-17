@@ -17,6 +17,7 @@ class TDropdownOption<T> {
     this.disabled = false,
     this.divider = false,
     this.value,
+    this.children,
     this.onClick,
   });
 
@@ -35,6 +36,9 @@ class TDropdownOption<T> {
   /// 下拉操作项唯一标识
   final T? value;
 
+  /// 子选项
+  final List<TDropdownOption<T>>? children;
+
   /// 点击时触发
   final TValueChange<TDropdownOption<T>>? onClick;
 
@@ -45,6 +49,7 @@ class TDropdownOption<T> {
     bool disabled = false,
     bool divider = false,
     T? value,
+    List<TDropdownOption<T>>? children,
     TValueChange<TDropdownOption<T>>? onClick,
   }) {
     return TDropdownOption<T>(
@@ -53,6 +58,7 @@ class TDropdownOption<T> {
       disabled: disabled,
       divider: divider,
       value: value,
+      children: children,
       onClick: onClick,
     );
   }
