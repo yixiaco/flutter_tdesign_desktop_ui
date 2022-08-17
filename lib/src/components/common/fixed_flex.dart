@@ -30,136 +30,19 @@ bool? _startIsTopLeft(Axis direction, TextDirection? textDirection, VerticalDire
 /// 固定交叉轴的Flex组件
 /// 组件会先绘制一遍子布局的大小，得到最大组件宽度，然后强制应用到所有其他子组件中
 /// 这个类可能是昂贵的，因此应首先考虑使用[Flex]，而不是[FixedCrossFlex]
-class FixedCrossFlex extends MultiChildRenderObjectWidget {
+class FixedCrossFlex extends Flex {
   FixedCrossFlex({
-    Key? key,
-    required this.direction,
-    this.mainAxisAlignment = MainAxisAlignment.start,
-    this.mainAxisSize = MainAxisSize.max,
-    this.textDirection,
-    this.verticalDirection = VerticalDirection.down,
-    this.textBaseline, // NO DEFAULT: we don't know what the text's baseline should be
-    this.clipBehavior = Clip.none,
-    List<Widget> children = const <Widget>[],
-  }) : super(key: key, children: children);
-
-  /// The direction to use as the main axis.
-  ///
-  /// If you know the axis in advance, then consider using a [Row] (if it's
-  /// horizontal) or [Column] (if it's vertical) instead of a [Flex], since that
-  /// will be less verbose. (For [Row] and [Column] this property is fixed to
-  /// the appropriate axis.)
-  final Axis direction;
-
-  /// How the children should be placed along the main axis.
-  ///
-  /// For example, [MainAxisAlignment.start], the default, places the children
-  /// at the start (i.e., the left for a [Row] or the top for a [Column]) of the
-  /// main axis.
-  final MainAxisAlignment mainAxisAlignment;
-
-  /// How much space should be occupied in the main axis.
-  ///
-  /// After allocating space to children, there might be some remaining free
-  /// space. This value controls whether to maximize or minimize the amount of
-  /// free space, subject to the incoming layout constraints.
-  ///
-  /// If some children have a non-zero flex factors (and none have a fit of
-  /// [FlexFit.loose]), they will expand to consume all the available space and
-  /// there will be no remaining free space to maximize or minimize, making this
-  /// value irrelevant to the final layout.
-  final MainAxisSize mainAxisSize;
-
-  /// Determines the order to lay children out horizontally and how to interpret
-  /// `start` and `end` in the horizontal direction.
-  ///
-  /// Defaults to the ambient [Directionality].
-  ///
-  /// If [textDirection] is [TextDirection.rtl], then the direction in which
-  /// text flows starts from right to left. Otherwise, if [textDirection] is
-  /// [TextDirection.ltr], then the direction in which text flows starts from
-  /// left to right.
-  ///
-  /// If the [direction] is [Axis.horizontal], this controls the order in which
-  /// the children are positioned (left-to-right or right-to-left), and the
-  /// meaning of the [mainAxisAlignment] property's [MainAxisAlignment.start] and
-  /// [MainAxisAlignment.end] values.
-  ///
-  /// If the [direction] is [Axis.horizontal], and either the
-  /// [mainAxisAlignment] is either [MainAxisAlignment.start] or
-  /// [MainAxisAlignment.end], or there's more than one child, then the
-  /// [textDirection] (or the ambient [Directionality]) must not be null.
-  ///
-  /// If the [direction] is [Axis.vertical], this controls the meaning of the
-  /// [crossAxisAlignment] property's [CrossAxisAlignment.start] and
-  /// [CrossAxisAlignment.end] values.
-  ///
-  /// If the [direction] is [Axis.vertical], and the [crossAxisAlignment] is
-  /// either [CrossAxisAlignment.start] or [CrossAxisAlignment.end], then the
-  /// [textDirection] (or the ambient [Directionality]) must not be null.
-  final TextDirection? textDirection;
-
-  /// Determines the order to lay children out vertically and how to interpret
-  /// `start` and `end` in the vertical direction.
-  ///
-  /// Defaults to [VerticalDirection.down].
-  ///
-  /// If the [direction] is [Axis.vertical], this controls which order children
-  /// are painted in (down or up), the meaning of the [mainAxisAlignment]
-  /// property's [MainAxisAlignment.start] and [MainAxisAlignment.end] values.
-  ///
-  /// If the [direction] is [Axis.vertical], and either the [mainAxisAlignment]
-  /// is either [MainAxisAlignment.start] or [MainAxisAlignment.end], or there's
-  /// more than one child, then the [verticalDirection] must not be null.
-  ///
-  /// If the [direction] is [Axis.horizontal], this controls the meaning of the
-  /// [crossAxisAlignment] property's [CrossAxisAlignment.start] and
-  /// [CrossAxisAlignment.end] values.
-  ///
-  /// If the [direction] is [Axis.horizontal], and the [crossAxisAlignment] is
-  /// either [CrossAxisAlignment.start] or [CrossAxisAlignment.end], then the
-  /// [verticalDirection] must not be null.
-  final VerticalDirection verticalDirection;
-
-  /// If aligning items according to their baseline, which baseline to use.
-  ///
-  /// This must be set if using baseline alignment. There is no default because there is no
-  /// way for the framework to know the correct baseline _a priori_.
-  final TextBaseline? textBaseline;
-
-  /// {@macro flutter.material.Material.clipBehavior}
-  ///
-  /// Defaults to [Clip.none].
-  final Clip clipBehavior;
-
-  bool get _needTextDirection {
-    switch (direction) {
-      case Axis.horizontal:
-        return true; // because it affects the layout order.
-      case Axis.vertical:
-        return true;
-    }
-  }
-
-  /// The value to pass to [RenderFlex.textDirection].
-  ///
-  /// This value is derived from the [textDirection] property and the ambient
-  /// [Directionality]. The value is null if there is no need to specify the
-  /// text direction. In practice there's always a need to specify the direction
-  /// except for vertical flexes (e.g. [Column]s) whose [crossAxisAlignment] is
-  /// not dependent on the text direction (not `start` or `end`). In particular,
-  /// a [Row] always needs a text direction because the text direction controls
-  /// its layout order. (For [Column]s, the layout order is controlled by
-  /// [verticalDirection], which is always specified as it does not depend on an
-  /// inherited widget and defaults to [VerticalDirection.down].)
-  ///
-  /// This method exists so that subclasses of [Flex] that create their own
-  /// render objects that are derived from [RenderFlex] can do so and still use
-  /// the logic for providing a text direction only when it is necessary.
-  @protected
-  TextDirection? getEffectiveTextDirection(BuildContext context) {
-    return textDirection ?? (_needTextDirection ? Directionality.maybeOf(context) : null);
-  }
+    super.key,
+    required super.direction,
+    super.mainAxisAlignment = MainAxisAlignment.start,
+    super.mainAxisSize = MainAxisSize.max,
+    super.crossAxisAlignment = CrossAxisAlignment.center,
+    super.textDirection,
+    super.verticalDirection = VerticalDirection.down,
+    super.textBaseline, // NO DEFAULT: we don't know what the text's baseline should be
+    super.clipBehavior = Clip.none,
+    super.children = const <Widget>[],
+  });
 
   @override
   RenderFixedCrossFlex createRenderObject(BuildContext context) {
@@ -167,6 +50,7 @@ class FixedCrossFlex extends MultiChildRenderObjectWidget {
       direction: direction,
       mainAxisAlignment: mainAxisAlignment,
       mainAxisSize: mainAxisSize,
+      crossAxisAlignment: crossAxisAlignment,
       textDirection: getEffectiveTextDirection(context),
       verticalDirection: verticalDirection,
       textBaseline: textBaseline,
@@ -180,21 +64,11 @@ class FixedCrossFlex extends MultiChildRenderObjectWidget {
       ..direction = direction
       ..mainAxisAlignment = mainAxisAlignment
       ..mainAxisSize = mainAxisSize
+      ..crossAxisAlignment = crossAxisAlignment
       ..textDirection = getEffectiveTextDirection(context)
       ..verticalDirection = verticalDirection
       ..textBaseline = textBaseline
       ..clipBehavior = clipBehavior;
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(EnumProperty<Axis>('direction', direction));
-    properties.add(EnumProperty<MainAxisAlignment>('mainAxisAlignment', mainAxisAlignment));
-    properties.add(EnumProperty<MainAxisSize>('mainAxisSize', mainAxisSize, defaultValue: MainAxisSize.max));
-    properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
-    properties.add(EnumProperty<VerticalDirection>('verticalDirection', verticalDirection, defaultValue: VerticalDirection.down));
-    properties.add(EnumProperty<TextBaseline>('textBaseline', textBaseline, defaultValue: null));
   }
 }
 
@@ -213,6 +87,7 @@ class RenderFixedCrossFlex extends RenderFlex {
 
   // Set during layout if overflow occurred on the main axis.
   double _overflow = 0;
+
   // Check whether any meaningful overflow is present. Values below an epsilon
   // are treated as not overflowing.
   bool get _hasOverflow => _overflow > precisionErrorTolerance;
@@ -228,23 +103,23 @@ class RenderFixedCrossFlex extends RenderFlex {
           break;
       }
     }
-    if (mainAxisAlignment == MainAxisAlignment.start ||
-        mainAxisAlignment == MainAxisAlignment.end) {
+    if (mainAxisAlignment == MainAxisAlignment.start || mainAxisAlignment == MainAxisAlignment.end) {
       switch (direction) {
         case Axis.horizontal:
-          assert(textDirection != null, 'Horizontal $runtimeType with $mainAxisAlignment has a null textDirection, so the alignment cannot be resolved.');
+          assert(textDirection != null,
+              'Horizontal $runtimeType with $mainAxisAlignment has a null textDirection, so the alignment cannot be resolved.');
           break;
         case Axis.vertical:
           break;
       }
     }
-    if (crossAxisAlignment == CrossAxisAlignment.start ||
-        crossAxisAlignment == CrossAxisAlignment.end) {
+    if (crossAxisAlignment == CrossAxisAlignment.start || crossAxisAlignment == CrossAxisAlignment.end) {
       switch (direction) {
         case Axis.horizontal:
           break;
         case Axis.vertical:
-          assert(textDirection != null, 'Vertical $runtimeType with $crossAxisAlignment has a null textDirection, so the alignment cannot be resolved.');
+          assert(
+              textDirection != null, 'Vertical $runtimeType with $crossAxisAlignment has a null textDirection, so the alignment cannot be resolved.');
           break;
       }
     }
@@ -269,11 +144,12 @@ class RenderFixedCrossFlex extends RenderFlex {
             error = ErrorSummary('RenderFlex children have non-zero flex but incoming $dimension constraints are unbounded.');
             message = ErrorDescription(
               'When a $identity is in a parent that does not provide a finite $dimension constraint, for example '
-                  'if it is in a $axis scrollable, it will try to shrink-wrap its children along the $axis '
-                  'axis. Setting a flex on a child (e.g. using Expanded) indicates that the child is to '
-                  'expand to fill the remaining space in the $axis direction.',
+              'if it is in a $axis scrollable, it will try to shrink-wrap its children along the $axis '
+              'axis. Setting a flex on a child (e.g. using Expanded) indicates that the child is to '
+              'expand to fill the remaining space in the $axis direction.',
             );
-            if (reportParentConstraints) { // Constraints of parents are unavailable in dry layout.
+            if (reportParentConstraints) {
+              // Constraints of parents are unavailable in dry layout.
               RenderBox? node = this;
               switch (direction) {
                 case Axis.horizontal:
@@ -306,26 +182,26 @@ class RenderFixedCrossFlex extends RenderFlex {
             message,
             ErrorDescription(
               'These two directives are mutually exclusive. If a parent is to shrink-wrap its child, the child '
-                  'cannot simultaneously expand to fit its parent.',
+              'cannot simultaneously expand to fit its parent.',
             ),
             ErrorHint(
               'Consider setting mainAxisSize to MainAxisSize.min and using FlexFit.loose fits for the flexible '
-                  'children (using Flexible rather than Expanded). This will allow the flexible children '
-                  'to size themselves to less than the infinite remaining space they would otherwise be '
-                  'forced to take, and then will cause the RenderFlex to shrink-wrap the children '
-                  'rather than expanding to fit the maximum constraints provided by the parent.',
+              'children (using Flexible rather than Expanded). This will allow the flexible children '
+              'to size themselves to less than the infinite remaining space they would otherwise be '
+              'forced to take, and then will cause the RenderFlex to shrink-wrap the children '
+              'rather than expanding to fit the maximum constraints provided by the parent.',
             ),
             ErrorDescription(
               'If this message did not help you determine the problem, consider using debugDumpRenderTree():\n'
-                  '  https://flutter.dev/debugging/#rendering-layer\n'
-                  '  http://api.flutter.dev/flutter/rendering/debugDumpRenderTree.html',
+              '  https://flutter.dev/debugging/#rendering-layer\n'
+              '  http://api.flutter.dev/flutter/rendering/debugDumpRenderTree.html',
             ),
             describeForError('The affected RenderFlex is', style: DiagnosticsTreeStyle.errorProperty),
             DiagnosticsProperty<dynamic>('The creator information is set to', debugCreator, style: DiagnosticsTreeStyle.errorProperty),
             ...addendum,
             ErrorDescription(
               "If none of the above helps enough to fix this problem, please don't hesitate to file a bug:\n"
-                  '  https://github.com/flutter/flutter/issues/new?template=2_bug.md',
+              '  https://github.com/flutter/flutter/issues/new?template=2_bug.md',
             ),
           ]);
           return true;
@@ -603,10 +479,10 @@ class RenderFixedCrossFlex extends RenderFlex {
       switch (crossAxisAlignment) {
         case CrossAxisAlignment.start:
         case CrossAxisAlignment.end:
-          childCrossPosition = _startIsTopLeft(flipAxis(direction), textDirection, verticalDirection)
-              == (crossAxisAlignment == CrossAxisAlignment.start)
-              ? 0.0
-              : crossSize - _getCrossSize(child.size);
+          childCrossPosition =
+              _startIsTopLeft(flipAxis(direction), textDirection, verticalDirection) == (crossAxisAlignment == CrossAxisAlignment.start)
+                  ? 0.0
+                  : crossSize - _getCrossSize(child.size);
           break;
         case CrossAxisAlignment.center:
           childCrossPosition = crossSize / 2.0 - _getCrossSize(child.size) / 2.0;
@@ -650,11 +526,17 @@ class RenderFixedCrossFlex extends RenderFlex {
 
   /// 重置子组件布局大小
   void resetChildConstraints(LayoutSizes sizes, BoxConstraints constraints) {
-    double maxWidth = sizes.crossSize;
     var list = getChildrenAsList();
     for (var child in list) {
-      if (child.size.width < maxWidth) {
-        ChildLayoutHelper.layoutChild(child, constraints.copyWith(minWidth: maxWidth, maxWidth: maxWidth));
+      if (child.size.width < sizes.crossSize) {
+        switch (direction) {
+          case Axis.horizontal:
+            ChildLayoutHelper.layoutChild(child, constraints.copyWith(minHeight: sizes.crossSize, maxHeight: sizes.crossSize));
+            break;
+          case Axis.vertical:
+            ChildLayoutHelper.layoutChild(child, constraints.copyWith(minWidth: sizes.crossSize, maxWidth: sizes.crossSize));
+            break;
+        }
       }
     }
   }
@@ -695,20 +577,20 @@ class RenderFixedCrossFlex extends RenderFlex {
         ),
         ErrorDescription(
           'The edge of the $runtimeType that is overflowing has been marked '
-              'in the rendering with a yellow and black striped pattern. This is '
-              'usually caused by the contents being too big for the $runtimeType.',
+          'in the rendering with a yellow and black striped pattern. This is '
+          'usually caused by the contents being too big for the $runtimeType.',
         ),
         ErrorHint(
           'Consider applying a flex factor (e.g. using an Expanded widget) to '
-              'force the children of the $runtimeType to fit within the available '
-              'space instead of being sized to their natural size.',
+          'force the children of the $runtimeType to fit within the available '
+          'space instead of being sized to their natural size.',
         ),
         ErrorHint(
           'This is considered an error condition because it indicates that there '
-              'is content that cannot be seen. If the content is legitimately bigger '
-              'than the available space, consider clipping it with a ClipRect widget '
-              'before putting it in the flex, or using a scrollable container rather '
-              'than a Flex, like a ListView.',
+          'is content that cannot be seen. If the content is legitimately bigger '
+          'than the available space, consider clipping it with a ClipRect widget '
+          'before putting it in the flex, or using a scrollable container rather '
+          'than a Flex, like a ListView.',
         ),
       ];
 

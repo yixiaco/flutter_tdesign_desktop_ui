@@ -240,7 +240,7 @@ class _TTagState extends State<TTag> {
       case TTagShape.square:
         decoration = BoxDecoration(
           color: backgroundColor,
-          borderRadius: BorderRadius.circular(TVar.borderRadius),
+          borderRadius: BorderRadius.circular(TVar.borderRadiusDefault),
         );
         break;
       case TTagShape.round:

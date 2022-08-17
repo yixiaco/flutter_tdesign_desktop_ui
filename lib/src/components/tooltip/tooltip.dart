@@ -110,12 +110,14 @@ class _TTooltipState extends State<TTooltip> {
     var padding = widget.padding ?? EdgeInsets.symmetric(horizontal: TVar.spacer, vertical: TVar.spacerS);
 
     return TPopup(
-      backgroundColor: backgroundColor,
+      style: TPopupStyle(
+        backgroundColor: backgroundColor,
+        padding: padding,
+      ),
       showArrow: widget.showArrow,
       placement: widget.placement,
       destroyOnClose: widget.destroyOnClose,
       trigger: widget.trigger,
-      padding: padding,
       content: Text(
         widget.message!,
         style: TextStyle(

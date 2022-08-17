@@ -25,8 +25,7 @@ class TPopup extends StatefulWidget {
     this.hideDuration = const Duration(milliseconds: 150),
     this.destroyOnClose = true,
     this.builderContent,
-    this.backgroundColor,
-    this.padding,
+    this.style,
   })  : assert(!(content != null && builderContent != null), 'content和builderContent只能给定一个'),
         assert(!(content == null && builderContent == null), 'content或builderContent不能为空'),
         super(key: key);
@@ -73,11 +72,8 @@ class TPopup extends StatefulWidget {
   /// 使用build创建浮层
   final WidgetBuilder? builderContent;
 
-  /// 浮层背景色
-  final Color? backgroundColor;
-
-  /// 浮层内边距
-  final EdgeInsetsGeometry? padding;
+  /// 浮层样式
+  final TPopupStyle? style;
 
   @override
   State<TPopup> createState() => TPopupState();
@@ -591,17 +587,20 @@ class _PopupOverlayState extends State<_PopupOverlay> {
 
     TPopup currentPopupWidget = widget.popupState.widget;
 
+    // 浮层样式
+    var style = currentPopupWidget.style ?? popupTheme.style;
+
     // 浮层背景色
-    var bgColorContainer = currentPopupWidget.backgroundColor ?? popupTheme.backgroundColor ?? colorScheme.bgColorContainer;
+    var bgColorContainer = style?.backgroundColor ?? colorScheme.bgColorContainer;
     // 浮层内边距
-    var padding = currentPopupWidget.padding ?? popupTheme.padding ?? EdgeInsets.symmetric(vertical: 4, horizontal: TVar.spacer);
+    var padding = style?.padding ?? EdgeInsets.symmetric(vertical: 4, horizontal: TVar.spacer);
 
     // 当小部件完全不显示时，忽略所有事件
     Widget result = ValueListenableBuilder<bool>(
       builder: (BuildContext context, value, Widget? child) {
         return DefaultTextStyle(
           style: TextStyle(
-            fontSize: TVar.fontSizeBase,
+            fontSize: theme.fontData.fontSizeBase,
             fontFamily: theme.fontFamily,
             color: colorScheme.textColorPrimary,
           ),
@@ -618,8 +617,14 @@ class _PopupOverlayState extends State<_PopupOverlay> {
         child: ValueListenableBuilder(
           valueListenable: _isReverse,
           builder: (BuildContext context, bool value, Widget? child) {
-            return Container(
+            return AnimatedContainer(
+              margin: style?.margin,
               clipBehavior: Clip.antiAlias,
+              width: style?.width,
+              height: style?.height,
+              constraints: style?.constraints,
+              transform: style?.transform,
+              transformAlignment: style?.transformAlignment,
               decoration: ShapeDecoration(
                 color: bgColorContainer,
                 shadows: [...popupShadow, ...popupTopArrowShadow, ...popupRightArrowShadow, ...popupBottomArrowShadow, ...popupLeftArrowShadow],
@@ -636,7 +641,8 @@ class _PopupOverlayState extends State<_PopupOverlay> {
                           bottom: value ? BubbleDirection.bottom : BubbleDirection.top,
                         )
                       : BubbleDirection.none,
-                  radius: BorderRadius.circular(TVar.borderRadius),
+                  radius: style?.radius ?? BorderRadius.circular(TVar.borderRadiusDefault),
+                  border: style?.border,
                   position: currentPopupWidget.placement.valueOf(
                     topLeft: () => BubblePosition.start(popupContentArrowSpacer),
                     top: () => const BubblePosition.center(0),
@@ -654,6 +660,7 @@ class _PopupOverlayState extends State<_PopupOverlay> {
                 ),
               ),
               padding: padding,
+              duration: TVar.animDurationBase,
               child: child,
             );
           },

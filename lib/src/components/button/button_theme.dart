@@ -71,6 +71,18 @@ class TButtonThemeData with Diagnosticable {
   @override
   int get hashCode =>
       baseStyle.hashCode ^ outlineStyle.hashCode ^ dashedStyle.hashCode ^ textStyle.hashCode ^ themeStyle.hashCode ^ ghost.hashCode ^ size.hashCode;
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<ButtonStyle>('baseStyle', baseStyle, defaultValue: null));
+    properties.add(DiagnosticsProperty<ButtonStyle>('outlineStyle', outlineStyle, defaultValue: null));
+    properties.add(DiagnosticsProperty<ButtonStyle>('dashedStyle', dashedStyle, defaultValue: null));
+    properties.add(DiagnosticsProperty<ButtonStyle>('textStyle', textStyle, defaultValue: null));
+    properties.add(DiagnosticsProperty<TButtonThemeStyle>('themeStyle', themeStyle, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('ghost', ghost, defaultValue: null));
+    properties.add(DiagnosticsProperty<TComponentSize>('size', size, defaultValue: null));
+  }
 }
 
 /// 按钮主题
@@ -99,7 +111,6 @@ class TButtonTheme extends InheritedTheme {
     return TButtonTheme(data: data, child: child);
   }
 }
-
 
 ///按钮变体枚举
 enum TButtonVariant {

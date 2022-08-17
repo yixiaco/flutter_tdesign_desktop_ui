@@ -197,7 +197,7 @@ class _THollowState extends State<THollow> {
     return CustomPaint(
       foregroundPainter: _HollowPainter(
         keys: _keys,
-        radius: widget.radius ?? TVar.borderRadius,
+        radius: widget.radius ?? TVar.borderRadiusDefault,
         strokeWidth: strokeWidth,
         colors: colors,
         priority: priority,
@@ -266,11 +266,11 @@ class _HollowPainter extends CustomPainter {
     var isLast = i == keys.length - 1;
     Size childSize = keys[i].currentContext!.size!;
     if (i == 0) {
-      topLeft = Radius.circular(TVar.borderRadius);
-      bottomLeft = Radius.circular(TVar.borderRadius);
+      topLeft = Radius.circular(TVar.borderRadiusDefault);
+      bottomLeft = Radius.circular(TVar.borderRadiusDefault);
     } else if (isLast) {
-      topRight = Radius.circular(TVar.borderRadius);
-      bottomRight = Radius.circular(TVar.borderRadius);
+      topRight = Radius.circular(TVar.borderRadiusDefault);
+      bottomRight = Radius.circular(TVar.borderRadiusDefault);
     }
 
     paint.color = colors[i];

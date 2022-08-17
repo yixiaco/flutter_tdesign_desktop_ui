@@ -222,7 +222,7 @@ class _TRadioGroupState<T> extends State<TRadioGroup<T>> with SingleTickerProvid
       padding: const EdgeInsets.all(2),
       decoration: BoxDecoration(
         color: colorScheme.bgColorComponent,
-        borderRadius: BorderRadius.circular(TVar.borderRadius),
+        borderRadius: BorderRadius.circular(TVar.borderRadiusDefault),
       ),
       child: CustomPaint(
         painter: _indicatorPainter
@@ -330,7 +330,7 @@ class _TRadioGroupState<T> extends State<TRadioGroup<T>> with SingleTickerProvid
     });
     return THollow(
       breakLine: true,
-      radius: TVar.borderRadius,
+      radius: TVar.borderRadiusDefault,
       color: effectiveBorderColor,
       children: box,
     );
@@ -392,7 +392,7 @@ class _IndicatorBlockPainter extends AnimationChangeNotifierPainter {
     if (index == -1) {
       if (_currentRect != null) {
         var rect = Rect.lerp(_currentRect!.center & Size.zero, _currentRect, t.value);
-        canvas.drawRRect(RRect.fromRectAndRadius(rect!, Radius.circular(TVar.borderRadius)), paint);
+        canvas.drawRRect(RRect.fromRectAndRadius(rect!, Radius.circular(TVar.borderRadiusDefault)), paint);
         if (t.value == 0) {
           _currentRect = null;
         }
@@ -407,7 +407,7 @@ class _IndicatorBlockPainter extends AnimationChangeNotifierPainter {
     var oldRect = _oldRect ?? _currentRect!.center & Size.zero;
     var rect = Rect.lerp(oldRect, _currentRect, t.value);
 
-    canvas.drawRRect(RRect.fromRectAndRadius(rect!, Radius.circular(TVar.borderRadius)), paint);
+    canvas.drawRRect(RRect.fromRectAndRadius(rect!, Radius.circular(TVar.borderRadiusDefault)), paint);
   }
 }
 

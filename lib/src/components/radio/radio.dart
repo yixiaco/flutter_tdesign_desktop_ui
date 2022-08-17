@@ -142,7 +142,7 @@ class _TRadioState<T> extends State<TRadio<T>> with TickerProviderStateMixin, TT
         padding: EdgeInsets.symmetric(horizontal: TVar.spacer),
         child: DefaultTextStyle(
           style: TextStyle(
-            fontSize: TVar.fontSizeBase,
+            fontSize: theme.fontData.fontSizeBase,
             color: widget.disabled ? colorScheme.textColorDisabled : colorScheme.textColorPrimary,
           ),
           child: label,

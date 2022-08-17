@@ -54,6 +54,9 @@ class TDropdown<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var theme = TTheme.of(context);
+    var colorScheme = theme.colorScheme;
+
     return TPopup(
       disabled: disabled,
       content: _TDropdownMenu<T>(
@@ -62,7 +65,13 @@ class TDropdown<T> extends StatelessWidget {
         maxHeight: maxHeight,
         options: options,
       ),
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      style: TPopupStyle(
+          backgroundColor: colorScheme.bgColorContainer,
+          padding: EdgeInsets.zero,
+          border: BubbleBoxBorder(
+            width: 1 / MediaQuery.of(context).devicePixelRatio,
+            color: colorScheme.borderLevel2Color,
+          )),
       placement: placement,
       trigger: trigger,
       child: child,
@@ -101,37 +110,108 @@ class _TDropdownMenu<T> extends StatefulWidget {
 }
 
 class _TDropdownMenuState<T> extends State<_TDropdownMenu<T>> {
+  List<TDropdownOption<T>> levelOptions = [];
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    levelOptions.clear();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    levelOptions.clear();
+  }
+
   @override
   Widget build(BuildContext context) {
     // var theme = TTheme.of(context);
     // var colorScheme = theme.colorScheme;
 
+    List<Widget> menus = [];
+    // root
+    menus.add(buildMenu(widget.options, 0));
+    menus.addAll(List.generate(levelOptions.length, (index) => buildMenu(levelOptions[index].children!, index + 1)));
+
+    var list = menus
+        .expand((element) => [
+              element,
+              const TDivider(
+                layout: Axis.vertical,
+                space: 0,
+                margin: EdgeInsets.symmetric(vertical: 0, horizontal: 2),
+              )
+            ])
+        .toList();
+    list.removeLast();
+
+    return FixedCrossFlex(
+      mainAxisSize: MainAxisSize.min,
+      direction: Axis.horizontal,
+      children: list,
+    );
+  }
+
+  ConstrainedBox buildMenu(List<TDropdownOption<T>> options, int level) {
     return ConstrainedBox(
       constraints: BoxConstraints(
         minWidth: widget.minColumnWidth,
         maxWidth: widget.maxColumnWidth,
         maxHeight: widget.maxHeight,
       ),
-      child: ScrollConfiguration(
-        behavior: const TScrollBehavior(),
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.only(right: 0),
-          child: FixedCrossFlex(
-            mainAxisSize: MainAxisSize.min,
-            // crossAxisAlignment: CrossAxisAlignment.start,
-            direction: Axis.vertical,
-            children: List.generate(widget.options.length, (index) {
-              var option = widget.options[index];
-              return _TDropdownItem<T>(
-                option: option,
-                onPressed: () {
-                  option.onClick?.call(option);
-                  widget.onClick?.call(option);
-                },
-                minColumnWidth: widget.minColumnWidth,
-                maxColumnWidth: widget.maxColumnWidth,
-              );
-            }),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: ScrollConfiguration(
+          behavior: const TScrollBehavior(),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.only(right: 2),
+            child: FixedCrossFlex(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              direction: Axis.vertical,
+              children: List.generate(options.length, (index) {
+                var option = options[index];
+                return _TDropdownItem<T>(
+                  option: option,
+                  onHover: (hover) {
+                    if (hover) {
+                      if (levelOptions.length > level) {
+                        setState(() {
+                          levelOptions.removeRange(level, levelOptions.length);
+                        });
+                      }
+                      if (option.children?.isNotEmpty ?? false) {
+                        setState(() {
+                          levelOptions.add(option);
+                        });
+                      }
+                    }
+                  },
+                  onPressed: () {
+                    widget.onClick?.call(option);
+                    option.onClick?.call(option);
+                  },
+                  minColumnWidth: widget.minColumnWidth,
+                  maxColumnWidth: widget.maxColumnWidth,
+                );
+              }).expand((element) {
+                var list = <Widget>[element];
+                if (element.option.divider) {
+                  // 让组件被自动拉伸
+                  list.add(const TDivider(
+                    space: 0,
+                    margin: EdgeInsets.symmetric(vertical: 4),
+                  ));
+                }
+                return list;
+              }).toList(),
+            ),
           ),
         ),
       ),
@@ -148,7 +228,11 @@ class _TDropdownItem<T> extends StatefulWidget {
     this.onHover,
     required this.maxColumnWidth,
     required this.minColumnWidth,
+    this.parent,
   }) : super(key: key);
+
+  /// 父选项数据
+  final TDropdownOption<T>? parent;
 
   /// 选项数据
   final TDropdownOption<T> option;
@@ -188,14 +272,14 @@ class _TDropdownItemState<T> extends State<_TDropdownItem<T>> with MaterialState
     var colorScheme = theme.colorScheme;
 
     var effectiveCursor = MaterialStateProperty.resolveWith((states) {
-      if(states.contains(MaterialState.disabled)){
+      if (states.contains(MaterialState.disabled)) {
         return SystemMouseCursors.noDrop;
       }
       return SystemMouseCursors.click;
     });
 
     var effectiveTextColor = MaterialStateProperty.resolveWith((states) {
-      if(states.contains(MaterialState.disabled)){
+      if (states.contains(MaterialState.disabled)) {
         return colorScheme.textColorDisabled;
       }
       return colorScheme.textColorPrimary;
@@ -212,6 +296,14 @@ class _TDropdownItemState<T> extends State<_TDropdownItem<T>> with MaterialState
       return null;
     });
 
+    var children = <Widget>[widget.option.content];
+    if (widget.option.children?.isNotEmpty ?? false) {
+      children.add(Icon(
+        TIcons.chevronRight,
+        size: theme.fontData.fontSizeL,
+        color: effectiveTextColor.resolve(materialStates),
+      ));
+    }
     return ConstrainedBox(
       constraints: BoxConstraints(
         minWidth: widget.minColumnWidth,
@@ -240,13 +332,17 @@ class _TDropdownItemState<T> extends State<_TDropdownItem<T>> with MaterialState
             canRequestFocus: !widget.option.disabled,
             splashFactory: InkBevelAngle.splashFactory,
             overlayColor: overlayColor,
-            borderRadius: BorderRadius.circular(3),
+            borderRadius: BorderRadius.circular(TVar.borderRadiusDefault),
             highlightColor: Colors.transparent,
             child: AnimatedPadding(
               padding: EdgeInsets.symmetric(vertical: 9, horizontal: TVar.spacer),
               duration: TVar.animDurationBase,
               curve: TVar.animTimeFnEaseIn,
-              child: widget.option.content,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: children,
+              ),
             ),
           ),
         ),

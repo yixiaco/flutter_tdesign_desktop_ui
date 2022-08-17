@@ -173,7 +173,7 @@ class _TCheckboxState<T> extends State<TCheckbox<T>> with SingleTickerProviderSt
         padding: EdgeInsets.symmetric(horizontal: TVar.spacer),
         child: DefaultTextStyle(
           style: TextStyle(
-            fontSize: TVar.fontSizeBase,
+            fontSize: theme.fontData.fontSizeBase,
             color: widget.disabled ? colorScheme.textColorDisabled : colorScheme.textColorPrimary,
           ),
           child: label,
@@ -209,7 +209,7 @@ class _TCheckboxState<T> extends State<TCheckbox<T>> with SingleTickerProviderSt
                   decoration: ShapeDecoration(
                     shape: TRoundedRectangleBorder(
                       side: effectiveBorderSide.resolve(states),
-                      borderRadius: BorderRadius.circular(TVar.borderRadius),
+                      borderRadius: BorderRadius.circular(TVar.borderRadiusDefault),
                     ),
                   ),
                   child: CustomPaint(
