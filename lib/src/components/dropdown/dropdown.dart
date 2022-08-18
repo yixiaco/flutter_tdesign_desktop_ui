@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:tdesign_desktop_ui/src/components/common/decoration_box.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// 下拉菜单
 /// 用于承载过多的操作集合，通过下拉拓展的形式，收纳更多的操作。
-class TDropdown<T> extends StatelessWidget {
+class TDropdown<T> extends StatefulWidget {
   const TDropdown({
     Key? key,
     this.direction = TDropdownDirection.right,
@@ -53,17 +54,44 @@ class TDropdown<T> extends StatelessWidget {
   final Widget child;
 
   @override
+  State<TDropdown<T>> createState() => _TDropdownState<T>();
+}
+
+class _TDropdownState<T> extends State<TDropdown<T>> {
+  late ValueNotifier<bool> visible;
+
+  @override
+  void initState() {
+    super.initState();
+    visible = ValueNotifier(false);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    visible.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     var theme = TTheme.of(context);
     var colorScheme = theme.colorScheme;
 
     return TPopup(
-      disabled: disabled,
+      visible: visible,
+      disabled: widget.disabled,
       content: _TDropdownMenu<T>(
-        minColumnWidth: minColumnWidth,
-        maxColumnWidth: maxColumnWidth,
-        maxHeight: maxHeight,
-        options: options,
+        direction: widget.direction,
+        minColumnWidth: widget.minColumnWidth,
+        maxColumnWidth: widget.maxColumnWidth,
+        maxHeight: widget.maxHeight,
+        options: widget.options,
+        onClick: (value) {
+          widget.onClick?.call(value);
+          if (widget.hideAfterItemClick) {
+            visible.value = false;
+          }
+        },
       ),
       style: TPopupStyle(
           backgroundColor: colorScheme.bgColorContainer,
@@ -72,9 +100,9 @@ class TDropdown<T> extends StatelessWidget {
             width: 1 / MediaQuery.of(context).devicePixelRatio,
             color: colorScheme.borderLevel2Color,
           )),
-      placement: placement,
-      trigger: trigger,
-      child: child,
+      placement: widget.placement,
+      trigger: widget.trigger,
+      child: widget.child,
     );
   }
 }
@@ -83,12 +111,16 @@ class TDropdown<T> extends StatelessWidget {
 class _TDropdownMenu<T> extends StatefulWidget {
   const _TDropdownMenu({
     Key? key,
+    required this.direction,
     required this.maxColumnWidth,
     required this.minColumnWidth,
     required this.maxHeight,
     required this.options,
     this.onClick,
   }) : super(key: key);
+
+  /// 多层级操作时，子层级展开方向
+  final TDropdownDirection direction;
 
   /// 选项最大宽度，内容超出时，显示为省略号。
   final double maxColumnWidth;
@@ -110,7 +142,11 @@ class _TDropdownMenu<T> extends StatefulWidget {
 }
 
 class _TDropdownMenuState<T> extends State<_TDropdownMenu<T>> {
+  /// 多级选项
   List<TDropdownOption<T>> levelOptions = [];
+
+  /// 高亮选项
+  List<TDropdownOption<T>> highlightOptions = [];
 
   @override
   void initState() {
@@ -121,44 +157,47 @@ class _TDropdownMenuState<T> extends State<_TDropdownMenu<T>> {
   void dispose() {
     super.dispose();
     levelOptions.clear();
+    highlightOptions.clear();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     levelOptions.clear();
+    highlightOptions.clear();
   }
 
   @override
   Widget build(BuildContext context) {
-    // var theme = TTheme.of(context);
-    // var colorScheme = theme.colorScheme;
-
     List<Widget> menus = [];
     // root
-    menus.add(buildMenu(widget.options, 0));
-    menus.addAll(List.generate(levelOptions.length, (index) => buildMenu(levelOptions[index].children!, index + 1)));
+    menus.add(buildMenu(widget.options, null, 0));
+    menus.addAll(List.generate(
+      levelOptions.length,
+      (index) => buildMenu(
+        levelOptions[index].children!,
+        levelOptions[index],
+        index + 1,
+      ),
+    ));
 
-    var list = menus
-        .expand((element) => [
-              element,
-              const TDivider(
-                layout: Axis.vertical,
-                space: 0,
-                margin: EdgeInsets.symmetric(vertical: 0, horizontal: 2),
-              )
-            ])
-        .toList();
+    const divider = TDivider(
+      layout: Axis.vertical,
+      space: 0,
+      margin: EdgeInsets.symmetric(vertical: 0, horizontal: 2),
+    );
+    var list = menus.expand((element) => [element, divider]).toList();
     list.removeLast();
 
     return FixedCrossFlex(
+      textDirection: widget.direction == TDropdownDirection.left ? TextDirection.rtl : TextDirection.ltr,
       mainAxisSize: MainAxisSize.min,
       direction: Axis.horizontal,
       children: list,
     );
   }
 
-  ConstrainedBox buildMenu(List<TDropdownOption<T>> options, int level) {
+  ConstrainedBox buildMenu(List<TDropdownOption<T>> options, TDropdownOption<T>? parent, int level) {
     return ConstrainedBox(
       constraints: BoxConstraints(
         minWidth: widget.minColumnWidth,
@@ -179,18 +218,30 @@ class _TDropdownMenuState<T> extends State<_TDropdownMenu<T>> {
                 var option = options[index];
                 return _TDropdownItem<T>(
                   option: option,
+                  parent: parent,
+                  highlight: highlightOptions.contains(option),
                   onHover: (hover) {
+                    bool update = false;
                     if (hover) {
+                      if (highlightOptions.length > level) {
+                        highlightOptions.removeRange(level, highlightOptions.length);
+                        update = true;
+                      }
+                      if (parent != null) {
+                        highlightOptions.add(parent);
+                        update = true;
+                      }
                       if (levelOptions.length > level) {
-                        setState(() {
-                          levelOptions.removeRange(level, levelOptions.length);
-                        });
+                        levelOptions.removeRange(level, levelOptions.length);
+                        update = true;
                       }
                       if (option.children?.isNotEmpty ?? false) {
-                        setState(() {
-                          levelOptions.add(option);
-                        });
+                        levelOptions.add(option);
+                        update = true;
                       }
+                    }
+                    if (update) {
+                      setState(() {});
                     }
                   },
                   onPressed: () {
@@ -229,6 +280,7 @@ class _TDropdownItem<T> extends StatefulWidget {
     required this.maxColumnWidth,
     required this.minColumnWidth,
     this.parent,
+    this.highlight = false,
   }) : super(key: key);
 
   /// 父选项数据
@@ -248,6 +300,9 @@ class _TDropdownItem<T> extends StatefulWidget {
 
   /// 选项最小宽度
   final double minColumnWidth;
+
+  /// 是否高亮
+  final bool highlight;
 
   @override
   State<_TDropdownItem<T>> createState() => _TDropdownItemState<T>();
@@ -282,7 +337,7 @@ class _TDropdownItemState<T> extends State<_TDropdownItem<T>> with MaterialState
       if (states.contains(MaterialState.disabled)) {
         return colorScheme.textColorDisabled;
       }
-      return colorScheme.textColorPrimary;
+      return widget.highlight ? colorScheme.brandColor : colorScheme.textColorPrimary;
     });
 
     // 覆盖色
@@ -296,13 +351,13 @@ class _TDropdownItemState<T> extends State<_TDropdownItem<T>> with MaterialState
       return null;
     });
 
-    var children = <Widget>[widget.option.content];
+    Widget? suffix;
     if (widget.option.children?.isNotEmpty ?? false) {
-      children.add(Icon(
+      suffix = Icon(
         TIcons.chevronRight,
         size: theme.fontData.fontSizeL,
         color: effectiveTextColor.resolve(materialStates),
-      ));
+      );
     }
     return ConstrainedBox(
       constraints: BoxConstraints(
@@ -317,8 +372,8 @@ class _TDropdownItemState<T> extends State<_TDropdownItem<T>> with MaterialState
             color: effectiveTextColor.resolve(materialStates),
             overflow: TextOverflow.ellipsis,
           ),
-          color: Colors.transparent,
-          animationDuration: TVar.animDurationBase,
+          color: widget.highlight ? colorScheme.brandColorLight : Colors.transparent,
+          borderRadius: BorderRadius.circular(TVar.borderRadiusDefault),
           clipBehavior: Clip.antiAlias,
           child: InkWell(
             onTap: widget.option.disabled ? null : () => widget.onPressed?.call(),
@@ -332,16 +387,15 @@ class _TDropdownItemState<T> extends State<_TDropdownItem<T>> with MaterialState
             canRequestFocus: !widget.option.disabled,
             splashFactory: InkBevelAngle.splashFactory,
             overlayColor: overlayColor,
-            borderRadius: BorderRadius.circular(TVar.borderRadiusDefault),
             highlightColor: Colors.transparent,
             child: AnimatedPadding(
               padding: EdgeInsets.symmetric(vertical: 9, horizontal: TVar.spacer),
               duration: TVar.animDurationBase,
               curve: TVar.animTimeFnEaseIn,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
+              child: TDecorationBox(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: children,
+                suffix: suffix,
+                child: widget.option.content,
               ),
             ),
           ),

@@ -38,7 +38,10 @@ class _TDropdownExampleState extends State<TDropdownExample> {
     TDropdownOption.text(content: '操作十六'),
     TDropdownOption.text(content: '操作十七'),
     TDropdownOption.text(content: '操作十八'),
-    TDropdownOption.text(content: '操作十九很长很长'),
+    TDropdownOption.text(content: '操作十九很长很长', children: [
+      TDropdownOption.text(content: '选项66'),
+      TDropdownOption.text(content: '选项666'),
+    ]),
   ];
 
   List<TDropdownOption<int>> options2 = [
@@ -53,9 +56,10 @@ class _TDropdownExampleState extends State<TDropdownExample> {
       direction: Axis.horizontal,
       children: [
         TDropdown<int>(
-          // maxColumnWidth: 300,
+          maxColumnWidth: 300,
           options: options,
           trigger: TPopupTrigger.click,
+          hideAfterItemClick: false,
           child: const TButton(
             variant: TButtonVariant.outline,
             child: Text('下拉菜单'),
