@@ -56,7 +56,7 @@ class _TDropdownExampleState extends State<TDropdownExample> {
       direction: Axis.horizontal,
       children: [
         TDropdown<int>(
-          maxColumnWidth: 300,
+          // maxColumnWidth: 300,
           options: options,
           trigger: TPopupTrigger.click,
           hideAfterItemClick: false,

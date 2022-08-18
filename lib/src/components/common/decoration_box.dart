@@ -292,7 +292,7 @@ class RenderTDecorationBox extends RenderBox
       return Size.zero;
     }
 
-    final LayoutSizes sizes = _computeSizes(
+    final _LayoutSizes sizes = _computeSizes(
       layoutChild: ChildLayoutHelper.dryLayoutChild,
       constraints: constraints,
     );
@@ -305,7 +305,7 @@ class RenderTDecorationBox extends RenderBox
     }
   }
 
-  LayoutSizes _computeSizes({required BoxConstraints constraints, required ChildLayouter layoutChild}) {
+  _LayoutSizes _computeSizes({required BoxConstraints constraints, required ChildLayouter layoutChild}) {
     double crossSize = 0.0;
     double allocatedSize = 0.0;
 
@@ -361,7 +361,7 @@ class RenderTDecorationBox extends RenderBox
     allocatedSize += _getMainSize(childSize);
     crossSize = math.max(crossSize, _getCrossSize(childSize));
 
-    return LayoutSizes(
+    return _LayoutSizes(
       mainSize: allocatedSize,
       crossSize: crossSize,
     );
@@ -633,8 +633,8 @@ class RenderTDecorationBox extends RenderBox
   }
 }
 
-class LayoutSizes {
-  const LayoutSizes({
+class _LayoutSizes {
+  const _LayoutSizes({
     required this.mainSize,
     required this.crossSize,
   });

@@ -241,7 +241,7 @@ class RenderFixedCrossFlex extends RenderFlex {
     }
   }
 
-  LayoutSizes _computeSizes({required BoxConstraints constraints, required ChildLayouter layoutChild}) {
+  _LayoutSizes _computeSizes({required BoxConstraints constraints, required ChildLayouter layoutChild}) {
     assert(_debugHasNecessaryDirections);
 
     // Determine used flex factor, size inflexible items, calculate free space.
@@ -359,7 +359,7 @@ class RenderFixedCrossFlex extends RenderFlex {
     }
 
     final double idealSize = canFlex && mainAxisSize == MainAxisSize.max ? maxMainSize : allocatedSize;
-    return LayoutSizes(
+    return _LayoutSizes(
       mainSize: idealSize,
       crossSize: crossSize,
       allocatedSize: allocatedSize,
@@ -381,11 +381,11 @@ class RenderFixedCrossFlex extends RenderFlex {
       return true;
     }());
 
-    final LayoutSizes sizes = _computeSizes(
+    final _LayoutSizes sizes = _computeSizes(
       layoutChild: ChildLayoutHelper.layoutChild,
       constraints: constraints,
     );
-    resetChildConstraints(sizes, constraints);
+    resetChildConstraints(sizes.crossSize, constraints);
 
     final double allocatedSize = sizes.allocatedSize;
     double actualSize = sizes.mainSize;
@@ -525,16 +525,16 @@ class RenderFixedCrossFlex extends RenderFlex {
   }
 
   /// 重置子组件布局大小
-  void resetChildConstraints(LayoutSizes sizes, BoxConstraints constraints) {
+  void resetChildConstraints(double crossSize, BoxConstraints constraints) {
     var list = getChildrenAsList();
     for (var child in list) {
-      if (child.size.width < sizes.crossSize) {
+      if (child.size.width < crossSize) {
         switch (direction) {
           case Axis.horizontal:
-            ChildLayoutHelper.layoutChild(child, constraints.copyWith(minHeight: sizes.crossSize, maxHeight: sizes.crossSize));
+            ChildLayoutHelper.layoutChild(child, constraints.copyWith(minHeight: crossSize, maxHeight: crossSize));
             break;
           case Axis.vertical:
-            ChildLayoutHelper.layoutChild(child, constraints.copyWith(minWidth: sizes.crossSize, maxWidth: sizes.crossSize));
+            ChildLayoutHelper.layoutChild(child, constraints.copyWith(minWidth: crossSize, maxWidth: crossSize));
             break;
         }
       }
@@ -634,8 +634,8 @@ class RenderFixedCrossFlex extends RenderFlex {
   }
 }
 
-class LayoutSizes {
-  const LayoutSizes({
+class _LayoutSizes {
+  const _LayoutSizes({
     required this.mainSize,
     required this.crossSize,
     required this.allocatedSize,
