@@ -9,16 +9,13 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 class TVar {
   const TVar._();
 
-  // 边框圆角
-  static double borderRadius = 3;
-
-  // Font
-  static double fontSize = 10;
-  static double fontSizeS = fontSize * 1.2;
-  static double fontSizeBase = fontSize * 1.4;
-  static double fontSizeL = fontSize * 1.6;
-  static double fontSizeXL = fontSize * 2;
-  static double fontSizeXXL = fontSize * 3.6;
+  // Border Radius
+  static double borderRadiusSmall = 2; // 圆角-2
+  static double borderRadiusDefault = 3; // 圆角-3
+  static double borderRadiusMedium = 6; // 圆角-6
+  static double borderRadiusLarge = 9; // 圆角-9
+  static double borderRadiusExtraLarge = 12; // 圆角-12
+  static double borderRadiusRound = 999; // 圆角-999
 
   // Spacer
   static double spacer = 8;
@@ -149,9 +146,9 @@ class TThemeData with Diagnosticable {
 
   /// 通用字体大小
   double get fontSize => size.lazySizeOf(
-        small: () => TVar.fontSizeS,
-        medium: () => TVar.fontSizeBase,
-        large: () => TVar.fontSizeL,
+        small: () => fontData.fontSizeS,
+        medium: () => fontData.fontSizeBase,
+        large: () => fontData.fontSizeL,
       );
 
   TThemeData copyWith({
@@ -204,4 +201,19 @@ class TThemeData with Diagnosticable {
       checkboxThemeData.hashCode ^
       inputThemeData.hashCode ^
       popupThemeData.hashCode;
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Brightness>('brightness', brightness, defaultValue: null));
+    properties.add(DiagnosticsProperty<TColorScheme>('colorScheme', colorScheme, defaultValue: null));
+    properties.add(DiagnosticsProperty<TComponentSize>('size', size, defaultValue: null));
+    properties.add(DiagnosticsProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+    properties.add(DiagnosticsProperty<String>('fontFamily', fontFamily, defaultValue: null));
+    properties.add(DiagnosticsProperty<TFontData>('fontData', fontData, defaultValue: null));
+    properties.add(DiagnosticsProperty<TButtonThemeData>('buttonThemeData', buttonThemeData, defaultValue: null));
+    properties.add(DiagnosticsProperty<TCheckboxThemeData>('checkboxThemeData', checkboxThemeData, defaultValue: null));
+    properties.add(DiagnosticsProperty<TInputThemeData>('inputThemeData', inputThemeData, defaultValue: null));
+    properties.add(DiagnosticsProperty<TPopupThemeData>('popupThemeData', popupThemeData, defaultValue: null));
+  }
 }

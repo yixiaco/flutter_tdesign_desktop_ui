@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:tdesign_desktop_ui/src/components/common/animated_icon.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// 标签类型
@@ -241,7 +240,7 @@ class _TTagState extends State<TTag> {
       case TTagShape.square:
         decoration = BoxDecoration(
           color: backgroundColor,
-          borderRadius: BorderRadius.circular(TVar.borderRadius),
+          borderRadius: BorderRadius.circular(TVar.borderRadiusDefault),
         );
         break;
       case TTagShape.round:

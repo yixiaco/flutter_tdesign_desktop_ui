@@ -48,11 +48,7 @@ class TDivider extends StatelessWidget {
   Widget build(BuildContext context) {
     var theme = TTheme.of(context);
     var colorScheme = theme.colorScheme;
-    var fontSize = theme.size.sizeOf(
-      small: TVar.fontSizeS,
-      medium: TVar.fontSizeBase,
-      large: TVar.fontSizeL,
-    );
+    var fontSize = theme.fontSize;
 
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {

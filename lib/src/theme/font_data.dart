@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 /// 字体相关
 class TFontData with Diagnosticable {
   const TFontData({
+    required this.fontSize,
     required this.fontSizeLinkSmall,
     required this.fontSizeLinkMedium,
     required this.fontSizeLinkLarge,
@@ -20,6 +21,24 @@ class TFontData with Diagnosticable {
     required this.fontSizeDisplayMedium,
     required this.fontSizeDisplayLarge,
   });
+
+  /// font size
+  final double fontSize;
+
+  /// font size s
+  double get fontSizeS => fontSizeBodySmall;
+
+  /// font size base
+  double get fontSizeBase => fontSizeBodyMedium;
+
+  /// font size l
+  double get fontSizeL => fontSizeBodyLarge;
+
+  /// font size xl
+  double get fontSizeXL => fontSizeTitleLarge;
+
+  /// font size xxl
+  double get fontSizeXXL => fontSizeHeadlineLarge;
 
   /// font size link small
   final double fontSizeLinkSmall;
@@ -71,6 +90,7 @@ class TFontData with Diagnosticable {
 
   factory TFontData.defaultFontData() {
     return const TFontData(
+      fontSize: 10,
       fontSizeLinkSmall: 12,
       fontSizeLinkMedium: 14,
       fontSizeLinkLarge: 16,
@@ -91,6 +111,7 @@ class TFontData with Diagnosticable {
   }
 
   TFontData copyWith({
+    double? fontSize,
     double? fontSizeLinkSmall,
     double? fontSizeLinkMedium,
     double? fontSizeLinkLarge,
@@ -109,6 +130,7 @@ class TFontData with Diagnosticable {
     double? fontSizeDisplayLarge,
   }) {
     return TFontData(
+      fontSize: fontSize ?? this.fontSize,
       fontSizeLinkSmall: fontSizeLinkSmall ?? this.fontSizeLinkSmall,
       fontSizeLinkMedium: fontSizeLinkMedium ?? this.fontSizeLinkMedium,
       fontSizeLinkLarge: fontSizeLinkLarge ?? this.fontSizeLinkLarge,
@@ -133,6 +155,7 @@ class TFontData with Diagnosticable {
       identical(this, other) ||
       other is TFontData &&
           runtimeType == other.runtimeType &&
+          fontSize == other.fontSize &&
           fontSizeLinkSmall == other.fontSizeLinkSmall &&
           fontSizeLinkMedium == other.fontSizeLinkMedium &&
           fontSizeLinkLarge == other.fontSizeLinkLarge &&
@@ -152,6 +175,7 @@ class TFontData with Diagnosticable {
 
   @override
   int get hashCode =>
+      fontSize.hashCode ^
       fontSizeLinkSmall.hashCode ^
       fontSizeLinkMedium.hashCode ^
       fontSizeLinkLarge.hashCode ^
@@ -172,6 +196,7 @@ class TFontData with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<double>('fontSize', fontSize, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('fontSizeLinkSmall', fontSizeLinkSmall, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('fontSizeLinkMedium', fontSizeLinkMedium, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('fontSizeLinkLarge', fontSizeLinkLarge, defaultValue: null));

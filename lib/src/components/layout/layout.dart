@@ -85,14 +85,12 @@ class TAside extends StatelessWidget {
         return Semantics(
           container: true,
           child: Container(
+            width: width,
+            height: constraints.maxHeight,
             color: color,
-            child: SizedBox(
-              width: width,
-              height: constraints.maxHeight,
-              child: ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: width, maxHeight: constraints.maxHeight),
-                child: child,
-              ),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: width, maxHeight: constraints.maxHeight),
+              child: child,
             ),
           ),
         );

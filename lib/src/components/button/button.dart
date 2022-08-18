@@ -67,8 +67,12 @@ class _TButton extends ButtonStyleButton {
   }
 
   /// 字体大小
-  double _btnFontSize(TComponentSize size) {
-    return size.sizeOf(small: TVar.fontSizeS, medium: TVar.fontSizeBase, large: TVar.fontSizeL);
+  double _btnFontSize(TThemeData theme, TComponentSize size) {
+    return size.sizeOf(
+      small: theme.fontData.fontSizeS,
+      medium: theme.fontData.fontSizeBase,
+      large: theme.fontData.fontSizeL,
+    );
   }
 
   /// padding大小
@@ -444,7 +448,7 @@ class _TButton extends ButtonStyleButton {
     return ButtonStyle(
       textStyle: ButtonStyleButton.allOrNull<TextStyle>(TextStyle(
         fontFamily: ttheme.fontFamily,
-        fontSize: _btnFontSize(defaultSize),
+        fontSize: _btnFontSize(ttheme, defaultSize),
       )),
       backgroundColor: backgroundColor,
       foregroundColor: foregroundColor,
@@ -466,8 +470,8 @@ class _TButton extends ButtonStyleButton {
       shape: ButtonStyleButton.allOrNull<TRoundedRectangleBorder>(TRoundedRectangleBorder(
         borderRadius: radius ??
             BorderRadius.circular(shape.valueOf(
-              rectangle: TVar.borderRadius,
-              square: TVar.borderRadius,
+              rectangle: TVar.borderRadiusDefault,
+              square: TVar.borderRadiusDefault,
               round: halfHeight,
               circle: halfHeight,
             )),
@@ -586,20 +590,24 @@ class TButton extends StatelessWidget {
   final bool softWrap;
 
   /// icon大小
-  double _btnIconSize(TComponentSize size) {
-    return size.sizeOf(small: TVar.fontSizeBase, medium: TVar.fontSizeL, large: TVar.fontSizeXL);
+  double _btnIconSize(TThemeData theme, TComponentSize size) {
+    return size.sizeOf(
+      small: theme.fontData.fontSizeBase,
+      medium: theme.fontData.fontSizeL,
+      large: theme.fontData.fontSizeXL,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    var ttheme = TTheme.of(context);
+    var theme = TTheme.of(context);
     var buttonTheme = TButtonTheme.of(context);
-    TComponentSize defaultSize = size ?? buttonTheme.size ?? ttheme.size;
+    TComponentSize defaultSize = size ?? buttonTheme.size ?? theme.size;
 
     Widget? iconWidget;
     List<Widget?> result = [];
     var disabled = this.disabled;
-    var btnIconSize = _btnIconSize(defaultSize);
+    var btnIconSize = _btnIconSize(theme, defaultSize);
     if (loading) {
       disabled = true;
       // TODO: 实现自定义加载指示器
@@ -607,7 +615,7 @@ class TButton extends StatelessWidget {
         constraints: BoxConstraints.expand(width: btnIconSize / 1.5, height: btnIconSize / 1.5),
         child: CircularProgressIndicator(
           strokeWidth: 1.5,
-          valueColor: AlwaysStoppedAnimation<Color>(ttheme.colorScheme.gray7),
+          valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.gray7),
         ),
       );
     } else if (icon != null) {

@@ -41,7 +41,9 @@ class _PopupExampleState extends State<PopupExample> {
           onOpen: () {
             backgroundColor.value = Colors.primaries[Random().nextInt(Colors.primaries.length)];
           },
-          backgroundColor: backgroundColor.value,
+          style: TPopupStyle(
+            backgroundColor: backgroundColor.value,
+          ),
           builderContent: (context) {
             return ValueListenableBuilder(
               valueListenable: i,

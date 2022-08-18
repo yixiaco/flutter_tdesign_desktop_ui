@@ -95,7 +95,7 @@ class InkBevelAngle extends InteractiveInkFeature {
 
     _fadeOut = _fadeOutController.drive(
       Tween(
-        begin: 0.9,
+        begin: color.opacity,
         end: 0.0,
       ).chain(_fadeOutIntervalTween)
       .chain(CurveTween(curve: Curves.linear)),

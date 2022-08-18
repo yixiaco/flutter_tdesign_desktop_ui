@@ -272,7 +272,7 @@ class _TInputState extends State<TInput> {
       );
       return CustomOutlineInputBorder(
         borderSide: BorderSide(width: onePx, color: color),
-        borderRadius: BorderRadius.circular(TVar.borderRadius),
+        borderRadius: BorderRadius.circular(TVar.borderRadiusDefault),
         shadows: shadows,
       );
     });
@@ -347,7 +347,7 @@ class _TInputState extends State<TInput> {
         widget.label!,
         style: TextStyle(
           fontFamily: theme.fontFamily,
-          fontSize: getFontSize(size),
+          fontSize: getFontSize(theme, size),
           color: widget.disabled ? colorScheme.textColorDisabled : colorScheme.textColorPrimary,
         ),
       ));
@@ -390,7 +390,7 @@ class _TInputState extends State<TInput> {
       helperText: widget.tips,
       helperStyle: TextStyle(
         fontFamily: theme.fontFamily,
-        fontSize: TVar.fontSizeS,
+        fontSize: theme.fontData.fontSizeS,
         color: tipsColor,
         height: 0.5, // 通过压缩字体的高度，实现tips的高度缩小
       ),
@@ -410,11 +410,11 @@ class _TInputState extends State<TInput> {
   }
 
   /// 获取字体大小
-  double getFontSize(TComponentSize size) {
+  double getFontSize(TThemeData theme, TComponentSize size) {
     return size.sizeOf(
-      small: TVar.fontSizeS,
-      medium: TVar.fontSizeBase,
-      large: TVar.fontSizeL,
+      small: theme.fontData.fontSizeS,
+      medium: theme.fontData.fontSizeBase,
+      large: theme.fontData.fontSizeL,
     );
   }
 
@@ -425,7 +425,7 @@ class _TInputState extends State<TInput> {
     var colorScheme = theme.colorScheme;
     var size = widget.size ?? inputTheme.size ?? theme.size;
 
-    var fontSize = getFontSize(size);
+    var fontSize = getFontSize(theme, size);
     MouseCursor? cursor;
     if (widget.disabled) {
       cursor = SystemMouseCursors.noDrop;

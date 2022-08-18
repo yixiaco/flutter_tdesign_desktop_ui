@@ -1,8 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:tdesign_desktop_ui/src/theme/color.dart';
 
 /// 配色方案
-class TColorScheme {
+class TColorScheme with Diagnosticable {
   const TColorScheme({
     required this.brandColor,
     required this.warningColor,
@@ -91,54 +92,94 @@ class TColorScheme {
 
   /// 品牌色 & 基础颜色
   final MaterialColor brandColor;
+
   Color get brandColor1 => brandColor.shade50;
+
   Color get brandColor2 => brandColor.shade100;
+
   Color get brandColor3 => brandColor.shade200;
+
   Color get brandColor4 => brandColor.shade300;
+
   Color get brandColor5 => brandColor.shade400;
+
   Color get brandColor6 => brandColor.shade500;
+
   Color get brandColor7 => brandColor.shade600;
+
   Color get brandColor8 => brandColor.shade700;
+
   Color get brandColor9 => brandColor.shade800;
+
   Color get brandColor10 => brandColor.shade900;
 
   /// 告警色 & 基础颜色
   final MaterialColor warningColor;
+
   Color get warningColor1 => warningColor.shade50;
+
   Color get warningColor2 => warningColor.shade100;
+
   Color get warningColor3 => warningColor.shade200;
+
   Color get warningColor4 => warningColor.shade300;
+
   Color get warningColor5 => warningColor.shade400;
+
   Color get warningColor6 => warningColor.shade500;
+
   Color get warningColor7 => warningColor.shade600;
+
   Color get warningColor8 => warningColor.shade700;
+
   Color get warningColor9 => warningColor.shade800;
+
   Color get warningColor10 => warningColor.shade900;
 
   /// 错误色 & 基础颜色
   final MaterialColor errorColor;
+
   Color get errorColor1 => errorColor.shade50;
+
   Color get errorColor2 => errorColor.shade100;
+
   Color get errorColor3 => errorColor.shade200;
+
   Color get errorColor4 => errorColor.shade300;
+
   Color get errorColor5 => errorColor.shade400;
+
   Color get errorColor6 => errorColor.shade500;
+
   Color get errorColor7 => errorColor.shade600;
+
   Color get errorColor8 => errorColor.shade700;
+
   Color get errorColor9 => errorColor.shade800;
+
   Color get errorColor10 => errorColor.shade900;
 
   /// 成功色 & 基础颜色
   final MaterialColor successColor;
+
   Color get successColor1 => successColor.shade50;
+
   Color get successColor2 => successColor.shade100;
+
   Color get successColor3 => successColor.shade200;
+
   Color get successColor4 => successColor.shade300;
+
   Color get successColor5 => successColor.shade400;
+
   Color get successColor6 => successColor.shade500;
+
   Color get successColor7 => successColor.shade600;
+
   Color get successColor8 => successColor.shade700;
+
   Color get successColor9 => successColor.shade800;
+
   Color get successColor10 => successColor.shade900;
 
   /// 灰色
@@ -865,4 +906,92 @@ class TColorScheme {
       scrollbarColor.hashCode ^
       scrollbarHoverColor.hashCode ^
       scrollTrackColor.hashCode;
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<MaterialColor>('brandColor', brandColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialColor>('warningColor', warningColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialColor>('errorColor', errorColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialColor>('successColor', successColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('gray1', gray1, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('gray2', gray2, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('gray3', gray3, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('gray4', gray4, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('gray5', gray5, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('gray6', gray6, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('gray7', gray7, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('gray8', gray8, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('gray9', gray9, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('gray10', gray10, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('gray11', gray11, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('gray12', gray12, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('gray13', gray13, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('gray14', gray14, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('fontWhite1', fontWhite1, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('fontWhite2', fontWhite2, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('fontWhite3', fontWhite3, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('fontWhite4', fontWhite4, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('fontGray1', fontGray1, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('fontGray2', fontGray2, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('fontGray3', fontGray3, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('fontGray4', fontGray4, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('brandColorHover', brandColorHover, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('brandColorFocus', brandColorFocus, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('brandColorActive', brandColorActive, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('brandColorDisabled', brandColorDisabled, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('brandColorLight', brandColorLight, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('warningColorHover', warningColorHover, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('warningColorFocus', warningColorFocus, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('warningColorActive', warningColorActive, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('warningColorDisabled', warningColorDisabled, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('warningColorLight', warningColorLight, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('errorColorHover', errorColorHover, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('errorColorFocus', errorColorFocus, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('errorColorActive', errorColorActive, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('errorColorDisabled', errorColorDisabled, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('errorColorLight', errorColorLight, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('successColorHover', successColorHover, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('successColorFocus', successColorFocus, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('successColorActive', successColorActive, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('successColorDisabled', successColorDisabled, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('successColorLight', successColorLight, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('maskActive', maskActive, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('maskDisabled', maskDisabled, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('bgColorPage', bgColorPage, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('bgColorContainer', bgColorContainer, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('bgColorContainerHover', bgColorContainerHover, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('bgColorContainerActive', bgColorContainerActive, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('bgColorContainerSelect', bgColorContainerSelect, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('bgColorSecondaryContainer', bgColorSecondaryContainer, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('bgColorSecondaryContainerHover', bgColorSecondaryContainerHover, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('bgColorSecondaryContainerActive', bgColorSecondaryContainerActive, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('bgColorComponent', bgColorComponent, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('bgColorComponentHover', bgColorComponentHover, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('bgColorComponentActive', bgColorComponentActive, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('bgColorComponentDisabled', bgColorComponentDisabled, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('bgColorSpecialComponent', bgColorSpecialComponent, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('textColorPrimary', textColorPrimary, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('textColorSecondary', textColorSecondary, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('textColorPlaceholder', textColorPlaceholder, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('textColorDisabled', textColorDisabled, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('textColorAnti', textColorAnti, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('textColorBrand', textColorBrand, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('textColorLink', textColorLink, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('borderLevel1Color', borderLevel1Color, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('componentStroke', componentStroke, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('borderLevel2Color', borderLevel2Color, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('componentBorder', componentBorder, defaultValue: null));
+    properties.add(DiagnosticsProperty<List<BoxShadow>>('shadow1', shadow1, defaultValue: null));
+    properties.add(DiagnosticsProperty<List<BoxShadow>>('shadow1', shadow2, defaultValue: null));
+    properties.add(DiagnosticsProperty<List<BoxShadow>>('shadow1', shadow3, defaultValue: null));
+    properties.add(DiagnosticsProperty<BoxShadow>('shadowInsetTop', shadowInsetTop, defaultValue: null));
+    properties.add(DiagnosticsProperty<BoxShadow>('shadowInsetRight', shadowInsetRight, defaultValue: null));
+    properties.add(DiagnosticsProperty<BoxShadow>('shadowInsetBottom', shadowInsetBottom, defaultValue: null));
+    properties.add(DiagnosticsProperty<BoxShadow>('shadowInsetLeft', shadowInsetLeft, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('tableShadowColor', tableShadowColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('scrollbarColor', scrollbarColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('scrollbarHoverColor', scrollbarHoverColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('scrollTrackColor', scrollTrackColor, defaultValue: null));
+  }
 }

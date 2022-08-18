@@ -44,6 +44,14 @@ class TInputThemeData with Diagnosticable {
 
   @override
   int get hashCode => maxLength.hashCode ^ size.hashCode ^ decoration.hashCode;
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<int>('maxLength', maxLength, defaultValue: null));
+    properties.add(DiagnosticsProperty<TComponentSize>('size', size, defaultValue: null));
+    properties.add(DiagnosticsProperty<InputDecoration>('decoration', decoration, defaultValue: null));
+  }
 }
 
 /// 弹出层主题
