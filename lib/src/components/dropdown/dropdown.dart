@@ -387,6 +387,7 @@ class _TDropdownItemState<T> extends State<_TDropdownItem<T>> with MaterialState
             splashFactory: InkBevelAngle.splashFactory,
             overlayColor: overlayColor,
             highlightColor: Colors.transparent,
+            borderRadius: BorderRadius.circular(TVar.borderRadiusDefault),
             child: AnimatedPadding(
               padding: EdgeInsets.symmetric(vertical: 9, horizontal: TVar.spacer),
               duration: TVar.animDurationBase,
