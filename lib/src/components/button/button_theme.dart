@@ -5,26 +5,18 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 /// 按钮主题数据
 class TButtonThemeData with Diagnosticable {
   const TButtonThemeData({
-    this.baseStyle,
-    this.outlineStyle,
-    this.dashedStyle,
-    this.textStyle,
+    this.style,
+    this.variant,
     this.themeStyle,
     this.ghost,
     this.size,
   });
 
-  /// 基础主题样式（填充按钮）
-  final ButtonStyle? baseStyle;
+  /// 按钮样式
+  final ButtonStyle? style;
 
-  /// 线框主题样式（描边按钮）
-  final ButtonStyle? outlineStyle;
-
-  /// 虚线主题样式（虚框按钮）
-  final ButtonStyle? dashedStyle;
-
-  /// 文字主题样式（文字按钮）
-  final ButtonStyle? textStyle;
+  /// 按钮形式
+  final TButtonVariant? variant;
 
   /// 组件风格.
   final TButtonThemeStyle? themeStyle;
@@ -36,19 +28,15 @@ class TButtonThemeData with Diagnosticable {
   final TComponentSize? size;
 
   TButtonThemeData copyWith({
-    ButtonStyle? baseStyle,
-    ButtonStyle? outlineStyle,
-    ButtonStyle? dashedStyle,
-    ButtonStyle? textStyle,
+    ButtonStyle? style,
+    TButtonVariant? variant,
     TButtonThemeStyle? themeStyle,
     bool? ghost,
     TComponentSize? size,
   }) {
     return TButtonThemeData(
-      baseStyle: baseStyle ?? this.baseStyle,
-      outlineStyle: outlineStyle ?? this.outlineStyle,
-      dashedStyle: dashedStyle ?? this.dashedStyle,
-      textStyle: textStyle ?? this.textStyle,
+      style: style ?? this.style,
+      variant: variant ?? this.variant,
       themeStyle: themeStyle ?? this.themeStyle,
       ghost: ghost ?? this.ghost,
       size: size ?? this.size,
@@ -60,25 +48,20 @@ class TButtonThemeData with Diagnosticable {
       identical(this, other) ||
       other is TButtonThemeData &&
           runtimeType == other.runtimeType &&
-          baseStyle == other.baseStyle &&
-          outlineStyle == other.outlineStyle &&
-          dashedStyle == other.dashedStyle &&
-          textStyle == other.textStyle &&
+          style == other.style &&
+          variant == other.variant &&
           themeStyle == other.themeStyle &&
           ghost == other.ghost &&
           size == other.size;
 
   @override
-  int get hashCode =>
-      baseStyle.hashCode ^ outlineStyle.hashCode ^ dashedStyle.hashCode ^ textStyle.hashCode ^ themeStyle.hashCode ^ ghost.hashCode ^ size.hashCode;
+  int get hashCode => style.hashCode ^ variant.hashCode ^ themeStyle.hashCode ^ ghost.hashCode ^ size.hashCode;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<ButtonStyle>('baseStyle', baseStyle, defaultValue: null));
-    properties.add(DiagnosticsProperty<ButtonStyle>('outlineStyle', outlineStyle, defaultValue: null));
-    properties.add(DiagnosticsProperty<ButtonStyle>('dashedStyle', dashedStyle, defaultValue: null));
-    properties.add(DiagnosticsProperty<ButtonStyle>('textStyle', textStyle, defaultValue: null));
+    properties.add(DiagnosticsProperty<ButtonStyle>('style', style, defaultValue: null));
+    properties.add(DiagnosticsProperty<TButtonVariant>('variant', variant, defaultValue: null));
     properties.add(DiagnosticsProperty<TButtonThemeStyle>('themeStyle', themeStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('ghost', ghost, defaultValue: null));
     properties.add(DiagnosticsProperty<TComponentSize>('size', size, defaultValue: null));
