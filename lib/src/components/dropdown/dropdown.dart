@@ -205,63 +205,59 @@ class _TDropdownMenuState<T> extends State<_TDropdownMenu<T>> {
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 4),
-        child: ScrollConfiguration(
-          behavior: const TScrollBehavior(),
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.only(right: 2),
-            child: FixedCrossFlex(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              direction: Axis.vertical,
-              children: List.generate(options.length, (index) {
-                var option = options[index];
-                return _TDropdownItem<T>(
-                  option: option,
-                  parent: parent,
-                  highlight: highlightOptions.contains(option),
-                  onHover: (hover) {
-                    bool update = false;
-                    if (hover) {
-                      if (highlightOptions.length > level) {
-                        highlightOptions.removeRange(level, highlightOptions.length);
-                        update = true;
-                      }
-                      if (parent != null) {
-                        highlightOptions.add(parent);
-                        update = true;
-                      }
-                      if (levelOptions.length > level) {
-                        levelOptions.removeRange(level, levelOptions.length);
-                        update = true;
-                      }
-                      if (option.children?.isNotEmpty ?? false) {
-                        levelOptions.add(option);
-                        update = true;
-                      }
+        child: TSingleChildScrollView(
+          child: FixedCrossFlex(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            direction: Axis.vertical,
+            children: List.generate(options.length, (index) {
+              var option = options[index];
+              return _TDropdownItem<T>(
+                option: option,
+                parent: parent,
+                highlight: highlightOptions.contains(option),
+                onHover: (hover) {
+                  bool update = false;
+                  if (hover) {
+                    if (highlightOptions.length > level) {
+                      highlightOptions.removeRange(level, highlightOptions.length);
+                      update = true;
                     }
-                    if (update) {
-                      setState(() {});
+                    if (parent != null) {
+                      highlightOptions.add(parent);
+                      update = true;
                     }
-                  },
-                  onPressed: () {
-                    widget.onClick?.call(option);
-                    option.onClick?.call(option);
-                  },
-                  minColumnWidth: widget.minColumnWidth,
-                  maxColumnWidth: widget.maxColumnWidth,
-                );
-              }).expand((element) {
-                var list = <Widget>[element];
-                if (element.option.divider) {
-                  // 让组件被自动拉伸
-                  list.add(const TDivider(
-                    space: 0,
-                    margin: EdgeInsets.symmetric(vertical: 4),
-                  ));
-                }
-                return list;
-              }).toList(),
-            ),
+                    if (levelOptions.length > level) {
+                      levelOptions.removeRange(level, levelOptions.length);
+                      update = true;
+                    }
+                    if (option.children?.isNotEmpty ?? false) {
+                      levelOptions.add(option);
+                      update = true;
+                    }
+                  }
+                  if (update) {
+                    setState(() {});
+                  }
+                },
+                onPressed: () {
+                  widget.onClick?.call(option);
+                  option.onClick?.call(option);
+                },
+                minColumnWidth: widget.minColumnWidth,
+                maxColumnWidth: widget.maxColumnWidth,
+              );
+            }).expand((element) {
+              var list = <Widget>[element];
+              if (element.option.divider) {
+                // 让组件被自动拉伸
+                list.add(const TDivider(
+                  space: 0,
+                  margin: EdgeInsets.symmetric(vertical: 4),
+                ));
+              }
+              return list;
+            }).toList(),
           ),
         ),
       ),
