@@ -16,7 +16,7 @@ class _TButton extends ButtonStyleButton {
     Widget? child,
     this.size,
     required this.variant,
-    this.themeStyle,
+    required this.themeStyle,
     this.ghost,
     required this.shape,
     this.side,
@@ -43,7 +43,7 @@ class _TButton extends ButtonStyleButton {
 
   /// 组件风格. 可参考[TColors.blue]、[TColors.red]、[TColors.orange]、[TColors.green]
   /// 分别可代表，主题色、危险色、告警色、成功色
-  final TButtonThemeStyle? themeStyle;
+  final TButtonThemeStyle themeStyle;
 
   /// 是否为幽灵按钮（镂空按钮）
   final bool? ghost;
@@ -157,7 +157,7 @@ class _TButton extends ButtonStyleButton {
     var colorScheme = ttheme.colorScheme;
     var buttonTheme = TButtonTheme.of(context);
     TComponentSize defaultSize = size ?? buttonTheme.size ?? ttheme.size;
-    var buttonThemeStyle = themeStyle ?? buttonTheme.themeStyle ?? TButtonThemeStyle.defaultStyle;
+    var buttonThemeStyle = themeStyle;
     var isGhost = ghost ?? buttonTheme.ghost ?? false;
     var media = MediaQuery.of(context);
     var variables = _variables(colorScheme);
@@ -170,14 +170,14 @@ class _TButton extends ButtonStyleButton {
     late MaterialStateProperty<Color?> foregroundColor;
 
     Color? resolve(String theme, Set<MaterialState> states, {bool ghost = false, String? defaultColor}) {
+      if (states.contains(MaterialState.disabled)) {
+        return variables['btn-color-$theme-disabled'];
+      }
       if (states.contains(MaterialState.hovered)) {
         return variables['btn-color-$theme-hover'];
       }
       if ((states.contains(MaterialState.focused) || states.contains(MaterialState.pressed))) {
         return variables['btn-color-$theme-active'];
-      }
-      if (states.contains(MaterialState.disabled)) {
-        return variables['btn-color-$theme-disabled'];
       }
       return variables[defaultColor] ?? variables['btn-color-$theme'];
     }
@@ -498,7 +498,7 @@ class _TButton extends ButtonStyleButton {
 
   @override
   ButtonStyle? themeStyleOf(BuildContext context) {
-    return TButtonTheme.of(context).baseStyle;
+    return TButtonTheme.of(context).style;
   }
 }
 
@@ -507,7 +507,7 @@ class TButton extends StatelessWidget {
   const TButton({
     Key? key,
     this.onPressed,
-    this.variant = TButtonVariant.base,
+    this.variant,
     this.disabled = false,
     this.onLongPress,
     this.onHover,
@@ -535,7 +535,7 @@ class TButton extends StatelessWidget {
   final VoidCallback? onPressed;
 
   ///按钮形式，基础、线框、虚线、文字。可选项：base/outline/dashed/text
-  final TButtonVariant variant;
+  final TButtonVariant? variant;
 
   /// 是否禁用
   final bool disabled;
@@ -601,27 +601,43 @@ class TButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var theme = TTheme.of(context);
+    var colorScheme = theme.colorScheme;
     var buttonTheme = TButtonTheme.of(context);
     TComponentSize defaultSize = size ?? buttonTheme.size ?? theme.size;
+    var themeStyle = this.themeStyle ?? buttonTheme.themeStyle ?? TButtonThemeStyle.defaultStyle;
+    var variant = this.variant ?? buttonTheme.variant ?? TButtonVariant.base;
 
     Widget? iconWidget;
     List<Widget?> result = [];
     var disabled = this.disabled;
     var btnIconSize = _btnIconSize(theme, defaultSize);
+    var softWrap = this.softWrap;
     if (loading) {
       disabled = true;
-      // TODO: 实现自定义加载指示器
-      iconWidget = ConstrainedBox(
-        constraints: BoxConstraints.expand(width: btnIconSize / 1.5, height: btnIconSize / 1.5),
-        child: CircularProgressIndicator(
-          strokeWidth: 1.5,
-          valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.gray7),
-        ),
+      Color? loadingColor;
+      if(themeStyle == TButtonThemeStyle.defaultStyle) {
+        loadingColor = colorScheme.textColorPrimary;
+      } else if(variant == TButtonVariant.base) {
+        loadingColor = colorScheme.textColorAnti;
+      } else if(themeStyle == TButtonThemeStyle.primary) {
+        loadingColor = colorScheme.brandColor;
+      } else if(themeStyle == TButtonThemeStyle.warning) {
+        loadingColor = colorScheme.warningColor;
+      } else if(themeStyle == TButtonThemeStyle.danger) {
+        loadingColor = colorScheme.errorColor;
+      } else if(themeStyle == TButtonThemeStyle.success) {
+        loadingColor = colorScheme.successColor;
+      }
+      iconWidget = TLoading(
+        boxSize: Size.square(btnIconSize / 1.3),
+        thickness: 2,
+        color: loadingColor,
+        size: TComponentSize.small,
       );
     } else if (icon != null) {
+      softWrap = true;
       iconWidget = Icon(icon, size: btnIconSize);
     }
-    var softWrap = iconWidget != null || this.softWrap;
     result.add(iconWidget);
     result.add(child);
     var pressed = disabled ? null : onPressed ?? () {};

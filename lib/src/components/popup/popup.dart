@@ -275,11 +275,13 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
     // 窗口变更时，通知到组件
     MediaQuery.of(context);
     // 在下一帧时，更新浮层
-    SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
-      if (mounted) {
-        _overlayKey.currentState?.setState(() {});
-      }
-    });
+    if (_overlayKey.currentState != null) {
+      SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+        if (mounted) {
+          _overlayKey.currentState?.setState(() {});
+        }
+      });
+    }
     Widget child = widget.child;
     if (widget.trigger == TPopupTrigger.hover) {
       child = MouseRegion(

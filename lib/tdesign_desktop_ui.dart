@@ -59,6 +59,8 @@ export 'src/components/radio/radio_group.dart';
 export 'src/components/input/input.dart';
 export 'src/components/input/custom_outline_input_border.dart';
 export 'src/components/input/input_theme.dart';
+/// 加载
+export 'src/components/loading/loading.dart';
 /// 标签
 export 'src/components/tag/tag.dart';
 export 'src/components/tag/check_tag.dart';

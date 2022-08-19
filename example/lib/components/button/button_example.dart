@@ -37,9 +37,113 @@ class ButtonExample extends StatelessWidget {
                   icon: TIcons.cloudUpload,
                   // child: const Text('描边按钮'),
                 ),
-                TButton(onPressed: () {},loading: true, variant: TButtonVariant.outline, child: const Text('描边按钮')),
+                TButton(onPressed: () {}, variant: TButtonVariant.outline, child: const Text('描边按钮')),
                 TButton(onPressed: () {}, variant: TButtonVariant.dashed, child: const Text('虚框按钮')),
                 TButton(onPressed: () {}, variant: TButtonVariant.text, child: const Text('文字按钮')),
+              ],
+            ),
+          ),
+        ),
+        TCol(
+          span: const TColSpan.span(12),
+          child: Container(
+            alignment: Alignment.centerLeft,
+            child: Row(
+              children: [
+                TButton(onPressed: () {}, loading: true, variant: TButtonVariant.base, child: const Text('确定')),
+                TButton(onPressed: () {}, loading: true, variant: TButtonVariant.outline, child: const Text('确定')),
+                TButton(onPressed: () {}, loading: true, variant: TButtonVariant.dashed, child: const Text('确定')),
+                TButton(onPressed: () {}, loading: true, variant: TButtonVariant.text, child: const Text('确定')),
+              ],
+            ),
+          ),
+        ),
+        TCol(
+          span: const TColSpan.span(12),
+          child: Container(
+            alignment: Alignment.centerLeft,
+            child: Row(
+              children: [
+                TButton(
+                    onPressed: () {}, loading: true, themeStyle: TButtonThemeStyle.primary, variant: TButtonVariant.base, child: const Text('确定')),
+                TButton(
+                    onPressed: () {}, loading: true, themeStyle: TButtonThemeStyle.success, variant: TButtonVariant.base, child: const Text('确定')),
+                TButton(onPressed: () {}, loading: true, themeStyle: TButtonThemeStyle.danger, variant: TButtonVariant.base, child: const Text('确定')),
+                TButton(
+                    onPressed: () {}, loading: true, themeStyle: TButtonThemeStyle.warning, variant: TButtonVariant.base, child: const Text('确定')),
+              ],
+            ),
+          ),
+        ),
+        TCol(
+          span: const TColSpan.span(12),
+          child: Container(
+            alignment: Alignment.centerLeft,
+            child: Row(
+              children: [
+                TButton(
+                    onPressed: () {}, loading: true, themeStyle: TButtonThemeStyle.primary, variant: TButtonVariant.text, child: const Text('确定')),
+                TButton(
+                    onPressed: () {}, loading: true, themeStyle: TButtonThemeStyle.success, variant: TButtonVariant.text, child: const Text('确定')),
+                TButton(onPressed: () {}, loading: true, themeStyle: TButtonThemeStyle.danger, variant: TButtonVariant.text, child: const Text('确定')),
+                TButton(
+                    onPressed: () {}, loading: true, themeStyle: TButtonThemeStyle.warning, variant: TButtonVariant.text, child: const Text('确定')),
+              ],
+            ),
+          ),
+        ),
+        TCol(
+          span: const TColSpan.span(12),
+          child: Container(
+            alignment: Alignment.centerLeft,
+            child: Row(
+              children: [
+                TButton(onPressed: () {}, ghost: true, loading: true, variant: TButtonVariant.base, child: const Text('确定')),
+                TButton(onPressed: () {}, ghost: true, loading: true, variant: TButtonVariant.outline, child: const Text('确定')),
+                TButton(onPressed: () {}, ghost: true, loading: true, variant: TButtonVariant.dashed, child: const Text('确定')),
+                TButton(onPressed: () {}, ghost: true, loading: true, variant: TButtonVariant.text, child: const Text('确定')),
+              ],
+            ),
+          ),
+        ),
+        TCol(
+          span: const TColSpan.span(12),
+          child: Container(
+            alignment: Alignment.centerLeft,
+            child: Row(
+              children: [
+                TButton(
+                  onPressed: () {},
+                  ghost: true,
+                  loading: true,
+                  themeStyle: TButtonThemeStyle.primary,
+                  variant: TButtonVariant.text,
+                  child: const Text('确定'),
+                ),
+                TButton(
+                  onPressed: () {},
+                  ghost: true,
+                  loading: true,
+                  themeStyle: TButtonThemeStyle.success,
+                  variant: TButtonVariant.text,
+                  child: const Text('确定'),
+                ),
+                TButton(
+                  onPressed: () {},
+                  ghost: true,
+                  loading: true,
+                  themeStyle: TButtonThemeStyle.danger,
+                  variant: TButtonVariant.text,
+                  child: const Text('确定'),
+                ),
+                TButton(
+                  onPressed: () {},
+                  ghost: true,
+                  loading: true,
+                  themeStyle: TButtonThemeStyle.warning,
+                  variant: TButtonVariant.text,
+                  child: const Text('确定'),
+                ),
               ],
             ),
           ),
