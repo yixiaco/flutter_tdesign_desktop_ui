@@ -30,4 +30,10 @@ abstract class AnimationChangeNotifierPainter extends ChangeNotifier implements 
 
   @override
   String toString() => describeIdentity(this);
+
+  @override
+  void dispose() {
+    super.dispose();
+    _t?.removeListener(notifyListeners);
+  }
 }

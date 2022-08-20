@@ -64,12 +64,24 @@ class TProgress extends ImplicitlyAnimatedWidget {
 class _TProgressState extends AnimatedWidgetBaseState<TProgress> {
   late Tween<double> _percentage;
 
+  /// 动画进度
   double get animationPercentage => _percentage.evaluate(animation);
 
+  /// 实时进度
   double get percentage => widget.percentage.clamp(0, 100);
 
+  /// 如果是默认状态，则值100时变更为success状态
   TProgressStatus? get status {
-    return widget.status ?? (animationPercentage == 100.0 ? TProgressStatus.success : null);
+    if(widget.status == null) {
+      if(animationPercentage >= 100.0){
+        return TProgressStatus.success;
+      } else {
+        return null;
+      }
+    } else if(widget.status == TProgressStatus.active && animationPercentage >= 100){
+      return TProgressStatus.success;
+    }
+    return widget.status;
   }
 
   @override
@@ -79,12 +91,114 @@ class _TProgressState extends AnimatedWidgetBaseState<TProgress> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
     _percentage = visitor(
       _percentage,
       widget.percentage.clamp(0.0, 100.0),
       (dynamic value) => Tween<double>(begin: value as double),
     ) as Tween<double>;
+  }
+
+  /// 构建标签
+  Widget? _buildLabel(TThemeData theme, TColorScheme colorScheme) {
+    Widget? label = widget.label;
+    var size = widget.size ?? theme.size;
+    IconThemeData? iconThemeData;
+    TextStyle style;
+    switch (widget.theme) {
+      case TProgressTheme.line:
+        var iconSize = theme.fontSize * 1.20;
+        style = TextStyle(
+          fontSize: theme.fontData.fontSizeBodyMedium,
+          color: colorScheme.textColorPrimary,
+          overflow: TextOverflow.ellipsis,
+        );
+        switch (status) {
+          case TProgressStatus.success:
+            iconThemeData = IconThemeData(
+              color: colorScheme.successColor,
+              size: iconSize,
+            );
+            label ??= const Icon(TIcons.checkCircleFilled);
+            break;
+          case TProgressStatus.error:
+            iconThemeData = IconThemeData(
+              color: colorScheme.errorColor,
+              size: iconSize,
+            );
+            label ??= const Icon(TIcons.closeCircleFilled);
+            break;
+          case TProgressStatus.warning:
+            iconThemeData = IconThemeData(
+              color: colorScheme.warningColor,
+              size: iconSize,
+            );
+            label ??= const Icon(TIcons.errorCircleFilled);
+            break;
+          default:
+            label ??= Text('${(percentage).round()}%');
+        }
+        break;
+      case TProgressTheme.plump:
+        Color fontColor;
+        if (animationPercentage <= 10) {
+          fontColor = colorScheme.textColorPrimary;
+        } else {
+          fontColor = colorScheme.textColorAnti;
+        }
+        style = TextStyle(
+          fontSize: theme.fontData.fontSizeS,
+          color: fontColor,
+          overflow: TextOverflow.ellipsis,
+        );
+        label ??= Text('${(percentage).round()}%');
+        break;
+      case TProgressTheme.circle:
+        double fontSize = size.sizeOf(small: 14, medium: 20, large: 36);
+        var iconSize = fontSize * 2.40;
+        style = TextStyle(
+          fontSize: fontSize,
+          color: colorScheme.textColorPrimary,
+          overflow: TextOverflow.ellipsis,
+          fontWeight: FontWeight.w500,
+        );
+        switch (status) {
+          case TProgressStatus.success:
+            iconThemeData = IconThemeData(
+              color: colorScheme.successColor,
+              size: iconSize,
+            );
+            label ??= const Icon(TIcons.check);
+            break;
+          case TProgressStatus.error:
+            iconThemeData = IconThemeData(
+              color: colorScheme.errorColor,
+              size: iconSize,
+            );
+            label ??= const Icon(TIcons.close);
+            break;
+          case TProgressStatus.warning:
+            iconThemeData = IconThemeData(
+              color: colorScheme.warningColor,
+              size: iconSize,
+            );
+            label ??= const Icon(TIcons.error);
+            break;
+          default:
+            label ??= Text('${(percentage).round()}%');
+        }
+        break;
+    }
+    if (iconThemeData != null) {
+      label = IconTheme(data: iconThemeData, child: label);
+    }
+    label = DefaultTextStyle(style: style, child: label);
+    return label;
   }
 
   @override
@@ -128,18 +242,27 @@ class _TProgressState extends AnimatedWidgetBaseState<TProgress> {
       }
     }
 
+    // 运动状态
+    var isAction = widget.status == TProgressStatus.active && percentage < 100;
     switch (widget.theme) {
       case TProgressTheme.line:
         var list = <Widget>[
           Expanded(
-            child: CustomPaint(
+            child: _TProgressActionPaint(
+              action: isAction,
+              willChange: isAction,
+              isComplex: isAction,
               size: Size.fromHeight(strokeWidth),
-              painter: _TLinePrinter(
-                percentage: animationPercentage,
-                strokeWidth: strokeWidth,
-                color: color,
-                trackColor: trackColor,
-              ),
+              painter: (animation) {
+                return _TLinePrinter(
+                  percentage: animationPercentage,
+                  strokeWidth: strokeWidth!,
+                  color: color!,
+                  trackColor: trackColor,
+                  animation: animation,
+                  actionColor: colorScheme.textColorAnti,
+                );
+              },
             ),
           ),
         ];
@@ -186,13 +309,20 @@ class _TProgressState extends AnimatedWidgetBaseState<TProgress> {
             minWidth: double.infinity,
             minHeight: strokeWidth,
           ),
-          child: CustomPaint(
-            painter: _TLinePrinter(
-              percentage: animationPercentage,
-              strokeWidth: strokeWidth,
-              color: color,
-              trackColor: trackColor,
-            ),
+          child: _TProgressActionPaint(
+            action: isAction,
+            willChange: isAction,
+            isComplex: isAction,
+            painter: (animation) {
+              return _TLinePrinter(
+                percentage: animationPercentage,
+                strokeWidth: strokeWidth!,
+                color: color!,
+                trackColor: trackColor,
+                animation: animation,
+                actionColor: colorScheme.textColorAnti,
+              );
+            },
             child: label,
           ),
         );
@@ -209,125 +339,121 @@ class _TProgressState extends AnimatedWidgetBaseState<TProgress> {
             width: boxSize.width,
             height: boxSize.height,
           ),
-          child: CustomPaint(
-            painter: _TCirclePainter(
-              percentage: animationPercentage,
-              strokeWidth: strokeWidth,
-              color: color,
-              trackColor: trackColor,
-            ),
+          child: _TProgressActionPaint(
+            action: isAction,
+            willChange: isAction,
+            isComplex: isAction,
+            painter: (animation) {
+              return _TCirclePainter(
+                percentage: animationPercentage,
+                strokeWidth: strokeWidth!,
+                color: color!,
+                trackColor: trackColor,
+                animation: animation,
+                actionColor: colorScheme.textColorAnti,
+              );
+            },
             child: label,
           ),
         );
     }
   }
+}
 
-  /// 构建标签
-  Widget? _buildLabel(TThemeData theme, TColorScheme colorScheme) {
-    Widget? label = widget.label;
-    var size = widget.size ?? theme.size;
-    switch(widget.theme){
-      case TProgressTheme.line:
-        var iconSize = theme.fontSize * 1.20;
-        switch (status) {
-          case TProgressStatus.success:
-            label ??= Icon(
-              TIcons.checkCircleFilled,
-              color: colorScheme.successColor,
-              size: iconSize,
-            );
-            break;
-          case TProgressStatus.error:
-            label ??= Icon(
-              TIcons.closeCircleFilled,
-              color: colorScheme.errorColor,
-              size: iconSize,
-            );
-            break;
-          case TProgressStatus.warning:
-            label ??= Icon(
-              TIcons.errorCircleFilled,
-              color: colorScheme.warningColor,
-              size: iconSize,
-            );
-            break;
-          default:
-            label ??= Text(
-              '${(percentage).round()}%',
-              style: TextStyle(
-                fontSize: theme.fontData.fontSizeBodyMedium,
-                color: colorScheme.textColorPrimary,
-                overflow: TextOverflow.ellipsis,
-              ),
-            );
-        }
-        break;
-      case TProgressTheme.plump:
-        Color fontColor;
-        if (animationPercentage <= 10) {
-          fontColor = colorScheme.textColorPrimary;
-        } else {
-          fontColor = colorScheme.textColorAnti;
-        }
-        label ??= Text(
-          '${(percentage).round()}%',
-          style: TextStyle(
-            fontSize: theme.fontData.fontSizeS,
-            color: fontColor,
-            overflow: TextOverflow.ellipsis,
-          ),
-        );
-        break;
-      case TProgressTheme.circle:
-        double fontSize = size.sizeOf(small: 14, medium: 20, large: 36);
-        var iconSize = fontSize * 2.40;
-        switch (status) {
-          case TProgressStatus.success:
-            label ??= Icon(
-              TIcons.check,
-              color: colorScheme.successColor,
-              size: iconSize,
-            );
-            break;
-          case TProgressStatus.error:
-            label ??= Icon(
-              TIcons.close,
-              color: colorScheme.errorColor,
-              size: iconSize,
-            );
-            break;
-          case TProgressStatus.warning:
-            label ??= Icon(
-              TIcons.error,
-              color: colorScheme.warningColor,
-              size: iconSize,
-            );
-            break;
-          default:
-            label ??= Text(
-              '${(percentage).round()}%',
-              style: TextStyle(
-                fontSize: fontSize,
-                color: colorScheme.textColorPrimary,
-                overflow: TextOverflow.ellipsis,
-                fontWeight: FontWeight.w500,
-              ),
-            );
-        }
-        break;
+typedef AnimationPainter = CustomPainter Function(Animation<double> animation);
+
+class _TProgressActionPaint extends StatefulWidget {
+  const _TProgressActionPaint({
+    Key? key,
+    this.painter,
+    this.size = Size.zero,
+    this.isComplex = false,
+    this.willChange = false,
+    this.child,
+    required this.action,
+  }) : super(key: key);
+
+  /// 子组件
+  final Widget? child;
+
+  /// 继承自[CustomPaint.painter]
+  final AnimationPainter? painter;
+
+  /// 继承自[CustomPaint.size]
+  final Size size;
+
+  /// 继承自[CustomPaint.isComplex]
+  final bool isComplex;
+
+  /// 继承自[CustomPaint.willChange]
+  final bool willChange;
+
+  /// 是否是运动状态
+  final bool action;
+
+  @override
+  State<_TProgressActionPaint> createState() => _TProgressActionPaintState();
+}
+
+class _TProgressActionPaintState extends State<_TProgressActionPaint> with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late CurvedAnimation curvedAnimation;
+
+  @override
+  void initState() {
+    _animationController = AnimationController(vsync: this, duration: const Duration(seconds: 2));
+    curvedAnimation = CurvedAnimation(parent: _animationController, curve: const Cubic(.23, .99, .86, .2));
+    if (widget.action) {
+      _animationController.repeat();
     }
-    return label;
+    super.initState();
+  }
+
+  @override
+  void didUpdateWidget(covariant _TProgressActionPaint oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.action != oldWidget.action) {
+      if (widget.action) {
+        _animationController.repeat();
+      } else {
+        _animationController.value = 0;
+        _animationController.stop();
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    curvedAnimation.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      painter: widget.painter?.call(curvedAnimation),
+      size: widget.size,
+      isComplex: widget.isComplex,
+      willChange: widget.willChange,
+      child: widget.child,
+    );
   }
 }
 
 /// 线条
 class _TLinePrinter extends CustomPainter {
   const _TLinePrinter({
+    required this.animation,
     required this.percentage,
     required this.color,
     required this.strokeWidth,
     required this.trackColor,
-  });
+    required this.actionColor,
+  }) : super(repaint: animation);
+
+  /// 动画
+  final Animation<double> animation;
 
   /// 进度条百分比 0-100
   final double percentage;
@@ -340,6 +466,9 @@ class _TLinePrinter extends CustomPainter {
 
   /// 进度条未完成部分颜色
   final Color trackColor;
+
+  /// 运动状态颜色
+  final Color actionColor;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -378,6 +507,21 @@ class _TLinePrinter extends CustomPainter {
     }
     // 进度
     canvas.drawLine(p1, p2, paint);
+
+    // action动画
+    if(animation.value > 0) {
+      var value = animation.value;
+      if (value <= .35) {
+        var tween = Tween<double>(begin: .1, end: .4);
+        paint.color = actionColor.withOpacity(tween.transform(value));
+      } else {
+        var tween = Tween<double>(begin: .4, end: 0);
+        paint.color = actionColor.withOpacity(tween.transform(value));
+      }
+      paint.shader = null;
+      paint.strokeCap = StrokeCap.square;
+      canvas.drawLine(p1, Offset(max(p1.dx, p2.dx * value), p2.dy), paint);
+    }
   }
 
   @override
@@ -389,11 +533,16 @@ class _TLinePrinter extends CustomPainter {
 /// 圆形
 class _TCirclePainter extends CustomPainter {
   const _TCirclePainter({
+    required this.animation,
     required this.percentage,
     required this.color,
     required this.strokeWidth,
     required this.trackColor,
-  });
+    required this.actionColor,
+  }) : super(repaint: animation);
+
+  /// 动画
+  final Animation<double> animation;
 
   /// 进度条百分比 0-100
   final double percentage;
@@ -406,6 +555,9 @@ class _TCirclePainter extends CustomPainter {
 
   /// 进度条未完成部分颜色
   final Color trackColor;
+
+  /// 运动状态颜色
+  final Color actionColor;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -438,6 +590,21 @@ class _TCirclePainter extends CustomPainter {
     }
 
     canvas.drawArc(offset & effectiveSize, -pi / 2, endAngle, false, paint);
+
+    // action动画
+    if (animation.value > 0) {
+      var value = animation.value;
+      if (value <= .35) {
+        var tween = Tween<double>(begin: .1, end: .4);
+        paint.color = actionColor.withOpacity(tween.transform(value));
+      } else {
+        var tween = Tween<double>(begin: .4, end: 0);
+        paint.color = actionColor.withOpacity(tween.transform(value));
+      }
+      paint.shader = null;
+      paint.strokeCap = StrokeCap.square;
+      canvas.drawArc(offset & effectiveSize, -pi / 2, endAngle * animation.value, false, paint);
+    }
   }
 
   @override
