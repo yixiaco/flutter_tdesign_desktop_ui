@@ -73,6 +73,7 @@ class _TRadioState<T> extends State<TRadio<T>> with TickerProviderStateMixin, TT
   @override
   void dispose() {
     super.dispose();
+    _position.dispose();
     _painter.dispose();
   }
 
