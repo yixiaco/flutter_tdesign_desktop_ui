@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// 加载组件
+/// 在网络较慢或数据较多时，表示数据正在加载的状态。
 class TLoading extends StatefulWidget {
   const TLoading({
     Key? key,
@@ -271,7 +272,20 @@ class _TLoadingPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+  bool shouldRepaint(covariant _TLoadingPainter oldDelegate) {
     return this != oldDelegate;
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is _TLoadingPainter &&
+          runtimeType == other.runtimeType &&
+          t == other.t &&
+          gradientColor == other.gradientColor &&
+          strokeWidth == other.strokeWidth &&
+          size == other.size;
+
+  @override
+  int get hashCode => t.hashCode ^ gradientColor.hashCode ^ strokeWidth.hashCode ^ size.hashCode;
 }

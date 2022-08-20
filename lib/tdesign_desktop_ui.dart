@@ -30,6 +30,7 @@ export 'src/components/common/scrollbar.dart';
 export 'src/components/common/animated_icon.dart';
 export 'src/components/common/fixed_flex.dart';
 export 'src/components/common/decoration_box.dart';
+export 'src/components/common/scroll_view.dart';
 /// 按钮
 export 'src/components/button/button.dart';
 export 'src/components/button/button_theme.dart';
@@ -61,6 +62,9 @@ export 'src/components/input/custom_outline_input_border.dart';
 export 'src/components/input/input_theme.dart';
 /// 加载
 export 'src/components/loading/loading.dart';
+/// 进度条
+export 'src/components/progress/progress.dart';
+export 'src/components/progress/types.dart';
 /// 标签
 export 'src/components/tag/tag.dart';
 export 'src/components/tag/check_tag.dart';
