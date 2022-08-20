@@ -220,6 +220,7 @@ mixin TToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixi
   void handleTapDown(TapDownDetails details) {
     if (isInteractive) {
       setState(() {
+        _pressed = true;
         _downPosition = details.localPosition;
       });
       _reactionController.forward();
@@ -249,11 +250,14 @@ mixin TToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixi
   void handleTapEnd([TapUpDetails? _]) {
     if (_downPosition != null) {
       setState(() {
+        _pressed = false;
         _downPosition = null;
       });
     }
     _reactionController.reverse();
   }
+
+  bool get isPressed => _pressed;
 
   bool get isFocused => _focused;
 
@@ -274,6 +278,8 @@ mixin TToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixi
       }
     }
   }
+
+  bool _pressed = false;
 
   bool _hovering = false;
 
@@ -303,6 +309,7 @@ mixin TToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixi
         if (!isInteractive) MaterialState.disabled,
         if (_hovering) MaterialState.hovered,
         if (_focused) MaterialState.focused,
+        if (_pressed) MaterialState.pressed,
         if (value ?? true) MaterialState.selected,
       };
 

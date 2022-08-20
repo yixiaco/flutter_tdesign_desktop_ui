@@ -1,4 +1,4 @@
-import 'package:example/components/progress/progress_example.dart';
+import 'package:example/components/switch/switch_example.dart';
 import 'package:example/state/semantics_state.dart';
 import 'package:example/state/size_state.dart';
 import 'package:example/state/theme_state.dart';
@@ -58,50 +58,54 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
       body: TLayout(
         aside: TAside(color: Colors.blueAccent.withOpacity(0.5), child: const Text('Aside')),
         header: THeader(
-          child: TSpace(
-            children: [
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text('主题：'),
-                  TButton(
-                    onPressed: () => ref.read(themeProvider.notifier).toggle(),
-                    child: Text(theme.brightness == Brightness.light ? '亮' : '暗'),
-                  ),
-                ],
-              ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text('语义：'),
-                  TButton(
-                    onPressed: () => ref.read(semanticsProvider.notifier).update((state) => !state),
-                    child: Text(semantics ? '显示语义' : '隐藏语义'),
-                  ),
-                ],
-              ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text('布局大小：'),
-                  TRadioGroup<TComponentSize>(
-                    variant: TRadioVariant.defaultFilled,
-                    options: [
-                      TRadioOption<TComponentSize>(label: const Text('小'), value: TComponentSize.small),
-                      TRadioOption<TComponentSize>(label: const Text('中'), value: TComponentSize.medium),
-                      TRadioOption<TComponentSize>(label: const Text('大'), value: TComponentSize.large),
-                    ],
-                    value: size,
-                    onChange: (value) => ref.read(sizeProvider.notifier).state = value!,
-                  ),
-                ],
-              )
-            ],
+          child: TSingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            primary: false,
+            child: TSpace(
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text('主题：'),
+                    TButton(
+                      onPressed: () => ref.read(themeProvider.notifier).toggle(),
+                      child: Text(theme.brightness == Brightness.light ? '亮' : '暗'),
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text('语义：'),
+                    TButton(
+                      onPressed: () => ref.read(semanticsProvider.notifier).update((state) => !state),
+                      child: Text(semantics ? '显示语义' : '隐藏语义'),
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text('布局大小：'),
+                    TRadioGroup<TComponentSize>(
+                      variant: TRadioVariant.defaultFilled,
+                      options: [
+                        TRadioOption<TComponentSize>(label: const Text('小'), value: TComponentSize.small),
+                        TRadioOption<TComponentSize>(label: const Text('中'), value: TComponentSize.medium),
+                        TRadioOption<TComponentSize>(label: const Text('大'), value: TComponentSize.large),
+                      ],
+                      value: size,
+                      onChange: (value) => ref.read(sizeProvider.notifier).state = value!,
+                    ),
+                  ],
+                )
+              ],
+            ),
           ),
         ),
         footer: const TFooter(child: Text('Footer')),
         content: const TContent(
-          child: TProgressExample(),
+          child: TSwitchExample(),
         ),
       ),
     );

@@ -56,6 +56,8 @@ export 'src/components/checkbox/checkbox_theme.dart';
 /// 单选框
 export 'src/components/radio/radio.dart';
 export 'src/components/radio/radio_group.dart';
+/// 开关
+export 'src/components/switch/switch.dart';
 /// 输入框
 export 'src/components/input/input.dart';
 export 'src/components/input/custom_outline_input_border.dart';
