@@ -108,10 +108,10 @@ class _TSwitchState<T> extends State<TSwitch<T>> with TickerProviderStateMixin, 
           return colorScheme.brandColor;
         }
       } else {
-        if (states.contains(MaterialState.disabled)) {
-          return colorScheme.bgColorComponentDisabled;
-        } else if (widget.loading) {
+        if (widget.loading) {
           return colorScheme.bgColorPage;
+        } else if (states.contains(MaterialState.disabled)) {
+          return colorScheme.bgColorComponentDisabled;
         } else {
           return colorScheme.gray5;
         }
