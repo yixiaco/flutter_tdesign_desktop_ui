@@ -46,7 +46,10 @@ export 'src/components/layout/layout.dart';
 export 'src/components/space/space.dart';
 /// 下拉菜单
 export 'src/components/dropdown/dropdown.dart';
-export 'src/components/dropdown/dropdown_types.dart';
+export 'src/components/dropdown/types.dart';
+/// 选项卡
+export 'src/components/tabs/tabs.dart';
+export 'src/components/tabs/types.dart';
 /// 跳转
 export 'src/components/jumper/jumper.dart';
 /// 复选框
@@ -70,6 +73,7 @@ export 'src/components/progress/types.dart';
 /// 标签
 export 'src/components/tag/tag.dart';
 export 'src/components/tag/check_tag.dart';
+export 'src/components/tag/types.dart';
 /// 文字提示
 export 'src/components/tooltip/tooltip.dart';
 /// 弹出层

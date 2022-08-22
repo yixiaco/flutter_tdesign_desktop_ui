@@ -67,10 +67,10 @@ class _TCheckTagState extends State<TCheckTag> with TickerProviderStateMixin, TT
 
     // 文本颜色
     var textColor = MaterialStateProperty.resolveWith((states) {
-      if(states.contains(MaterialState.disabled)) {
+      if (states.contains(MaterialState.disabled)) {
         return null;
       }
-      if(states.contains(MaterialState.selected)) {
+      if (states.contains(MaterialState.selected)) {
         return colorScheme.textColorAnti;
       }
       return null;
@@ -78,16 +78,16 @@ class _TCheckTagState extends State<TCheckTag> with TickerProviderStateMixin, TT
 
     // 背景填充颜色
     final bgColor = MaterialStateProperty.resolveWith((states) {
-      if(states.contains(MaterialState.disabled)) {
+      if (states.contains(MaterialState.disabled)) {
         return null;
       }
-      if(states.contains(MaterialState.selected) && states.contains(MaterialState.hovered)) {
+      if (states.contains(MaterialState.selected) && states.contains(MaterialState.hovered)) {
         return colorScheme.brandColorHover;
       }
-      if(states.contains(MaterialState.selected)) {
+      if (states.contains(MaterialState.selected)) {
         return colorScheme.brandColor;
       }
-      if(states.contains(MaterialState.hovered)) {
+      if (states.contains(MaterialState.hovered)) {
         return colorScheme.bgColorComponentHover;
       }
       return colorScheme.bgColorComponent;
@@ -96,32 +96,15 @@ class _TCheckTagState extends State<TCheckTag> with TickerProviderStateMixin, TT
     return Semantics(
       inMutuallyExclusiveGroup: true,
       checked: widget.checked,
-      child: FocusableActionDetector(
-        actions: actionMap,
-        focusNode: widget.focusNode,
-        autofocus: widget.autofocus,
-        enabled: isInteractive,
-        onShowFocusHighlight: handleFocusHighlightChanged,
-        onShowHoverHighlight: handleHoverChanged,
-        mouseCursor: effectiveMouseCursor.resolve(states),
-        child: GestureDetector(
-          excludeFromSemantics: !isInteractive,
-          onTapDown: handleTapDown,
-          onTap: handleTap,
-          onTapUp: handleTapEnd,
-          onTapCancel: handleTapEnd,
-          behavior: HitTestBehavior.translucent,
-          child: Semantics(
-            enabled: isInteractive,
-            child: AbsorbPointer(
-              child: TTag(
-                size: size,
-                disabled: widget.disabled,
-                backgroundColor: bgColor.resolve(states),
-                textColor: textColor.resolve(states),
-                child: widget.child,
-              ),
-            ),
+      child: buildToggleable(
+        mouseCursor: effectiveMouseCursor,
+        child: AbsorbPointer(
+          child: TTag(
+            size: size,
+            disabled: widget.disabled,
+            backgroundColor: bgColor.resolve(states),
+            textColor: textColor.resolve(states),
+            child: widget.child,
           ),
         ),
       ),

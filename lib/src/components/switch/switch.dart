@@ -177,65 +177,48 @@ class _TSwitchState<T> extends State<TSwitch<T>> with TickerProviderStateMixin, 
     return Semantics(
       inMutuallyExclusiveGroup: true,
       checked: value,
-      child: FocusableActionDetector(
-        actions: actionMap,
-        focusNode: widget.focusNode,
-        autofocus: widget.autofocus,
-        enabled: isInteractive,
-        onShowFocusHighlight: handleFocusHighlightChanged,
-        onShowHoverHighlight: handleHoverChanged,
-        mouseCursor: effectiveMouseCursor.resolve(states),
-        child: GestureDetector(
-          excludeFromSemantics: !isInteractive,
-          onTapDown: handleTapDown,
-          onTap: handleTap,
-          onTapUp: handleTapEnd,
-          onTapCancel: handleTapEnd,
-          behavior: HitTestBehavior.translucent,
-          child: Semantics(
-            enabled: isInteractive,
-            child: Stack(
-              children: [
-                // 底部
-                AnimatedContainer(
-                  constraints: BoxConstraints(
-                    minWidth: minWidth,
-                    minHeight: height,
-                    maxHeight: height,
-                  ),
-                  duration: TVar.animDurationBase,
-                  curve: TVar.animTimeFnEaseOut,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(height / 2),
-                    color: checkColor.resolve(states),
-                  ),
-                  child: label,
-                ),
-                // 滑块
-                Positioned.fill(
-                  left: borderWidth,
-                  right: borderWidth,
-                  child: AnimatedAlign(
-                    alignment: value! ? Alignment.centerRight : Alignment.centerLeft,
-                    duration: TVar.animDurationBase,
-                    curve: TVar.animTimeFnEasing,
-                    child: AnimatedContainer(
-                      width: height - 2 * borderWidth + handleOffset.resolve(states),
-                      height: height - 2 * borderWidth,
-                      duration: TVar.animDurationBase,
-                      curve: TVar.animTimeFnEasing,
-                      decoration: BoxDecoration(
-                        color: colorScheme.textColorAnti,
-                        borderRadius: BorderRadius.circular(TVar.borderRadiusExtraLarge),
-                      ),
-                      child: loading,
-                    ),
-                  ),
-                ),
-              ],
+      child: buildToggleable(
+        mouseCursor: effectiveMouseCursor,
+        child: Stack(
+          children: [
+            // 底部
+            AnimatedContainer(
+              constraints: BoxConstraints(
+                minWidth: minWidth,
+                minHeight: height,
+                maxHeight: height,
+              ),
+              duration: TVar.animDurationBase,
+              curve: TVar.animTimeFnEaseOut,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(height / 2),
+                color: checkColor.resolve(states),
+              ),
+              child: label,
             ),
-          ),
+            // 滑块
+            Positioned.fill(
+              left: borderWidth,
+              right: borderWidth,
+              child: AnimatedAlign(
+                alignment: value! ? Alignment.centerRight : Alignment.centerLeft,
+                duration: TVar.animDurationBase,
+                curve: TVar.animTimeFnEasing,
+                child: AnimatedContainer(
+                  width: height - 2 * borderWidth + handleOffset.resolve(states),
+                  height: height - 2 * borderWidth,
+                  duration: TVar.animDurationBase,
+                  curve: TVar.animTimeFnEasing,
+                  decoration: BoxDecoration(
+                    color: colorScheme.textColorAnti,
+                    borderRadius: BorderRadius.circular(TVar.borderRadiusExtraLarge),
+                  ),
+                  child: loading,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

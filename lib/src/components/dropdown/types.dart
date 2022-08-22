@@ -10,6 +10,7 @@ enum TDropdownDirection {
   right;
 }
 
+/// 下拉菜单选项
 class TDropdownOption<T> {
   const TDropdownOption({
     this.active = false,
