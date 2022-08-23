@@ -21,6 +21,9 @@ class TSingleChildScrollView extends StatefulWidget {
     this.thickness,
     this.mainAxisMargin,
     this.crossAxisMargin,
+    this.showScroll = true,
+    this.thumbVisibility = true,
+    this.onShowScroll,
   }) : super(key: key);
 
   /// The axis along which the scroll view scrolls.
@@ -118,20 +121,43 @@ class TSingleChildScrollView extends StatefulWidget {
   /// Must not be null and defaults to 0.
   final double? crossAxisMargin;
 
+  /// 是否显示滚动条
+  final bool showScroll;
+
+  /// 当为false时，滚动条将在滚动时显示，否则将淡出。
+  /// 当为true时，滚动条将始终可见且永不淡出。
+  final bool thumbVisibility;
+
+  /// 显示滚动条事件
+  final void Function(bool showScroll)? onShowScroll;
+
   @override
   State<TSingleChildScrollView> createState() => _TSingleChildScrollViewState();
 }
 
 class _TSingleChildScrollViewState extends State<TSingleChildScrollView> {
   late bool _showPadding;
+  late bool _showScroll;
 
   @override
   void initState() {
     _showPadding = false;
+    _showScroll = false;
     super.initState();
   }
 
+  void _handleShowScroll(bool show) {
+    if (_showScroll != show) {
+      _showScroll = show;
+      widget.onShowScroll?.call(show);
+    }
+  }
+
   void _handleShowPadding(bool show) {
+    // 如果不显示滚动条，则不加padding
+    if (!widget.showScroll) {
+      return;
+    }
     if (_showPadding != show) {
       setState(() {
         _showPadding = show;
@@ -163,11 +189,15 @@ class _TSingleChildScrollViewState extends State<TSingleChildScrollView> {
         thickness: thickness,
         crossAxisMargin: crossAxisMargin,
         mainAxisMargin: mainAxisMargin,
+        showScroll: widget.showScroll,
+        thumbVisibility: widget.thumbVisibility,
       ),
       child: NotificationListener<ScrollMetricsNotification>(
         onNotification: (notification) {
           // 显示滚动条
-          _handleShowPadding(notification.metrics.maxScrollExtent > 0);
+          var maxScrollExtent = notification.metrics.maxScrollExtent > 0;
+          _handleShowPadding(maxScrollExtent);
+          _handleShowScroll(maxScrollExtent);
           return false;
         },
         child: SingleChildScrollView(

@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
@@ -10,57 +11,113 @@ class TTabsExample extends StatefulWidget {
 }
 
 class _TTabsExampleState extends State<TTabsExample> {
-  String value = 'first';
+  String value = 'first1';
+  TTabsTheme theme = TTabsTheme.normal;
+  TTabsPlacement placement = TTabsPlacement.top;
 
   @override
   Widget build(BuildContext context) {
-    return TSpace(
-      direction: Axis.vertical,
-      children: [
-        TTabs<String>(
-          value: value,
-          list: const [
-            TTabsPanel(
-              label: Text.rich(TextSpan(children: [
-                WidgetSpan(child: Icon(TIcons.home)),
-                TextSpan(text: '首页'),
-              ])),
-              value: 'first',
-              panel: Padding(
-                padding: EdgeInsets.only(left: 25),
-                child: Text('选项卡1内容'),
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: TSpace(
+        direction: Axis.vertical,
+        children: [
+          TSpace(
+            children: [
+              TRadioGroup<TTabsTheme>(
+                variant: TRadioVariant.defaultFilled,
+                options: [
+                  TRadioOption(label: const Text('常规型'), value: TTabsTheme.normal),
+                  TRadioOption(label: const Text('卡片型'), value: TTabsTheme.card),
+                ],
+                value: theme,
+                onChange: (value) => setState(() {
+                  theme = value!;
+                }),
               ),
-            ),
-            TTabsPanel(
-              label: Text.rich(TextSpan(children: [
-                WidgetSpan(child: Icon(TIcons.calendar)),
-                TextSpan(text: '日程'),
-              ])),
-              value: 'second',
-              panel: Padding(
-                padding: EdgeInsets.only(left: 25),
-                child: Text('选项卡2内容'),
+              TRadioGroup<TTabsPlacement>(
+                variant: TRadioVariant.defaultFilled,
+                options: [
+                  TRadioOption(label: const Text('top'), value: TTabsPlacement.top),
+                  TRadioOption(label: const Text('right'), value: TTabsPlacement.right),
+                  TRadioOption(label: const Text('bottom'), value: TTabsPlacement.bottom),
+                  TRadioOption(label: const Text('left'), value: TTabsPlacement.left),
+                ],
+                value: placement,
+                onChange: (value) => setState(() {
+                  placement = value!;
+                }),
               ),
-            ),
-            TTabsPanel(
-              label: Text.rich(TextSpan(children: [
-                WidgetSpan(child: Icon(TIcons.layers)),
-                TextSpan(text: '事项'),
-              ])),
-              value: 'third',
-              panel: Padding(
-                padding: EdgeInsets.only(left: 25),
-                child: Text('选项卡3内容'),
+              TButton(
+                onPressed: () {
+                  setState(() {
+                    value = '';
+                  });
+                },
+                child: const Text('置空'),
               ),
-            ),
-          ],
-          onChange: (value) {
-            setState(() {
-              this.value = value;
-            });
-          },
-        )
-      ],
+            ],
+          ),
+          TTabs<String>(
+            value: value,
+            theme: theme,
+            placement: placement,
+            list: [
+              TTabsPanel(
+                label: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: const [
+                    Icon(TIcons.home),
+                    Text('首页'),
+                  ],
+                ),
+                value: 'first',
+                panel: const Padding(
+                  padding: EdgeInsets.only(left: 25),
+                  child: Text('选项卡1内容'),
+                ),
+                removable: true,
+              ),
+              TTabsPanel(
+                label: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: const [
+                    Icon(TIcons.calendar),
+                    Text('日程'),
+                  ],
+                ),
+                value: 'second',
+                panel: const Padding(
+                  padding: EdgeInsets.only(left: 25),
+                  child: Text('选项卡2内容'),
+                ),
+                disabled: true,
+                removable: true,
+              ),
+              TTabsPanel(
+                label: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: const [
+                    Icon(TIcons.layers),
+                    Text('事项'),
+                  ],
+                ),
+                value: 'third',
+                panel: const Padding(
+                  padding: EdgeInsets.only(left: 25),
+                  child: Text('选项卡3内容'),
+                ),
+                removable: true,
+              ),
+            ],
+            onChange: (value) {
+              setState(() {
+                this.value = value;
+              });
+            },
+          )
+        ],
+      ),
     );
   }
 }

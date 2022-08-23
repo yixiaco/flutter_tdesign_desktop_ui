@@ -26,11 +26,12 @@ export 'src/events/allow_tap_listener.dart';
 export 'src/components/common/toggleable.dart';
 export 'src/components/common/animation_change_notifier_painter.dart';
 export 'src/components/common/hollow.dart';
-export 'src/components/common/scrollbar.dart';
+export 'src/components/common/scroll/scrollbar.dart';
 export 'src/components/common/animated_icon.dart';
 export 'src/components/common/fixed_flex.dart';
 export 'src/components/common/decoration_box.dart';
-export 'src/components/common/scroll_view.dart';
+export 'src/components/common/scroll/scroll_view.dart';
+export 'src/components/common/common_material.dart';
 /// 按钮
 export 'src/components/button/button.dart';
 export 'src/components/button/button_theme.dart';
