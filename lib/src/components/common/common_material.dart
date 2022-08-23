@@ -6,6 +6,7 @@ class TMaterialStateBuilder extends StatefulWidget {
     Key? key,
     required this.builder,
     this.disabled = false,
+    this.selected = false,
     this.cursor,
     this.focusNode,
     this.autofocus = false,
@@ -15,6 +16,9 @@ class TMaterialStateBuilder extends StatefulWidget {
 
   /// 是否禁用
   final bool disabled;
+
+  /// 是否选中状态
+  final bool selected;
 
   /// 鼠标
   final MaterialStateProperty<MouseCursor>? cursor;
@@ -42,6 +46,7 @@ class _TMaterialStateBuilderState extends State<TMaterialStateBuilder> with Mate
   @override
   void initState() {
     super.initState();
+    setMaterialState(MaterialState.selected, widget.selected);
     setMaterialState(MaterialState.disabled, widget.disabled);
   }
 
@@ -49,6 +54,7 @@ class _TMaterialStateBuilderState extends State<TMaterialStateBuilder> with Mate
   void didUpdateWidget(covariant TMaterialStateBuilder oldWidget) {
     super.didUpdateWidget(oldWidget);
     setMaterialState(MaterialState.disabled, widget.disabled);
+    setMaterialState(MaterialState.selected, widget.selected);
   }
 
   @override

@@ -22,41 +22,44 @@ class _TTabsExampleState extends State<TTabsExample> {
       child: TSpace(
         direction: Axis.vertical,
         children: [
-          TSpace(
-            children: [
-              TRadioGroup<TTabsTheme>(
-                variant: TRadioVariant.defaultFilled,
-                options: [
-                  TRadioOption(label: const Text('常规型'), value: TTabsTheme.normal),
-                  TRadioOption(label: const Text('卡片型'), value: TTabsTheme.card),
-                ],
-                value: theme,
-                onChange: (value) => setState(() {
-                  theme = value!;
-                }),
-              ),
-              TRadioGroup<TTabsPlacement>(
-                variant: TRadioVariant.defaultFilled,
-                options: [
-                  TRadioOption(label: const Text('top'), value: TTabsPlacement.top),
-                  TRadioOption(label: const Text('right'), value: TTabsPlacement.right),
-                  TRadioOption(label: const Text('bottom'), value: TTabsPlacement.bottom),
-                  TRadioOption(label: const Text('left'), value: TTabsPlacement.left),
-                ],
-                value: placement,
-                onChange: (value) => setState(() {
-                  placement = value!;
-                }),
-              ),
-              TButton(
-                onPressed: () {
-                  setState(() {
-                    value = '';
-                  });
-                },
-                child: const Text('置空'),
-              ),
-            ],
+          TSingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: TSpace(
+              children: [
+                TRadioGroup<TTabsTheme>(
+                  variant: TRadioVariant.defaultFilled,
+                  options: [
+                    TRadioOption(label: const Text('常规型'), value: TTabsTheme.normal),
+                    TRadioOption(label: const Text('卡片型'), value: TTabsTheme.card),
+                  ],
+                  value: theme,
+                  onChange: (value) => setState(() {
+                    theme = value!;
+                  }),
+                ),
+                TRadioGroup<TTabsPlacement>(
+                  variant: TRadioVariant.defaultFilled,
+                  options: [
+                    TRadioOption(label: const Text('top'), value: TTabsPlacement.top),
+                    TRadioOption(label: const Text('right'), value: TTabsPlacement.right),
+                    TRadioOption(label: const Text('bottom'), value: TTabsPlacement.bottom),
+                    TRadioOption(label: const Text('left'), value: TTabsPlacement.left),
+                  ],
+                  value: placement,
+                  onChange: (value) => setState(() {
+                    placement = value!;
+                  }),
+                ),
+                TButton(
+                  onPressed: () {
+                    setState(() {
+                      value = '';
+                    });
+                  },
+                  child: const Text('置空'),
+                ),
+              ],
+            ),
           ),
           TTabs<String>(
             value: value,

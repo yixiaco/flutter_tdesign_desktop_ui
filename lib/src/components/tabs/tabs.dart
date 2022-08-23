@@ -69,10 +69,12 @@ class _TTabsState<T> extends State<TTabs<T>> with SingleTickerProviderStateMixin
   final _LabelPainter _painter = _LabelPainter();
   late AnimationController _controller;
   late CurvedAnimation _position;
+  late bool _showScroll;
 
   @override
   void initState() {
     super.initState();
+    _showScroll = false;
     if (widget._index != -1) {
       _pageController = PageController(initialPage: widget._index);
     }
@@ -138,31 +140,41 @@ class _TTabsState<T> extends State<TTabs<T>> with SingleTickerProviderStateMixin
         direction = Axis.vertical;
         break;
     }
-    Widget child = Flex(
-      direction: direction,
-      mainAxisSize: MainAxisSize.min,
-      children: List.generate(widget.list.length, (index) {
-        var panel = widget.list[index];
-        return KeyedSubtree(
-          key: _tabKeys[index],
-          child: _TabButton<T>(
-            checked: widget.value == panel.value,
-            placement: widget.placement,
-            theme: widget.theme,
-            size: widget.size,
-            disabled: widget.disabled || panel.disabled,
-            onChange: (checked) => widget.onChange?.call(panel.value),
-            index: index,
-            count: widget.list.length,
-            onRemove: (value, index) {
-              panel.onRemove?.call(value);
-              widget.onRemove?.call(value, index);
-            },
-            removable: panel.removable,
-            child: panel.label,
-          ),
-        );
-      }),
+    Widget child = TSingleChildScrollView(
+      scrollDirection: direction,
+      showScroll: false,
+      onShowScroll: (showScroll) {
+        /// 显示滚动
+        setState(() {
+          _showScroll = true;
+        });
+      },
+      child: Flex(
+        direction: direction,
+        mainAxisSize: MainAxisSize.min,
+        children: List.generate(widget.list.length, (index) {
+          var panel = widget.list[index];
+          return KeyedSubtree(
+            key: _tabKeys[index],
+            child: _TabButton<T>(
+              checked: widget.value == panel.value,
+              placement: widget.placement,
+              theme: widget.theme,
+              size: widget.size,
+              disabled: widget.disabled || panel.disabled,
+              onChange: (checked) => widget.onChange?.call(panel.value),
+              index: index,
+              count: widget.list.length,
+              onRemove: (value, index) {
+                panel.onRemove?.call(value);
+                widget.onRemove?.call(value, index);
+              },
+              removable: panel.removable,
+              child: panel.label,
+            ),
+          );
+        }),
+      ),
     );
 
     switch (widget.theme) {
@@ -402,6 +414,7 @@ class _TabButtonState extends State<_TabButton> with TickerProviderStateMixin, T
     var theme = TTheme.of(context);
     var colorScheme = theme.colorScheme;
     var size = widget.size ?? theme.size;
+    var isCard = widget.theme == TTabsTheme.card;
 
     // 鼠标
     final effectiveMouseCursor = MaterialStateProperty.resolveWith<MouseCursor>((states) {
@@ -524,32 +537,23 @@ class _TabButtonState extends State<_TabButton> with TickerProviderStateMixin, T
             mainAxisSize: MainAxisSize.min,
             children: [
               widget.child,
-              if (widget.removable)
-                Padding(
-                  padding: const EdgeInsets.only(left: 8),
-                  child: TMaterialStateBuilder(
-                    disabled: widget.disabled,
-                    builder: (BuildContext context, Set<MaterialState> states) {
-                      return TAnimatedIcon(
-                        duration: TVar.animDurationBase,
-                        curve: TVar.animTimeFnEasing,
-                        color: effectiveIconColor.resolve(states),
-                        data: iconThemeData,
-                        child: const Icon(TIcons.close),
-                      );
-                    },
-                  ),
-                ),
+              if (widget.removable && isCard) _buildCloseIcon(effectiveIconColor, iconThemeData),
             ],
           ),
         ),
       ),
     );
+    if (!isCard) {
+      child = Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [child, _buildCloseIcon(effectiveIconColor, iconThemeData)],
+      );
+    }
+
     double height = size.sizeOf(small: 48, medium: 48, large: 64);
 
     // 边框
     Decoration? decoration;
-    var isCard = widget.theme == TTabsTheme.card;
     if (isCard) {
       child = SizedBox(
         height: height,
@@ -609,6 +613,25 @@ class _TabButtonState extends State<_TabButton> with TickerProviderStateMixin, T
             child: child,
           ),
         ),
+      ),
+    );
+  }
+
+  Padding _buildCloseIcon(MaterialStateProperty<Color?> effectiveIconColor, IconThemeData iconThemeData) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 8),
+      child: TMaterialStateBuilder(
+        selected: widget.checked,
+        disabled: widget.disabled,
+        builder: (BuildContext context, Set<MaterialState> states) {
+          return TAnimatedIcon(
+            duration: TVar.animDurationBase,
+            curve: TVar.animTimeFnEasing,
+            color: effectiveIconColor.resolve(states),
+            data: iconThemeData,
+            child: const Icon(TIcons.close),
+          );
+        },
       ),
     );
   }
