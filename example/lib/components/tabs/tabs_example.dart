@@ -14,6 +14,22 @@ class _TTabsExampleState extends State<TTabsExample> {
   String value = 'first1';
   TTabsTheme theme = TTabsTheme.normal;
   TTabsPlacement placement = TTabsPlacement.top;
+  late List<TTabsPanel<String>> panels;
+
+  @override
+  void initState() {
+    super.initState();
+    panels = List.generate(20, (index) {
+      return TTabsPanel(
+        label: Text('选项卡$index'),
+        value: '选项卡$index',
+        panel: Padding(
+          padding: const EdgeInsets.only(left: 25),
+          child: Text('选项卡$index内容'),
+        ),
+      );
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -61,63 +77,92 @@ class _TTabsExampleState extends State<TTabsExample> {
               ],
             ),
           ),
-          TTabs<String>(
-            value: value,
-            theme: theme,
-            placement: placement,
-            list: [
-              TTabsPanel(
-                label: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: const [
-                    Icon(TIcons.home),
-                    Text('首页'),
-                  ],
+          Expanded(
+            child: TTabs<String>(
+              value: value,
+              theme: theme,
+              placement: placement,
+              list: [
+                TTabsPanel(
+                  label: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      Padding(
+                        padding: EdgeInsets.only(right: 4),
+                        child: Icon(TIcons.home),
+                      ),
+                      Text('首页'),
+                    ],
+                  ),
+                  value: 'first',
+                  panel: const Padding(
+                    padding: EdgeInsets.only(left: 25),
+                    child: Text('选项卡1内容'),
+                  ),
+                  removable: true,
                 ),
-                value: 'first',
-                panel: const Padding(
-                  padding: EdgeInsets.only(left: 25),
-                  child: Text('选项卡1内容'),
+                TTabsPanel(
+                  label: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      Padding(
+                        padding: EdgeInsets.only(right: 4),
+                        child: Icon(TIcons.calendar),
+                      ),
+                      Text('日程'),
+                    ],
+                  ),
+                  value: 'second1',
+                  panel: const Padding(
+                    padding: EdgeInsets.only(left: 25),
+                    child: Text('选项卡2内容'),
+                  ),
                 ),
-                removable: true,
-              ),
-              TTabsPanel(
-                label: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: const [
-                    Icon(TIcons.calendar),
-                    Text('日程'),
-                  ],
+                TTabsPanel(
+                  label: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      Padding(
+                        padding: EdgeInsets.only(right: 4),
+                        child: Icon(TIcons.calendar),
+                      ),
+                      Text('日程'),
+                    ],
+                  ),
+                  value: 'second',
+                  panel: const Padding(
+                    padding: EdgeInsets.only(left: 25),
+                    child: Text('选项卡2内容'),
+                  ),
+                  disabled: true,
+                  removable: true,
                 ),
-                value: 'second',
-                panel: const Padding(
-                  padding: EdgeInsets.only(left: 25),
-                  child: Text('选项卡2内容'),
+                TTabsPanel(
+                  label: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      Padding(
+                        padding: EdgeInsets.only(right: 4),
+                        child: Icon(TIcons.layers),
+                      ),
+                      Text('事项'),
+                    ],
+                  ),
+                  value: 'third',
+                  panel: const Padding(
+                    padding: EdgeInsets.only(left: 25),
+                    child: Text('选项卡3内容'),
+                  ),
+                  removable: true,
                 ),
-                disabled: true,
-                removable: true,
-              ),
-              TTabsPanel(
-                label: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: const [
-                    Icon(TIcons.layers),
-                    Text('事项'),
-                  ],
-                ),
-                value: 'third',
-                panel: const Padding(
-                  padding: EdgeInsets.only(left: 25),
-                  child: Text('选项卡3内容'),
-                ),
-                removable: true,
-              ),
-            ],
-            onChange: (value) {
-              setState(() {
-                this.value = value;
-              });
-            },
+                ...panels,
+              ],
+              onChange: (value) {
+                setState(() {
+                  this.value = value;
+                });
+              },
+            ),
           )
         ],
       ),

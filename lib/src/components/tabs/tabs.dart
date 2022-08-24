@@ -1,4 +1,7 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// 选项卡
@@ -63,21 +66,133 @@ class TTabs<T> extends StatefulWidget {
   State<TTabs<T>> createState() => _TTabsState<T>();
 }
 
-class _TTabsState<T> extends State<TTabs<T>> with SingleTickerProviderStateMixin {
+class _TTabsState<T> extends State<TTabs<T>> {
   late PageController _pageController;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget._index != -1) {
+      _pageController = PageController(initialPage: widget._index);
+    }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _pageController.dispose();
+  }
+
+  @override
+  void didUpdateWidget(covariant TTabs<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _buildLabel();
+  }
+
+  /// 构建标签
+  Widget _buildLabel() {
+    return _TabsLabel(
+      addable: widget.addable,
+      disabled: widget.disabled,
+      dragSort: widget.dragSort,
+      value: widget.value,
+      list: widget.list,
+      placement: widget.placement,
+      size: widget.size,
+      theme: widget.theme,
+      onAdd: widget.onAdd,
+      onChange: widget.onChange,
+      onDragSort: widget.onDragSort,
+      onRemove: widget.onRemove,
+    );
+  }
+}
+
+class _TabsLabel<T> extends StatefulWidget {
+  const _TabsLabel({
+    Key? key,
+    this.addable = false,
+    this.disabled = false,
+    this.dragSort = false,
+    required this.value,
+    required this.list,
+    this.placement = TTabsPlacement.top,
+    this.size,
+    this.theme = TTabsTheme.normal,
+    this.onAdd,
+    this.onChange,
+    this.onDragSort,
+    this.onRemove,
+  }) : super(key: key);
+
+  /// 选项卡是否可增加
+  final bool addable;
+
+  /// 是否禁用选项卡
+  final bool disabled;
+
+  /// 是否开启拖拽调整顺序
+  final bool dragSort;
+
+  /// 激活的选项卡值
+  final T? value;
+
+  ///	选项卡列表
+  final List<TTabsPanel<T>> list;
+
+  /// 选项卡位置
+  final TTabsPlacement placement;
+
+  /// 组件尺寸
+  final TComponentSize? size;
+
+  /// 选项卡风格
+  final TTabsTheme theme;
+
+  /// 点击添加选项卡时触发
+  final void Function()? onAdd;
+
+  /// 激活的选项卡发生变化时触发
+  final void Function(T value)? onChange;
+
+  /// 拖拽排序时触发
+  final void Function(int currentIndex, T current, int targetIndex, T target)? onDragSort;
+
+  /// 删除选项卡时触发
+  final void Function(T value, int index)? onRemove;
+
+  /// 当前下标
+  int get _index => list.indexWhere((element) => element.value == value);
+
+  @override
+  State<_TabsLabel<T>> createState() => _TabsLabelState<T>();
+}
+
+class _TabsLabelState<T> extends State<_TabsLabel<T>> with SingleTickerProviderStateMixin {
   late List<GlobalKey> _tabKeys;
   final _LabelPainter _painter = _LabelPainter();
   late AnimationController _controller;
   late CurvedAnimation _position;
   late bool _showScroll;
+  final GlobalKey _painterKey = GlobalKey();
+  late ScrollController _scrollController;
+
+  /// 到初始
+  late bool _startOffset;
+
+  /// 到结尾
+  late bool _lastOffset;
 
   @override
   void initState() {
     super.initState();
     _showScroll = false;
-    if (widget._index != -1) {
-      _pageController = PageController(initialPage: widget._index);
-    }
+    _startOffset = true;
+    _lastOffset = false;
     _tabKeys = widget.list.map((option) => GlobalKey()).toList();
     _controller = AnimationController(
       vsync: this,
@@ -89,19 +204,35 @@ class _TTabsState<T> extends State<TTabs<T>> with SingleTickerProviderStateMixin
       curve: TVar.animTimeFnEasing,
       reverseCurve: TVar.animTimeFnEasing.flipped,
     );
+    _scrollController = ScrollController();
+    _scrollController.addListener(() {
+      var noScroll = _scrollController.offset == 0;
+      var maxScrollExtent = _scrollController.position.maxScrollExtent - _scrollController.offset == 0;
+      if (_startOffset != noScroll || _lastOffset != maxScrollExtent) {
+        setState(() {});
+      }
+      _scrollOffset();
+    });
+  }
+
+  void _scrollOffset() {
+    if (_scrollController.hasClients) {
+      _startOffset = _scrollController.offset == 0;
+      _lastOffset = _scrollController.position.maxScrollExtent - _scrollController.offset == 0;
+    }
   }
 
   @override
   void dispose() {
     super.dispose();
     _painter.dispose();
-    _pageController.dispose();
     _controller.dispose();
     _position.dispose();
+    _scrollController.dispose();
   }
 
   @override
-  void didUpdateWidget(covariant TTabs<T> oldWidget) {
+  void didUpdateWidget(covariant _TabsLabel<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.list.length > _tabKeys.length) {
       final int delta = widget.list.length - _tabKeys.length;
@@ -117,17 +248,28 @@ class _TTabsState<T> extends State<TTabs<T>> with SingleTickerProviderStateMixin
         _controller.reverse();
       }
     }
+    int index;
+    if (widget.value != oldWidget.value && (index = widget._index) != -1) {
+      SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+        var tabKey = _tabKeys[index];
+        var box = context.findRenderObject() as RenderBox;
+        var width = tabKey.currentContext!.size!.width;
+        var targetBox = tabKey.currentContext!.findRenderObject() as RenderBox;
+        var offset2 = targetBox.localToGlobal(Offset.zero) - box.localToGlobal(Offset.zero);
+        var offset = _scrollController.offset;
+        // if (offset > offset2.dx) {
+        //   _animateTo(offset2.dx);
+        // } else if (offset + context.size!.width < offset2.dx + width) {
+        //   _animateTo(offset + (offset2.dx + width - offset - context.size!.width) + 40);
+        // }
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    _scrollOffset();
     var theme = TTheme.of(context);
-
-    return _buildLabel(theme);
-  }
-
-  /// 构建标签
-  Widget _buildLabel(TThemeData theme) {
     var colorScheme = theme.colorScheme;
     Axis direction;
     switch (widget.placement) {
@@ -140,47 +282,41 @@ class _TTabsState<T> extends State<TTabs<T>> with SingleTickerProviderStateMixin
         direction = Axis.vertical;
         break;
     }
-    Widget child = TSingleChildScrollView(
-      scrollDirection: direction,
-      showScroll: false,
-      onShowScroll: (showScroll) {
-        /// 显示滚动
-        setState(() {
-          _showScroll = true;
-        });
-      },
-      child: Flex(
-        direction: direction,
-        mainAxisSize: MainAxisSize.min,
-        children: List.generate(widget.list.length, (index) {
-          var panel = widget.list[index];
-          return KeyedSubtree(
-            key: _tabKeys[index],
-            child: _TabButton<T>(
-              checked: widget.value == panel.value,
-              placement: widget.placement,
-              theme: widget.theme,
-              size: widget.size,
-              disabled: widget.disabled || panel.disabled,
-              onChange: (checked) => widget.onChange?.call(panel.value),
-              index: index,
-              count: widget.list.length,
-              onRemove: (value, index) {
-                panel.onRemove?.call(value);
-                widget.onRemove?.call(value, index);
-              },
-              removable: panel.removable,
-              child: panel.label,
-            ),
-          );
-        }),
-      ),
+    List<Widget> buttons = List.generate(widget.list.length, (index) {
+      var panel = widget.list[index];
+      return KeyedSubtree(
+        key: _tabKeys[index],
+        child: _TabButton<T>(
+          checked: widget.value == panel.value,
+          placement: widget.placement,
+          theme: widget.theme,
+          size: widget.size,
+          disabled: widget.disabled || panel.disabled,
+          onChange: (checked) => widget.onChange?.call(panel.value),
+          index: index,
+          count: widget.list.length,
+          onRemove: (value, index) {
+            panel.onRemove?.call(value);
+            widget.onRemove?.call(value, index);
+          },
+          removable: panel.removable,
+          child: panel.label,
+        ),
+      );
+    });
+
+    Widget child = FixedCrossFlex(
+      direction: direction,
+      mainAxisSize: MainAxisSize.min,
+      children: buttons,
     );
 
     switch (widget.theme) {
       case TTabsTheme.normal:
-        return CustomPaint(
+        child = CustomPaint(
+          key: _painterKey,
           foregroundPainter: _painter
+            .._painterKey = _painterKey
             ..placement = widget.placement
             ..trackColor = colorScheme.bgColorSecondaryContainer
             ..t = _position
@@ -190,9 +326,126 @@ class _TTabsState<T> extends State<TTabs<T>> with SingleTickerProviderStateMixin
             ..strokeWidth = 1,
           child: child,
         );
+        break;
       case TTabsTheme.card:
-        return child;
+        child = child;
+        break;
     }
+
+    child = TSingleChildScrollView(
+      controller: _scrollController,
+      primary: false,
+      scrollDirection: direction,
+      showScroll: false,
+      onShowScroll: (showScroll) {
+        /// 显示滚动
+        setState(() {
+          _showScroll = showScroll;
+        });
+      },
+      // 由于按钮长度有可能不一致，此处使用[FixedCrossFlex]调整交叉轴取最长的轴对齐
+      child: child,
+    );
+
+    // 显示滚动按钮
+    if (_showScroll) {
+      child = Stack(
+        children: [
+          child,
+          if (!_startOffset)
+            Positioned(
+              left: 0,
+              child: _TabIconButton(
+                size: widget.size,
+                icon: TIcons.chevronLeft,
+                onTap: () {
+                  var offset = max(
+                    _scrollController.position.minScrollExtent,
+                    _scrollController.offset - context.size!.width + 80,
+                  );
+                  _animateTo(offset);
+                },
+              ),
+            ),
+          if (!_lastOffset)
+            Positioned(
+              right: 0,
+              child: _TabIconButton(
+                size: widget.size,
+                icon: TIcons.chevronRight,
+                onTap: () {
+                  var offset = min(
+                    _scrollController.position.maxScrollExtent,
+                    _scrollController.offset + context.size!.width - 80,
+                  );
+                  _animateTo(offset);
+                },
+              ),
+            ),
+        ],
+      );
+    }
+
+    return child;
+  }
+
+  void _animateTo(double offset) {
+    _scrollController.animateTo(
+      offset,
+      duration: TVar.animDurationModerate,
+      curve: TVar.animTimeFnEasing,
+    );
+  }
+}
+
+/// 图标
+class _TabIconButton extends StatelessWidget {
+  const _TabIconButton({
+    Key? key,
+    this.onTap,
+    this.size,
+    required this.icon,
+  }) : super(key: key);
+
+  /// 点击事件
+  final GestureTapCallback? onTap;
+
+  /// 图标大小
+  final TComponentSize? size;
+
+  /// 图标
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    var theme = TTheme.of(context);
+    var colorScheme = theme.colorScheme;
+    var size = this.size ?? theme.size;
+    var iconBgColor = MaterialStateProperty.resolveWith((states) {
+      if (states.contains(MaterialState.hovered)) {
+        return colorScheme.bgColorSecondaryContainerHover;
+      }
+      return colorScheme.bgColorSecondaryContainer;
+    });
+    var borderSide = BorderSide(color: colorScheme.componentStroke);
+    return TMaterialStateBuilder(
+      onTap: onTap,
+      builder: (BuildContext context, Set<MaterialState> states) {
+        return Container(
+          width: 40,
+          height: size.sizeOf(small: 48, medium: 48, large: 64),
+          decoration: BoxDecoration(
+            color: iconBgColor.resolve(states),
+            border: Border(left: borderSide),
+          ),
+          child: Icon(
+            icon,
+            size: theme.fontData.fontSizeBodyLarge,
+            color: colorScheme.textColorSecondary,
+          ),
+        );
+      },
+    );
   }
 }
 
@@ -267,15 +520,28 @@ class _LabelPainter extends AnimationChangeNotifierPainter {
     notifyListeners();
   }
 
-  Offset get offset {
-    if (index > 0) {
-      var box = tabKeys[index].currentContext!.findRenderObject() as RenderBox;
-      var offset1 = box.localToGlobal(const Offset(0, 0));
-      var beforeBox = tabKeys[0].currentContext!.findRenderObject() as RenderBox;
-      var offset2 = beforeBox.localToGlobal(const Offset(0, 0));
-      return offset1 - offset2;
+  GlobalKey get painterKey => _painterKey!;
+  GlobalKey? _painterKey;
+
+  set painterKey(GlobalKey value) {
+    if (value == _painterKey) {
+      return;
     }
-    return Offset.zero;
+    _painterKey = value;
+    notifyListeners();
+  }
+
+  Offset _keyOffset(GlobalKey key) {
+    var box = key.currentContext!.findRenderObject() as RenderBox;
+    var currentBox = painterKey.currentContext!.findRenderObject() as RenderBox;
+    return box.localToGlobal(Offset.zero) - currentBox.localToGlobal(Offset.zero);
+  }
+
+  Offset get offset {
+    if (index >= 0) {
+      return _keyOffset(tabKeys[index]);
+    }
+    return _keyOffset(tabKeys[index]);
   }
 
   @override
@@ -319,15 +585,22 @@ class _LabelPainter extends AnimationChangeNotifierPainter {
   }
 
   Rect _trackPlacementRect(Size size) {
+    var lastLabKey = tabKeys[tabKeys.length - 1];
+    var startOffset = _keyOffset(tabKeys[0]);
+    var offset = _keyOffset(lastLabKey);
+    var width = lastLabKey.currentContext!.size!.width;
+    var height = lastLabKey.currentContext!.size!.height;
+    var maxWidth = offset.dx + width;
+    var maxHeight = offset.dy + height;
     switch (placement) {
       case TTabsPlacement.top:
-        return Rect.fromLTWH(0, size.height - strokeWidth, size.width, strokeWidth);
+        return Rect.fromLTWH(startOffset.dx, maxHeight - strokeWidth, maxWidth, strokeWidth);
       case TTabsPlacement.bottom:
-        return Rect.fromLTWH(0, 0, size.width, strokeWidth);
+        return Rect.fromLTWH(startOffset.dx, startOffset.dy, maxWidth, strokeWidth);
       case TTabsPlacement.left:
-        return Rect.fromLTWH(size.width - strokeWidth, 0, strokeWidth, size.height);
+        return Rect.fromLTWH(maxWidth - strokeWidth, startOffset.dy, strokeWidth, maxHeight);
       case TTabsPlacement.right:
-        return Rect.fromLTWH(0, 0, strokeWidth, size.height);
+        return Rect.fromLTWH(0, 0, strokeWidth, maxHeight);
     }
   }
 
@@ -336,11 +609,11 @@ class _LabelPainter extends AnimationChangeNotifierPainter {
       case TTabsPlacement.top:
         return Rect.fromLTWH(rect.left, rect.bottom - strokeWidth, rect.width, strokeWidth);
       case TTabsPlacement.bottom:
-        return Rect.fromLTWH(rect.left, rect.top + strokeWidth, rect.width, strokeWidth);
+        return Rect.fromLTWH(rect.left, rect.top, rect.width, strokeWidth);
       case TTabsPlacement.left:
         return Rect.fromLTWH(rect.right - strokeWidth, rect.top, strokeWidth, rect.height);
       case TTabsPlacement.right:
-        return Rect.fromLTWH(rect.left, rect.top, strokeWidth, rect.height);
+        return Rect.fromLTWH(0, rect.top, strokeWidth, rect.height);
     }
   }
 
@@ -504,7 +777,7 @@ class _TabButtonState extends State<_TabButton> with TickerProviderStateMixin, T
           if (states.contains(MaterialState.disabled)) {
             return colorScheme.textColorDisabled;
           }
-          if (states.contains(MaterialState.selected) || states.contains(MaterialState.hovered)) {
+          if (states.contains(MaterialState.hovered)) {
             return colorScheme.textColorPrimary;
           }
           return colorScheme.textColorSecondary;
@@ -543,7 +816,7 @@ class _TabButtonState extends State<_TabButton> with TickerProviderStateMixin, T
         ),
       ),
     );
-    if (!isCard) {
+    if (widget.removable && !isCard) {
       child = Row(
         mainAxisSize: MainAxisSize.min,
         children: [child, _buildCloseIcon(effectiveIconColor, iconThemeData)],
@@ -594,6 +867,11 @@ class _TabButtonState extends State<_TabButton> with TickerProviderStateMixin, T
           );
           break;
       }
+    } else {
+      child = UnconstrainedBox(
+        alignment: Alignment.centerLeft,
+        child: child,
+      );
     }
 
     return Semantics(
@@ -601,7 +879,11 @@ class _TabButtonState extends State<_TabButton> with TickerProviderStateMixin, T
       checked: value,
       child: Material(
         textStyle: TextStyle(
-          fontSize: theme.fontData.fontSizeBodyLarge,
+          fontSize: size.sizeOf(
+            small: theme.fontData.fontSizeBodyMedium,
+            medium: theme.fontData.fontSizeBodyMedium,
+            large: theme.fontData.fontSizeBodyLarge,
+          ),
           color: textColor.resolve(states),
         ),
         color: effectiveBgColor.resolve(states),
@@ -609,9 +891,7 @@ class _TabButtonState extends State<_TabButton> with TickerProviderStateMixin, T
           decoration: decoration,
           height: isCard ? null : height,
           padding: margin,
-          child: UnconstrainedBox(
-            child: child,
-          ),
+          child: child,
         ),
       ),
     );

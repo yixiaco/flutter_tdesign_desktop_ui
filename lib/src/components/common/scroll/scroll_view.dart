@@ -192,12 +192,14 @@ class _TSingleChildScrollViewState extends State<TSingleChildScrollView> {
         showScroll: widget.showScroll,
         thumbVisibility: widget.thumbVisibility,
       ),
-      child: NotificationListener<ScrollMetricsNotification>(
+      child: NotificationListener<Notification>(
         onNotification: (notification) {
-          // 显示滚动条
-          var maxScrollExtent = notification.metrics.maxScrollExtent > 0;
-          _handleShowPadding(maxScrollExtent);
-          _handleShowScroll(maxScrollExtent);
+          if (notification is ScrollMetricsNotification) {
+            // 显示滚动条
+            var maxScrollExtent = notification.metrics.maxScrollExtent > 0;
+            _handleShowPadding(maxScrollExtent);
+            _handleShowScroll(maxScrollExtent);
+          }
           return false;
         },
         child: SingleChildScrollView(
