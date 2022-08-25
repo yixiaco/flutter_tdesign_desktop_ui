@@ -105,8 +105,8 @@ class BubbleBoxBorder {
     this.color = const Color(0xFF000000),
     this.width = 1,
     this.style = BubbleBoxBorderStyle.solid,
-    this.dashedGap,
-    this.dashedWidth = 5,
+    this.dashedGap = 2,
+    this.dashedWidth = 3,
     this.gradient,
   });
 
@@ -330,6 +330,7 @@ class BubbleShapeBorder extends ShapeBorder {
 
     /// 收尾
     path.lineTo(leftMargin, topMargin + math.min(_min(position.start, radius.topRight.y, BubbleDirection.left), size.height));
+    path = path.shift(rect.topLeft);
     path.close();
     return path;
   }

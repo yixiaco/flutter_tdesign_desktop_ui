@@ -81,11 +81,14 @@ class _TabButtonState<T> extends State<_TabButton<T>> with TickerProviderStateMi
     if (widget.dragSort) {
       child = Draggable<_TabButtonDraggableData<T>>(
         data: _TabButtonDraggableData<T>(currentIndex: widget.index, current: widget.value),
-        feedback: _buildButton(context, {...states, MaterialState.hovered, MaterialState.dragged}, false),
-        childWhenDragging: _buildButton(context, {...states, MaterialState.dragged, MaterialState.disabled}, true),
+        feedback: _buildButton(context, {...states, MaterialState.hovered, MaterialState.dragged}, showRemoveIcon: false),
+        childWhenDragging: _buildButton(context, {...states, MaterialState.dragged, MaterialState.disabled}),
         child: DragTarget<_TabButtonDraggableData<T>>(
           builder: (context, candidateData, rejectedData) {
-            return _buildButton(context, states, true);
+            if (candidateData.isNotEmpty) {
+              return _buildButton(context, states, showDashed: true);
+            }
+            return _buildButton(context, states);
           },
           onWillAccept: (data) {
             return data != null;
@@ -96,7 +99,7 @@ class _TabButtonState<T> extends State<_TabButton<T>> with TickerProviderStateMi
         ),
       );
     } else {
-      child = _buildButton(context, states, true);
+      child = _buildButton(context, states);
     }
 
     return Semantics(
@@ -106,7 +109,12 @@ class _TabButtonState<T> extends State<_TabButton<T>> with TickerProviderStateMi
     );
   }
 
-  Widget _buildButton(BuildContext context, Set<MaterialState> states, bool showRemoveIcon) {
+  Widget _buildButton(
+    BuildContext context,
+    Set<MaterialState> states, {
+    bool showRemoveIcon = true,
+    bool showDashed = false,
+  }) {
     var theme = TTheme.of(context);
     var colorScheme = theme.colorScheme;
     var size = widget.size ?? theme.size;
@@ -222,6 +230,19 @@ class _TabButtonState<T> extends State<_TabButton<T>> with TickerProviderStateMi
       color: textColor.resolve(states),
     );
     var removable = widget.removable && showRemoveIcon;
+    Decoration? dashedDecoration;
+    if (showDashed) {
+      dashedDecoration = ShapeDecoration(
+        shape: BubbleShapeBorder(
+          border: BubbleBoxBorder(
+            style: BubbleBoxBorderStyle.dashed,
+            color: colorScheme.brandColor,
+            width: 1 / MediaQuery.of(context).devicePixelRatio,
+          ),
+          radius: radius,
+        ),
+      );
+    }
     Widget child = InkWell(
       onFocusChange: handleFocusHighlightChanged,
       onHighlightChanged: handleHoverChanged,
@@ -237,6 +258,7 @@ class _TabButtonState<T> extends State<_TabButton<T>> with TickerProviderStateMi
       child: IconTheme(
         data: iconThemeData,
         child: Container(
+          decoration: dashedDecoration,
           padding: padding,
           color: effectiveOverlayColor.resolve(states),
           child: Row(
