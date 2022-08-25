@@ -14,12 +14,14 @@ class _TTabsExampleState extends State<TTabsExample> {
   String value = 'first1';
   TTabsTheme theme = TTabsTheme.normal;
   TTabsPlacement placement = TTabsPlacement.top;
+  int index = 0;
   late List<TTabsPanel<String>> panels;
 
   @override
   void initState() {
     super.initState();
-    panels = List.generate(20, (index) {
+    panels = List.generate(10, (index) {
+      this.index++;
       return TTabsPanel(
         label: Text('选项卡$index'),
         value: '选项卡$index',
@@ -27,17 +29,26 @@ class _TTabsExampleState extends State<TTabsExample> {
           padding: const EdgeInsets.only(left: 25),
           child: Text('选项卡$index内容'),
         ),
+        removable: true,
       );
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    var text = const Text('data');
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: TSpace(
         direction: Axis.vertical,
         children: [
+          Draggable(
+            feedback: text,
+            child: DragTarget(builder:(context, candidateData, rejectedData) {
+              print(candidateData);
+              return text;
+            }),
+          ),
           TSingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: TSpace(
@@ -82,6 +93,8 @@ class _TTabsExampleState extends State<TTabsExample> {
               value: value,
               theme: theme,
               placement: placement,
+              addable: true,
+              dragSort: true,
               list: [
                 TTabsPanel(
                   label: Row(
@@ -155,11 +168,55 @@ class _TTabsExampleState extends State<TTabsExample> {
                   ),
                   removable: true,
                 ),
-                ...panels,
               ],
+              onDragSort: (currentIndex, current, targetIndex, target) {
+                print('currentIndex:$currentIndex, current:$current, targetIndex:$targetIndex, target:$target');
+              },
               onChange: (value) {
                 setState(() {
                   this.value = value;
+                });
+              },
+            ),
+          ),
+          Expanded(
+            child: TTabs<String>(
+              value: value,
+              theme: theme,
+              placement: placement,
+              addable: true,
+              dragSort: true,
+              onRemove: (value, index) {
+                setState(() {
+                  panels.removeAt(index);
+                });
+              },
+              onAdd: () {
+                setState(() {
+                  index++;
+                  panels.add(TTabsPanel(
+                    label: Text('选项卡$index'),
+                    value: '选项卡$index',
+                    panel: Padding(
+                      padding: const EdgeInsets.only(left: 25),
+                      child: Text('选项卡$index内容'),
+                    ),
+                    removable: true,
+                  ));
+                  value = '选项卡$index';
+                });
+              },
+              list: panels,
+              onChange: (value) {
+                setState(() {
+                  this.value = value;
+                });
+              },
+              onDragSort: (currentIndex, current, targetIndex, target) {
+                setState(() {
+                  var panel = panels[currentIndex];
+                  panels[currentIndex] = panels[targetIndex];
+                  panels[targetIndex] = panel;
                 });
               },
             ),
