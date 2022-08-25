@@ -79,7 +79,7 @@ class TTabs<T> extends StatefulWidget {
 }
 
 class _TTabsState<T> extends State<TTabs<T>> {
-  late PageController _pageController;
+  PageController? _pageController;
 
   @override
   void initState() {
@@ -92,7 +92,7 @@ class _TTabsState<T> extends State<TTabs<T>> {
   @override
   void dispose() {
     super.dispose();
-    _pageController.dispose();
+    _pageController?.dispose();
   }
 
   @override
