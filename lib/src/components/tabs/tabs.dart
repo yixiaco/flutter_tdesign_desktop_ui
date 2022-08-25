@@ -79,20 +79,18 @@ class TTabs<T> extends StatefulWidget {
 }
 
 class _TTabsState<T> extends State<TTabs<T>> {
-  PageController? _pageController;
+  late PageController _pageController;
 
   @override
   void initState() {
     super.initState();
-    if (widget._index != -1) {
-      _pageController = PageController(initialPage: widget._index);
-    }
+    _pageController = PageController(initialPage: widget._index);
   }
 
   @override
   void dispose() {
     super.dispose();
-    _pageController?.dispose();
+    _pageController.dispose();
   }
 
   @override
@@ -102,7 +100,40 @@ class _TTabsState<T> extends State<TTabs<T>> {
 
   @override
   Widget build(BuildContext context) {
-    return _buildLabel();
+    Widget child = _buildLabel();
+    // Widget pageView = PageView(
+    //   controller: _pageController,
+    //   physics: const PageScrollPhysics().applyTo(const ClampingScrollPhysics()),
+    //   children: KeyedSubtree.ensureUniqueKeysForList(widget.list.map((e) => e.panel ?? Container()).toList()),
+    // );
+    // switch (widget.placement) {
+    //   case TTabsPlacement.top:
+    //     child = Column(
+    //       mainAxisSize: MainAxisSize.min,
+    //       crossAxisAlignment: CrossAxisAlignment.stretch,
+    //       children: [child, Expanded(child: pageView)],
+    //     );
+    //     break;
+    //   case TTabsPlacement.bottom:
+    //     child = Column(
+    //       mainAxisSize: MainAxisSize.min,
+    //       children: [pageView, child],
+    //     );
+    //     break;
+    //   case TTabsPlacement.left:
+    //     child = Row(
+    //       mainAxisSize: MainAxisSize.min,
+    //       children: [child, pageView],
+    //     );
+    //     break;
+    //   case TTabsPlacement.right:
+    //     child = Row(
+    //       mainAxisSize: MainAxisSize.min,
+    //       children: [pageView, child],
+    //     );
+    //     break;
+    // }
+    return child;
   }
 
   /// 构建标签

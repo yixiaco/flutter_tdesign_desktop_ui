@@ -145,9 +145,9 @@ class _LabelPainter extends AnimationChangeNotifierPainter {
     var maxHeight = offset.dy + height;
     switch (placement) {
       case TTabsPlacement.top:
-        return Rect.fromLTWH(startOffset.dx, maxHeight - strokeWidth, maxWidth, strokeWidth);
+        return Rect.fromLTWH(startOffset.dx, maxHeight - strokeWidth, size.width, strokeWidth);
       case TTabsPlacement.bottom:
-        return Rect.fromLTWH(startOffset.dx, startOffset.dy, maxWidth, strokeWidth);
+        return Rect.fromLTWH(startOffset.dx, startOffset.dy, size.width, strokeWidth);
       case TTabsPlacement.left:
         return Rect.fromLTWH(maxWidth - strokeWidth, startOffset.dy, strokeWidth, maxHeight);
       case TTabsPlacement.right:

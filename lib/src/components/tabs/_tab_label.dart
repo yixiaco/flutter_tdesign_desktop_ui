@@ -247,24 +247,22 @@ class _TabsLabelState<T> extends State<_TabsLabel<T>> with SingleTickerProviderS
         );
         break;
       case TTabsTheme.card:
-        child = child;
         break;
     }
 
-    child = TSingleChildScrollView(
-      controller: _scrollController,
-      primary: false,
-      scrollDirection: direction,
-      showScroll: direction == Axis.vertical,
-      onShowScroll: (showScroll) {
-        /// 显示滚动
-        setState(() {
-          _showScroll = showScroll;
-        });
-      },
-      // 由于按钮长度有可能不一致，此处使用[FixedCrossFlex]调整交叉轴取最长的轴对齐
-      child: Padding(
-        padding: EdgeInsets.only(right: direction == Axis.horizontal ? _addableIconWidth : 0),
+    child = Padding(
+      padding: EdgeInsets.only(right: direction == Axis.horizontal ? _addableIconWidth : 0),
+      child: TSingleChildScrollView(
+        controller: _scrollController,
+        primary: false,
+        scrollDirection: direction,
+        showScroll: direction == Axis.vertical,
+        onShowScroll: (showScroll) {
+          /// 显示滚动
+          setState(() {
+            _showScroll = showScroll;
+          });
+        },
         child: child,
       ),
     );
@@ -344,6 +342,17 @@ class _TabsLabelState<T> extends State<_TabsLabel<T>> with SingleTickerProviderS
 
     // 显示滚动按钮
     if (direction == Axis.horizontal) {
+      // child = FractionallySizedBox(
+      //   widthFactor: 1,
+      //   child: child,
+      // );
+      //
+      // if (widget.theme == TTabsTheme.card) {
+      //   child = Container(
+      //     color: colorScheme.bgColorSecondaryContainer,
+      //     child: child,
+      //   );
+      // }
       child = Stack(
         children: [
           child,

@@ -145,7 +145,7 @@ class _TabButtonState<T> extends State<_TabButton<T>> with TickerProviderStateMi
     });
 
     // 背景色
-    MaterialStateProperty<Color?> effectiveBgColor;
+    MaterialStateProperty<Color> effectiveBgColor;
     // 覆盖色
     MaterialStateProperty<Color?> effectiveOverlayColor;
     // icon颜色
@@ -288,12 +288,13 @@ class _TabButtonState<T> extends State<_TabButton<T>> with TickerProviderStateMi
         child: child,
       );
       var borderSide = BorderSide(color: colorScheme.componentStroke);
+      var bgBorderSide = BorderSide(color: effectiveBgColor.resolve(states));
       switch (widget.placement) {
         case TTabsPlacement.top:
           decoration = BoxDecoration(
             border: Border(
               right: borderSide,
-              bottom: widget.checked ? BorderSide.none : borderSide,
+              bottom: widget.checked ? bgBorderSide : borderSide,
             ),
           );
           break;
@@ -301,7 +302,7 @@ class _TabButtonState<T> extends State<_TabButton<T>> with TickerProviderStateMi
           decoration = BoxDecoration(
             border: Border(
               right: borderSide,
-              top: widget.checked ? BorderSide.none : borderSide,
+              top: widget.checked ? bgBorderSide : borderSide,
             ),
           );
           break;
@@ -309,7 +310,7 @@ class _TabButtonState<T> extends State<_TabButton<T>> with TickerProviderStateMi
           decoration = BoxDecoration(
             border: Border(
               bottom: borderSide,
-              right: widget.checked ? BorderSide.none : borderSide,
+              right: widget.checked ? bgBorderSide : borderSide,
             ),
           );
           break;
@@ -317,7 +318,7 @@ class _TabButtonState<T> extends State<_TabButton<T>> with TickerProviderStateMi
           decoration = BoxDecoration(
             border: Border(
               bottom: borderSide,
-              left: widget.checked ? BorderSide.none : borderSide,
+              left: widget.checked ? bgBorderSide : borderSide,
             ),
           );
           break;
