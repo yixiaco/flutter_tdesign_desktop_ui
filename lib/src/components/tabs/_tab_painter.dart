@@ -27,17 +27,6 @@ class _LabelPainter extends AnimationChangeNotifierPainter {
     notifyListeners();
   }
 
-  Color get trackColor => _trackColor!;
-  Color? _trackColor;
-
-  set trackColor(Color value) {
-    if (value == _trackColor) {
-      return;
-    }
-    _trackColor = value;
-    notifyListeners();
-  }
-
   double get strokeWidth => _strokeWidth!;
   double? _strokeWidth;
 
@@ -97,10 +86,7 @@ class _LabelPainter extends AnimationChangeNotifierPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    var paint = Paint()..color = trackColor;
-    canvas.drawRect(_trackPlacementRect(size), paint);
-
-    paint.color = color;
+    var paint = Paint()..color = color;
     if (index == -1) {
       if (_currentRect != null) {
         var rect = Rect.lerp(_originOffset() & Size.zero, _currentRect, t.value);
@@ -135,6 +121,51 @@ class _LabelPainter extends AnimationChangeNotifierPainter {
     }
   }
 
+  Rect _currentPlacementRect(Rect rect) {
+    switch (placement) {
+      case TTabsPlacement.top:
+        return Rect.fromLTWH(rect.left, rect.bottom - strokeWidth, rect.width, strokeWidth);
+      case TTabsPlacement.bottom:
+        return Rect.fromLTWH(rect.left, rect.top, rect.width, strokeWidth);
+      case TTabsPlacement.left:
+        return Rect.fromLTWH(rect.right - strokeWidth, rect.top, strokeWidth, rect.height);
+      case TTabsPlacement.right:
+        return Rect.fromLTWH(0, rect.top, strokeWidth, rect.height);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _LabelPainter oldDelegate) {
+    return this != oldDelegate;
+  }
+}
+
+/// 标签轨道
+class _TabLabelTrackPainter extends CustomPainter {
+  const _TabLabelTrackPainter({
+    required this.trackColor,
+    required this.strokeWidth,
+    required this.placement,
+    required this.tabKeys,
+    required this.painterKey,
+  });
+  /// 轨道颜色
+  final Color trackColor;
+  /// 轨道宽度
+  final double strokeWidth;
+  /// 方向
+  final TTabsPlacement placement;
+  /// 标签key
+  final List<GlobalKey> tabKeys;
+  /// 画布key
+  final GlobalKey painterKey;
+
+  Offset _keyOffset(GlobalKey key) {
+    var box = key.currentContext!.findRenderObject() as RenderBox;
+    var currentBox = painterKey.currentContext!.findRenderObject() as RenderBox;
+    return box.localToGlobal(Offset.zero) - currentBox.localToGlobal(Offset.zero);
+  }
+
   Rect _trackPlacementRect(Size size) {
     var lastLabKey = tabKeys[tabKeys.length - 1];
     var startOffset = _keyOffset(tabKeys[0]);
@@ -155,21 +186,15 @@ class _LabelPainter extends AnimationChangeNotifierPainter {
     }
   }
 
-  Rect _currentPlacementRect(Rect rect) {
-    switch (placement) {
-      case TTabsPlacement.top:
-        return Rect.fromLTWH(rect.left, rect.bottom - strokeWidth, rect.width, strokeWidth);
-      case TTabsPlacement.bottom:
-        return Rect.fromLTWH(rect.left, rect.top, rect.width, strokeWidth);
-      case TTabsPlacement.left:
-        return Rect.fromLTWH(rect.right - strokeWidth, rect.top, strokeWidth, rect.height);
-      case TTabsPlacement.right:
-        return Rect.fromLTWH(0, rect.top, strokeWidth, rect.height);
-    }
+  @override
+  void paint(Canvas canvas, Size size) {
+    var paint = Paint()..color = trackColor;
+    canvas.drawRect(_trackPlacementRect(size), paint);
   }
 
   @override
-  bool shouldRepaint(covariant _LabelPainter oldDelegate) {
-    return this != oldDelegate;
+  bool shouldRepaint(covariant _TabLabelTrackPainter oldDelegate) {
+    return true;
   }
+
 }

@@ -20,7 +20,7 @@ class _TTabsExampleState extends State<TTabsExample> {
   @override
   void initState() {
     super.initState();
-    panels = List.generate(10, (index) {
+    panels = List.generate(3, (index) {
       this.index++;
       return TTabsPanel(
         label: Text('选项卡$index'),
@@ -36,19 +36,11 @@ class _TTabsExampleState extends State<TTabsExample> {
 
   @override
   Widget build(BuildContext context) {
-    var text = const Text('data');
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: TSpace(
         direction: Axis.vertical,
         children: [
-          Draggable(
-            feedback: text,
-            child: DragTarget(builder:(context, candidateData, rejectedData) {
-              print(candidateData);
-              return text;
-            }),
-          ),
           TSingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: TSpace(
@@ -88,96 +80,94 @@ class _TTabsExampleState extends State<TTabsExample> {
               ],
             ),
           ),
-          Expanded(
-            child: TTabs<String>(
-              value: value,
-              theme: theme,
-              placement: placement,
-              addable: true,
-              dragSort: true,
-              list: [
-                TTabsPanel(
-                  label: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: const [
-                      Padding(
-                        padding: EdgeInsets.only(right: 4),
-                        child: Icon(TIcons.home),
-                      ),
-                      Text('首页'),
-                    ],
-                  ),
-                  value: 'first',
-                  panel: const Padding(
-                    padding: EdgeInsets.only(left: 25),
-                    child: Text('选项卡1内容'),
-                  ),
-                  removable: true,
+          TTabs<String>(
+            value: value,
+            theme: theme,
+            placement: placement,
+            addable: true,
+            dragSort: true,
+            list: [
+              TTabsPanel(
+                label: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: const [
+                    Padding(
+                      padding: EdgeInsets.only(right: 4),
+                      child: Icon(TIcons.home),
+                    ),
+                    Text('首页'),
+                  ],
                 ),
-                TTabsPanel(
-                  label: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: const [
-                      Padding(
-                        padding: EdgeInsets.only(right: 4),
-                        child: Icon(TIcons.calendar),
-                      ),
-                      Text('日程'),
-                    ],
-                  ),
-                  value: 'second1',
-                  panel: const Padding(
-                    padding: EdgeInsets.only(left: 25),
-                    child: Text('选项卡2内容'),
-                  ),
+                value: 'first',
+                panel: const Padding(
+                  padding: EdgeInsets.only(left: 25),
+                  child: Text('选项卡1内容'),
                 ),
-                TTabsPanel(
-                  label: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: const [
-                      Padding(
-                        padding: EdgeInsets.only(right: 4),
-                        child: Icon(TIcons.calendar),
-                      ),
-                      Text('日程'),
-                    ],
-                  ),
-                  value: 'second',
-                  panel: const Padding(
-                    padding: EdgeInsets.only(left: 25),
-                    child: Text('选项卡2内容'),
-                  ),
-                  disabled: true,
-                  removable: true,
+                removable: true,
+              ),
+              TTabsPanel(
+                label: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: const [
+                    Padding(
+                      padding: EdgeInsets.only(right: 4),
+                      child: Icon(TIcons.calendar),
+                    ),
+                    Text('日程'),
+                  ],
                 ),
-                TTabsPanel(
-                  label: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: const [
-                      Padding(
-                        padding: EdgeInsets.only(right: 4),
-                        child: Icon(TIcons.layers),
-                      ),
-                      Text('事项'),
-                    ],
-                  ),
-                  value: 'third',
-                  panel: const Padding(
-                    padding: EdgeInsets.only(left: 25),
-                    child: Text('选项卡3内容'),
-                  ),
-                  removable: true,
+                value: 'second1',
+                panel: const Padding(
+                  padding: EdgeInsets.only(left: 25),
+                  child: Text('选项卡2内容'),
                 ),
-              ],
-              onDragSort: (currentIndex, current, targetIndex, target) {
-                print('currentIndex:$currentIndex, current:$current, targetIndex:$targetIndex, target:$target');
-              },
-              onChange: (value) {
-                setState(() {
-                  this.value = value;
-                });
-              },
-            ),
+              ),
+              TTabsPanel(
+                label: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: const [
+                    Padding(
+                      padding: EdgeInsets.only(right: 4),
+                      child: Icon(TIcons.calendar),
+                    ),
+                    Text('日程'),
+                  ],
+                ),
+                value: 'second',
+                panel: const Padding(
+                  padding: EdgeInsets.only(left: 25),
+                  child: Text('选项卡2内容'),
+                ),
+                disabled: true,
+                removable: true,
+              ),
+              TTabsPanel(
+                label: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: const [
+                    Padding(
+                      padding: EdgeInsets.only(right: 4),
+                      child: Icon(TIcons.layers),
+                    ),
+                    Text('事项'),
+                  ],
+                ),
+                value: 'third',
+                panel: const Padding(
+                  padding: EdgeInsets.only(left: 25),
+                  child: Text('选项卡3内容'),
+                ),
+                removable: true,
+              ),
+            ],
+            onDragSort: (currentIndex, current, targetIndex, target) {
+              print('currentIndex:$currentIndex, current:$current, targetIndex:$targetIndex, target:$target');
+            },
+            onChange: (value) {
+              setState(() {
+                this.value = value;
+              });
+            },
           ),
           Expanded(
             child: TTabs<String>(
@@ -193,7 +183,6 @@ class _TTabsExampleState extends State<TTabsExample> {
               },
               onAdd: () {
                 setState(() {
-                  index++;
                   panels.add(TTabsPanel(
                     label: Text('选项卡$index'),
                     value: '选项卡$index',
@@ -204,6 +193,7 @@ class _TTabsExampleState extends State<TTabsExample> {
                     removable: true,
                   ));
                   value = '选项卡$index';
+                  index++;
                 });
               },
               list: panels,

@@ -167,10 +167,7 @@ class _TabButtonState<T> extends State<_TabButton<T>> with TickerProviderStateMi
         );
         radius = BorderRadius.circular(TVar.borderRadiusDefault);
         effectiveBgColor = MaterialStateProperty.resolveWith((states) {
-          if (states.contains(MaterialState.dragged)) {
-            return Colors.transparent;
-          }
-          return colorScheme.bgColorContainer;
+          return Colors.transparent;
         });
         effectiveOverlayColor = MaterialStateProperty.resolveWith((states) {
           if (states.contains(MaterialState.hovered)) {
