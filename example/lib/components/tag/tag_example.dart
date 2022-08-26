@@ -177,7 +177,6 @@ class _TagExampleState extends State<TagExample> {
                   checked = value;
                 });
               },
-              onClick: () => print('点击回调'),
             ),
             TCheckTag(
               disabled: true,

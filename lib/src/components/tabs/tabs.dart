@@ -37,6 +37,9 @@ class TTabs<T> extends StatefulWidget {
     this.onDragSort,
     this.onRemove,
     this.crossAxisAlignment,
+    this.mainAxisSize,
+    this.softWrap = true,
+    this.mainAxisAlignment,
   }) : super(key: key);
 
   /// 选项卡是否可增加
@@ -78,6 +81,15 @@ class TTabs<T> extends StatefulWidget {
   /// 交叉轴对齐方式
   final CrossAxisAlignment? crossAxisAlignment;
 
+  /// 主轴大小
+  final MainAxisSize? mainAxisSize;
+
+  /// 主轴对齐方式
+  final MainAxisAlignment? mainAxisAlignment;
+
+  /// 是否缩小包装
+  final bool softWrap;
+
   /// 当前下标
   int get _index => list.indexWhere((element) => element.value == value);
 
@@ -113,37 +125,67 @@ class _TTabsState<T> extends State<TTabs<T>> {
       index: widget._index,
       value: widget.value,
     );
-    var crossAxisAlignment = widget.crossAxisAlignment ?? CrossAxisAlignment.start;
+    CrossAxisAlignment? crossAxisAlignment = widget.crossAxisAlignment;
+    MainAxisSize? mainAxisSize = widget.mainAxisSize;
+    MainAxisAlignment? mainAxisAlignment = widget.mainAxisAlignment;
     switch (widget.placement) {
       case TTabsPlacement.top:
+        mainAxisSize ??= MainAxisSize.min;
+        if (widget.softWrap) {
+          crossAxisAlignment ??= CrossAxisAlignment.start;
+        } else {
+          crossAxisAlignment ??= CrossAxisAlignment.stretch;
+        }
         child = FixedCrossFlex(
+          mainAxisAlignment: mainAxisAlignment ?? MainAxisAlignment.start,
           direction: Axis.vertical,
           crossAxisAlignment: crossAxisAlignment,
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: mainAxisSize,
           children: [child, panel],
         );
         break;
       case TTabsPlacement.bottom:
+        mainAxisSize ??= MainAxisSize.min;
+        if (widget.softWrap) {
+          crossAxisAlignment ??= CrossAxisAlignment.start;
+        } else {
+          crossAxisAlignment ??= CrossAxisAlignment.stretch;
+        }
         child = FixedCrossFlex(
+          mainAxisAlignment: mainAxisAlignment ?? MainAxisAlignment.spaceBetween,
           direction: Axis.vertical,
           crossAxisAlignment: crossAxisAlignment,
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: mainAxisSize,
           children: [panel, child],
         );
         break;
       case TTabsPlacement.left:
+        crossAxisAlignment ??= CrossAxisAlignment.start;
+        if (widget.softWrap) {
+          mainAxisSize ??= MainAxisSize.min;
+        } else {
+          mainAxisSize ??= MainAxisSize.max;
+        }
         child = FixedCrossFlex(
+          mainAxisAlignment: mainAxisAlignment ?? MainAxisAlignment.start,
           direction: Axis.horizontal,
           crossAxisAlignment: crossAxisAlignment,
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: mainAxisSize,
           children: [child, panel],
         );
         break;
       case TTabsPlacement.right:
+        crossAxisAlignment ??= CrossAxisAlignment.start;
+        if (widget.softWrap) {
+          mainAxisSize ??= MainAxisSize.min;
+        } else {
+          mainAxisSize ??= MainAxisSize.max;
+        }
         child = FixedCrossFlex(
+          mainAxisAlignment: mainAxisAlignment ?? MainAxisAlignment.spaceBetween,
           direction: Axis.horizontal,
           crossAxisAlignment: crossAxisAlignment,
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: mainAxisSize,
           children: [panel, child],
         );
         break;

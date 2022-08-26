@@ -171,7 +171,7 @@ class _TabsLabelState<T> extends State<_TabsLabel<T>> with SingleTickerProviderS
             var height = tabKey.currentContext!.size!.height;
             if (offset > offset2.dy) {
               _animateTo(offset2.dy);
-            } else if (offset + context.size!.width < offset2.dy + height) {
+            } else if (offset + context.size!.height < offset2.dy + height) {
               _animateTo(offset + (offset2.dy + height - (offset + context.size!.height)));
             }
             break;
