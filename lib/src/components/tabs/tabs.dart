@@ -16,6 +16,9 @@ part '_tab_label.dart';
 /// 标签下划线
 part '_tab_painter.dart';
 
+/// 面板
+part '_tab_panel.dart';
+
 /// 选项卡
 /// 用于承载同一层级下不同页面或类别的组件，方便用户在同一个页面框架下进行快速切换。
 class TTabs<T> extends StatefulWidget {
@@ -79,18 +82,14 @@ class TTabs<T> extends StatefulWidget {
 }
 
 class _TTabsState<T> extends State<TTabs<T>> {
-  late PageController _pageController;
-
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(initialPage: widget._index);
   }
 
   @override
   void dispose() {
     super.dispose();
-    _pageController.dispose();
   }
 
   @override
@@ -101,38 +100,45 @@ class _TTabsState<T> extends State<TTabs<T>> {
   @override
   Widget build(BuildContext context) {
     Widget child = _buildLabel();
-    // Widget pageView = PageView(
-    //   controller: _pageController,
-    //   physics: const PageScrollPhysics().applyTo(const ClampingScrollPhysics()),
-    //   children: KeyedSubtree.ensureUniqueKeysForList(widget.list.map((e) => e.panel ?? Container()).toList()),
-    // );
-    // switch (widget.placement) {
-    //   case TTabsPlacement.top:
-    //     child = Column(
-    //       mainAxisSize: MainAxisSize.min,
-    //       crossAxisAlignment: CrossAxisAlignment.stretch,
-    //       children: [child, Expanded(child: pageView)],
-    //     );
-    //     break;
-    //   case TTabsPlacement.bottom:
-    //     child = Column(
-    //       mainAxisSize: MainAxisSize.min,
-    //       children: [pageView, child],
-    //     );
-    //     break;
-    //   case TTabsPlacement.left:
-    //     child = Row(
-    //       mainAxisSize: MainAxisSize.min,
-    //       children: [child, pageView],
-    //     );
-    //     break;
-    //   case TTabsPlacement.right:
-    //     child = Row(
-    //       mainAxisSize: MainAxisSize.min,
-    //       children: [pageView, child],
-    //     );
-    //     break;
-    // }
+    var panel = _TabPanel(
+      list: widget.list,
+      index: widget._index,
+      value: widget.value,
+    );
+    switch (widget.placement) {
+      case TTabsPlacement.top:
+        child = FixedCrossFlex(
+          direction: Axis.vertical,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [child, panel],
+        );
+        break;
+      case TTabsPlacement.bottom:
+        child = FixedCrossFlex(
+          direction: Axis.vertical,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [panel, child],
+        );
+        break;
+      case TTabsPlacement.left:
+        child = FixedCrossFlex(
+          direction: Axis.horizontal,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [child, panel],
+        );
+        break;
+      case TTabsPlacement.right:
+        child = FixedCrossFlex(
+          direction: Axis.horizontal,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [panel, child],
+        );
+        break;
+    }
     return child;
   }
 

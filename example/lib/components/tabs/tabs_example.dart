@@ -101,8 +101,9 @@ class _TTabsExampleState extends State<TTabsExample> {
                 value: 'first',
                 panel: const Padding(
                   padding: EdgeInsets.only(left: 25),
-                  child: Text('选项卡1内容'),
+                  child: TInput(),
                 ),
+                destroyOnHide: false,
                 removable: true,
               ),
               TTabsPanel(
@@ -121,6 +122,7 @@ class _TTabsExampleState extends State<TTabsExample> {
                   padding: EdgeInsets.only(left: 25),
                   child: Text('选项卡2内容'),
                 ),
+                destroyOnHide: false,
               ),
               TTabsPanel(
                 label: Row(
@@ -155,7 +157,7 @@ class _TTabsExampleState extends State<TTabsExample> {
                 value: 'third',
                 panel: const Padding(
                   padding: EdgeInsets.only(left: 25),
-                  child: Text('选项卡3内容'),
+                  child: TInput(),
                 ),
                 removable: true,
               ),
