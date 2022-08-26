@@ -36,6 +36,7 @@ class TTabs<T> extends StatefulWidget {
     this.onChange,
     this.onDragSort,
     this.onRemove,
+    this.crossAxisAlignment,
   }) : super(key: key);
 
   /// 选项卡是否可增加
@@ -74,6 +75,9 @@ class TTabs<T> extends StatefulWidget {
   /// 删除选项卡时触发
   final void Function(T value, int index)? onRemove;
 
+  /// 交叉轴对齐方式
+  final CrossAxisAlignment? crossAxisAlignment;
+
   /// 当前下标
   int get _index => list.indexWhere((element) => element.value == value);
 
@@ -99,17 +103,22 @@ class _TTabsState<T> extends State<TTabs<T>> {
 
   @override
   Widget build(BuildContext context) {
+    var theme = TTheme.of(context);
+    var colorScheme = theme.colorScheme;
+    var size = widget.size ?? theme.size;
+
     Widget child = _buildLabel();
     var panel = _TabPanel(
       list: widget.list,
       index: widget._index,
       value: widget.value,
     );
+    var crossAxisAlignment = widget.crossAxisAlignment ?? CrossAxisAlignment.start;
     switch (widget.placement) {
       case TTabsPlacement.top:
         child = FixedCrossFlex(
           direction: Axis.vertical,
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: crossAxisAlignment,
           mainAxisSize: MainAxisSize.min,
           children: [child, panel],
         );
@@ -117,7 +126,7 @@ class _TTabsState<T> extends State<TTabs<T>> {
       case TTabsPlacement.bottom:
         child = FixedCrossFlex(
           direction: Axis.vertical,
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: crossAxisAlignment,
           mainAxisSize: MainAxisSize.min,
           children: [panel, child],
         );
@@ -125,7 +134,7 @@ class _TTabsState<T> extends State<TTabs<T>> {
       case TTabsPlacement.left:
         child = FixedCrossFlex(
           direction: Axis.horizontal,
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: crossAxisAlignment,
           mainAxisSize: MainAxisSize.min,
           children: [child, panel],
         );
@@ -133,13 +142,32 @@ class _TTabsState<T> extends State<TTabs<T>> {
       case TTabsPlacement.right:
         child = FixedCrossFlex(
           direction: Axis.horizontal,
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: crossAxisAlignment,
           mainAxisSize: MainAxisSize.min,
           children: [panel, child],
         );
         break;
     }
-    return child;
+    return Container(
+      color: colorScheme.bgColorContainer,
+      child: IconTheme(
+        data: IconThemeData(
+          size: theme.fontData.fontSizeL,
+        ),
+        child: DefaultTextStyle(
+          style: TextStyle(
+            color: colorScheme.textColorPrimary,
+            fontFamily: theme.fontFamily,
+            fontSize: size.lazySizeOf(
+              small: () => theme.fontData.fontSizeBodyMedium,
+              medium: () => theme.fontData.fontSizeBodyMedium,
+              large: () => theme.fontData.fontSizeBodyLarge,
+            ),
+          ),
+          child: child,
+        ),
+      ),
+    );
   }
 
   /// 构建标签

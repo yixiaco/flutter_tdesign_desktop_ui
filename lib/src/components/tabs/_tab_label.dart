@@ -274,18 +274,15 @@ class _TabsLabelState<T> extends State<_TabsLabel<T>> with SingleTickerProviderS
     // 轨道与背景色
     switch (widget.theme) {
       case TTabsTheme.normal:
-        child = Container(
-          color: colorScheme.bgColorContainer,
-          child: CustomPaint(
-            painter: _TabLabelTrackPainter(
-              trackColor: colorScheme.bgColorSecondaryContainer,
-              strokeWidth: 1,
-              placement: widget.placement,
-              tabKeys: _tabKeys,
-              painterKey: _painterKey,
-            ),
-            child: child,
+        child = CustomPaint(
+          painter: _TabLabelTrackPainter(
+            trackColor: colorScheme.bgColorSecondaryContainer,
+            strokeWidth: 1,
+            placement: widget.placement,
+            tabKeys: _tabKeys,
+            painterKey: _painterKey,
           ),
+          child: child,
         );
         break;
       case TTabsTheme.card:

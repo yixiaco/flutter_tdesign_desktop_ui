@@ -222,10 +222,11 @@ class _TabButtonState<T> extends State<_TabButton<T>> with TickerProviderStateMi
     }
 
     var isNotTap = widget.disabled || widget.checked;
-    var iconThemeData = IconThemeData(
-      size: theme.fontData.fontSizeL,
+
+    var iconTheme = IconTheme.of(context);
+    var iconThemeData = iconTheme.merge(IconThemeData(
       color: textColor.resolve(states),
-    );
+    ));
     var removable = widget.removable && showRemoveIcon;
     Decoration? dashedDecoration;
     if (showDashed) {
@@ -328,15 +329,12 @@ class _TabButtonState<T> extends State<_TabButton<T>> with TickerProviderStateMi
       );
     }
 
+    var textStyle = DefaultTextStyle.of(context);
+
     child = Material(
-      textStyle: TextStyle(
-        fontSize: size.sizeOf(
-          small: theme.fontData.fontSizeBodyMedium,
-          medium: theme.fontData.fontSizeBodyMedium,
-          large: theme.fontData.fontSizeBodyLarge,
-        ),
+      textStyle: textStyle.style.merge(TextStyle(
         color: textColor.resolve(states),
-      ),
+      )),
       color: effectiveBgColor.resolve(states),
       child: Container(
         decoration: decoration,

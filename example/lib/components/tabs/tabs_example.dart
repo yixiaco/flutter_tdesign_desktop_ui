@@ -86,6 +86,7 @@ class _TTabsExampleState extends State<TTabsExample> {
             placement: placement,
             addable: true,
             dragSort: true,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             list: [
               TTabsPanel(
                 label: Row(
@@ -101,9 +102,8 @@ class _TTabsExampleState extends State<TTabsExample> {
                 value: 'first',
                 panel: const Padding(
                   padding: EdgeInsets.only(left: 25),
-                  child: TInput(),
+                  child: Text('选项卡1内容'),
                 ),
-                destroyOnHide: false,
                 removable: true,
               ),
               TTabsPanel(
@@ -122,7 +122,6 @@ class _TTabsExampleState extends State<TTabsExample> {
                   padding: EdgeInsets.only(left: 25),
                   child: Text('选项卡2内容'),
                 ),
-                destroyOnHide: false,
               ),
               TTabsPanel(
                 label: Row(
@@ -157,7 +156,7 @@ class _TTabsExampleState extends State<TTabsExample> {
                 value: 'third',
                 panel: const Padding(
                   padding: EdgeInsets.only(left: 25),
-                  child: TInput(),
+                  child: Text('选项卡3内容'),
                 ),
                 removable: true,
               ),
@@ -178,6 +177,7 @@ class _TTabsExampleState extends State<TTabsExample> {
               placement: placement,
               addable: true,
               dragSort: true,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               onRemove: (value, index) {
                 setState(() {
                   panels.removeAt(index);
