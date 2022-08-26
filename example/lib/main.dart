@@ -1,4 +1,4 @@
-import 'package:example/components/tabs/tabs_example.dart';
+import 'package:example/components/collapse/collapse_example.dart';
 import 'package:example/state/semantics_state.dart';
 import 'package:example/state/size_state.dart';
 import 'package:example/state/theme_state.dart';
@@ -51,7 +51,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
     var size = ref.watch(sizeProvider);
 
     Widget child = Scaffold(
-      backgroundColor: theme.brightness == Brightness.light ? Colors.white : Colors.black,
+      backgroundColor: theme.brightness == Brightness.light ? const Color(0xFFEEEEEE) : Colors.black,
       appBar: AppBar(
         title: Text(widget.title),
       ),
@@ -105,7 +105,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
         ),
         footer: const TFooter(child: Text('Footer')),
         content: const TContent(
-          child: TTabsExample(),
+          child: TCollapseExample(),
         ),
       ),
     );

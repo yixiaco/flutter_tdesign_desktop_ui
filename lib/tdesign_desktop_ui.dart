@@ -66,6 +66,9 @@ export 'src/components/switch/switch.dart';
 export 'src/components/input/input.dart';
 export 'src/components/input/custom_outline_input_border.dart';
 export 'src/components/input/input_theme.dart';
+/// 折叠面板
+export 'src/components/collapse/collapse.dart';
+export 'src/components/collapse/types.dart';
 /// 加载
 export 'src/components/loading/loading.dart';
 /// 进度条
