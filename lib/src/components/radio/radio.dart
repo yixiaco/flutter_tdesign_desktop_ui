@@ -154,48 +154,31 @@ class _TRadioState<T> extends State<TRadio<T>> with TickerProviderStateMixin, TT
     return Semantics(
       inMutuallyExclusiveGroup: true,
       checked: widget.checked,
-      child: FocusableActionDetector(
-        actions: actionMap,
-        focusNode: widget.focusNode,
-        autofocus: widget.autofocus,
-        enabled: isInteractive,
-        onShowFocusHighlight: handleFocusHighlightChanged,
-        onShowHoverHighlight: handleHoverChanged,
-        mouseCursor: effectiveMouseCursor.resolve(states),
-        child: GestureDetector(
-          excludeFromSemantics: !isInteractive,
-          onTapDown: handleTapDown,
-          onTap: handleTap,
-          onTapUp: handleTapEnd,
-          onTapCancel: handleTapEnd,
-          behavior: HitTestBehavior.translucent,
-          child: Semantics(
-            enabled: isInteractive,
-            child: SizedBox(
-              height: 22,
-              child: TSpace(
-                spacing: 0,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                breakLine: false,
-                children: [
-                  CustomPaint(
-                    size: const Size.square(18),
-                    painter: _painter
-                      ..position = position
-                      ..reaction = reaction
-                      ..reactionFocusFade = reactionFocusFade
-                      ..reactionHoverFade = reactionHoverFade
-                      ..downPosition = downPosition
-                      ..isFocused = isFocused
-                      ..isHovered = isHovered
-                      ..checkColor = checkColor.resolve(states)
-                      ..backgroundColor = bgColor.resolve(states)
-                      ..borderColor = borderColor.resolve(states),
-                  ),
-                  label,
-                ],
+      child: buildToggleable(
+        mouseCursor: effectiveMouseCursor,
+        child: SizedBox(
+          height: 22,
+          child: TSpace(
+            spacing: 0,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            breakLine: false,
+            children: [
+              CustomPaint(
+                size: const Size.square(18),
+                painter: _painter
+                  ..position = position
+                  ..reaction = reaction
+                  ..reactionFocusFade = reactionFocusFade
+                  ..reactionHoverFade = reactionHoverFade
+                  ..downPosition = downPosition
+                  ..isFocused = isFocused
+                  ..isHovered = isHovered
+                  ..checkColor = checkColor.resolve(states)
+                  ..backgroundColor = bgColor.resolve(states)
+                  ..borderColor = borderColor.resolve(states),
               ),
-            ),
+              label,
+            ],
           ),
         ),
       ),

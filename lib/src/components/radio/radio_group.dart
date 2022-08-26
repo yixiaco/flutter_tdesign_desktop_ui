@@ -104,7 +104,7 @@ class _TRadioGroupState<T> extends State<TRadioGroup<T>> with SingleTickerProvid
   final _IndicatorBlockPainter _indicatorPainter = _IndicatorBlockPainter();
   late List<GlobalKey> _optionKeys;
   late AnimationController _controller;
-  late Animation<double> _position;
+  late CurvedAnimation _position;
 
   @override
   void initState() {
@@ -127,6 +127,7 @@ class _TRadioGroupState<T> extends State<TRadioGroup<T>> with SingleTickerProvid
     super.dispose();
     _indicatorPainter.dispose();
     _controller.dispose();
+    _position.dispose();
   }
 
   @override
@@ -467,8 +468,10 @@ class _TRadioButton<T> extends StatefulWidget {
   /// 组件大小
   final TComponentSize? size;
 
+  /// 焦点
   final FocusNode? focusNode;
 
+  /// 是否自动聚焦
   final bool autofocus;
 
   bool get _checked => checked == true;
@@ -505,6 +508,7 @@ class _TRadioButtonState<T> extends State<_TRadioButton<T>> with TickerProviderS
 
   @override
   void dispose() {
+    _position.dispose();
     super.dispose();
   }
 
@@ -548,38 +552,23 @@ class _TRadioButtonState<T> extends State<_TRadioButton<T>> with TickerProviderS
     return Semantics(
       inMutuallyExclusiveGroup: true,
       checked: widget.checked,
-      child: FocusableActionDetector(
-        actions: actionMap,
+      child: buildToggleable(
+        mouseCursor: effectiveMouseCursor,
         focusNode: widget.focusNode,
         autofocus: widget.autofocus,
-        enabled: isInteractive,
-        onShowFocusHighlight: handleFocusHighlightChanged,
-        onShowHoverHighlight: handleHoverChanged,
-        mouseCursor: effectiveMouseCursor.resolve(states),
-        child: GestureDetector(
-          excludeFromSemantics: !isInteractive,
-          onTapDown: handleTapDown,
-          onTap: handleTap,
-          onTapUp: handleTapEnd,
-          onTapCancel: handleTapEnd,
-          behavior: HitTestBehavior.translucent,
-          child: Semantics(
-            enabled: isInteractive,
-            child: Container(
-              decoration: BoxDecoration(
-                color: MaterialStateProperty.resolveAs(widget.backgroundColor, states),
-                border: widget.border?.resolve(states),
-                borderRadius: widget.radius,
-              ),
-              padding: padding,
-              child: DefaultTextStyle(
-                style: TextStyle(
-                  fontSize: theme.fontSize,
-                  color: Color.lerp(oldColor ?? currentColor, currentColor, position.value),
-                ),
-                child: widget.label,
-              ),
+        child: Container(
+          decoration: BoxDecoration(
+            color: MaterialStateProperty.resolveAs(widget.backgroundColor, states),
+            border: widget.border?.resolve(states),
+            borderRadius: widget.radius,
+          ),
+          padding: padding,
+          child: DefaultTextStyle(
+            style: TextStyle(
+              fontSize: theme.fontSize,
+              color: Color.lerp(oldColor ?? currentColor, currentColor, position.value),
             ),
+            child: widget.label,
           ),
         ),
       ),

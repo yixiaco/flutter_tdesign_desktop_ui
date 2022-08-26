@@ -10,20 +10,25 @@ class TAnimatedIcon extends ImplicitlyAnimatedWidget {
     this.shadows,
     required this.child,
     Curve curve = Curves.linear,
+    this.data,
     required Duration duration,
     VoidCallback? onEnd,
   }) : super(key: key, curve: curve, duration: duration, onEnd: onEnd);
 
-  /// The default color for icons.
+  /// icon颜色
   final Color? color;
 
+  /// 透明度
   final double? opacity;
 
-  /// The default size for icons.
+  /// icon大小
   final double? size;
 
-  /// The default shadow for icons.
+  /// icon阴影
   final List<Shadow>? shadows;
+
+  /// icon theme data
+  final IconThemeData? data;
 
   /// 子组件,执行动画期间，会立即改变
   final Widget child;
@@ -40,10 +45,10 @@ class _TAnimatedIconState extends AnimatedWidgetBaseState<TAnimatedIcon> {
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
-    _color = visitor(_color, widget.color, (dynamic value) => ColorTween(begin: value as Color)) as ColorTween?;
-    _opacity = visitor(_opacity, widget.opacity, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>?;
-    _size = visitor(_size, widget.size, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>?;
-    _shadows = visitor(_shadows, widget.shadows, (dynamic value) => ShadowsTween(begin: value as List<Shadow>)) as ShadowsTween?;
+    _color = visitor(_color, widget.color ?? widget.data?.color, (dynamic value) => ColorTween(begin: value as Color)) as ColorTween?;
+    _opacity = visitor(_opacity, widget.opacity ?? widget.data?.opacity, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>?;
+    _size = visitor(_size, widget.size ?? widget.data?.size, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>?;
+    _shadows = visitor(_shadows, widget.shadows ?? widget.data?.shadows, (dynamic value) => ShadowsTween(begin: value as List<Shadow>)) as ShadowsTween?;
   }
 
   @override

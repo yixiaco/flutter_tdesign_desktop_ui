@@ -6,6 +6,8 @@ class TScrollBehavior extends ScrollBehavior {
     this.thickness,
     this.mainAxisMargin,
     this.crossAxisMargin,
+    this.showScroll = true,
+    this.thumbVisibility = true,
   });
 
   /// The thickness of the scrollbar in the cross axis of the scrollable.
@@ -25,6 +27,13 @@ class TScrollBehavior extends ScrollBehavior {
   /// Must not be null and defaults to 0.
   final double? crossAxisMargin;
 
+  /// 是否显示滚动条
+  final bool showScroll;
+
+  /// 当为false时，滚动条将在滚动时显示，否则将淡出。
+  /// 当为true时，滚动条将始终可见且永不淡出。
+  final bool thumbVisibility;
+
   @override
   Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) {
     var theme = TTheme.of(context);
@@ -35,10 +44,13 @@ class TScrollBehavior extends ScrollBehavior {
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
+        if (!showScroll) {
+          return child;
+        }
         return RawScrollbar(
           radius: Radius.circular(thickness / 2),
           thickness: thickness,
-          thumbVisibility: true,
+          thumbVisibility: thumbVisibility,
           thumbColor: colorScheme.scrollbarColor,
           trackColor: colorScheme.scrollTrackColor,
           minThumbLength: 6,

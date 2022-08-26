@@ -1,4 +1,4 @@
-import 'package:example/components/switch/switch_example.dart';
+import 'package:example/components/tabs/tabs_example.dart';
 import 'package:example/state/semantics_state.dart';
 import 'package:example/state/size_state.dart';
 import 'package:example/state/theme_state.dart';
@@ -105,7 +105,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
         ),
         footer: const TFooter(child: Text('Footer')),
         content: const TContent(
-          child: TSwitchExample(),
+          child: TTabsExample(),
         ),
       ),
     );

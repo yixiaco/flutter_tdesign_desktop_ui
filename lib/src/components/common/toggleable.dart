@@ -313,26 +313,15 @@ mixin TToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixi
         if (value ?? true) MaterialState.selected,
       };
 
-  /// Typically wraps a `painter` that draws the actual visuals of the
-  /// Toggleable with logic to toggle it.
-  ///
-  /// Consider providing a subclass of [ToggleablePainter] as a `painter`, which
-  /// implements logic to draw a radial ink reaction for this control. The
-  /// painter is usually configured with the [reaction], [position],
-  /// [reactionHoverFade], and [reactionFocusFade] animation provided by this
-  /// mixin. It is expected to draw the visuals of the Toggleable based on the
-  /// current value of these animations. The animations are triggered by
-  /// this mixin to transition the Toggleable from one state to another.
-  ///
   /// This method must be called from the [build] method of the [State] class
   /// that uses this mixin. The returned [Widget] must be returned from the
   /// build method - potentially after wrapping it in other widgets.
   Widget buildToggleable({
     FocusNode? focusNode,
     bool autofocus = false,
+    HitTestBehavior behavior = HitTestBehavior.translucent,
     required MaterialStateProperty<MouseCursor> mouseCursor,
-    required Size size,
-    required CustomPainter painter,
+    required Widget child,
   }) {
     return FocusableActionDetector(
       actions: actionMap,
@@ -348,12 +337,10 @@ mixin TToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixi
         onTap: handleTap,
         onTapUp: handleTapEnd,
         onTapCancel: handleTapEnd,
+        behavior: behavior,
         child: Semantics(
           enabled: isInteractive,
-          child: CustomPaint(
-            size: size,
-            painter: painter,
-          ),
+          child: child,
         ),
       ),
     );

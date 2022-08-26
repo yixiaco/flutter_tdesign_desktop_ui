@@ -93,12 +93,13 @@ class _TDropdownState<T> extends State<TDropdown<T>> {
         },
       ),
       style: TPopupStyle(
-          backgroundColor: colorScheme.bgColorContainer,
-          padding: EdgeInsets.zero,
-          border: BubbleBoxBorder(
-            width: 1 / MediaQuery.of(context).devicePixelRatio,
-            color: colorScheme.borderLevel2Color,
-          )),
+        backgroundColor: colorScheme.bgColorContainer,
+        padding: EdgeInsets.zero,
+        border: BubbleBoxBorder(
+          width: 1 / MediaQuery.of(context).devicePixelRatio,
+          color: colorScheme.borderLevel2Color,
+        ),
+      ),
       placement: widget.placement,
       trigger: widget.trigger,
       child: widget.child,

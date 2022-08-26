@@ -31,6 +31,7 @@ bool? _startIsTopLeft(Axis direction, TextDirection? textDirection, VerticalDire
 /// 组件会先绘制一遍子布局的大小，得到最大组件宽度，然后强制应用到所有其他子组件中
 /// 这个类可能是昂贵的，因此应首先考虑使用[Flex]，而不是[FixedCrossFlex]
 class FixedCrossFlex extends Flex {
+  /// 固定交叉轴的Flex组件
   FixedCrossFlex({
     super.key,
     required super.direction,
@@ -241,7 +242,11 @@ class RenderFixedCrossFlex extends RenderFlex {
     }
   }
 
-  _LayoutSizes _computeSizes({required BoxConstraints constraints, required ChildLayouter layoutChild}) {
+  _LayoutSizes _computeSizes({
+    required BoxConstraints constraints,
+    required ChildLayouter layoutChild,
+    Map<RenderBox, BoxConstraints>? cacheConstraints,
+  }) {
     assert(_debugHasNecessaryDirections);
 
     // Determine used flex factor, size inflexible items, calculate free space.
@@ -280,6 +285,7 @@ class RenderFixedCrossFlex extends RenderFlex {
               break;
           }
         }
+        cacheConstraints?[child] = innerConstraints;
         final Size childSize = layoutChild(child, innerConstraints);
         allocatedSize += _getMainSize(childSize);
         crossSize = math.max(crossSize, _getCrossSize(childSize));
@@ -346,6 +352,7 @@ class RenderFixedCrossFlex extends RenderFlex {
                 break;
             }
           }
+          cacheConstraints?[child] = innerConstraints;
           final Size childSize = layoutChild(child, innerConstraints);
           final double childMainSize = _getMainSize(childSize);
           assert(childMainSize <= maxChildExtent);
@@ -381,11 +388,14 @@ class RenderFixedCrossFlex extends RenderFlex {
       return true;
     }());
 
+    // 缓存child的约束
+    Map<RenderBox, BoxConstraints> cacheConstraints = {};
     final _LayoutSizes sizes = _computeSizes(
       layoutChild: ChildLayoutHelper.layoutChild,
       constraints: constraints,
+      cacheConstraints: cacheConstraints,
     );
-    resetChildConstraints(sizes.crossSize, constraints);
+    resetChildConstraints(sizes.crossSize, cacheConstraints);
 
     final double allocatedSize = sizes.allocatedSize;
     double actualSize = sizes.mainSize;
@@ -525,18 +535,22 @@ class RenderFixedCrossFlex extends RenderFlex {
   }
 
   /// 重置子组件布局大小
-  void resetChildConstraints(double crossSize, BoxConstraints constraints) {
+  void resetChildConstraints(double crossSize, Map<RenderBox, BoxConstraints> cacheConstraints) {
     var list = getChildrenAsList();
     for (var child in list) {
-      if (child.size.width < crossSize) {
-        switch (direction) {
-          case Axis.horizontal:
-            ChildLayoutHelper.layoutChild(child, constraints.copyWith(minHeight: crossSize, maxHeight: crossSize));
-            break;
-          case Axis.vertical:
-            ChildLayoutHelper.layoutChild(child, constraints.copyWith(minWidth: crossSize, maxWidth: crossSize));
-            break;
-        }
+      switch (direction) {
+        case Axis.horizontal:
+          if (child.size.height < crossSize) {
+            var cacheConstraint = cacheConstraints[child];
+            ChildLayoutHelper.layoutChild(child, cacheConstraint!.copyWith(minHeight: crossSize, maxHeight: crossSize));
+          }
+          break;
+        case Axis.vertical:
+          if (child.size.width < crossSize) {
+            var cacheConstraint = cacheConstraints[child];
+            ChildLayoutHelper.layoutChild(child, cacheConstraint!.copyWith(minWidth: crossSize, maxWidth: crossSize));
+          }
+          break;
       }
     }
   }
