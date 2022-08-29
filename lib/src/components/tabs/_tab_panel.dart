@@ -22,18 +22,24 @@ class _TabPanel<T> extends StatefulWidget {
 }
 
 class _TabPanelState<T> extends State<_TabPanel<T>> {
+  /// 缓存页面
   late Map<T, Widget> cachePage;
+
+  /// 动态监听选项卡值的变化
+  late ValueNotifier<T?> value;
 
   @override
   void initState() {
     super.initState();
     cachePage = {};
+    value = ValueNotifier(widget.value);
   }
 
   @override
   void dispose() {
     super.dispose();
     cachePage.clear();
+    value.dispose();
   }
 
   @override
@@ -43,6 +49,11 @@ class _TabPanelState<T> extends State<_TabPanel<T>> {
     // 删除隐藏时销毁的页面
     var destroyValues = widget.list.where((element) => element.destroyOnHide).map((e) => e.value);
     cachePage.removeWhere((key, value) => destroyValues.contains(key));
+    // 删除value不存在的页面
+    var allKeys = widget.list.map((e) => e.value);
+    cachePage.removeWhere((key, value) => !allKeys.contains(key));
+
+    value.value = widget.value;
   }
 
   @override
@@ -59,7 +70,19 @@ class _TabPanelState<T> extends State<_TabPanel<T>> {
 
     Widget child = tabsPanel.panel ?? empty;
 
-    child = KeyedSubtree(key: ValueKey(tabsPanel.value), child: child);
+    child = KeyedSubtree(
+      key: ValueKey(tabsPanel.value),
+      child: ValueListenableBuilder(
+        valueListenable: value,
+        builder: (BuildContext context, T? value, Widget? child) {
+          return Offstage(
+            offstage: value != tabsPanel.value,
+            child: child,
+          );
+        },
+        child: child,
+      ),
+    );
 
     if (!tabsPanel.destroyOnHide) {
       cachePage[tabsPanel.value] = child;
