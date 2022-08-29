@@ -54,6 +54,11 @@ export 'src/components/tabs/tabs.dart';
 export 'src/components/tabs/types.dart';
 /// 跳转
 export 'src/components/jumper/jumper.dart';
+/// 菜单
+export 'src/components/menu/head_menu.dart';
+export 'src/components/menu/menu.dart';
+export 'src/components/menu/menu_controller.dart';
+export 'src/components/menu/types.dart';
 /// 复选框
 export 'src/components/checkbox/checkbox.dart';
 export 'src/components/checkbox/checkbox_group.dart';

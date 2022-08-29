@@ -1,4 +1,4 @@
-import 'package:example/components/collapse/collapse_example.dart';
+import 'package:example/components/menu/menu_example.dart';
 import 'package:example/state/semantics_state.dart';
 import 'package:example/state/size_state.dart';
 import 'package:example/state/theme_state.dart';
@@ -105,7 +105,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
         ),
         footer: const TFooter(child: Text('Footer')),
         content: const TContent(
-          child: TCollapseExample(),
+          child: TMenuExample(),
         ),
       ),
     );

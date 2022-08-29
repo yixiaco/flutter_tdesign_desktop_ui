@@ -432,7 +432,7 @@ class _TButton extends ButtonStyleButton {
       return SystemMouseCursors.click;
     });
 
-    double btnHeight = defaultSize.sizeOf(small: 24 / devicePixelRatio, medium: 32 / devicePixelRatio, large: 40 / devicePixelRatio);
+    double btnHeight = defaultSize.sizeOf(small: 24, medium: 32, large: 40);
     var halfHeight = btnHeight / 2;
     return ButtonStyle(
       textStyle: ButtonStyleButton.allOrNull<TextStyle>(ttheme.fontData.fontBody(defaultSize)),
