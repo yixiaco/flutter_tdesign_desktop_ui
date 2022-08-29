@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
+// 字体大小 token
 const double _kFontSizeLinkSmall = 12;
 const double _kFontSizeLinkMedium = 14;
 const double _kFontSizeLinkLarge = 16;
@@ -17,6 +19,23 @@ const double _kFontSizeHeadlineMedium = 28;
 const double _kFontSizeHeadlineLarge = 36;
 const double _kFontSizeDisplayMedium = 48;
 const double _kFontSizeDisplayLarge = 64;
+// 字体行高 token
+// const _kLineHeightLinkSmall = 20 / _kFontSizeLinkSmall;
+// const _kLineHeightLinkMedium = 22 / _kFontSizeLinkMedium;
+// const _kLineHeightLinkLarge = 24 / _kFontSizeLinkLarge;
+// const _kLineHeightMarkSmall = 20 / _kFontSizeMarkSmall;
+// const _kLineHeightMarkMedium = 22 / _kFontSizeMarkMedium;
+// const _kLineHeightBodySmall = 20 / _kFontSizeBodySmall;
+// const _kLineHeightBodyMedium = 22 / _kFontSizeBodyMedium;
+// const _kLineHeightBodyLarge = 24 / _kFontSizeBodyLarge;
+// const _kLineHeightTitleSmall = 22 / _kFontSizeTitleSmall;
+// const _kLineHeightTitleMedium = 24 / _kFontSizeTitleMedium;
+// const _kLineHeightTitleLarge = 28 / _kFontSizeTitleLarge;
+// const _kLineHeightHeadlineSmall = 32 / _kFontSizeHeadlineSmall;
+// const _kLineHeightHeadlineMedium = 36 / _kFontSizeHeadlineMedium;
+// const _kLineHeightHeadlineLarge = 44 / _kFontSizeHeadlineLarge;
+// const _kLineHeightDisplayMedium = 56 / _kFontSizeDisplayMedium;
+// const _kLineHeightDisplayLarge = 72 / _kFontSizeDisplayLarge;
 
 /// 字体相关
 class TFontData with Diagnosticable {
@@ -169,6 +188,34 @@ class TFontData with Diagnosticable {
 
   /// Font Display Large
   final TextStyle fontDisplayLarge;
+
+  /// font body by size
+  TextStyle fontBody(TComponentSize size) => size.lazySizeOf(
+    small: () => fontBodySmall,
+    medium: () => fontBodyMedium,
+    large: () => fontBodyLarge,
+  );
+
+  /// font link by size
+  TextStyle fontLink(TComponentSize size) => size.lazySizeOf(
+    small: () => fontLinkSmall,
+    medium: () => fontLinkMedium,
+    large: () => fontLinkLarge,
+  );
+
+  /// font title by size
+  TextStyle fontTitle(TComponentSize size) => size.lazySizeOf(
+    small: () => fontTitleSmall,
+    medium: () => fontTitleMedium,
+    large: () => fontTitleLarge,
+  );
+
+  /// font headline by size
+  TextStyle fontHeadline(TComponentSize size) => size.lazySizeOf(
+    small: () => fontHeadlineSmall,
+    medium: () => fontHeadlineMedium,
+    large: () => fontHeadlineLarge,
+  );
 
   factory TFontData.defaultFontData(String fontFamily) {
     return TFontData(

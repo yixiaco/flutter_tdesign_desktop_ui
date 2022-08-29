@@ -61,20 +61,6 @@ class _TButton extends ButtonStyleButton {
   /// 是否收紧包装
   final bool softWrap;
 
-  /// 按钮高度
-  double _btnHeight(TComponentSize size) {
-    return size.sizeOf(small: 28, medium: 36, large: 44);
-  }
-
-  /// 字体大小
-  double _btnFontSize(TThemeData theme, TComponentSize size) {
-    return size.sizeOf(
-      small: theme.fontData.fontSizeS,
-      medium: theme.fontData.fontSizeBase,
-      large: theme.fontData.fontSizeL,
-    );
-  }
-
   /// padding大小
   double _btnPaddingHorizontal(TComponentSize size) {
     return size.sizeOf(small: TVar.spacer, medium: TVar.spacer * 2, large: TVar.spacer * 3);
@@ -161,6 +147,7 @@ class _TButton extends ButtonStyleButton {
     var isGhost = ghost ?? buttonTheme.ghost ?? false;
     var media = MediaQuery.of(context);
     var variables = _variables(colorScheme);
+    var devicePixelRatio = media.devicePixelRatio;
 
     // 边框
     late MaterialStateProperty<TBorderSide?> borderSide;
@@ -194,11 +181,13 @@ class _TButton extends ButtonStyleButton {
 
     // 动态边框
     MaterialStateProperty<TBorderSide?> borderSideResolve(String theme, {bool ghost = false}) {
-      return MaterialStateProperty.resolveWith((states) => TBorderSide(
-            width: 1 / media.devicePixelRatio,
+      return MaterialStateProperty.resolveWith((states) {
+        return TBorderSide(
+            width: 1 / devicePixelRatio,
             color: resolve(theme, states, ghost: ghost) ?? Colors.transparent,
             dashed: variant == TButtonVariant.dashed,
-          ));
+          );
+      });
     }
 
     // 动态背景
@@ -443,13 +432,10 @@ class _TButton extends ButtonStyleButton {
       return SystemMouseCursors.click;
     });
 
-    var btnHeight = _btnHeight(defaultSize);
+    double btnHeight = defaultSize.sizeOf(small: 24 / devicePixelRatio, medium: 32 / devicePixelRatio, large: 40 / devicePixelRatio);
     var halfHeight = btnHeight / 2;
     return ButtonStyle(
-      textStyle: ButtonStyleButton.allOrNull<TextStyle>(TextStyle(
-        fontFamily: ttheme.fontFamily,
-        fontSize: _btnFontSize(ttheme, defaultSize),
-      )),
+      textStyle: ButtonStyleButton.allOrNull<TextStyle>(ttheme.fontData.fontBody(defaultSize)),
       backgroundColor: backgroundColor,
       foregroundColor: foregroundColor,
       overlayColor: overlayColor,
@@ -460,10 +446,10 @@ class _TButton extends ButtonStyleButton {
       padding: ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(softWrap ? EdgeInsets.zero : _scaledPadding(context, defaultSize)),
       minimumSize: ButtonStyleButton.allOrNull<Size>(Size.square(btnHeight)),
       fixedSize: ButtonStyleButton.allOrNull<Size>(shape.valueOf(
-        rectangle: Size.fromHeight(halfHeight),
-        square: Size.square(halfHeight),
-        round: Size.fromHeight(halfHeight),
-        circle: Size.square(halfHeight),
+        rectangle: Size.fromHeight(btnHeight),
+        square: Size.square(btnHeight),
+        round: Size.fromHeight(btnHeight),
+        circle: Size.square(btnHeight),
       )),
       maximumSize: ButtonStyleButton.allOrNull<Size>(Size.fromHeight(btnHeight)),
       side: MaterialStateProperty.resolveWith((states) => MaterialStateProperty.resolveAs(side, states) ?? borderSide.resolve(states)),

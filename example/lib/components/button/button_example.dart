@@ -37,6 +37,13 @@ class ButtonExample extends StatelessWidget {
                   icon: TIcons.cloudUpload,
                   // child: const Text('描边按钮'),
                 ),
+                TButton(
+                  onPressed: () {},
+                  shape: TButtonShape.square,
+                  themeStyle: TButtonThemeStyle.danger,
+                  icon: TIcons.cloudUpload,
+                  // child: const Text('描边按钮'),
+                ),
                 TButton(onPressed: () {}, variant: TButtonVariant.outline, child: const Text('描边按钮')),
                 TButton(onPressed: () {}, variant: TButtonVariant.dashed, child: const Text('虚框按钮')),
                 TButton(onPressed: () {}, variant: TButtonVariant.text, child: const Text('文字按钮')),

@@ -9,6 +9,7 @@ enum TCollapseExpandIconPlacement {
   right;
 }
 
+/// 折叠面板属性
 class TCollapsePanel<T> {
   const TCollapsePanel({
     this.content,
