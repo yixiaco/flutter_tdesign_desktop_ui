@@ -56,13 +56,14 @@ class TThemeData with Diagnosticable {
     TInputThemeData? inputThemeData,
     TPopupThemeData? popupThemeData,
   }) {
+    var family = fontFamily ?? 'Microsoft YaHei';
     return TThemeData.raw(
       brightness: brightness,
       colorScheme: colorScheme ?? (brightness == Brightness.light ? TColorScheme.light : TColorScheme.dark),
       size: size ?? TComponentSize.medium,
       textDirection: textDirection ?? TextDirection.ltr,
-      fontFamily: fontFamily ?? 'Microsoft YaHei',
-      fontData: fontData ?? TFontData.defaultFontData(),
+      fontFamily: family,
+      fontData: fontData ?? TFontData.defaultFontData(family),
       buttonThemeData: buttonThemeData ?? const TButtonThemeData(),
       checkboxThemeData: checkboxThemeData ?? const TCheckboxThemeData(),
       inputThemeData: inputThemeData ?? const TInputThemeData(),

@@ -75,7 +75,6 @@ class _TMaterialStateBuilderState extends State<TMaterialStateBuilder> with Mate
         behavior: widget.behavior,
         onTap: () {
           _onTap(true);
-          widget.onTap?.call();
         },
         onTapCancel: () => _onTap(false),
         onTapUp: (details) => _onTap(false),
@@ -88,6 +87,7 @@ class _TMaterialStateBuilderState extends State<TMaterialStateBuilder> with Mate
     if (widget.disabled) {
       return;
     }
+    widget.onTap?.call();
     setMaterialState(MaterialState.pressed, tap);
   }
 }

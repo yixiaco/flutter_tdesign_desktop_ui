@@ -24,14 +24,15 @@ export 'src/events/allow_tap_listener.dart';
 
 /// 通用
 export 'src/components/common/toggleable.dart';
-export 'src/components/common/animation_change_notifier_painter.dart';
+export 'src/components/common/animation/animation_change_notifier_painter.dart';
 export 'src/components/common/hollow.dart';
 export 'src/components/common/scroll/scrollbar.dart';
-export 'src/components/common/animated_icon.dart';
+export 'src/components/common/animation/animated_icon.dart';
 export 'src/components/common/fixed_flex.dart';
 export 'src/components/common/decoration_box.dart';
 export 'src/components/common/scroll/scroll_view.dart';
-export 'src/components/common/common_material.dart';
+export 'src/components/common/material_state_builder.dart';
+export 'src/components/common/fake_arrow.dart';
 /// 按钮
 export 'src/components/button/button.dart';
 export 'src/components/button/button_theme.dart';
@@ -66,6 +67,9 @@ export 'src/components/switch/switch.dart';
 export 'src/components/input/input.dart';
 export 'src/components/input/custom_outline_input_border.dart';
 export 'src/components/input/input_theme.dart';
+/// 折叠面板
+export 'src/components/collapse/collapse.dart';
+export 'src/components/collapse/types.dart';
 /// 加载
 export 'src/components/loading/loading.dart';
 /// 进度条
