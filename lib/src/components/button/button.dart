@@ -555,7 +555,7 @@ Map<String, Color> _variables(TColorScheme scheme) {
     'btn-color-none-disabled': Colors.transparent,
 
     // 文本
-    'btn-text-variant-base-color': scheme.textColorAnti
+    'btn-text-variant-base-color': scheme.textColorAnti,
   };
 }
 
@@ -563,15 +563,6 @@ Map<String, Color> _variables(TColorScheme scheme) {
 class _TButton extends StatelessWidget {
   const _TButton({
     Key? key,
-    // required VoidCallback? onPressed,
-    // VoidCallback? onLongPress,
-    // ValueChanged<bool>? onHover,
-    // ValueChanged<bool>? onFocusChange,
-    // ButtonStyle? style,
-    // FocusNode? focusNode,
-    // bool autofocus = false,
-    // Clip clipBehavior = Clip.none,
-    // Widget? child,
     this.size,
     required this.variant,
     required this.themeStyle,
@@ -656,73 +647,90 @@ class _TButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var buttonStyle = defaultStyleOf(context).merge(themeStyleOf(context)).merge(style);
-    return TAngleRipple(
-      fixedRippleColor: buttonStyle.fixedRippleColor,
-      enableFeedback: buttonStyle.enableFeedback,
-      onHover: onHover,
-      onLongPress: onLongPress,
-      onFocusChange: onFocusChange,
-      disabled: disabled,
-      cursor: buttonStyle.mouseCursor,
-      onTap: onPressed,
-      autofocus: autofocus,
-      focusNode: focusNode,
-      builder: (context, states) {
-        var fixedSize = buttonStyle.fixedSize?.resolve(states);
-        var minimumSize = buttonStyle.minimumSize?.resolve(states);
-        var maximumSize = buttonStyle.maximumSize?.resolve(states);
-        var foregroundColor = buttonStyle.foregroundColor?.resolve(states);
-        var backgroundColor = buttonStyle.backgroundColor?.resolve(states);
-        var shape = buttonStyle.shape?.resolve(states);
-        var side = buttonStyle.side?.resolve(states);
-        var padding = buttonStyle.padding?.resolve(states);
-        var textStyle = buttonStyle.textStyle?.resolve(states);
-        BoxConstraints effectiveConstraints = BoxConstraints(
-          minWidth: minimumSize?.width ?? 0,
-          minHeight: minimumSize?.height ?? 0,
-          maxWidth: maximumSize?.width ?? double.infinity,
-          maxHeight: maximumSize?.height ?? double.infinity,
-        );
-        if (fixedSize != null) {
-          final Size size = effectiveConstraints.constrain(fixedSize);
-          if (size.width.isFinite) {
-            effectiveConstraints = effectiveConstraints.copyWith(
-              minWidth: size.width,
-              maxWidth: size.width,
-            );
+    return Semantics(
+      container: true,
+      button: true,
+      enabled: !disabled,
+      child: TAngleRipple(
+        fixedRippleColor: buttonStyle.fixedRippleColor,
+        enableFeedback: buttonStyle.enableFeedback,
+        onHover: onHover,
+        onLongPress: onLongPress,
+        onFocusChange: onFocusChange,
+        disabled: disabled,
+        cursor: buttonStyle.mouseCursor,
+        onTap: onPressed,
+        autofocus: autofocus,
+        focusNode: focusNode,
+        beforeBuilder: (context, states) {
+          var fixedSize = buttonStyle.fixedSize?.resolve(states);
+          var minimumSize = buttonStyle.minimumSize?.resolve(states);
+          var maximumSize = buttonStyle.maximumSize?.resolve(states);
+          var foregroundColor = buttonStyle.foregroundColor?.resolve(states);
+          var padding = buttonStyle.padding?.resolve(states);
+          var textStyle = buttonStyle.textStyle?.resolve(states);
+          BoxConstraints effectiveConstraints = BoxConstraints(
+            minWidth: minimumSize?.width ?? 0,
+            minHeight: minimumSize?.height ?? 0,
+            maxWidth: maximumSize?.width ?? double.infinity,
+            maxHeight: maximumSize?.height ?? double.infinity,
+          );
+          if (fixedSize != null) {
+            final Size size = effectiveConstraints.constrain(fixedSize);
+            if (size.width.isFinite) {
+              effectiveConstraints = effectiveConstraints.copyWith(
+                minWidth: size.width,
+                maxWidth: size.width,
+              );
+            }
+            if (size.height.isFinite) {
+              effectiveConstraints = effectiveConstraints.copyWith(
+                minHeight: size.height,
+                maxHeight: size.height,
+              );
+            }
           }
-          if (size.height.isFinite) {
-            effectiveConstraints = effectiveConstraints.copyWith(
-              minHeight: size.height,
-              maxHeight: size.height,
-            );
-          }
-        }
 
-        return DefaultTextStyle.merge(
-          style: textStyle?.merge(TextStyle(color: foregroundColor)),
-          child: Container(
-            clipBehavior: Clip.antiAlias,
-            padding: padding,
-            constraints: effectiveConstraints,
-            // duration: const Duration(milliseconds: 200),
-            decoration: ShapeDecoration(
-              color: backgroundColor ?? Colors.transparent,
-              shape: shape!.copyWith(side: side),
+          return IconTheme.merge(
+            data: IconThemeData(color: foregroundColor),
+            child: DefaultTextStyle.merge(
+              style: textStyle?.merge(TextStyle(color: foregroundColor)),
+              child: AnimatedContainer(
+                padding: padding,
+                constraints: effectiveConstraints,
+                duration: const Duration(milliseconds: 200),
+                alignment: buttonStyle.alignment,
+                child: child,
+              ),
             ),
-            alignment: buttonStyle.alignment,
-            child: child,
-          ),
-        );
-      },
+          );
+        },
+        afterBuilder: (context, states, child) {
+          var shape = buttonStyle.shape?.resolve(states);
+          var side = buttonStyle.side?.resolve(states);
+          var backgroundColor = buttonStyle.backgroundColor?.resolve(states);
+          shape = shape?.copyWith(side: side);
+          if (shape != null) {
+            return ClipPath(
+              clipper: ShapeBorderClipper(shape: shape),
+              child: Container(
+                color: backgroundColor ?? Colors.transparent,
+                foregroundDecoration: ShapeDecoration(shape: shape),
+                child: child,
+              ),
+            );
+          }
+          return child;
+        },
+      ),
     );
   }
 
   TButtonStyle defaultStyleOf(BuildContext context) {
-    var ttheme = TTheme.of(context);
-    var colorScheme = ttheme.colorScheme;
+    var theme = TTheme.of(context);
+    var colorScheme = theme.colorScheme;
     var buttonTheme = TButtonTheme.of(context);
-    TComponentSize defaultSize = size ?? buttonTheme.size ?? ttheme.size;
+    TComponentSize defaultSize = size ?? buttonTheme.size ?? theme.size;
     var buttonThemeStyle = themeStyle;
     var isGhost = ghost ?? buttonTheme.ghost ?? false;
     var media = MediaQuery.of(context);
@@ -992,7 +1000,7 @@ class _TButton extends StatelessWidget {
           success: variables['btn-color-success-active'],
         );
       } else {
-        variables['btn-color-white-bg-active'];
+        fixedRippleColor = variables['btn-color-white-bg-active'];
       }
     }
 
@@ -1008,7 +1016,7 @@ class _TButton extends StatelessWidget {
     var halfHeight = btnHeight / 2;
     var padding = softWrap ? EdgeInsets.zero : _scaledPadding(context, defaultSize);
     return TButtonStyle(
-      textStyle: ButtonStyleButton.allOrNull<TextStyle>(ttheme.fontData.fontBody(defaultSize)),
+      textStyle: ButtonStyleButton.allOrNull<TextStyle>(theme.fontData.fontBody(defaultSize)),
       backgroundColor: backgroundColor,
       foregroundColor: foregroundColor,
       fixedRippleColor: fixedRippleColor,

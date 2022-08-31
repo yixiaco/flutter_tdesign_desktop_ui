@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 /// 一个通用的状态构建器
@@ -12,9 +13,12 @@ class TMaterialStateBuilder extends StatefulWidget {
     this.autofocus = false,
     this.behavior = HitTestBehavior.translucent,
     this.onTap,
+    this.onTapDown,
     this.onTapUp,
     this.onTapCancel,
     this.onLongPress,
+    this.onLongPressUp,
+    this.onLongPressCancel,
     this.onHover,
     this.onFocusChange,
     this.actions,
@@ -46,6 +50,9 @@ class TMaterialStateBuilder extends StatefulWidget {
   /// 点击事件
   final GestureTapCallback? onTap;
 
+  /// 点击事件
+  final GestureTapDownCallback? onTapDown;
+
   /// 取消点击回调
   final GestureTapCancelCallback? onTapCancel;
 
@@ -54,6 +61,12 @@ class TMaterialStateBuilder extends StatefulWidget {
 
   /// 长按
   final GestureLongPressCallback? onLongPress;
+
+  /// 长按放开
+  final GestureLongPressUpCallback? onLongPressUp;
+
+  /// 长按取消
+  final GestureLongPressCancelCallback? onLongPressCancel;
 
   /// 鼠标经过
   final ValueChanged<bool>? onHover;
@@ -103,7 +116,7 @@ class _TMaterialStateBuilderState extends State<TMaterialStateBuilder> with Mate
     return FocusableActionDetector(
       mouseCursor: widget.cursor?.resolve(materialStates) ?? effectiveCursor.resolve(materialStates),
       onShowFocusHighlight: (value) => setMaterialState(MaterialState.focused, value),
-      onShowHoverHighlight: _handleHoved,
+      onShowHoverHighlight: _handleHovered,
       onFocusChange: widget.onFocusChange,
       enabled: !widget.disabled,
       autofocus: widget.autofocus,
@@ -112,24 +125,31 @@ class _TMaterialStateBuilderState extends State<TMaterialStateBuilder> with Mate
       shortcuts: widget.shortcuts,
       child: GestureDetector(
         behavior: widget.behavior,
-        onTap: () {
+        onTap: _handleTap,
+        onTapDown: (details) {
           _onTap(true);
-        },
-        onLongPress: _handleLongPress,
-        onTapCancel: () {
-          _onTap(false);
-          widget.onTapCancel?.call();
+          if (!widget.disabled) widget.onTapDown?.call(details);
         },
         onTapUp: (details) {
           _onTap(false);
           widget.onTapUp?.call(details);
         },
+        onTapCancel: () {
+          _onTap(false);
+          widget.onTapCancel?.call();
+        },
+        onLongPress: widget.onLongPress != null ? _handleLongPress : null,
+        onLongPressUp: widget.onLongPressUp,
+        onLongPressCancel: widget.onLongPressCancel,
         child: widget.builder(context, materialStates),
       ),
     );
   }
 
   void _handleLongPress() {
+    if (widget.disabled) {
+      return;
+    }
     if (widget.onLongPress != null) {
       if (widget.enableFeedback) {
         Feedback.forLongPress(context);
@@ -138,20 +158,29 @@ class _TMaterialStateBuilderState extends State<TMaterialStateBuilder> with Mate
     }
   }
 
-  void _handleHoved(value) {
+  void _handleHovered(value) {
+    if (widget.disabled) {
+      return;
+    }
     setMaterialState(MaterialState.hovered, value);
     widget.onHover?.call(value);
   }
 
-  void _onTap(bool tap) {
+  void _handleTap() {
     if (widget.disabled) {
       return;
     }
-    if (widget.onTap != null && tap) {
+    if (widget.onTap != null) {
       if (widget.enableFeedback) {
         Feedback.forTap(context);
       }
       widget.onTap?.call();
+    }
+  }
+
+  void _onTap(bool tap) {
+    if (widget.disabled && tap) {
+      return;
     }
     setMaterialState(MaterialState.pressed, tap);
   }

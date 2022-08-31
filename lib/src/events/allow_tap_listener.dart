@@ -1,4 +1,3 @@
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 
@@ -18,9 +17,13 @@ class AllowTapListener extends StatefulWidget {
     this.onTertiaryTapDown,
     this.onTertiaryTapUp,
     this.onTertiaryTapCancel,
+    this.behavior,
   }) : super(key: key);
 
   final Widget child;
+
+  /// 命中测试
+  final HitTestBehavior? behavior;
 
   /// A pointer that might cause a tap with a primary button has contacted the
   /// screen at a particular location.
@@ -160,6 +163,7 @@ class _AllowTapListenerState extends State<AllowTapListener> {
   @override
   Widget build(BuildContext context) {
     return Listener(
+      behavior: widget.behavior ?? HitTestBehavior.deferToChild,
       onPointerDown: _onPointerDown,
       onPointerCancel: (event) => _onPointerCancel(_down, event),
       onPointerUp: (event) => _onPointerUp(_down, event),

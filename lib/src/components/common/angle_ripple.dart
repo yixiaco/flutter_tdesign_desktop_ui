@@ -10,7 +10,8 @@ const _kDefaultRippleColor = Color.fromRGBO(0, 0, 0, .35);
 class TAngleRipple extends StatefulWidget {
   const TAngleRipple({
     Key? key,
-    required this.builder,
+    required this.beforeBuilder,
+    required this.afterBuilder,
     this.disabled = false,
     this.selected = false,
     this.cursor,
@@ -36,8 +37,11 @@ class TAngleRipple extends StatefulWidget {
   /// 鼠标
   final MaterialStateProperty<MouseCursor?>? cursor;
 
-  /// 子组件构建器
-  final Widget Function(BuildContext context, Set<MaterialState> states) builder;
+  /// 子组件构建器之前
+  final Widget Function(BuildContext context, Set<MaterialState> states) beforeBuilder;
+
+  /// 子组件构建器之后
+  final Widget Function(BuildContext context, Set<MaterialState> states, Widget child) afterBuilder;
 
   /// 焦点
   final FocusNode? focusNode;
@@ -110,52 +114,71 @@ class _TAngleRippleState extends State<TAngleRipple> with TickerProviderStateMix
 
   @override
   void dispose() {
-    super.dispose();
     _transformAnimation.dispose();
     _angleController.dispose();
     _fadeOutController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return TMaterialStateBuilder(
-      shortcuts: widget.shortcuts,
-      actions: widget.actions,
-      focusNode: widget.focusNode,
-      autofocus: widget.autofocus,
-      disabled: widget.disabled,
-      onTap: _handleOnTap,
+    return AllowTapListener(
       onTapUp: _handleCancel,
       onTapCancel: _handleCancel,
-      behavior: widget.behavior,
-      cursor: widget.cursor,
-      selected: widget.selected,
-      onFocusChange: widget.onFocusChange,
-      onLongPress: widget.onLongPress,
-      onHover: widget.onHover,
-      enableFeedback: widget.enableFeedback ?? true,
-      builder: (context, states) {
-        return CustomPaint(
-          foregroundPainter: _TAngleRipplePainter(
-            transformAnimation: _transformAnimation,
-            fadeOut: _fadeOut,
-            fixedRippleColor: widget.fixedRippleColor ?? _kDefaultRippleColor,
-          ),
-          child: widget.builder(context, states),
-        );
-      },
+      child: TMaterialStateBuilder(
+        shortcuts: widget.shortcuts,
+        actions: widget.actions,
+        focusNode: widget.focusNode,
+        autofocus: widget.autofocus,
+        disabled: widget.disabled,
+        onTapDown: _handleOnTapDown,
+        onTap: _handleTap,
+        onLongPress: widget.onLongPress,
+        behavior: widget.behavior,
+        cursor: widget.cursor,
+        selected: widget.selected,
+        onFocusChange: widget.onFocusChange,
+        onHover: widget.onHover,
+        enableFeedback: widget.enableFeedback ?? true,
+        builder: (context, states) {
+          Widget child = CustomPaint(
+            painter: _TAngleRipplePainter(
+              transformAnimation: _transformAnimation,
+              fadeOut: _fadeOut,
+              fixedRippleColor: widget.fixedRippleColor ?? _kDefaultRippleColor,
+            ),
+            child: widget.beforeBuilder(context, states),
+          );
+          return widget.afterBuilder(context, states, child);
+        },
+      ),
     );
   }
 
   /// 处理点击事件
-  void _handleOnTap() {
+  void _handleOnTapDown([TapDownDetails? details]) {
     _angleController.forward(from: 0);
-    _fadeOutController.forward(from: 0);
+    _fadeOutController.value = 0;
+  }
+
+  void _handleTap() {
+    confirm();
     widget.onTap?.call();
   }
 
   void _handleCancel([TapUpDetails? details]) {
-    // _fadeOutController.reverse();
+    cancel();
+  }
+
+  ///当鼠标左键放开时
+  void confirm() {
+    _angleController.forward();
+    _fadeOutController.animateTo(1.0);
+  }
+
+  void cancel() {
+    _angleController.forward();
+    _fadeOutController.animateTo(1.0);
   }
 }
 
@@ -179,8 +202,10 @@ class _TAngleRipplePainter extends CustomPainter {
     var path = Path();
     // tan((180d / 22) = 8°) * 临边 = 对边
     var width = (size.width + tan(pi / 22) * size.height) * transformAnimation.value;
-    path.addRect(Rect.fromLTWH(0, 0, width, size.height));
-    canvas.drawPath(path.transform(Matrix4.skewX(-pi / 22).storage), paint);
+    if (width > 0) {
+      path.addRect(Rect.fromLTWH(0, 0, width, size.height));
+      canvas.drawPath(path.transform(Matrix4.skewX(-pi / 22).storage), paint);
+    }
   }
 
   @override
