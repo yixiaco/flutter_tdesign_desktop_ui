@@ -338,11 +338,11 @@ class _TDropdownItemState<T> extends State<_TDropdownItem<T>> with MaterialState
 
     // 覆盖色
     final MaterialStateProperty<Color?> overlayColor = MaterialStateProperty.resolveWith((states) {
-      if (states.contains(MaterialState.hovered)) {
-        return colorScheme.bgColorContainerHover;
-      }
       if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
         return colorScheme.bgColorContainerActive;
+      }
+      if (states.contains(MaterialState.hovered)) {
+        return colorScheme.bgColorContainerHover;
       }
       return null;
     });

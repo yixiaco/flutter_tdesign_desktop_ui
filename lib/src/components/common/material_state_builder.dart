@@ -12,6 +12,14 @@ class TMaterialStateBuilder extends StatefulWidget {
     this.autofocus = false,
     this.behavior = HitTestBehavior.translucent,
     this.onTap,
+    this.onTapUp,
+    this.onTapCancel,
+    this.onLongPress,
+    this.onHover,
+    this.onFocusChange,
+    this.actions,
+    this.shortcuts,
+    this.enableFeedback = true,
   }) : super(key: key);
 
   /// 是否禁用
@@ -21,7 +29,7 @@ class TMaterialStateBuilder extends StatefulWidget {
   final bool selected;
 
   /// 鼠标
-  final MaterialStateProperty<MouseCursor>? cursor;
+  final MaterialStateProperty<MouseCursor?>? cursor;
 
   /// 子组件构建器
   final Widget Function(BuildContext context, Set<MaterialState> states) builder;
@@ -37,6 +45,32 @@ class TMaterialStateBuilder extends StatefulWidget {
 
   /// 点击事件
   final GestureTapCallback? onTap;
+
+  /// 取消点击回调
+  final GestureTapCancelCallback? onTapCancel;
+
+  /// 松开点击回调
+  final GestureTapUpCallback? onTapUp;
+
+  /// 长按
+  final GestureLongPressCallback? onLongPress;
+
+  /// 鼠标经过
+  final ValueChanged<bool>? onHover;
+
+  /// 聚焦变更
+  final ValueChanged<bool>? onFocusChange;
+
+  /// {@macro flutter.widgets.actions.actions}
+  final Map<Type, Action<Intent>>? actions;
+
+  /// {@macro flutter.widgets.shortcuts.shortcuts}
+  final Map<ShortcutActivator, Intent>? shortcuts;
+
+  /// 检测到的手势是否应该提供声音和/或触觉反馈。
+  /// 例如，在Android上，当反馈功能被启用时，轻按会产生点击声，长按会产生短暂的震动。
+  /// 通常组件的默认值是true
+  final bool enableFeedback;
 
   @override
   State<TMaterialStateBuilder> createState() => _TMaterialStateBuilderState();
@@ -69,25 +103,56 @@ class _TMaterialStateBuilderState extends State<TMaterialStateBuilder> with Mate
     return FocusableActionDetector(
       mouseCursor: widget.cursor?.resolve(materialStates) ?? effectiveCursor.resolve(materialStates),
       onShowFocusHighlight: (value) => setMaterialState(MaterialState.focused, value),
-      onShowHoverHighlight: (value) => setMaterialState(MaterialState.hovered, value),
+      onShowHoverHighlight: _handleHoved,
+      onFocusChange: widget.onFocusChange,
       enabled: !widget.disabled,
+      autofocus: widget.autofocus,
+      focusNode: widget.focusNode,
+      actions: widget.actions,
+      shortcuts: widget.shortcuts,
       child: GestureDetector(
         behavior: widget.behavior,
         onTap: () {
           _onTap(true);
         },
-        onTapCancel: () => _onTap(false),
-        onTapUp: (details) => _onTap(false),
+        onLongPress: _handleLongPress,
+        onTapCancel: () {
+          _onTap(false);
+          widget.onTapCancel?.call();
+        },
+        onTapUp: (details) {
+          _onTap(false);
+          widget.onTapUp?.call(details);
+        },
         child: widget.builder(context, materialStates),
       ),
     );
+  }
+
+  void _handleLongPress() {
+    if (widget.onLongPress != null) {
+      if (widget.enableFeedback) {
+        Feedback.forLongPress(context);
+      }
+      widget.onLongPress?.call();
+    }
+  }
+
+  void _handleHoved(value) {
+    setMaterialState(MaterialState.hovered, value);
+    widget.onHover?.call(value);
   }
 
   void _onTap(bool tap) {
     if (widget.disabled) {
       return;
     }
-    widget.onTap?.call();
+    if (widget.onTap != null && tap) {
+      if (widget.enableFeedback) {
+        Feedback.forTap(context);
+      }
+      widget.onTap?.call();
+    }
     setMaterialState(MaterialState.pressed, tap);
   }
 }

@@ -2,6 +2,118 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
+class TButtonStyle with Diagnosticable {
+  const TButtonStyle({
+    this.textStyle,
+    this.backgroundColor,
+    this.foregroundColor,
+    this.padding,
+    this.fixedSize,
+    this.minimumSize,
+    this.maximumSize,
+    this.side,
+    this.shape,
+    this.mouseCursor,
+    this.enableFeedback,
+    this.alignment,
+    this.fixedRippleColor,
+  });
+
+  /// 文本样式
+  final MaterialStateProperty<TextStyle?>? textStyle;
+
+  /// 背景色
+  final MaterialStateProperty<Color?>? backgroundColor;
+
+  /// 前景色
+  final MaterialStateProperty<Color?>? foregroundColor;
+
+  /// 内边距
+  final MaterialStateProperty<EdgeInsetsGeometry?>? padding;
+
+  /// 固定大小
+  final MaterialStateProperty<Size?>? fixedSize;
+
+  /// 最小大小
+  final MaterialStateProperty<Size?>? minimumSize;
+
+  /// 最大大小
+  final MaterialStateProperty<Size?>? maximumSize;
+
+  /// 边框
+  final MaterialStateProperty<BorderSide?>? side;
+
+  /// 自定义形状
+  final MaterialStateProperty<OutlinedBorder?>? shape;
+
+  /// 鼠标样式
+  final MaterialStateProperty<MouseCursor?>? mouseCursor;
+
+  /// 检测到的手势是否应该提供声音和/或触觉反馈。
+  /// 例如，在Android上，当反馈功能被启用时，轻按会产生点击声，长按会产生短暂的震动。
+  /// 通常组件的默认值是true
+  final bool? enableFeedback;
+
+  /// 对齐
+  final AlignmentGeometry? alignment;
+
+  /// 波纹颜色
+  final Color? fixedRippleColor;
+
+  TButtonStyle copyWith({
+    MaterialStateProperty<TextStyle?>? textStyle,
+    MaterialStateProperty<Color?>? backgroundColor,
+    MaterialStateProperty<Color?>? foregroundColor,
+    MaterialStateProperty<EdgeInsetsGeometry?>? padding,
+    MaterialStateProperty<Size?>? fixedSize,
+    MaterialStateProperty<Size?>? minimumSize,
+    MaterialStateProperty<Size?>? maximumSize,
+    MaterialStateProperty<BorderSide?>? side,
+    MaterialStateProperty<OutlinedBorder?>? shape,
+    MaterialStateProperty<MouseCursor?>? mouseCursor,
+    bool? enableFeedback,
+    AlignmentGeometry? alignment,
+    Color? fixedRippleColor,
+  }) {
+    return TButtonStyle(
+      textStyle: textStyle ?? this.textStyle,
+      backgroundColor: backgroundColor ?? this.backgroundColor,
+      foregroundColor: foregroundColor ?? this.foregroundColor,
+      padding: padding ?? this.padding,
+      fixedSize: fixedSize ?? this.fixedSize,
+      minimumSize: minimumSize ?? this.minimumSize,
+      maximumSize: maximumSize ?? this.maximumSize,
+      side: side ?? this.side,
+      shape: shape ?? this.shape,
+      mouseCursor: mouseCursor ?? this.mouseCursor,
+      enableFeedback: enableFeedback ?? this.enableFeedback,
+      alignment: alignment ?? this.alignment,
+      fixedRippleColor: fixedRippleColor ?? this.fixedRippleColor,
+    );
+  }
+
+  TButtonStyle merge(TButtonStyle? buttonStyle) {
+    if (buttonStyle == null) {
+      return this;
+    }
+    return copyWith(
+      textStyle: buttonStyle.textStyle,
+      backgroundColor: buttonStyle.backgroundColor,
+      foregroundColor: buttonStyle.foregroundColor,
+      padding: buttonStyle.padding,
+      fixedSize: buttonStyle.fixedSize,
+      minimumSize: buttonStyle.minimumSize,
+      maximumSize: buttonStyle.maximumSize,
+      side: buttonStyle.side,
+      shape: buttonStyle.shape,
+      mouseCursor: buttonStyle.mouseCursor,
+      enableFeedback: buttonStyle.enableFeedback,
+      alignment: buttonStyle.alignment,
+      fixedRippleColor: buttonStyle.fixedRippleColor,
+    );
+  }
+}
+
 /// 按钮主题数据
 class TButtonThemeData with Diagnosticable {
   const TButtonThemeData({
@@ -13,7 +125,7 @@ class TButtonThemeData with Diagnosticable {
   });
 
   /// 按钮样式
-  final ButtonStyle? style;
+  final TButtonStyle? style;
 
   /// 按钮形式
   final TButtonVariant? variant;
@@ -28,7 +140,7 @@ class TButtonThemeData with Diagnosticable {
   final TComponentSize? size;
 
   TButtonThemeData copyWith({
-    ButtonStyle? style,
+    TButtonStyle? style,
     TButtonVariant? variant,
     TButtonThemeStyle? themeStyle,
     bool? ghost,
@@ -60,7 +172,7 @@ class TButtonThemeData with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<ButtonStyle>('style', style, defaultValue: null));
+    properties.add(DiagnosticsProperty<TButtonStyle>('style', style, defaultValue: null));
     properties.add(DiagnosticsProperty<TButtonVariant>('variant', variant, defaultValue: null));
     properties.add(DiagnosticsProperty<TButtonThemeStyle>('themeStyle', themeStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('ghost', ghost, defaultValue: null));
@@ -92,130 +204,5 @@ class TButtonTheme extends InheritedTheme {
   @override
   Widget wrap(BuildContext context, Widget child) {
     return TButtonTheme(data: data, child: child);
-  }
-}
-
-///按钮变体枚举
-enum TButtonVariant {
-  /// 填充按钮
-  base,
-
-  /// 描边按钮
-  outline,
-
-  /// 虚框按钮
-  dashed,
-
-  /// 文字按钮
-  text;
-
-  /// 判断是否包含类型
-  bool contain({
-    bool base = false,
-    bool outline = false,
-    bool dashed = false,
-    bool text = false,
-  }) {
-    switch (this) {
-      case TButtonVariant.base:
-        return base;
-      case TButtonVariant.outline:
-        return outline;
-      case TButtonVariant.dashed:
-        return dashed;
-      case TButtonVariant.text:
-        return text;
-    }
-  }
-
-  /// 根据按钮形式，返回对应的值
-  T variantOf<T>({required T base, required T outline, required T dashed, required T text}) {
-    switch (this) {
-      case TButtonVariant.base:
-        return base;
-      case TButtonVariant.outline:
-        return outline;
-      case TButtonVariant.dashed:
-        return dashed;
-      case TButtonVariant.text:
-        return text;
-    }
-  }
-}
-
-/// 预定义的一组形状
-enum TButtonShape {
-  /// 长方形
-  rectangle,
-
-  /// 正方形
-  square,
-
-  /// 圆角长方形
-  round,
-
-  /// 圆形
-  circle;
-
-  /// 根据按钮形状，返回对应的值
-  T valueOf<T>({required T rectangle, required T square, required T round, required T circle}) {
-    switch (this) {
-      case TButtonShape.rectangle:
-        return rectangle;
-      case TButtonShape.square:
-        return square;
-      case TButtonShape.round:
-        return round;
-      case TButtonShape.circle:
-        return circle;
-    }
-  }
-}
-
-/// 按钮组件风格
-enum TButtonThemeStyle {
-  /// 默认色
-  defaultStyle,
-
-  /// 品牌色
-  primary,
-
-  /// 危险色
-  danger,
-
-  /// 告警色
-  warning,
-
-  /// 成功色
-  success;
-
-  T valueOf<T>({required T defaultStyle, required T primary, required T danger, required T warning, required T success}) {
-    switch (this) {
-      case TButtonThemeStyle.defaultStyle:
-        return defaultStyle;
-      case TButtonThemeStyle.primary:
-        return primary;
-      case TButtonThemeStyle.danger:
-        return danger;
-      case TButtonThemeStyle.warning:
-        return warning;
-      case TButtonThemeStyle.success:
-        return success;
-    }
-  }
-
-  T isDefaultOf<T>({required T defaultStyle, required T other}) {
-    switch (this) {
-      case TButtonThemeStyle.defaultStyle:
-        return defaultStyle;
-      case TButtonThemeStyle.primary:
-        return other;
-      case TButtonThemeStyle.danger:
-        return other;
-      case TButtonThemeStyle.warning:
-        return other;
-      case TButtonThemeStyle.success:
-        return other;
-    }
   }
 }

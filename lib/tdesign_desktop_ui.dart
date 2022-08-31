@@ -33,9 +33,11 @@ export 'src/components/common/decoration_box.dart';
 export 'src/components/common/scroll/scroll_view.dart';
 export 'src/components/common/material_state_builder.dart';
 export 'src/components/common/fake_arrow.dart';
+export 'src/components/common/angle_ripple.dart';
 /// 按钮
 export 'src/components/button/button.dart';
 export 'src/components/button/button_theme.dart';
+export 'src/components/button/types.dart';
 /// 图标
 export 'src/components/icons/t_icons.dart';
 /// 分割线
