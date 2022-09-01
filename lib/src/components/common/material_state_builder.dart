@@ -50,14 +50,14 @@ class TMaterialStateBuilder extends StatefulWidget {
   /// 点击事件
   final GestureTapCallback? onTap;
 
+  /// 松开点击回调
+  final GestureTapUpCallback? onTapUp;
+
   /// 点击事件
   final GestureTapDownCallback? onTapDown;
 
   /// 取消点击回调
   final GestureTapCancelCallback? onTapCancel;
-
-  /// 松开点击回调
-  final GestureTapUpCallback? onTapUp;
 
   /// 长按
   final GestureLongPressCallback? onLongPress;
@@ -159,7 +159,7 @@ class _TMaterialStateBuilderState extends State<TMaterialStateBuilder> with Mate
   }
 
   void _handleHovered(value) {
-    if (widget.disabled) {
+    if (widget.disabled && value) {
       return;
     }
     setMaterialState(MaterialState.hovered, value);

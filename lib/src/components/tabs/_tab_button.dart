@@ -147,7 +147,7 @@ class _TabButtonState<T> extends State<_TabButton<T>> with TickerProviderStateMi
     // 背景色
     MaterialStateProperty<Color> effectiveBgColor;
     // 覆盖色
-    MaterialStateProperty<Color?> effectiveOverlayColor;
+    Color fixedRippleColor;
     // icon颜色
     MaterialStateProperty<Color?> effectiveIconColor;
     // 外边距
@@ -167,17 +167,15 @@ class _TabButtonState<T> extends State<_TabButton<T>> with TickerProviderStateMi
         );
         radius = BorderRadius.circular(TVar.borderRadiusDefault);
         effectiveBgColor = MaterialStateProperty.resolveWith((states) {
-          return Colors.transparent;
-        });
-        effectiveOverlayColor = MaterialStateProperty.resolveWith((states) {
-          if (states.contains(MaterialState.hovered)) {
+          if (states.contains(MaterialState.selected)) {
+            return Colors.transparent;
+          }
+          if (states.contains(MaterialState.hovered) || states.contains(MaterialState.dragged)) {
             return colorScheme.bgColorContainerHover;
           }
-          if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
-            return colorScheme.bgColorContainerActive;
-          }
-          return null;
+          return Colors.transparent;
         });
+        fixedRippleColor = colorScheme.bgColorContainerActive;
         effectiveIconColor = MaterialStateProperty.resolveWith((states) {
           if (states.contains(MaterialState.disabled)) {
             return colorScheme.textColorDisabled;
@@ -198,17 +196,12 @@ class _TabButtonState<T> extends State<_TabButton<T>> with TickerProviderStateMi
           if (states.contains(MaterialState.selected)) {
             return colorScheme.bgColorContainer;
           }
-          return colorScheme.bgColorSecondaryContainer;
-        });
-        effectiveOverlayColor = MaterialStateProperty.resolveWith((states) {
           if (states.contains(MaterialState.hovered)) {
             return colorScheme.bgColorSecondaryContainerHover;
           }
-          if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
-            return colorScheme.bgColorSecondaryContainerActive;
-          }
-          return null;
+          return colorScheme.bgColorSecondaryContainer;
         });
+        fixedRippleColor = colorScheme.bgColorSecondaryContainerActive;
         effectiveIconColor = MaterialStateProperty.resolveWith((states) {
           if (states.contains(MaterialState.disabled)) {
             return colorScheme.textColorDisabled;
@@ -241,33 +234,34 @@ class _TabButtonState<T> extends State<_TabButton<T>> with TickerProviderStateMi
         ),
       );
     }
-    Widget child = InkWell(
-      onFocusChange: handleFocusHighlightChanged,
-      onHighlightChanged: handleHoverChanged,
-      mouseCursor: effectiveMouseCursor.resolve(states),
-      onTapDown: isNotTap ? null : handleTapDown,
+    Widget child = TRipple(
+      fixedRippleColor: fixedRippleColor,
+      disabled: isNotTap,
+      cursor: MaterialStateProperty.all(effectiveMouseCursor.resolve(states)),
       onTap: isNotTap ? null : handleTap,
       onTapUp: handleTapEnd,
       onTapCancel: handleTapEnd,
-      canRequestFocus: !isNotTap,
-      splashFactory: InkBevelAngle.splashFactory,
-      overlayColor: effectiveOverlayColor,
-      borderRadius: radius,
-      child: IconTheme(
-        data: iconThemeData,
-        child: Container(
-          decoration: dashedDecoration,
-          padding: padding,
-          color: effectiveOverlayColor.resolve(states),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              widget.child,
-              if (removable && isCard) _buildCloseIcon(effectiveIconColor, iconThemeData),
-            ],
+      selected: widget.checked,
+      onHover: handleHoverChanged,
+      onFocusChange: handleFocusHighlightChanged,
+      backgroundColor: MaterialStateProperty.all(effectiveBgColor.resolve(states)),
+      radius: radius,
+      builder: (context, states) {
+        return IconTheme(
+          data: iconThemeData,
+          child: Container(
+            decoration: dashedDecoration,
+            padding: padding,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                widget.child,
+                if (removable && isCard) _buildCloseIcon(effectiveIconColor, iconThemeData),
+              ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
     if (removable && !isCard) {
       child = Row(
@@ -329,18 +323,18 @@ class _TabButtonState<T> extends State<_TabButton<T>> with TickerProviderStateMi
       );
     }
 
-    var textStyle = DefaultTextStyle.of(context);
-
     child = Material(
-      textStyle: textStyle.style.merge(TextStyle(
-        color: textColor.resolve(states),
-      )),
-      color: effectiveBgColor.resolve(states),
-      child: Container(
-        decoration: decoration,
-        height: isCard ? null : height,
-        padding: margin,
-        child: child,
+      color: Colors.transparent,
+      child: DefaultTextStyle.merge(
+        style: TextStyle(
+          color: textColor.resolve(states),
+        ),
+        child: Container(
+          decoration: decoration,
+          height: isCard ? null : height,
+          padding: margin,
+          child: child,
+        ),
       ),
     );
     return child;

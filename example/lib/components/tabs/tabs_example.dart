@@ -86,6 +86,7 @@ class _TTabsExampleState extends State<TTabsExample> {
               theme: theme,
               placement: placement,
               addable: true,
+              softWrap: false,
               list: [
                 TTabsPanel(
                   label: Row(
@@ -174,7 +175,6 @@ class _TTabsExampleState extends State<TTabsExample> {
                 placement: placement,
                 addable: true,
                 dragSort: true,
-                softWrap: false,
                 onRemove: (value, index) {
                   setState(() {
                     panels.removeAt(index);

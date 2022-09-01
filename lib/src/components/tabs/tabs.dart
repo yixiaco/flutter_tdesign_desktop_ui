@@ -120,7 +120,7 @@ class _TTabsState<T> extends State<TTabs<T>> {
     var size = widget.size ?? theme.size;
 
     Widget child = _buildLabel();
-    var panel = _TabPanel(
+    Widget panel = _TabPanel(
       list: widget.list,
       index: widget._index,
       value: widget.value,
@@ -135,6 +135,9 @@ class _TTabsState<T> extends State<TTabs<T>> {
           crossAxisAlignment ??= CrossAxisAlignment.start;
         } else {
           crossAxisAlignment ??= CrossAxisAlignment.stretch;
+        }
+        if(mainAxisSize == MainAxisSize.max) {
+          panel = Expanded(child: panel);
         }
         child = FixedCrossFlex(
           mainAxisAlignment: mainAxisAlignment ?? MainAxisAlignment.start,
@@ -151,6 +154,9 @@ class _TTabsState<T> extends State<TTabs<T>> {
         } else {
           crossAxisAlignment ??= CrossAxisAlignment.stretch;
         }
+        if(mainAxisSize == MainAxisSize.max) {
+          panel = Expanded(child: panel);
+        }
         child = FixedCrossFlex(
           mainAxisAlignment: mainAxisAlignment ?? MainAxisAlignment.spaceBetween,
           direction: Axis.vertical,
@@ -166,6 +172,9 @@ class _TTabsState<T> extends State<TTabs<T>> {
         } else {
           mainAxisSize ??= MainAxisSize.max;
         }
+        if(mainAxisSize == MainAxisSize.max) {
+          panel = Expanded(child: panel);
+        }
         child = FixedCrossFlex(
           mainAxisAlignment: mainAxisAlignment ?? MainAxisAlignment.start,
           direction: Axis.horizontal,
@@ -180,6 +189,9 @@ class _TTabsState<T> extends State<TTabs<T>> {
           mainAxisSize ??= MainAxisSize.min;
         } else {
           mainAxisSize ??= MainAxisSize.max;
+        }
+        if(mainAxisSize == MainAxisSize.max) {
+          panel = Expanded(child: panel);
         }
         child = FixedCrossFlex(
           mainAxisAlignment: mainAxisAlignment ?? MainAxisAlignment.spaceBetween,

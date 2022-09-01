@@ -70,18 +70,16 @@ class _TabPanelState<T> extends State<_TabPanel<T>> {
 
     Widget child = tabsPanel.panel ?? empty;
 
-    child = KeyedSubtree(
+    child = ValueListenableBuilder(
       key: ValueKey(tabsPanel.value),
-      child: ValueListenableBuilder(
-        valueListenable: value,
-        builder: (BuildContext context, T? value, Widget? child) {
-          return Offstage(
-            offstage: value != tabsPanel.value,
-            child: child,
-          );
-        },
-        child: child,
-      ),
+      valueListenable: value,
+      builder: (BuildContext context, T? value, Widget? child) {
+        return Offstage(
+          offstage: value != tabsPanel.value,
+          child: child,
+        );
+      },
+      child: child,
     );
 
     if (!tabsPanel.destroyOnHide) {
