@@ -152,6 +152,9 @@ class TThemeData with Diagnosticable {
         large: () => fontData.fontSizeL,
       );
 
+  /// 是否是亮色主题
+  bool get isLight => brightness == Brightness.light;
+
   TThemeData copyWith({
     Brightness? brightness,
     TColorScheme? colorScheme,

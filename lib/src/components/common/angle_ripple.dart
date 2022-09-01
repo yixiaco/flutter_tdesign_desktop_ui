@@ -34,6 +34,8 @@ class TRipple extends StatefulWidget {
     this.radius,
     this.shape,
     this.backgroundColor,
+    this.animatedDuration,
+    this.curve = Curves.linear,
   }) : super(key: key);
 
   /// 是否禁用
@@ -107,6 +109,12 @@ class TRipple extends StatefulWidget {
   /// 背景色
   final MaterialStateProperty<Color?>? backgroundColor;
 
+  /// 动画持续时间
+  final Duration? animatedDuration;
+
+  /// 动画曲线
+  final Curve curve;
+
   @override
   State<TRipple> createState() => _TRippleState();
 }
@@ -172,10 +180,19 @@ class _TRippleState extends State<TRipple> with TickerProviderStateMixin {
             child: widget.builder(context, states),
           );
           if (widget.backgroundColor != null) {
-            child = Container(
-              color: widget.backgroundColor?.resolve(states),
-              child: child,
-            );
+            if(widget.animatedDuration != null) {
+              child = AnimatedContainer(
+                color: widget.backgroundColor?.resolve(states),
+                duration: widget.animatedDuration!,
+                curve: widget.curve,
+                child: child,
+              );
+            } else {
+              child = Container(
+                color: widget.backgroundColor?.resolve(states),
+                child: child,
+              );
+            }
           }
           if (widget.radius != null) {
             child = ClipRRect(
@@ -189,7 +206,7 @@ class _TRippleState extends State<TRipple> with TickerProviderStateMixin {
               child: child,
             );
           }
-          if(widget.radius == null && widget.shape == null){
+          if (widget.radius == null && widget.shape == null) {
             child = ClipRect(
               child: child,
             );

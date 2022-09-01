@@ -16,15 +16,18 @@ enum TMenuTheme {
 
   /// 暗
   dark;
+
+  /// 是否是亮色主题
+  bool get isLight => this == TMenuTheme.light;
 }
 
 /// 菜单属性抽象对象
-abstract class TMenuProps {
+abstract class TMenuProps<T> {
   const TMenuProps();
 }
 
 /// 二级菜单
-class TSubMenuProps<T> extends TMenuProps {
+class TSubMenuProps<T> extends TMenuProps<T> {
   const TSubMenuProps({
     this.children = const [],
     this.content,
@@ -35,7 +38,7 @@ class TSubMenuProps<T> extends TMenuProps {
   });
 
   /// 子菜单
-  final List<TMenuProps> children;
+  final List<TMenuProps<T>> children;
 
   /// 菜单项内容
   final Widget? content;
@@ -54,7 +57,7 @@ class TSubMenuProps<T> extends TMenuProps {
 }
 
 /// 菜单项
-class TMenuItemProps<T> extends TMenuProps {
+class TMenuItemProps<T> extends TMenuProps<T> {
   const TMenuItemProps({
     this.content,
     this.disabled = false,
@@ -99,7 +102,7 @@ class TMenuItemProps<T> extends TMenuProps {
   final GestureTapCallback? onClick;
 }
 
-class TMenuGroupProps extends TMenuProps {
+class TMenuGroupProps<T> extends TMenuProps<T> {
   const TMenuGroupProps({
     required this.title,
     this.children = const [],
@@ -109,5 +112,5 @@ class TMenuGroupProps extends TMenuProps {
   final Widget title;
 
   /// 子菜单
-  final List<TMenuProps> children;
+  final List<TMenuProps<T>> children;
 }
