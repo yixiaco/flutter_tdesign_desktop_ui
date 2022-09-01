@@ -69,6 +69,9 @@ class _TMenuState<T> extends State<TMenu<T>> {
     var theme = TTheme.of(context);
     var colorScheme = theme.colorScheme;
     var menuTheme = widget.theme ?? (theme.isLight ? TMenuTheme.light : TMenuTheme.dark);
+    var textColor = menuTheme.isLight ? colorScheme.fontGray2 : colorScheme.fontWhite2;
+    var menuBorderColor = menuTheme.isLight ? colorScheme.componentStroke : colorScheme.gray10;
+    var stroke = BorderSide(color: menuBorderColor);
 
     List<Widget> children = List.generate(widget.menus.length, (index) {
       var menu = widget.menus[index];
@@ -76,25 +79,69 @@ class _TMenuState<T> extends State<TMenu<T>> {
         menuProps: menu,
         index: index,
         menus: widget.menus,
+        theme: menuTheme,
+        level: 1,
       );
     });
 
     return DefaultTextStyle.merge(
       style: theme.fontData.fontBodyMedium.merge(TextStyle(
-        overflow: TextOverflow.ellipsis,
-        color: menuTheme.isLight ? colorScheme.fontGray2 : colorScheme.fontWhite2,
+        color: colorScheme.textColorPrimary,
       )),
-      child: Container(
-        color: menuTheme.isLight ? Colors.white : colorScheme.gray13,
-        width: widget.collapsed ? widget.foldingWidth ?? _kMenuFoldingWidth : widget.width ?? _kMenuWidth,
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-        child: AnimatedSize(
+      child: IconTheme.merge(
+        data: IconThemeData(
+          color: colorScheme.textColorPrimary,
+        ),
+        child: AnimatedContainer(
           duration: TVar.animDurationSlow,
           curve: const Cubic(.645, .045, .355, 1),
+          color: menuTheme.isLight ? Colors.white : colorScheme.gray13,
+          width: widget.collapsed ? widget.foldingWidth ?? _kMenuFoldingWidth : widget.width ?? _kMenuWidth,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: children,
+            children: [
+              if (widget.logo != null)
+                Container(
+                  decoration: BoxDecoration(
+                    border: Border(bottom: stroke),
+                  ),
+                  alignment: Alignment.centerLeft,
+                  height: 64,
+                  child: widget.logo!,
+                ),
+              DefaultTextStyle.merge(
+                style: theme.fontData.fontBodyMedium.merge(TextStyle(
+                  overflow: TextOverflow.ellipsis,
+                  color: textColor,
+                )),
+                child: IconTheme.merge(
+                  data: IconThemeData(
+                    color: textColor,
+                    size: 20,
+                  ),
+                  child: AnimatedPadding(
+                    duration: TVar.animDurationSlow,
+                    curve: const Cubic(.645, .045, .355, 1),
+                    padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: children,
+                    ),
+                  ),
+                ),
+              ),
+              if (widget.operations != null)
+                Container(
+                  decoration: BoxDecoration(
+                    border: Border(top: stroke),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                  alignment: Alignment.centerLeft,
+                  child: UnconstrainedBox(child: widget.operations!),
+                ),
+            ],
           ),
         ),
       ),
@@ -108,6 +155,8 @@ class _TMenuButton<T> extends StatelessWidget {
     required this.menuProps,
     required this.index,
     required this.menus,
+    required this.theme,
+    required this.level,
   }) : super(key: key);
 
   /// 菜单项
@@ -119,6 +168,12 @@ class _TMenuButton<T> extends StatelessWidget {
   /// 菜单项
   final List<TMenuProps<T>> menus;
 
+  /// 菜单风格
+  final TMenuTheme theme;
+
+  /// 层级
+  final int level;
+
   @override
   Widget build(BuildContext context) {
     if (menuProps is TMenuItemProps) {
@@ -126,7 +181,11 @@ class _TMenuButton<T> extends StatelessWidget {
         menuProps: menuProps as TMenuItemProps<T>,
         index: index,
         menus: menus,
+        theme: theme,
+        level: level,
       );
+    } else if (menuProps is TMenuGroupProps<T>) {
+      assert(level == 1);
     }
     return Container();
   }
@@ -138,6 +197,8 @@ class _TMenuItemButton<T> extends StatefulWidget {
     required this.menuProps,
     required this.index,
     required this.menus,
+    required this.theme,
+    required this.level,
   }) : super(key: key);
 
   /// 菜单项
@@ -148,6 +209,12 @@ class _TMenuItemButton<T> extends StatefulWidget {
 
   /// 菜单项
   final List<TMenuProps<T>> menus;
+
+  /// 菜单风格
+  final TMenuTheme theme;
+
+  /// 层级
+  final int level;
 
   @override
   State<_TMenuItemButton<T>> createState() => _TMenuItemButtonState<T>();
@@ -165,21 +232,39 @@ class _TMenuItemButtonState<T> extends State<_TMenuItemButton<T>> {
     // var isInner = !isFirst && !isLast;
     // 波纹颜色
     var fixedRippleColor = theme.isLight ? colorScheme.gray3 : colorScheme.gray11;
+    var menuLightBg = MaterialStateProperty.resolveWith((states) {
+      if (states.contains(MaterialState.hovered)) {
+        return theme.isLight ? colorScheme.gray2 : colorScheme.gray9;
+      }
+    });
 
-    return TRipple(
-      fixedRippleColor: fixedRippleColor,
-      radius: BorderRadius.circular(TVar.borderRadiusDefault),
-      builder: (context, states) {
-        return SizedBox(
-          height: 36,
-          child: Container(
-            alignment: Alignment.centerLeft,
-            margin: EdgeInsets.only(top: isFirst ? 0 : 4, bottom: isLast ? 0 : 4),
-            padding: const EdgeInsets.only(right: 10, left: 16),
-            child: widget.menuProps.content,
-          ),
-        );
-      },
+    return Padding(
+      padding: EdgeInsets.only(top: isFirst ? 0 : 4, bottom: isLast ? 0 : 4),
+      child: TRipple(
+        fixedRippleColor: fixedRippleColor,
+        radius: BorderRadius.circular(TVar.borderRadiusDefault),
+        backgroundColor: menuLightBg,
+        builder: (context, states) {
+          return SizedBox(
+            height: 36,
+            child: Container(
+              alignment: Alignment.centerLeft,
+              padding: const EdgeInsets.only(right: 10, left: 16),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (widget.menuProps.icon != null)
+                    Padding(
+                      padding: EdgeInsets.only(right: TVar.spacer),
+                      child: widget.menuProps.icon!,
+                    ),
+                  if (widget.menuProps.content != null) widget.menuProps.content!,
+                ],
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 }

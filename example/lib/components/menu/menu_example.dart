@@ -95,6 +95,8 @@ class _TMenuExampleState extends State<TMenuExample> {
     ),
   ];
 
+  bool showLogo = true;
+
   @override
   void initState() {
     super.initState();
@@ -109,18 +111,41 @@ class _TMenuExampleState extends State<TMenuExample> {
 
   @override
   Widget build(BuildContext context) {
-    return TMenu(
-      collapsed: collapsed,
-      controller: _controller,
-      menus: menus,
-      operations: GestureDetector(
-        onTap: () {
-          setState(() {
-            collapsed = !collapsed;
-          });
-        },
-        child: const Icon(TIcons.viewList),
-      ),
+    Widget? logo;
+    if (showLogo) {
+      logo = const Text('LOGO');
+    }
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        TSpace(
+          children: [
+            TButton(
+              child: Text('${showLogo ? '隐藏' : '显示'}logo'),
+              onPressed: () {
+                setState(() {
+                  showLogo = !showLogo;
+                });
+              },
+            ),
+          ],
+        ),
+        TMenu(
+          collapsed: collapsed,
+          controller: _controller,
+          menus: menus,
+          logo: logo,
+          operations: TButton(
+            onPressed: () {
+              setState(() {
+                collapsed = !collapsed;
+              });
+            },
+            shape: TButtonShape.square,
+            icon: TIcons.viewList,
+          ),
+        ),
+      ],
     );
   }
 }
