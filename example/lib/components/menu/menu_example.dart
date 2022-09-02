@@ -12,7 +12,7 @@ class TMenuExample extends StatefulWidget {
 class _TMenuExampleState extends State<TMenuExample> {
   late TMenuController _controller;
   bool collapsed = false;
-  List<TMenuProps> menus = [
+  List<TMenuProps<String>> menus = [
     const TSubMenuProps<String>(
       value: '3',
       icon: Icon(TIcons.mail),
@@ -117,6 +117,7 @@ class _TMenuExampleState extends State<TMenuExample> {
     }
     return Column(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         TSpace(
           children: [
@@ -130,19 +131,45 @@ class _TMenuExampleState extends State<TMenuExample> {
             ),
           ],
         ),
-        TMenu(
-          collapsed: collapsed,
-          controller: _controller,
-          menus: menus,
-          logo: logo,
-          operations: TButton(
-            onPressed: () {
-              setState(() {
-                collapsed = !collapsed;
-              });
-            },
-            shape: TButtonShape.square,
-            icon: TIcons.viewList,
+        Flexible(
+          child: TSpace(
+            children: [
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Expanded(
+                    child: TMenu(
+                      collapsed: collapsed,
+                      controller: _controller,
+                      menus: menus,
+                      logo: logo,
+                      operations: TMenuOperationIconButton(
+                        onClick: () {
+                          setState(() {
+                            collapsed = !collapsed;
+                          });
+                        },
+                        child: Icon(collapsed ? TIcons.chevronRight : TIcons.chevronLeft),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              TMenu(
+                collapsed: collapsed,
+                controller: _controller,
+                menus: menus,
+                logo: logo,
+                operations: TMenuOperationIconButton(
+                  onClick: () {
+                    setState(() {
+                      collapsed = !collapsed;
+                    });
+                  },
+                  child: Icon(collapsed ? TIcons.chevronRight : TIcons.chevronLeft),
+                ),
+              )
+            ],
           ),
         ),
       ],

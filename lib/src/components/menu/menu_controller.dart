@@ -3,18 +3,32 @@ import 'package:flutter/material.dart';
 /// 菜单栏选中项及展开菜单控制
 class TMenuController<T> extends ChangeNotifier {
   TMenuController({
-    List<T> expanded = const [],
+    Set<T>? expanded,
     T? value,
   })  : _value = value,
-        _expanded = expanded;
+        _expanded = expanded ?? <T>{};
 
   /// 子菜单展开的导航集合。
-  List<T> get expanded => _expanded;
-  List<T> _expanded;
+  Set<T> get expanded => _expanded;
+  Set<T> _expanded;
 
-  set expanded(List<T> expanded) {
+  set expanded(Set<T> expanded) {
     if (_expanded != expanded) {
       _expanded = expanded;
+      notifyListeners();
+    }
+  }
+
+  /// 新增展开的导航集合
+  void addExpanded(T value) {
+    if (expanded.add(value)) {
+      notifyListeners();
+    }
+  }
+
+  /// 移除展开的导航集合
+  void removeExpanded(T value) {
+    if (expanded.remove(value)) {
       notifyListeners();
     }
   }

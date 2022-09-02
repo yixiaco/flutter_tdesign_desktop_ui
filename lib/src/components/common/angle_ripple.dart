@@ -7,6 +7,9 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 const _kPeriod = Duration(milliseconds: 200);
 const _kDefaultRippleColor = Color.fromRGBO(0, 0, 0, .35);
 
+typedef RippleBuilder = Widget Function(BuildContext context, Set<MaterialState> states);
+typedef RippleAfterBuilder = Widget Function(BuildContext context, Set<MaterialState> states, Widget child);
+
 /// 水波纹
 class TRipple extends StatefulWidget {
   const TRipple({
@@ -15,6 +18,7 @@ class TRipple extends StatefulWidget {
     this.afterBuilder,
     this.disabled = false,
     this.selected = false,
+    this.selectedClick = true,
     this.cursor,
     this.focusNode,
     this.autofocus = false,
@@ -44,14 +48,17 @@ class TRipple extends StatefulWidget {
   /// 是否选中状态
   final bool selected;
 
+  /// 选中状态下是否可以点击
+  final bool selectedClick;
+
   /// 鼠标
   final MaterialStateProperty<MouseCursor?>? cursor;
 
   /// 子组件构建器之前
-  final Widget Function(BuildContext context, Set<MaterialState> states) builder;
+  final RippleBuilder builder;
 
   /// 子组件构建器之后
-  final Widget Function(BuildContext context, Set<MaterialState> states, Widget child)? afterBuilder;
+  final RippleAfterBuilder? afterBuilder;
 
   /// 焦点
   final FocusNode? focusNode;
@@ -171,6 +178,7 @@ class _TRippleState extends State<TRipple> with TickerProviderStateMixin {
         behavior: widget.behavior,
         cursor: widget.cursor,
         selected: widget.selected,
+        selectedClick: widget.selectedClick,
         onFocusChange: widget.onFocusChange,
         onHover: widget.onHover,
         enableFeedback: widget.enableFeedback ?? true,
@@ -180,7 +188,7 @@ class _TRippleState extends State<TRipple> with TickerProviderStateMixin {
             child: widget.builder(context, states),
           );
           if (widget.backgroundColor != null) {
-            if(widget.animatedDuration != null) {
+            if (widget.animatedDuration != null) {
               child = AnimatedContainer(
                 color: widget.backgroundColor?.resolve(states),
                 duration: widget.animatedDuration!,
@@ -334,8 +342,10 @@ class RippleController {
 
 /// 实现波纹需要继承的基类
 abstract class RippleSplash {
+  /// 波纹控制器
   final RippleController controller;
 
+  /// 释放资源时需要执行的删除回调
   final void Function() onRemove;
 
   const RippleSplash({
@@ -343,14 +353,19 @@ abstract class RippleSplash {
     required this.onRemove,
   });
 
+  /// 开始动画
   void start();
 
+  /// 左键释放执行的动画
   void confirm();
 
+  /// 取消点击时执行的动画
   void cancel();
 
+  /// 画图
   void paint(Canvas canvas, Size size);
 
+  /// 释放资源
   @mustCallSuper
   void dispose() {
     onRemove();

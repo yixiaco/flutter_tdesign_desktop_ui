@@ -30,7 +30,6 @@ abstract class TMenuProps<T> {
 class TSubMenuProps<T> extends TMenuProps<T> {
   const TSubMenuProps({
     this.children = const [],
-    this.content,
     this.disabled = false,
     this.icon,
     this.title,
@@ -39,9 +38,6 @@ class TSubMenuProps<T> extends TMenuProps<T> {
 
   /// 子菜单
   final List<TMenuProps<T>> children;
-
-  /// 菜单项内容
-  final Widget? content;
 
   /// 是否禁用菜单项展开/收起/跳转等功能
   final bool disabled;

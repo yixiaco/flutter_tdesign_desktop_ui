@@ -8,6 +8,7 @@ class TMaterialStateBuilder extends StatefulWidget {
     required this.builder,
     this.disabled = false,
     this.selected = false,
+    this.selectedClick = true,
     this.cursor,
     this.focusNode,
     this.autofocus = false,
@@ -31,6 +32,9 @@ class TMaterialStateBuilder extends StatefulWidget {
 
   /// 是否选中状态
   final bool selected;
+
+  /// 选中状态下是否可以点击
+  final bool selectedClick;
 
   /// 鼠标
   final MaterialStateProperty<MouseCursor?>? cursor;
@@ -104,6 +108,16 @@ class _TMaterialStateBuilderState extends State<TMaterialStateBuilder> with Mate
     setMaterialState(MaterialState.selected, widget.selected);
   }
 
+  bool get _isClick {
+    if(widget.disabled){
+      return false;
+    }
+    if(widget.selected && !widget.selectedClick) {
+      return false;
+    }
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     var effectiveCursor = MaterialStateProperty.resolveWith((states) {
@@ -128,7 +142,7 @@ class _TMaterialStateBuilderState extends State<TMaterialStateBuilder> with Mate
         onTap: _handleTap,
         onTapDown: (details) {
           _onTap(true);
-          if (!widget.disabled) widget.onTapDown?.call(details);
+          if (_isClick) widget.onTapDown?.call(details);
         },
         onTapUp: (details) {
           _onTap(false);
@@ -147,7 +161,7 @@ class _TMaterialStateBuilderState extends State<TMaterialStateBuilder> with Mate
   }
 
   void _handleLongPress() {
-    if (widget.disabled) {
+    if (!_isClick) {
       return;
     }
     if (widget.onLongPress != null) {
@@ -159,7 +173,7 @@ class _TMaterialStateBuilderState extends State<TMaterialStateBuilder> with Mate
   }
 
   void _handleHovered(value) {
-    if (widget.disabled && value) {
+    if (!_isClick && value) {
       return;
     }
     setMaterialState(MaterialState.hovered, value);
@@ -167,7 +181,7 @@ class _TMaterialStateBuilderState extends State<TMaterialStateBuilder> with Mate
   }
 
   void _handleTap() {
-    if (widget.disabled) {
+    if (!_isClick) {
       return;
     }
     if (widget.onTap != null) {
@@ -179,7 +193,7 @@ class _TMaterialStateBuilderState extends State<TMaterialStateBuilder> with Mate
   }
 
   void _onTap(bool tap) {
-    if (widget.disabled && tap) {
+    if (!_isClick && tap) {
       return;
     }
     setMaterialState(MaterialState.pressed, tap);
