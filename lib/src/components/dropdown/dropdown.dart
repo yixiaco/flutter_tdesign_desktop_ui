@@ -369,10 +369,13 @@ class _TDropdownItem<T> extends StatelessWidget {
                 padding: EdgeInsets.symmetric(vertical: 9, horizontal: TVar.spacer),
                 duration: TVar.animDurationBase,
                 curve: TVar.animTimeFnEaseIn,
-                child: TDecorationBox(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  suffix: suffix,
-                  child: option.content,
+                  children: [
+                    Flexible(child: option.content),
+                    if(suffix != null) suffix,
+                  ],
                 ),
               ),
             );

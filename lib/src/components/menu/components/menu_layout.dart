@@ -12,7 +12,7 @@ class _TMenuLayout<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var menuProps = props.menuProps;
+    var menuProps = props.currentProps;
     var level = props.level;
     if (menuProps is TMenuItemProps<T>) {
       return _TMenuItem<T>(

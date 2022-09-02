@@ -10,7 +10,8 @@ class TMenuExample extends StatefulWidget {
 }
 
 class _TMenuExampleState extends State<TMenuExample> {
-  late TMenuController _controller;
+  late TMenuController _controller1;
+  late TMenuController _controller2;
   bool collapsed = false;
   List<TMenuProps<String>> menus = [
     const TSubMenuProps<String>(
@@ -100,13 +101,15 @@ class _TMenuExampleState extends State<TMenuExample> {
   @override
   void initState() {
     super.initState();
-    _controller = TMenuController();
+    _controller1 = TMenuController();
+    _controller2 = TMenuController();
   }
 
   @override
   void dispose() {
     super.dispose();
-    _controller.dispose();
+    _controller1.dispose();
+    _controller2.dispose();
   }
 
   @override
@@ -140,7 +143,7 @@ class _TMenuExampleState extends State<TMenuExample> {
                   Expanded(
                     child: TMenu(
                       collapsed: collapsed,
-                      controller: _controller,
+                      controller: _controller1,
                       menus: menus,
                       logo: logo,
                       operations: TMenuOperationIconButton(
@@ -157,7 +160,8 @@ class _TMenuExampleState extends State<TMenuExample> {
               ),
               TMenu(
                 collapsed: collapsed,
-                controller: _controller,
+                controller: _controller2,
+                expandMutex: true,
                 menus: menus,
                 logo: logo,
                 operations: TMenuOperationIconButton(

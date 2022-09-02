@@ -1,7 +1,7 @@
 part of '../menu.dart';
 
 /// menu item button
-class _TMenuItem<T> extends StatefulWidget {
+class _TMenuItem<T> extends StatelessWidget {
   const _TMenuItem({
     Key? key,
     required this.props,
@@ -10,23 +10,23 @@ class _TMenuItem<T> extends StatefulWidget {
   /// 布局属性
   final _TMenuItemLayoutProps<T> props;
 
-  @override
-  State<_TMenuItem<T>> createState() => _TMenuItemState<T>();
-}
+  double? get paddingLeft {
+    return _paddingLeft(props);
+  }
 
-class _TMenuItemState<T> extends State<_TMenuItem<T>> {
   @override
   Widget build(BuildContext context) {
     var theme = TTheme.of(context);
     var colorScheme = theme.colorScheme;
 
-    var layoutProps = widget.props;
-    var menuProps = layoutProps.menuProps as TMenuItemProps<T>;
+    var layoutProps = props;
+    var menuProps = layoutProps.currentProps as TMenuItemProps<T>;
     var count = layoutProps.menus.length;
     var index = layoutProps.index;
     var isFirst = index == 0;
     var isLast = index == count - 1;
     var controller = layoutProps.controller;
+    var disabled = menuProps.disabled;
     var isActive = menuProps.value == controller.value;
     // 波纹颜色
     var fixedRippleColor = theme.isLight ? colorScheme.gray3 : colorScheme.gray11;
@@ -48,7 +48,7 @@ class _TMenuItemState<T> extends State<_TMenuItem<T>> {
     if (layoutProps.collapsed) {
       alignment = Alignment.center;
     } else {
-      margin = const EdgeInsets.only(right: 10, left: 16);
+      margin = EdgeInsets.only(right: 10, left: paddingLeft ?? 16);
       alignment = Alignment.centerLeft;
       content = menuProps.content;
     }
@@ -70,6 +70,7 @@ class _TMenuItemState<T> extends State<_TMenuItem<T>> {
         child: Padding(
           padding: EdgeInsets.only(top: isFirst ? 0 : 4, bottom: isLast ? 0 : 4),
           child: TRipple(
+            disabled: disabled,
             selected: isActive,
             selectedClick: !isActive,
             fixedRippleColor: fixedRippleColor,
@@ -78,7 +79,7 @@ class _TMenuItemState<T> extends State<_TMenuItem<T>> {
             animatedDuration: TVar.animDurationSlow,
             curve: TVar.animTimeFnEasing,
             onTap: () {
-              controller.value = menuProps.value;
+              _handleClick(controller, menuProps);
             },
             builder: (context, states) {
               return SizedBox(
@@ -100,5 +101,12 @@ class _TMenuItemState<T> extends State<_TMenuItem<T>> {
         ),
       ),
     );
+  }
+
+  /// 处理点击事件
+  void _handleClick(TMenuController<T> controller, TMenuItemProps<T> menuProps) {
+    controller.value = menuProps.value;
+    props.onChange?.call(menuProps.value);
+    menuProps.onClick?.call();
   }
 }

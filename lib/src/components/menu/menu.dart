@@ -64,7 +64,7 @@ class TMenu<T> extends StatefulWidget {
   final void Function(T value)? onChange;
 
   /// 展开的菜单项发生变化时触发
-  final void Function(List<T> value)? onExpand;
+  final void Function(Set<T> value)? onExpand;
 
   /// 菜单项
   final List<TMenuProps<T>> menus;
@@ -121,13 +121,18 @@ class _TMenuState<T> extends State<TMenu<T>> {
       var menu = widget.menus[index];
       return _TMenuLayout<T>(
         props: _TMenuItemLayoutProps<T>(
+          parent: null,
           controller: widget.controller,
           collapsed: collapsed,
-          menuProps: menu,
+          currentProps: menu,
           index: index,
           menus: widget.menus,
           theme: menuTheme,
           level: 1,
+          expandMutex: expandMutex,
+          expandType: expandType,
+          onChange: widget.onChange,
+          onExpand: widget.onExpand,
         ),
       );
     });
@@ -177,57 +182,47 @@ class _TMenuState<T> extends State<TMenu<T>> {
           curve: const Cubic(.645, .045, .355, 1),
           color: menuTheme.isLight ? Colors.white : colorScheme.gray13,
           width: collapsed ? foldingWidth : width,
-          child: Stack(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  if (logo != null) logo,
-                  Flexible(
-                    child: DefaultTextStyle.merge(
-                      style: theme.fontData.fontBodyMedium.merge(TextStyle(
-                        overflow: TextOverflow.ellipsis,
-                        color: textColor,
-                      )),
-                      child: IconTheme.merge(
-                        data: IconThemeData(
+              Flexible(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (logo != null) logo,
+                    Flexible(
+                      child: DefaultTextStyle.merge(
+                        style: theme.fontData.fontBodyMedium.merge(TextStyle(
+                          overflow: TextOverflow.ellipsis,
                           color: textColor,
-                          size: 20,
-                        ),
-                        child: TSingleChildScrollView(
-                          child: AnimatedPadding(
-                            duration: TVar.animDurationSlow,
-                            curve: const Cubic(.645, .045, .355, 1),
-                            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: children,
+                        )),
+                        child: IconTheme.merge(
+                          data: IconThemeData(
+                            color: textColor,
+                            size: 20,
+                          ),
+                          child: TSingleChildScrollView(
+                            child: AnimatedPadding(
+                              duration: TVar.animDurationSlow,
+                              curve: const Cubic(.645, .045, .355, 1),
+                              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: children,
+                              ),
                             ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                  if (operations != null)
-                    Visibility(
-                      visible: false,
-                      maintainSize: true,
-                      maintainState: true,
-                      maintainAnimation: true,
-                      child: operations,
-                    ),
-                ],
-              ),
-              if (operations != null)
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  child: operations,
+                  ],
                 ),
+              ),
+              if (operations != null) operations,
             ],
           ),
         ),

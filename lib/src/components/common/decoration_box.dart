@@ -25,6 +25,7 @@ List<Widget> _addAll({
 /// 当约束最小值比组件占有空间小时，组件将紧贴在一起
 /// 当约束最小值比组件占有空间大时，组件将按照主轴的对齐方式放置
 /// 当不明确组件大小，并需要附加装饰时，会很有用
+@Deprecated('弃用，已有替代方式以及不明确bug')
 class TDecorationBox extends MultiChildRenderObjectWidget {
   TDecorationBox({
     Key? key,
@@ -127,6 +128,7 @@ class TDecorationBox extends MultiChildRenderObjectWidget {
 ///
 /// 另请参阅:
 /// * [TDecorationBox]
+@Deprecated("弃用，已有替代方式以及不明确bug")
 class RenderTDecorationBox extends RenderBox
     with
         ContainerRenderObjectMixin<RenderBox, MultiChildLayoutParentData>,
@@ -350,10 +352,16 @@ class RenderTDecorationBox extends RenderBox
     final BoxConstraints childConstraints;
     switch (direction) {
       case Axis.horizontal:
-        childConstraints = BoxConstraints(maxWidth: math.max(0, constraints.maxWidth - allocatedSize));
+        childConstraints = BoxConstraints(
+          maxWidth: math.max(0, constraints.maxWidth - allocatedSize),
+          maxHeight: constraints.maxHeight,
+        );
         break;
       case Axis.vertical:
-        childConstraints = BoxConstraints(maxHeight: math.max(0, constraints.maxHeight - allocatedSize));
+        childConstraints = BoxConstraints(
+          maxHeight: math.max(0, constraints.maxHeight - allocatedSize),
+          maxWidth: constraints.maxWidth,
+        );
         break;
     }
     // child

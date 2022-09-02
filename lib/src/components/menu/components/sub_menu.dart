@@ -1,7 +1,21 @@
 part of '../menu.dart';
 
+double? _paddingLeft<T>(_TMenuItemLayoutProps<T> props) {
+  double? paddingLeft;
+  var parent = props.parent;
+  while (parent != null && parent.currentProps is TSubMenuProps<T>) {
+    if (paddingLeft == null) {
+      paddingLeft = 44;
+    } else {
+      paddingLeft += 16;
+    }
+    parent = parent.parent;
+  }
+  return paddingLeft;
+}
+
 /// 次级菜单
-class _TSubMenu<T> extends StatefulWidget {
+class _TSubMenu<T> extends StatelessWidget {
   const _TSubMenu({
     Key? key,
     required this.props,
@@ -10,11 +24,6 @@ class _TSubMenu<T> extends StatefulWidget {
   /// 布局属性
   final _TMenuItemLayoutProps<T> props;
 
-  @override
-  State<_TSubMenu<T>> createState() => _TSubMenuState<T>();
-}
-
-class _TSubMenuState<T> extends State<_TSubMenu<T>> {
   /// 在子菜单项中查询是否包含选中的菜单
   bool containsValue(List<TMenuProps<T>> props, T? value) {
     if (value == null) {
@@ -22,14 +31,17 @@ class _TSubMenuState<T> extends State<_TSubMenu<T>> {
     }
     for (var prop in props) {
       if (prop is TSubMenuProps<T>) {
-        return containsValue((prop).children, value);
-      } else if (prop is TMenuItemProps<T>) {
-        var itemProps = prop;
-        if (itemProps.value == value) {
+        if (containsValue((prop).children, value)) {
           return true;
         }
       } else if (prop is TMenuGroupProps<T>) {
-        return containsValue((prop).children, value);
+        if (containsValue((prop).children, value)) {
+          return true;
+        }
+      } else if (prop is TMenuItemProps<T>) {
+        if (prop.value == value) {
+          return true;
+        }
       }
     }
     return false;
@@ -37,8 +49,8 @@ class _TSubMenuState<T> extends State<_TSubMenu<T>> {
 
   @override
   Widget build(BuildContext context) {
-    var layoutProps = widget.props;
-    var menuProps = layoutProps.menuProps as TSubMenuProps<T>;
+    var layoutProps = props;
+    var menuProps = layoutProps.currentProps as TSubMenuProps<T>;
     var controller = layoutProps.controller;
     var value = menuProps.value;
     var isExpanded = controller.expanded.contains(value);
@@ -54,12 +66,13 @@ class _TSubMenuState<T> extends State<_TSubMenu<T>> {
             children: List.generate(menuProps.children.length, (index) {
               var props = menuProps.children[index];
               return _TMenuLayout<T>(
-                props: widget.props.copyWith(
-                  level: widget.props.level + 1,
-                  index: index,
-                  menuProps: props,
-                  menus: menuProps.children,
-                ),
+                props: this.props.copyWith(
+                      parent: this.props,
+                      level: this.props.level + 1,
+                      index: index,
+                      currentProps: props,
+                      menus: menuProps.children,
+                    ),
               );
             }),
           ),
@@ -73,21 +86,27 @@ class _TSubMenuState<T> extends State<_TSubMenu<T>> {
     );
   }
 
+  double? get paddingLeft {
+    return _paddingLeft(props);
+  }
+
   Widget _buildSubItem(BuildContext context, bool isExpanded) {
     var theme = TTheme.of(context);
     var colorScheme = theme.colorScheme;
 
-    var layoutProps = widget.props;
-    var menuProps = layoutProps.menuProps as TSubMenuProps<T>;
+    var layoutProps = props;
+    var menuProps = layoutProps.currentProps as TSubMenuProps<T>;
     var count = layoutProps.menus.length;
     var index = layoutProps.index;
     var isFirst = index == 0;
     var isLast = index == count - 1;
     var controller = layoutProps.controller;
     var value = menuProps.value;
-    var isActive = containsValue(menuProps.children, controller.value);
-    var textColor = isActive ? Colors.white : null;
     var collapsed = layoutProps.collapsed;
+    var isActive = !isExpanded && containsValue(menuProps.children, controller.value);
+    var textColor = isActive ? Colors.white : null;
+    textColor ??= isExpanded ? colorScheme.fontGray1 : null;
+    var disabled = menuProps.disabled;
 
     var menuBackgroundColor = MaterialStateProperty.resolveWith((states) {
       if (states.contains(MaterialState.selected)) {
@@ -105,7 +124,7 @@ class _TSubMenuState<T> extends State<_TSubMenu<T>> {
     if (collapsed) {
       alignment = Alignment.center;
     } else {
-      margin = const EdgeInsets.only(right: 10, left: 16);
+      margin = EdgeInsets.only(right: 10, left: paddingLeft ?? 16);
       alignment = Alignment.centerLeft;
       title = menuProps.title;
     }
@@ -128,13 +147,9 @@ class _TSubMenuState<T> extends State<_TSubMenu<T>> {
         child: Padding(
           padding: EdgeInsets.only(top: isFirst ? 0 : 4, bottom: isLast ? 0 : 4),
           child: TMaterialStateBuilder(
-            onTap: () {
-              if (isExpanded) {
-                controller.removeExpanded(value);
-              } else {
-                controller.addExpanded(value);
-              }
-            },
+            disabled: disabled,
+            selected: isActive,
+            onTap: () => _handleClick(isExpanded, controller, value),
             builder: (context, states) {
               return AnimatedContainer(
                 height: 36,
@@ -148,6 +163,7 @@ class _TSubMenuState<T> extends State<_TSubMenu<T>> {
                     borderRadius: BorderRadius.circular(TVar.borderRadiusDefault),
                   ),
                   child: Stack(
+                    // 使用Stack避免执行动画使溢出
                     children: [
                       Row(
                         mainAxisSize: MainAxisSize.min,
@@ -176,5 +192,24 @@ class _TSubMenuState<T> extends State<_TSubMenu<T>> {
         ),
       ),
     );
+  }
+
+  /// 处理点击事件
+  void _handleClick(bool isExpanded, TMenuController<T> controller, T value) {
+    if (isExpanded) {
+      // 收起
+      controller.removeExpanded({value});
+    } else {
+      // 展开
+      if (props.expandMutex) {
+        // 同级互斥
+        var set = props.menus.where((element) => element != props.currentProps && element is TSubMenuProps).map((e) {
+          return (e as TSubMenuProps<T>).value;
+        }).toSet();
+        controller.removeExpanded(set);
+      }
+      controller.addExpanded({value});
+    }
+    props.onExpand?.call(controller.expanded);
   }
 }
