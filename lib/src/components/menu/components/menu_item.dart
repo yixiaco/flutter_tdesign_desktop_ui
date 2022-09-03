@@ -30,7 +30,16 @@ class _TMenuItem<T> extends StatelessWidget {
     var isActive = menuProps.value == controller.value;
     // 波纹颜色
     var fixedRippleColor = theme.isLight ? colorScheme.gray3 : colorScheme.gray11;
-    var textColor = isActive ? Colors.white : null;
+
+    var textColor = MaterialStateProperty.resolveWith((states) {
+      if (states.contains(MaterialState.selected)) {
+        return Colors.white;
+      }
+      if (states.contains(MaterialState.disabled)) {
+        return theme.isLight ? colorScheme.fontGray4 : colorScheme.fontWhite4;
+      }
+      return null;
+    });
 
     var menuBackgroundColor = MaterialStateProperty.resolveWith((states) {
       if (states.contains(MaterialState.selected)) {
@@ -59,30 +68,30 @@ class _TMenuItem<T> extends StatelessWidget {
       );
     }
 
-    return DefaultTextStyle.merge(
-      style: TextStyle(
-        color: textColor,
-      ),
-      child: IconTheme.merge(
-        data: IconThemeData(
-          color: textColor,
-        ),
-        child: Padding(
-          padding: EdgeInsets.only(top: isFirst ? 0 : 4, bottom: isLast ? 0 : 4),
-          child: TRipple(
-            disabled: disabled,
-            selected: isActive,
-            selectedClick: !isActive,
-            fixedRippleColor: fixedRippleColor,
-            radius: BorderRadius.circular(TVar.borderRadiusDefault),
-            backgroundColor: menuBackgroundColor,
-            animatedDuration: TVar.animDurationSlow,
-            curve: TVar.animTimeFnEasing,
-            onTap: () {
-              _handleClick(controller, menuProps);
-            },
-            builder: (context, states) {
-              return SizedBox(
+    return Padding(
+      padding: EdgeInsets.only(top: isFirst ? 0 : 4, bottom: isLast ? 0 : 4),
+      child: TRipple(
+        disabled: disabled,
+        selected: isActive,
+        selectedClick: !isActive,
+        fixedRippleColor: fixedRippleColor,
+        radius: BorderRadius.circular(TVar.borderRadiusDefault),
+        backgroundColor: menuBackgroundColor,
+        animatedDuration: TVar.animDurationSlow,
+        curve: TVar.animTimeFnEasing,
+        onTap: () {
+          _handleClick(controller, menuProps);
+        },
+        builder: (context, states) {
+          return DefaultTextStyle.merge(
+            style: TextStyle(
+              color: textColor.resolve(states),
+            ),
+            child: IconTheme.merge(
+              data: IconThemeData(
+                color: textColor.resolve(states),
+              ),
+              child: SizedBox(
                 height: 36,
                 child: Container(
                   alignment: alignment,
@@ -95,10 +104,10 @@ class _TMenuItem<T> extends StatelessWidget {
                     ],
                   ),
                 ),
-              );
-            },
-          ),
-        ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }

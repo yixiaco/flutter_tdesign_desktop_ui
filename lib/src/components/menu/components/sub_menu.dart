@@ -53,7 +53,10 @@ class _TSubMenu<T> extends StatelessWidget {
     var menuProps = layoutProps.currentProps as TSubMenuProps<T>;
     var controller = layoutProps.controller;
     var value = menuProps.value;
-    var isExpanded = controller.expanded.contains(value);
+    var collapsed = layoutProps.collapsed;
+    var disabled = menuProps.disabled;
+    // 不收缩、不禁用、在展开的列表中才展开
+    var isExpanded =  !collapsed && !disabled && controller.expanded.contains(value);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -67,12 +70,12 @@ class _TSubMenu<T> extends StatelessWidget {
               var props = menuProps.children[index];
               return _TMenuLayout<T>(
                 props: this.props.copyWith(
-                      parent: this.props,
-                      level: this.props.level + 1,
-                      index: index,
-                      currentProps: props,
-                      menus: menuProps.children,
-                    ),
+                  parent: this.props,
+                  level: this.props.level + 1,
+                  index: index,
+                  currentProps: props,
+                  menus: menuProps.children,
+                ),
               );
             }),
           ),
@@ -105,12 +108,15 @@ class _TSubMenu<T> extends StatelessWidget {
     var collapsed = layoutProps.collapsed;
     var isActive = !isExpanded && containsValue(menuProps.children, controller.value);
     var textColor = isActive ? Colors.white : null;
-    textColor ??= isExpanded ? colorScheme.fontGray1 : null;
+    textColor ??= isExpanded ? (theme.isLight ? colorScheme.fontGray1 : Colors.white) : null;
     var disabled = menuProps.disabled;
 
     var menuBackgroundColor = MaterialStateProperty.resolveWith((states) {
       if (states.contains(MaterialState.selected)) {
         return colorScheme.brandColor;
+      }
+      if (states.contains(MaterialState.disabled) && states.contains(MaterialState.selected)) {
+        return colorScheme.brandColorDisabled;
       }
       if (states.contains(MaterialState.hovered)) {
         return theme.isLight ? colorScheme.gray2 : colorScheme.gray9;
@@ -151,10 +157,8 @@ class _TSubMenu<T> extends StatelessWidget {
             selected: isActive,
             onTap: () => _handleClick(isExpanded, controller, value),
             builder: (context, states) {
-              return AnimatedContainer(
+              return SizedBox(
                 height: 36,
-                duration: TVar.animDurationSlow,
-                curve: TVar.animTimeFnEasing,
                 child: Container(
                   alignment: alignment,
                   padding: margin,

@@ -89,11 +89,19 @@ class _TMenuExampleState extends State<TMenuExample> {
         ),
       ],
     ),
-    const TMenuItemProps(
-      value: 'edit1',
-      icon: Icon(TIcons.edit1),
-      content: Text('资源编辑'),
-    ),
+    const TMenuGroupProps(title: Text('分组'), children: [
+      TMenuItemProps(
+        value: 'edit1',
+        disabled: true,
+        icon: Icon(TIcons.edit1),
+        content: Text('资源编辑1'),
+      ),
+      TMenuItemProps(
+        value: 'edit2',
+        icon: Icon(TIcons.edit1),
+        content: Text('资源编辑2'),
+      ),
+    ]),
   ];
 
   bool showLogo = true;
