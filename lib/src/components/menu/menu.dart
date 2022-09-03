@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 part 'components/menu_group.dart';
@@ -96,7 +97,13 @@ class _TMenuState<T> extends State<TMenu<T>> {
   }
 
   void _notifyUpdate() {
-    setState(() {});
+    if(mounted) {
+      setState(() {});
+    } else {
+      SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+        _notifyUpdate();
+      });
+    }
   }
 
   @override
@@ -131,6 +138,8 @@ class _TMenuState<T> extends State<TMenu<T>> {
           level: 1,
           expandMutex: expandMutex,
           expandType: expandType,
+          width: width,
+          foldingWidth: foldingWidth,
           onChange: widget.onChange,
           onExpand: widget.onExpand,
         ),

@@ -56,36 +56,79 @@ class _TSubMenu<T> extends StatelessWidget {
     var collapsed = layoutProps.collapsed;
     var disabled = menuProps.disabled;
     // 不收缩、不禁用、在展开的列表中才展开
-    var isExpanded =  !collapsed && !disabled && controller.expanded.contains(value);
+    var isExpanded = !collapsed && !disabled && controller.expanded.contains(value);
+    var isPopup = collapsed || layoutProps.expandType == TMenuExpandType.popup;
+
+    var defaultTextStyle = DefaultTextStyle.of(context);
+    var iconTheme = IconTheme.of(context);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _buildSubItem(context, isExpanded),
-        AnimatedCrossFade(
-          firstChild: Container(),
-          secondChild: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: List.generate(menuProps.children.length, (index) {
-              var props = menuProps.children[index];
-              return _TMenuLayout<T>(
-                props: this.props.copyWith(
-                  parent: this.props,
-                  level: this.props.level + 1,
-                  index: index,
-                  currentProps: props,
-                  menus: menuProps.children,
-                ),
-              );
-            }),
+        if (isPopup)
+          TPopup(
+            disabled: disabled,
+            content: IconTheme(
+              data: iconTheme,
+              child: DefaultTextStyle(
+                style: defaultTextStyle.style,
+                child: _buildItem(menuProps),
+              ),
+            ),
+            destroyOnClose: false,
+            style: TPopupStyle(
+              width: 216,
+              margin: const EdgeInsets.only(left: 20),
+              radius: BorderRadius.circular(TVar.borderRadiusMedium),
+            ),
+            showDuration: const Duration(milliseconds: 50),
+            hideDuration: const Duration(milliseconds: 50),
+            onOpen: () {
+              print('打开');
+              _handleClick(false, controller, value);
+            },
+            onClose: () => _handleClick(true, controller, value),
+            placement: TPopupPlacement.rightTop,
+            child: _buildSubItem(context, isExpanded),
           ),
-          crossFadeState: isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
-          duration: TVar.animDurationBase,
-          firstCurve: TVar.animTimeFnEasing,
-          secondCurve: TVar.animTimeFnEasing,
-          sizeCurve: TVar.animTimeFnEasing,
-        )
+        if (!isPopup) _buildSubItem(context, isExpanded),
+        if (!isPopup) _buildNormalItem(context, isExpanded),
       ],
+    );
+  }
+
+  /// 常规方式打开
+  Widget _buildNormalItem(BuildContext context, bool isExpanded) {
+    var layoutProps = props;
+    var menuProps = layoutProps.currentProps as TSubMenuProps<T>;
+
+    return AnimatedCrossFade(
+      firstChild: Container(),
+      secondChild: _buildItem(menuProps),
+      crossFadeState: isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+      duration: TVar.animDurationBase,
+      firstCurve: TVar.animTimeFnEasing,
+      secondCurve: TVar.animTimeFnEasing,
+      sizeCurve: TVar.animTimeFnEasing,
+    );
+  }
+
+  /// 子项菜单项
+  Widget _buildItem(TSubMenuProps<T> menuProps) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(menuProps.children.length, (index) {
+        var props = menuProps.children[index];
+        return _TMenuLayout<T>(
+          props: this.props.copyWith(
+                parent: this.props,
+                level: this.props.level + 1,
+                index: index,
+                currentProps: props,
+                menus: menuProps.children,
+              ),
+        );
+      }),
     );
   }
 
@@ -93,6 +136,7 @@ class _TSubMenu<T> extends StatelessWidget {
     return _paddingLeft(props);
   }
 
+  /// 次级菜单项
   Widget _buildSubItem(BuildContext context, bool isExpanded) {
     var theme = TTheme.of(context);
     var colorScheme = theme.colorScheme;

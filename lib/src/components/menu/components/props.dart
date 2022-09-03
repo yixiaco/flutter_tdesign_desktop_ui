@@ -32,6 +32,12 @@ class _TMenuItemLayoutProps<T> {
   /// 二级菜单展开方式，平铺展开和浮层展开。
   final TMenuExpandType expandType;
 
+  /// 菜单展开时的宽度
+  final double width;
+
+  /// 菜单折叠时的宽度
+  final double foldingWidth;
+
   /// 激活菜单项发生变化时触发
   final void Function(T value)? onChange;
 
@@ -49,6 +55,8 @@ class _TMenuItemLayoutProps<T> {
     required this.level,
     required this.expandMutex,
     required this.expandType,
+    required this.width,
+    required this.foldingWidth,
     this.onChange,
     this.onExpand,
   });
@@ -64,6 +72,8 @@ class _TMenuItemLayoutProps<T> {
     int? level,
     bool? expandMutex,
     TMenuExpandType? expandType,
+    double? width,
+    double? foldingWidth,
     void Function(T value)? onChange,
     void Function(Set<T> value)? onExpand,
   }) {
@@ -78,6 +88,8 @@ class _TMenuItemLayoutProps<T> {
       level: level ?? this.level,
       expandMutex: expandMutex ?? this.expandMutex,
       expandType: expandType ?? this.expandType,
+      width: width ?? this.width,
+      foldingWidth: foldingWidth ?? this.foldingWidth,
       onChange: onChange ?? this.onChange,
       onExpand: onExpand ?? this.onExpand,
     );

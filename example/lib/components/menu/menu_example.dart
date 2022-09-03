@@ -167,6 +167,7 @@ class _TMenuExampleState extends State<TMenuExample> {
                 ],
               ),
               TMenu(
+                expandType: TMenuExpandType.popup,
                 collapsed: collapsed,
                 controller: _controller2,
                 expandMutex: true,
