@@ -27,6 +27,7 @@ class _PopupOverlayState extends State<_PopupOverlay> {
   /// 反方向布局
   late ValueNotifier<bool> _isReverse;
   final GlobalKey _containerKey = GlobalKey();
+  late _PopupLevelNotifier levelNotifier;
 
   /// 默认垂直偏移
   static const double _defaultVerticalOffset = 4.0;
@@ -34,6 +35,7 @@ class _PopupOverlayState extends State<_PopupOverlay> {
 
   @override
   void initState() {
+    levelNotifier = _PopupLevelNotifier({});
     _visible = ValueNotifier(false);
     _isReverse = ValueNotifier(false);
     _updateIgnore();
@@ -42,7 +44,17 @@ class _PopupOverlayState extends State<_PopupOverlay> {
   }
 
   @override
+  void didUpdateWidget(covariant _PopupOverlay oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if(widget.animation != oldWidget.animation){
+      oldWidget.animation.removeListener(_updateIgnore);
+      widget.animation.addListener(_updateIgnore);
+    }
+  }
+
+  @override
   void dispose() {
+    levelNotifier.dispose();
     widget.animation.removeListener(_updateIgnore);
     _visible.dispose();
     _isReverse.dispose();
@@ -90,6 +102,8 @@ class _PopupOverlayState extends State<_PopupOverlay> {
           child: Visibility(
             visible: value,
             maintainState: true,
+            maintainAnimation: true,
+            // maintainSize : true,
             child: child!,
           ),
         );
@@ -185,7 +199,10 @@ class _PopupOverlayState extends State<_PopupOverlay> {
             });
           },
         ),
-        child: result,
+        child: _PopupLevel(
+          popupLevel: levelNotifier,
+          child: result,
+        ),
       ),
     );
   }

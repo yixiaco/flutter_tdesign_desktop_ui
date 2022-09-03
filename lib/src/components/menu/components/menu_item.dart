@@ -10,7 +10,13 @@ class _TMenuItem<T> extends StatelessWidget {
   /// 布局属性
   final _TMenuItemLayoutProps<T> props;
 
+
+  bool get isPopup => props.collapsed || props.expandType == TMenuExpandType.popup;
+
   double? get paddingLeft {
+    if(isPopup) {
+      return null;
+    }
     return _paddingLeft(props);
   }
 
@@ -19,13 +25,12 @@ class _TMenuItem<T> extends StatelessWidget {
     var theme = TTheme.of(context);
     var colorScheme = theme.colorScheme;
 
-    var layoutProps = props;
-    var menuProps = layoutProps.currentProps as TMenuItemProps<T>;
-    var count = layoutProps.menus.length;
-    var index = layoutProps.index;
+    var menuProps = props.currentProps as TMenuItemProps<T>;
+    var count = props.menus.length;
+    var index = props.index;
     var isFirst = index == 0;
     var isLast = index == count - 1;
-    var controller = layoutProps.controller;
+    var controller = props.controller;
     var disabled = menuProps.disabled;
     var isActive = menuProps.value == controller.value;
     // 波纹颜色
@@ -54,7 +59,7 @@ class _TMenuItem<T> extends StatelessWidget {
     Widget? content;
     Widget? icon = menuProps.icon;
 
-    if (layoutProps.collapsed) {
+    if (props.collapsed && props.parent?.currentProps is! TSubMenuProps) {
       alignment = Alignment.center;
     } else {
       margin = EdgeInsets.only(right: 10, left: paddingLeft ?? 16);

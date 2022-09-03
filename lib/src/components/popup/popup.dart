@@ -7,6 +7,8 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
+part 'components/popup_level_notifier.dart';
+
 part 'components/popup_overlay.dart';
 
 part 'components/popup_position_delegate.dart';
@@ -151,12 +153,11 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
         if (box != null && currentBox != null) {
           var rect = box.localToGlobal(Offset.zero) & box.size;
           var currentRect = currentBox.localToGlobal(Offset.zero) & currentBox.size;
-          if (rect.contains(event.position) || currentRect.contains(event.position)) {
-            print('包含在坐标内');
-          } else {
-            _updateVisible(false);
+          if (!rect.contains(event.position) && !currentRect.contains(event.position)) {
+            if(_overlayKey.currentState!.levelNotifier.children.isEmpty) {
+              _updateVisible(false);
+            }
           }
-          print('rect:$rect,event:$event');
         }
       }
     }
@@ -198,13 +199,13 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
 
   /// 显示浮层
   void _showPopup({bool immediately = false}) {
+    // 阻止冒泡关闭浮层
+    _stopPropagation = true;
     // focus类型不需要监听指针事件
     if (!_existGlobalPointerRoute && !widget.trigger.isTrue(focus: true)) {
       // 监听全局指针事件，这样我们可以在单击其他控件时立即隐藏浮层。
       GestureBinding.instance.pointerRouter.addGlobalRoute(_globalPointerRoute);
       _existGlobalPointerRoute = true;
-      // 阻止冒泡关闭浮层
-      _stopPropagation = true;
     }
     _hideTimer?.cancel();
     _hideTimer = null;
@@ -217,12 +218,6 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
 
   /// 隐藏浮层
   void _hidePopup({bool immediately = false}) {
-    if (_existGlobalPointerRoute) {
-      // 移除监听全局指针事件
-      GestureBinding.instance.pointerRouter.removeGlobalRoute(_globalPointerRoute);
-      _existGlobalPointerRoute = false;
-      _stopPropagation = false;
-    }
     _showTimer?.cancel();
     _showTimer = null;
     if (immediately) {
@@ -230,6 +225,12 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
       return;
     }
     _hideTimer ??= Timer(widget.hideDuration, _reverseVisible);
+    if (_existGlobalPointerRoute) {
+      // 移除监听全局指针事件
+      GestureBinding.instance.pointerRouter.removeGlobalRoute(_globalPointerRoute);
+      _existGlobalPointerRoute = false;
+      _stopPropagation = false;
+    }
   }
 
   /// 立即显示浮层，不应该直接使用这个方法，而是使用[_showPopup]
@@ -239,12 +240,17 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
     if (_entry == null) {
       _createEntry();
     }
+    _PopupLevel.of(context)?.addOverlay(_overlayKey);
     widget.onOpen?.call();
     _controller.forward();
   }
 
   /// 浮层不可见.不应该直接使用这个方法，而是使用[_hidePopup]
   void _reverseVisible() {
+    if (_entry != null) {
+      _PopupLevel.of(context)?.removeOverlay(_overlayKey);
+      widget.onClose?.call();
+    }
     _controller.reverse();
   }
 
@@ -291,11 +297,6 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
     if (widget.destroyOnClose || force) {
       _entry?.remove();
       _entry = null;
-    }
-    if (widget.onClose != null) {
-      SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
-        widget.onClose?.call();
-      });
     }
   }
 

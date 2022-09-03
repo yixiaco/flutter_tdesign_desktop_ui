@@ -47,17 +47,17 @@ class _TSubMenu<T> extends StatelessWidget {
     return false;
   }
 
+  bool get isPopup => props.collapsed || props.expandType == TMenuExpandType.popup;
+
   @override
   Widget build(BuildContext context) {
-    var layoutProps = props;
-    var menuProps = layoutProps.currentProps as TSubMenuProps<T>;
-    var controller = layoutProps.controller;
+    var menuProps = props.currentProps as TSubMenuProps<T>;
+    var controller = props.controller;
     var value = menuProps.value;
-    var collapsed = layoutProps.collapsed;
+    var collapsed = props.collapsed;
     var disabled = menuProps.disabled;
     // 不收缩、不禁用、在展开的列表中才展开
-    var isExpanded = !collapsed && !disabled && controller.expanded.contains(value);
-    var isPopup = collapsed || layoutProps.expandType == TMenuExpandType.popup;
+    var isExpanded = (!collapsed || props.parent?.currentProps is TSubMenuProps) && !disabled && controller.expanded.contains(value);
 
     var defaultTextStyle = DefaultTextStyle.of(context);
     var iconTheme = IconTheme.of(context);
@@ -83,10 +83,7 @@ class _TSubMenu<T> extends StatelessWidget {
             ),
             showDuration: const Duration(milliseconds: 50),
             hideDuration: const Duration(milliseconds: 50),
-            onOpen: () {
-              print('打开');
-              _handleClick(false, controller, value);
-            },
+            onOpen: () => _handleClick(false, controller, value),
             onClose: () => _handleClick(true, controller, value),
             placement: TPopupPlacement.rightTop,
             child: _buildSubItem(context, isExpanded),
@@ -117,6 +114,7 @@ class _TSubMenu<T> extends StatelessWidget {
   Widget _buildItem(TSubMenuProps<T> menuProps) {
     return Column(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: List.generate(menuProps.children.length, (index) {
         var props = menuProps.children[index];
         return _TMenuLayout<T>(
@@ -133,6 +131,9 @@ class _TSubMenu<T> extends StatelessWidget {
   }
 
   double? get paddingLeft {
+    if(isPopup) {
+      return null;
+    }
     return _paddingLeft(props);
   }
 
@@ -141,15 +142,14 @@ class _TSubMenu<T> extends StatelessWidget {
     var theme = TTheme.of(context);
     var colorScheme = theme.colorScheme;
 
-    var layoutProps = props;
-    var menuProps = layoutProps.currentProps as TSubMenuProps<T>;
-    var count = layoutProps.menus.length;
-    var index = layoutProps.index;
+    var menuProps = props.currentProps as TSubMenuProps<T>;
+    var count = props.menus.length;
+    var index = props.index;
     var isFirst = index == 0;
     var isLast = index == count - 1;
-    var controller = layoutProps.controller;
+    var controller = props.controller;
     var value = menuProps.value;
-    var collapsed = layoutProps.collapsed;
+    var collapsed = props.collapsed;
     var isActive = !isExpanded && containsValue(menuProps.children, controller.value);
     var textColor = isActive ? Colors.white : null;
     textColor ??= isExpanded ? (theme.isLight ? colorScheme.fontGray1 : Colors.white) : null;
@@ -171,7 +171,7 @@ class _TSubMenu<T> extends StatelessWidget {
     Widget? title;
     Widget? icon = menuProps.icon;
 
-    if (collapsed) {
+    if (collapsed && props.parent?.currentProps is! TSubMenuProps) {
       alignment = Alignment.center;
     } else {
       margin = EdgeInsets.only(right: 10, left: paddingLeft ?? 16);
@@ -199,7 +199,7 @@ class _TSubMenu<T> extends StatelessWidget {
           child: TMaterialStateBuilder(
             disabled: disabled,
             selected: isActive,
-            onTap: () => _handleClick(isExpanded, controller, value),
+            onTap: isPopup ? null : () => _handleClick(isExpanded, controller, value),
             builder: (context, states) {
               return SizedBox(
                 height: 36,
@@ -221,7 +221,7 @@ class _TSubMenu<T> extends StatelessWidget {
                           if (title != null) Expanded(child: title),
                         ],
                       ),
-                      if (!collapsed)
+                      if (!collapsed || props.parent?.currentProps is TSubMenuProps)
                         Positioned(
                           right: 0,
                           top: 0,
