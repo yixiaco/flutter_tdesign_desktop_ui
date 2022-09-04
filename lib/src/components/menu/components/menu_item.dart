@@ -10,11 +10,10 @@ class _TMenuItem<T> extends StatelessWidget {
   /// 布局属性
   final _TMenuItemLayoutProps<T> props;
 
-
   bool get isPopup => props.collapsed || props.expandType == TMenuExpandType.popup;
 
   double? get paddingLeft {
-    if(isPopup) {
+    if (isPopup) {
       return null;
     }
     return _paddingLeft(props);

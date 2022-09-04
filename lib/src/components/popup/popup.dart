@@ -43,7 +43,7 @@ class TPopup extends StatefulWidget {
   /// 浮层出现位置
   final TPopupPlacement placement;
 
-  /// 触发浮层出现的方式。可选项：hover/click/focus/context-menu
+  /// 触发浮层出现的方式。可选项：hover/click/focus/contextMenu
   final TPopupTrigger trigger;
 
   /// 是否显示浮层箭头
@@ -117,9 +117,6 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
   /// 浮层对象
   OverlayEntry? _entry;
 
-  /// 停止向上传播
-  bool _stopPropagation = false;
-
   /// 是否存在全局指针路由事件
   bool _existGlobalPointerRoute = false;
 
@@ -147,26 +144,37 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
   /// 全局指针路由监听
   void _globalPointerRoute(event) {
     if (event is PointerHoverEvent && widget.trigger.isTrue(hover: true)) {
-      if (mounted) {
-        var currentBox = context.findRenderObject() as RenderBox?;
-        var box = _overlayKey.currentState?._containerKey.currentContext?.findRenderObject() as RenderBox?;
-        if (box != null && currentBox != null) {
-          var rect = box.localToGlobal(Offset.zero) & box.size;
-          var currentRect = currentBox.localToGlobal(Offset.zero) & currentBox.size;
-          if (!rect.contains(event.position) && !currentRect.contains(event.position)) {
-            if(_overlayKey.currentState!.levelNotifier.children.isEmpty) {
-              _updateVisible(false);
-            }
+      _handlePointerBounds(event);
+    }
+    // 点击与右键监听鼠标松开事件
+    else if (event is PointerUpEvent && widget.trigger.isTrue(click: true, contextMenu: true)) {
+      // 先检查子浮层的事件
+      var popupOverlayState = _overlayKey.currentState;
+      if(popupOverlayState != null) {
+        var set = popupOverlayState.levelNotifier.children.toSet();
+        for (var child in set) {
+          child.currentState?.widget.popupState._globalPointerRoute(event);
+        }
+      }
+      // 检查当前浮层的事件
+      _handlePointerBounds(event);
+    }
+  }
+
+  /// 处理鼠标越界时隐藏
+  void _handlePointerBounds(PointerEvent event) {
+    if (mounted) {
+      var currentBox = context.findRenderObject() as RenderBox?;
+      var box = _overlayKey.currentState?._containerKey.currentContext?.findRenderObject() as RenderBox?;
+      if (box != null && currentBox != null) {
+        var rect = box.localToGlobal(Offset.zero) & box.size;
+        var currentRect = currentBox.localToGlobal(Offset.zero) & currentBox.size;
+        if (!rect.contains(event.position) && !currentRect.contains(event.position)) {
+          if (_overlayKey.currentState!.levelNotifier.children.isEmpty) {
+            _updateVisible(false);
           }
         }
       }
-    }
-    // 点击与右键监听鼠标松开事件
-    if (event is PointerUpEvent && widget.trigger.isTrue(click: true, contextMenu: true)) {
-      if (!_stopPropagation) {
-        _updateVisible(false);
-      }
-      _stopPropagation = false;
     }
   }
 
@@ -199,8 +207,6 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
 
   /// 显示浮层
   void _showPopup({bool immediately = false}) {
-    // 阻止冒泡关闭浮层
-    _stopPropagation = true;
     // focus类型不需要监听指针事件
     if (!_existGlobalPointerRoute && !widget.trigger.isTrue(focus: true)) {
       // 监听全局指针事件，这样我们可以在单击其他控件时立即隐藏浮层。
@@ -229,7 +235,6 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
       // 移除监听全局指针事件
       GestureBinding.instance.pointerRouter.removeGlobalRoute(_globalPointerRoute);
       _existGlobalPointerRoute = false;
-      _stopPropagation = false;
     }
   }
 
@@ -240,7 +245,7 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
     if (_entry == null) {
       _createEntry();
     }
-    _PopupLevel.of(context)?.addOverlay(_overlayKey);
+    _PopupLevel.of(context)?.popupLevel.addOverlay(_overlayKey);
     widget.onOpen?.call();
     _controller.forward();
   }
@@ -248,7 +253,7 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
   /// 浮层不可见.不应该直接使用这个方法，而是使用[_hidePopup]
   void _reverseVisible() {
     if (_entry != null) {
-      _PopupLevel.of(context)?.removeOverlay(_overlayKey);
+      _PopupLevel.of(context)?.popupLevel.removeOverlay(_overlayKey);
       widget.onClose?.call();
     }
     _controller.reverse();
@@ -264,21 +269,10 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
     _entry = OverlayEntry(builder: (BuildContext context) {
       Widget child = _PopupOverlay(
         key: _overlayKey,
-        onPointerDown: (event) {
-          if (widget.trigger.isTrue(click: true, contextMenu: true)) {
-            _stopPropagation = true;
-          }
-        },
-        // margin: _margin,
         onEnter: (_) {
           if (widget.trigger.isTrue(hover: true)) {
             if (!_controller.isDismissed) _updateVisible(true);
           }
-        },
-        onExit: (event) {
-          // if (widget.trigger.isTrue(hover: true)) {
-          //   _updateVisible(false);
-          // }
         },
         animation: CurvedAnimation(
           parent: _controller,

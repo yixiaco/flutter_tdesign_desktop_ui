@@ -6,15 +6,11 @@ class _PopupOverlay extends StatefulWidget {
     Key? key,
     required this.animation,
     this.onEnter,
-    this.onExit,
-    this.onPointerDown,
     required this.popupState,
   }) : super(key: key);
 
   final Animation<double> animation;
-  final PointerDownEventListener? onPointerDown;
   final PointerEnterEventListener? onEnter;
-  final PointerExitEventListener? onExit;
   final TPopupState popupState;
 
   @override
@@ -46,7 +42,7 @@ class _PopupOverlayState extends State<_PopupOverlay> {
   @override
   void didUpdateWidget(covariant _PopupOverlay oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if(widget.animation != oldWidget.animation){
+    if (widget.animation != oldWidget.animation) {
       oldWidget.animation.removeListener(_updateIgnore);
       widget.animation.addListener(_updateIgnore);
     }
@@ -165,16 +161,9 @@ class _PopupOverlayState extends State<_PopupOverlay> {
         ),
       ),
     );
-    if (widget.onEnter != null || widget.onExit != null) {
+    if (widget.onEnter != null) {
       result = MouseRegion(
         onEnter: widget.onEnter,
-        onExit: widget.onExit,
-        child: result,
-      );
-    }
-    if (widget.onPointerDown != null) {
-      result = Listener(
-        onPointerDown: widget.onPointerDown,
         child: result,
       );
     }
@@ -200,6 +189,7 @@ class _PopupOverlayState extends State<_PopupOverlay> {
           },
         ),
         child: _PopupLevel(
+          overlayState: this,
           popupLevel: levelNotifier,
           child: result,
         ),

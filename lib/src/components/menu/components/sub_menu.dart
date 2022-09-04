@@ -68,11 +68,13 @@ class _TSubMenu<T> extends StatelessWidget {
         if (isPopup)
           TPopup(
             disabled: disabled,
-            content: IconTheme(
-              data: iconTheme,
-              child: DefaultTextStyle(
-                style: defaultTextStyle.style,
-                child: _buildItem(menuProps),
+            content: TSingleChildScrollView(
+              child: IconTheme(
+                data: iconTheme,
+                child: DefaultTextStyle(
+                  style: defaultTextStyle.style,
+                  child: _buildItem(menuProps),
+                ),
               ),
             ),
             destroyOnClose: false,

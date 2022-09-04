@@ -35,6 +35,66 @@ class _TMenuExampleState extends State<TMenuExample> {
               value: '3-1-3',
               content: Text('三级菜单内容'),
             ),
+            TMenuItemProps(
+              value: '3-1-4',
+              content: Text('三级菜单内容'),
+            ),
+            TMenuItemProps(
+              value: '3-1-5',
+              content: Text('三级菜单内容'),
+            ),
+            TMenuItemProps(
+              value: '3-1-6',
+              content: Text('三级菜单内容'),
+            ),
+            TMenuItemProps(
+              value: '3-1-6',
+              content: Text('三级菜单内容'),
+            ),
+            TMenuItemProps(
+              value: '3-1-7',
+              content: Text('三级菜单内容'),
+            ),
+            TMenuItemProps(
+              value: '3-1-8',
+              content: Text('三级菜单内容'),
+            ),
+            TMenuItemProps(
+              value: '3-1-9',
+              content: Text('三级菜单内容'),
+            ),
+            TMenuItemProps(
+              value: '3-1-10',
+              content: Text('三级菜单内容'),
+            ),
+            TMenuItemProps(
+              value: '3-1-11',
+              content: Text('三级菜单内容'),
+            ),
+            TMenuItemProps(
+              value: '3-1-12',
+              content: Text('三级菜单内容'),
+            ),
+            TMenuItemProps(
+              value: '3-1-13',
+              content: Text('三级菜单内容'),
+            ),
+            TMenuItemProps(
+              value: '3-1-14',
+              content: Text('三级菜单内容'),
+            ),
+            TMenuItemProps(
+              value: '3-1-15',
+              content: Text('三级菜单内容'),
+            ),
+            TMenuItemProps(
+              value: '3-1-16',
+              content: Text('三级菜单内容'),
+            ),
+            TMenuItemProps(
+              value: '3-1-17',
+              content: Text('最后三级菜单内容'),
+            ),
           ],
         ),
         TSubMenuProps<String>(
