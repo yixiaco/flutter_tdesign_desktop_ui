@@ -1,4 +1,4 @@
-part of '../menu.dart';
+part of '../../menu.dart';
 
 /// 菜单分组
 class _TMenuGroup<T> extends StatelessWidget {

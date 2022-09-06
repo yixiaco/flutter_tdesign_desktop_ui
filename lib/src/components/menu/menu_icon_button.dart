@@ -5,9 +5,9 @@ const _kDefaultMenuIconButtonSize = Size.square(32);
 const _kHeadMenuIconButtonSize = Size.square(40);
 const _kIconButtonPadding = EdgeInsets.all(8);
 
-/// 导航菜单操作区按钮，通常用于[TMenu]组件中
-class TMenuOperationIconButton extends StatelessWidget {
-  const TMenuOperationIconButton({
+/// 导航菜单操作区按钮，通常用于[TMenu]、[THeadMenu]组件中
+class TMenuIconButton extends StatelessWidget {
+  const TMenuIconButton({
     Key? key,
     this.onClick,
     this.theme,
@@ -36,10 +36,10 @@ class TMenuOperationIconButton extends StatelessWidget {
     var theme = TTheme.of(context);
     var colorScheme = theme.colorScheme;
     var defaultMenuTheme = TDefaultMenuTheme.of(context);
-    var menuTheme = this.theme ?? defaultMenuTheme.theme ?? (theme.isLight ? TMenuTheme.light : TMenuTheme.dark);
-    var headMenu = defaultMenuTheme.headMenu ?? false;
+    var headMenu = defaultMenuTheme?.headMenu ?? false;
+    var tMenuThemeParentData = headMenu ? TDefaultMenuTheme.headMenuOf(context) : TDefaultMenuTheme.menuOf(context);
+    var menuTheme = this.theme ?? tMenuThemeParentData.theme ?? (theme.isLight ? TMenuTheme.light : TMenuTheme.dark);
     var size = this.size ?? (headMenu ? _kHeadMenuIconButtonSize : _kDefaultMenuIconButtonSize);
-    // bool collapsed = defaultMenuTheme.collapsed ?? false;
 
     var backgroundColor = MaterialStateProperty.resolveWith((states) {
       if (this.backgroundColor != null) {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tdesign_desktop_ui/src/components/menu/types.dart';
 
 /// 菜单栏选中项及展开菜单控制
 class TMenuController<T> extends ChangeNotifier {
@@ -45,5 +46,28 @@ class TMenuController<T> extends ChangeNotifier {
       _value = value;
       notifyListeners();
     }
+  }
+
+  /// 在子菜单项中查询是否包含选中的菜单
+  bool containsValue(List<TMenuProps<T>> props) {
+    if (value == null) {
+      return false;
+    }
+    for (var prop in props) {
+      if (prop is TSubMenuProps<T>) {
+        if (containsValue((prop).children)) {
+          return true;
+        }
+      } else if (prop is TMenuGroupProps<T>) {
+        if (containsValue((prop).children)) {
+          return true;
+        }
+      } else if (prop is TMenuItemProps<T>) {
+        if (prop.value == value) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 }

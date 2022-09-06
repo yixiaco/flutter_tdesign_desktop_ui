@@ -214,7 +214,7 @@ class _TMenuExampleState extends State<TMenuExample> {
                       controller: _controller1,
                       menus: menus,
                       logo: logo,
-                      operations: TMenuOperationIconButton(
+                      operations: TMenuIconButton(
                         onClick: () {
                           setState(() {
                             collapsed = !collapsed;
@@ -233,7 +233,7 @@ class _TMenuExampleState extends State<TMenuExample> {
                 expandMutex: true,
                 menus: menus,
                 logo: logo,
-                operations: TMenuOperationIconButton(
+                operations: TMenuIconButton(
                   onClick: () {
                     setState(() {
                       collapsed = !collapsed;

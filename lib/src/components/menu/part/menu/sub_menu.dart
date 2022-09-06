@@ -1,4 +1,4 @@
-part of '../menu.dart';
+part of '../../menu.dart';
 
 double? _paddingLeft<T>(_TMenuItemLayoutProps<T> props) {
   double? paddingLeft;
@@ -23,29 +23,6 @@ class _TSubMenu<T> extends StatelessWidget {
 
   /// 布局属性
   final _TMenuItemLayoutProps<T> props;
-
-  /// 在子菜单项中查询是否包含选中的菜单
-  bool containsValue(List<TMenuProps<T>> props, T? value) {
-    if (value == null) {
-      return false;
-    }
-    for (var prop in props) {
-      if (prop is TSubMenuProps<T>) {
-        if (containsValue((prop).children, value)) {
-          return true;
-        }
-      } else if (prop is TMenuGroupProps<T>) {
-        if (containsValue((prop).children, value)) {
-          return true;
-        }
-      } else if (prop is TMenuItemProps<T>) {
-        if (prop.value == value) {
-          return true;
-        }
-      }
-    }
-    return false;
-  }
 
   bool get isPopup => props.collapsed || props.expandType == TMenuExpandType.popup;
 
@@ -152,7 +129,7 @@ class _TSubMenu<T> extends StatelessWidget {
     var controller = props.controller;
     var value = menuProps.value;
     var collapsed = props.collapsed;
-    var isActive = !isExpanded && containsValue(menuProps.children, controller.value);
+    var isActive = !isExpanded && controller.containsValue(menuProps.children);
     var textColor = isActive ? Colors.white : null;
     textColor ??= isExpanded ? (theme.isLight ? colorScheme.fontGray1 : Colors.white) : null;
     var disabled = menuProps.disabled;

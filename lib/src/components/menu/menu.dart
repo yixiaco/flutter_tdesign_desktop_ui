@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
-part 'components/menu_group.dart';
+part 'part/menu/menu_group.dart';
 
-part 'components/menu_item.dart';
+part 'part/menu/menu_item.dart';
 
-part 'components/menu_layout.dart';
+part 'part/menu/menu_layout.dart';
 
-part 'components/props.dart';
+part 'part/menu/props.dart';
 
-part 'components/sub_menu.dart';
+part 'part/menu/sub_menu.dart';
 
 const double _kMenuWidth = 232;
 const double _kMenuFoldingWidth = 64;
@@ -108,7 +108,7 @@ class _TMenuState<T> extends State<TMenu<T>> {
 
   @override
   Widget build(BuildContext context) {
-    var defaultMenuTheme = TDefaultMenuTheme.of(context);
+    var defaultMenuTheme = TDefaultMenuTheme.menuOf(context);
     var theme = TTheme.of(context);
     var colorScheme = theme.colorScheme;
     var menuTheme = widget.theme ?? defaultMenuTheme.theme ?? (theme.isLight ? TMenuTheme.light : TMenuTheme.dark);
@@ -162,18 +162,17 @@ class _TMenuState<T> extends State<TMenu<T>> {
           border: Border(top: stroke),
         ),
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-        alignment: Alignment.bottomLeft,
+        alignment: Alignment.centerLeft,
         child: TDefaultMenuTheme(
           data: TMenuThemeData(
             collapsed: collapsed,
-            headMenu: false,
             theme: menuTheme,
             width: width,
             expandMutex: expandMutex,
             expandType: expandType,
             foldingWidth: foldingWidth,
           ),
-          child: UnconstrainedBox(child: widget.operations!),
+          child: widget.operations!,
         ),
       );
     }

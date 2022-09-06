@@ -1,6 +1,6 @@
-part of '../menu.dart';
+part of '../../menu.dart';
 
-/// menu item button
+/// 子菜单
 class _TMenuItem<T> extends StatelessWidget {
   const _TMenuItem({
     Key? key,

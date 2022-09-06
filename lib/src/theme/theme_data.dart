@@ -56,6 +56,7 @@ class TThemeData with Diagnosticable {
     TInputThemeData? inputThemeData,
     TPopupThemeData? popupThemeData,
     TMenuThemeData? menuThemeData,
+    THeadMenuThemeData? headMenuThemeData,
   }) {
     var family = fontFamily ?? 'Microsoft YaHei';
     return TThemeData.raw(
@@ -70,6 +71,7 @@ class TThemeData with Diagnosticable {
       inputThemeData: inputThemeData ?? const TInputThemeData(),
       popupThemeData: popupThemeData ?? const TPopupThemeData(),
       menuThemeData: menuThemeData ?? const TMenuThemeData(),
+      headMenuThemeData: headMenuThemeData ?? const THeadMenuThemeData(),
     );
   }
 
@@ -85,6 +87,7 @@ class TThemeData with Diagnosticable {
     required this.inputThemeData,
     required this.popupThemeData,
     required this.menuThemeData,
+    required this.headMenuThemeData,
   });
 
   /// 描述主题或调色板的对比度。
@@ -119,6 +122,9 @@ class TThemeData with Diagnosticable {
 
   /// 导航菜单主题数据
   final TMenuThemeData menuThemeData;
+
+  /// 顶部导航菜单主题数据
+  final THeadMenuThemeData headMenuThemeData;
 
   /// 基础/下层 投影 hover 使用的组件包括：表格 /
   List<BoxShadow> get shadow1 => colorScheme.shadow1;

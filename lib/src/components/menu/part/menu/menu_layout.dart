@@ -1,4 +1,4 @@
-part of '../menu.dart';
+part of '../../menu.dart';
 
 /// 处理button分配
 class _TMenuLayout<T> extends StatelessWidget {
@@ -14,11 +14,8 @@ class _TMenuLayout<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     var menuProps = props.currentProps;
     var level = props.level;
-    if (menuProps is TMenuItemProps<T>) {
-      return _TMenuItem<T>(
-        props: props,
-      );
-    } else if (menuProps is TMenuGroupProps<T>) {
+    assert(menuProps is TMenuItemProps<T> || menuProps is TMenuGroupProps<T> || menuProps is TSubMenuProps<T>);
+    if (menuProps is TMenuGroupProps<T>) {
       assert(level == 1);
       return _TMenuGroup<T>(
         props: props,
@@ -27,7 +24,10 @@ class _TMenuLayout<T> extends StatelessWidget {
       return _TSubMenu<T>(
         props: props,
       );
+    } else {
+      return _TMenuItem<T>(
+        props: props,
+      );
     }
-    return Container();
   }
 }
