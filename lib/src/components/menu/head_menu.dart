@@ -3,8 +3,11 @@ import 'package:flutter/scheduler.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 part 'part/head_menu/head_menu_layout.dart';
+
 part 'part/head_menu/head_menu_props.dart';
+
 part 'part/head_menu/sub_head_menu.dart';
+
 part 'part/head_menu/head_menu_item.dart';
 
 /// 导航菜单-顶部导航
@@ -29,7 +32,7 @@ class THeadMenu<T> extends StatefulWidget {
   final Widget? logo;
 
   /// 导航操作区域。
-  final Widget? operations;
+  final List<Widget>? operations;
 
   /// 菜单风格
   final TMenuTheme? theme;
@@ -115,8 +118,7 @@ class _THeadMenuState<T> extends State<THeadMenu<T>> {
 
     if (widget.logo != null) {
       logo = Container(
-        alignment: Alignment.centerLeft,
-        height: 64,
+        margin: const EdgeInsets.only(right: 32),
         child: widget.logo!,
       );
     }
@@ -125,16 +127,43 @@ class _THeadMenuState<T> extends State<THeadMenu<T>> {
       operations = Container(
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
         alignment: Alignment.centerLeft,
-        child: TDefaultMenuTheme(
+        child: TDefaultMenuTheme<TMenuThemeParentData>(
           data: THeadMenuThemeData(
             theme: menuTheme,
             expandType: expandType,
           ),
-          child: UnconstrainedBox(child: widget.operations!),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: widget.operations!,
+          ),
         ),
       );
     }
 
-    return Container();
+    return DefaultTextStyle.merge(
+      style: theme.fontData.fontBodyMedium.merge(TextStyle(
+        color: colorScheme.textColorPrimary,
+      )),
+      child: IconTheme.merge(
+        data: IconThemeData(
+          color: colorScheme.textColorPrimary,
+        ),
+        child: Container(
+          color: menuTheme.isLight ? Colors.white : colorScheme.gray13,
+          height: 64,
+          child: Row(
+            children: [
+              if (logo != null) logo,
+              Expanded(
+                child: Row(
+                  children: children,
+                ),
+              ),
+              if (operations != null) operations,
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

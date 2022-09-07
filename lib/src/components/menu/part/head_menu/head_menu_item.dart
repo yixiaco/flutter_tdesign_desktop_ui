@@ -88,8 +88,8 @@ class _THeadMenuItem<T> extends StatelessWidget {
               data: IconThemeData(
                 color: textColor.resolve(states),
               ),
-              child: SizedBox(
-                height: 36,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(minHeight: 40, maxHeight: 40, minWidth: 104),
                 child: Container(
                   alignment: alignment,
                   padding: margin,

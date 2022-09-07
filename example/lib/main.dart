@@ -1,3 +1,4 @@
+import 'package:example/components/menu/head_menu_example.dart';
 import 'package:example/components/menu/menu_example.dart';
 import 'package:example/state/semantics_state.dart';
 import 'package:example/state/size_state.dart';
@@ -7,6 +8,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 void main() {
+  // 初始化之前如果访问二进制文件，需要先初始化
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const ProviderScope(
     child: MyApp(),
   ));
@@ -105,7 +108,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
         ),
         footer: const TFooter(child: Text('Footer')),
         content: const TContent(
-          child: TMenuExample(),
+          child: THeadMenuExample(),
         ),
       ),
     );

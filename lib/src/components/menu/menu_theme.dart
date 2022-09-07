@@ -101,7 +101,7 @@ class THeadMenuThemeData extends TMenuThemeParentData with Diagnosticable {
   const THeadMenuThemeData({
     TMenuExpandType? expandType,
     TMenuTheme? theme,
-  }) : super(headMenu: false, expandType: expandType, theme: theme);
+  }) : super(headMenu: true, expandType: expandType, theme: theme);
 
   THeadMenuThemeData copyWith({
     TMenuExpandType? expandType,

@@ -58,6 +58,7 @@ export 'src/components/tabs/types.dart';
 export 'src/components/jumper/jumper.dart';
 /// 菜单
 export 'src/components/menu/menu.dart';
+export 'src/components/menu/head_menu.dart';
 export 'src/components/menu/menu_controller.dart';
 export 'src/components/menu/types.dart';
 export 'src/components/menu/menu_theme.dart';

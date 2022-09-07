@@ -37,7 +37,7 @@ class TMenuIconButton extends StatelessWidget {
     var colorScheme = theme.colorScheme;
     var defaultMenuTheme = TDefaultMenuTheme.of(context);
     var headMenu = defaultMenuTheme?.headMenu ?? false;
-    var tMenuThemeParentData = headMenu ? TDefaultMenuTheme.headMenuOf(context) : TDefaultMenuTheme.menuOf(context);
+    var tMenuThemeParentData = headMenu ? defaultMenuTheme as THeadMenuThemeData : defaultMenuTheme as TMenuThemeData;
     var menuTheme = this.theme ?? tMenuThemeParentData.theme ?? (theme.isLight ? TMenuTheme.light : TMenuTheme.dark);
     var size = this.size ?? (headMenu ? _kHeadMenuIconButtonSize : _kDefaultMenuIconButtonSize);
 
@@ -56,7 +56,7 @@ class TMenuIconButton extends StatelessWidget {
     return IconTheme(
       data: IconThemeData(
         color: menuTheme.isLight ? colorScheme.fontGray1 : Colors.white,
-        size: theme.fontData.fontSizeBodyLarge,
+        size: size.height / 2,
       ),
       child: Semantics(
         container: true,

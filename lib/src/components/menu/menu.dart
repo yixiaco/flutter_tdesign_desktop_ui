@@ -163,7 +163,7 @@ class _TMenuState<T> extends State<TMenu<T>> {
         ),
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
         alignment: Alignment.centerLeft,
-        child: TDefaultMenuTheme(
+        child: TDefaultMenuTheme<TMenuThemeParentData>(
           data: TMenuThemeData(
             collapsed: collapsed,
             theme: menuTheme,
