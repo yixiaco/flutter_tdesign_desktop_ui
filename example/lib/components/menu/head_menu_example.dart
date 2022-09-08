@@ -23,7 +23,48 @@ class _THeadMenuExampleState extends State<THeadMenuExample> {
     ),
     const TMenuItemProps(
       value: 'item3',
+      disabled: true,
       content: Text('菜单3'),
+    ),
+  ];
+  List<TMenuProps<String>> menus2 = [
+    const TSubMenuProps(
+      value: '1',
+      title: Text('菜单1'),
+      children: [
+        TMenuItemProps(
+          value: '1-1',
+          content: Text('子菜单1-1'),
+        ),
+        TMenuItemProps(
+          value: '1-2',
+          content: Text('子菜单1-2'),
+        ),
+        TMenuItemProps(
+          value: '1-3',
+          disabled: true,
+          content: Text('子菜单1-3'),
+        ),
+      ],
+    ),
+    const TSubMenuProps(
+      value: '2',
+      title: Text('菜单2'),
+      children: [
+        TMenuItemProps(
+          value: '2-1',
+          content: Text('子菜单2-1'),
+        ),
+        TMenuItemProps(
+          value: '2-2',
+          content: Text('子菜单2-2'),
+        ),
+        TMenuItemProps(
+          value: '2-3',
+          disabled: true,
+          content: Text('子菜单2-3'),
+        ),
+      ],
     ),
   ];
 
@@ -74,6 +115,17 @@ class _THeadMenuExampleState extends State<THeadMenuExample> {
         THeadMenu(
           controller: _controller1,
           menus: menus,
+          logo: logo,
+          operations: const [
+            TMenuIconButton(child: Icon(TIcons.search)),
+            TMenuIconButton(child: Icon(TIcons.mail)),
+            TMenuIconButton(child: Icon(TIcons.user)),
+            TMenuIconButton(child: Icon(TIcons.ellipsis)),
+          ],
+        ),
+        THeadMenu(
+          controller: _controller2,
+          menus: menus2,
           logo: logo,
           operations: const [
             TMenuIconButton(child: Icon(TIcons.search)),

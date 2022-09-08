@@ -1,5 +1,7 @@
 part of '../../head_menu.dart';
 
+const Color menuItemHoverColorDark = Color.fromRGBO(255, 255, 255, .55);
+
 /// 子菜单
 class _THeadMenuItem<T> extends StatelessWidget {
   const _THeadMenuItem({
@@ -21,7 +23,6 @@ class _THeadMenuItem<T> extends StatelessWidget {
     var count = props.menus.length;
     var index = props.index;
     var isFirst = index == 0;
-    var isLast = index == count - 1;
     var controller = props.controller;
     var disabled = menuProps.disabled;
     var isActive = menuProps.value == controller.value;
@@ -30,7 +31,7 @@ class _THeadMenuItem<T> extends StatelessWidget {
 
     var textColor = MaterialStateProperty.resolveWith((states) {
       if (states.contains(MaterialState.selected)) {
-        return Colors.white;
+        return theme.isLight ? colorScheme.fontGray1 : colorScheme.textColorAnti;
       }
       if (states.contains(MaterialState.disabled)) {
         return theme.isLight ? colorScheme.fontGray4 : colorScheme.fontWhite4;
@@ -40,24 +41,18 @@ class _THeadMenuItem<T> extends StatelessWidget {
 
     var menuBackgroundColor = MaterialStateProperty.resolveWith((states) {
       if (states.contains(MaterialState.selected)) {
-        return colorScheme.brandColor;
+        return theme.isLight ? colorScheme.gray2 : colorScheme.gray9;
       }
       if (states.contains(MaterialState.hovered)) {
         return theme.isLight ? colorScheme.gray2 : colorScheme.gray9;
       }
     });
-    EdgeInsets? margin;
     Alignment alignment;
     Widget? content;
     Widget? icon = menuProps.icon;
 
-    if (props.parent?.currentProps is! TSubMenuProps) {
-      alignment = Alignment.center;
-    } else {
-      margin = const EdgeInsets.only(right: 10, left: 16);
-      alignment = Alignment.centerLeft;
-      content = menuProps.content;
-    }
+    alignment = Alignment.center;
+    content = menuProps.content;
     if (content != null && icon != null) {
       content = Padding(
         padding: EdgeInsets.only(left: TVar.spacer),
@@ -66,7 +61,7 @@ class _THeadMenuItem<T> extends StatelessWidget {
     }
 
     return Padding(
-      padding: EdgeInsets.only(top: isFirst ? 0 : 4, bottom: isLast ? 0 : 4),
+      padding: EdgeInsets.only(left: isFirst ? 0 : 4),
       child: TRipple(
         disabled: disabled,
         selected: isActive,
@@ -92,12 +87,11 @@ class _THeadMenuItem<T> extends StatelessWidget {
                 constraints: const BoxConstraints(minHeight: 40, maxHeight: 40, minWidth: 104),
                 child: Container(
                   alignment: alignment,
-                  padding: margin,
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       if (icon != null) icon,
-                      if (content != null) Expanded(child: content),
+                      if (content != null) content,
                     ],
                   ),
                 ),

@@ -17,17 +17,11 @@ class _TMenuLayout<T> extends StatelessWidget {
     assert(menuProps is TMenuItemProps<T> || menuProps is TMenuGroupProps<T> || menuProps is TSubMenuProps<T>);
     if (menuProps is TMenuGroupProps<T>) {
       assert(level == 1);
-      return _TMenuGroup<T>(
-        props: props,
-      );
+      return _TMenuGroup<T>(props: props);
     } else if (menuProps is TSubMenuProps<T>) {
-      return _TSubMenu<T>(
-        props: props,
-      );
+      return _TSubMenu<T>(props: props);
     } else {
-      return _TMenuItem<T>(
-        props: props,
-      );
+      return _TMenuItem<T>(props: props);
     }
   }
 }

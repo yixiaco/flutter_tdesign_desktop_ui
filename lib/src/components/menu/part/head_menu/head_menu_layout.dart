@@ -15,13 +15,9 @@ class _THeadMenuLayout<T> extends StatelessWidget {
     var menuProps = props.currentProps;
     assert(menuProps is TMenuItemProps<T> || menuProps is TSubMenuProps<T>);
     if (menuProps is TMenuItemProps<T>) {
-      return _THeadMenuItem<T>(
-        props: props,
-      );
+      return _THeadMenuItem<T>(props: props);
     } else {
-      return _TSubHeadMenu<T>(
-        props: props,
-      );
+      return _TSubHeadMenu<T>(props: props);
     }
   }
 }

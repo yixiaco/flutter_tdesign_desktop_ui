@@ -54,14 +54,19 @@ class THeadMenu<T> extends StatefulWidget {
 }
 
 class _THeadMenuState<T> extends State<THeadMenu<T>> {
+  late List<TMenuProps<T>> tabsChildren;
+  late THeadMenuThemeData headMenuTheme;
+
   @override
   void initState() {
+    tabsChildren = [];
     widget.controller.addListener(_notifyUpdate);
     super.initState();
   }
 
   @override
   void dispose() {
+    tabsChildren.clear();
     widget.controller.removeListener(_notifyUpdate);
     super.dispose();
   }
@@ -73,9 +78,30 @@ class _THeadMenuState<T> extends State<THeadMenu<T>> {
       oldWidget.controller.removeListener(_notifyUpdate);
       widget.controller.addListener(_notifyUpdate);
     }
+    if (widget.expandType != oldWidget.expandType) {
+      widget.controller.expanded.clear();
+      tabsChildren.clear();
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    headMenuTheme = TDefaultMenuTheme.headMenuOf(context);
   }
 
   void _notifyUpdate() {
+    var expandType = widget.expandType ?? headMenuTheme.expandType ?? TMenuExpandType.normal;
+    if (expandType == TMenuExpandType.normal && widget.controller.expanded.isNotEmpty) {
+      var first = widget.controller.expanded.first;
+      for (var element in widget.menus) {
+        var props = element as TSubMenuProps<T>;
+        if (first == props.value) {
+          tabsChildren = props.children;
+          break;
+        }
+      }
+    }
     if (mounted) {
       setState(() {});
     } else {
@@ -87,16 +113,17 @@ class _THeadMenuState<T> extends State<THeadMenu<T>> {
 
   @override
   Widget build(BuildContext context) {
-    var headMenuTheme = TDefaultMenuTheme.headMenuOf(context);
     var theme = TTheme.of(context);
     var colorScheme = theme.colorScheme;
     var menuTheme = widget.theme ?? headMenuTheme.theme ?? (theme.isLight ? TMenuTheme.light : TMenuTheme.dark);
-    // var textColor = menuTheme.isLight ? colorScheme.fontGray2 : colorScheme.fontWhite2;
-    var menuBorderColor = menuTheme.isLight ? colorScheme.componentStroke : colorScheme.gray10;
+    var menuBorderColor = menuTheme.isLight ? colorScheme.componentStroke : Colors.transparent;
+    var stroke = BorderSide(color: menuBorderColor);
+    var textColor = theme.isLight ? colorScheme.fontGray2 : menuItemHoverColorDark;
     var expandType = widget.expandType ?? headMenuTheme.expandType ?? TMenuExpandType.normal;
 
     Widget? logo;
     Widget? operations;
+    Widget? tabs;
 
     List<Widget> children = List.generate(widget.menus.length, (index) {
       var menu = widget.menus[index];
@@ -140,6 +167,28 @@ class _THeadMenuState<T> extends State<THeadMenu<T>> {
       );
     }
 
+    if (tabsChildren.isNotEmpty) {
+      tabs = Container(
+        decoration: BoxDecoration(
+          border: Border(top: stroke),
+        ),
+        child: TTabs<T>(
+          softWrap: false,
+          value: widget.controller.value,
+          list: List.generate(tabsChildren.length, (index) {
+            var tab = tabsChildren[index];
+            if (tab is TMenuItemProps<T>) {
+              return TTabsPanel(label: tab.content!, value: tab.value);
+            } else if (tab is TSubMenuProps<T>) {
+              return TTabsPanel(label: tab.title!, value: tab.value);
+            } else {
+              throw FlutterError('不支持TMenuGroupProps或其他对象');
+            }
+          }),
+        ),
+      );
+    }
+
     return DefaultTextStyle.merge(
       style: theme.fontData.fontBodyMedium.merge(TextStyle(
         color: colorScheme.textColorPrimary,
@@ -150,19 +199,39 @@ class _THeadMenuState<T> extends State<THeadMenu<T>> {
         ),
         child: Container(
           color: menuTheme.isLight ? Colors.white : colorScheme.gray13,
-          height: 64,
-          child: Row(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              if (logo != null) logo,
-              Expanded(
+              SizedBox(
+                height: 64,
                 child: Row(
-                  children: children,
+                  children: [
+                    if (logo != null) logo,
+                    _buildWrapTextStyle(theme, textColor, Expanded(child: Row(children: children))),
+                    if (operations != null) operations,
+                  ],
                 ),
               ),
-              if (operations != null) operations,
+              if (tabs != null) _buildWrapTextStyle(theme, textColor, tabs),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildWrapTextStyle(TThemeData theme, Color textColor, Widget child) {
+    return DefaultTextStyle.merge(
+      style: theme.fontData.fontBodyMedium.merge(TextStyle(
+        overflow: TextOverflow.ellipsis,
+        color: textColor,
+      )),
+      child: IconTheme.merge(
+        data: IconThemeData(
+          color: textColor,
+          size: 20,
+        ),
+        child: child,
       ),
     );
   }

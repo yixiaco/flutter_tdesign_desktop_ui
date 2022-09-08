@@ -1,5 +1,12 @@
 part of '../../menu.dart';
 
+/// 处理点击事件
+void _itemHandleClick<T>(_TMenuItemLayoutProps<T> props, TMenuController<T> controller, TMenuItemProps<T> menuProps) {
+  controller.value = menuProps.value;
+  props.onChange?.call(menuProps.value);
+  menuProps.onClick?.call();
+}
+
 /// 子菜单
 class _TMenuItem<T> extends StatelessWidget {
   const _TMenuItem({
@@ -84,7 +91,7 @@ class _TMenuItem<T> extends StatelessWidget {
         animatedDuration: TVar.animDurationSlow,
         curve: TVar.animTimeFnEasing,
         onTap: () {
-          _handleClick(controller, menuProps);
+          _itemHandleClick(props, controller, menuProps);
         },
         builder: (context, states) {
           return DefaultTextStyle.merge(
@@ -114,12 +121,5 @@ class _TMenuItem<T> extends StatelessWidget {
         },
       ),
     );
-  }
-
-  /// 处理点击事件
-  void _handleClick(TMenuController<T> controller, TMenuItemProps<T> menuProps) {
-    controller.value = menuProps.value;
-    props.onChange?.call(menuProps.value);
-    menuProps.onClick?.call();
   }
 }
