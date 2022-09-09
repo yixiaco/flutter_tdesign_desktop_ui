@@ -1,4 +1,4 @@
-part of 'tabs.dart';
+part of '../tabs.dart';
 
 /// 标签
 class _TabsLabel<T> extends StatefulWidget {

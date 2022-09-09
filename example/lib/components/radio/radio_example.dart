@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// 单选框示例
-class RadioExample extends StatefulWidget {
-  const RadioExample({Key? key}) : super(key: key);
+class TRadioExample extends StatefulWidget {
+  const TRadioExample({Key? key}) : super(key: key);
 
   @override
-  State<RadioExample> createState() => _RadioExampleState();
+  State<TRadioExample> createState() => _TRadioExampleState();
 }
 
-class _RadioExampleState extends State<RadioExample> {
+class _TRadioExampleState extends State<TRadioExample> {
   bool? checked = true;
   String? value = '选项一';
   bool disabled = false;

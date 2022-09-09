@@ -19,7 +19,7 @@ class _TTabsExampleState extends State<TTabsExample> {
   @override
   void initState() {
     super.initState();
-    panels = List.generate(3, (index) {
+    panels = List.generate(10, (index) {
       this.index++;
       return TTabsPanel(
         label: Text('选项卡$index'),

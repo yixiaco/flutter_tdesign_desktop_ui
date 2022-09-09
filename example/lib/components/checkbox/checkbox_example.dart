@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// 复选框示例
-class CheckboxExample extends StatefulWidget {
-  const CheckboxExample({Key? key}) : super(key: key);
+class TCheckboxExample extends StatefulWidget {
+  const TCheckboxExample({Key? key}) : super(key: key);
 
   @override
-  State<CheckboxExample> createState() => _CheckboxExampleState();
+  State<TCheckboxExample> createState() => _TCheckboxExampleState();
 }
 
-class _CheckboxExampleState extends State<CheckboxExample> {
+class _TCheckboxExampleState extends State<TCheckboxExample> {
   bool check = false;
   bool indeterminate = true;
   List<String> value = [];

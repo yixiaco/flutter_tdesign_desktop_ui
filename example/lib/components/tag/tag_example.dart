@@ -2,14 +2,14 @@ import 'package:flutter/widgets.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// 标签示例
-class TagExample extends StatefulWidget {
-  const TagExample({Key? key}) : super(key: key);
+class TTagExample extends StatefulWidget {
+  const TTagExample({Key? key}) : super(key: key);
 
   @override
-  State<TagExample> createState() => _TagExampleState();
+  State<TTagExample> createState() => _TTagExampleState();
 }
 
-class _TagExampleState extends State<TagExample> {
+class _TTagExampleState extends State<TTagExample> {
   bool checked = false;
 
   @override

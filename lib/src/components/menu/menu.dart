@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
-part 'part/menu/menu_group.dart';
+part 'components/menu/menu_group.dart';
 
-part 'part/menu/menu_item.dart';
+part 'components/menu/menu_item.dart';
 
-part 'part/menu/menu_layout.dart';
+part 'components/menu/menu_layout.dart';
 
-part 'part/menu/props.dart';
+part 'components/menu/props.dart';
 
-part 'part/menu/sub_menu.dart';
+part 'components/menu/sub_menu.dart';
 
 const double _kMenuWidth = 232;
 const double _kMenuFoldingWidth = 64;

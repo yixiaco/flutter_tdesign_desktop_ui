@@ -57,12 +57,7 @@ class TMenuItemProps<T> extends TMenuProps<T> {
   const TMenuItemProps({
     this.content,
     this.disabled = false,
-    this.href,
     this.icon,
-    this.replace = false,
-    this.router,
-    this.target,
-    this.to,
     required this.value,
     this.onClick,
   });
@@ -73,23 +68,8 @@ class TMenuItemProps<T> extends TMenuProps<T> {
   /// 是否禁用菜单项展开/收起/跳转等功能
   final bool disabled;
 
-  /// 跳转链接
-  final String? href;
-
   /// 图标。
   final Widget? icon;
-
-  /// 路由跳转是否采用覆盖的方式
-  final bool replace;
-
-  /// 路由对象。如果项目存在 Router，则默认使用 Router。
-  final Route? router;
-
-  /// 链接或路由跳转方式。可选项：_blank/_self/_parent/_top
-  final String? target;
-
-  /// 路由跳转目标，当且仅当 Router 存在时，该 API 有效。
-  final String? to;
 
   /// 菜单项唯一标识
   final T value;

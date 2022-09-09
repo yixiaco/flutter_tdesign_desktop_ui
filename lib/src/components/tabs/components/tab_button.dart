@@ -1,4 +1,4 @@
-part of 'tabs.dart';
+part of '../tabs.dart';
 
 /// 标签按钮
 class _TabButton<T> extends StatefulWidget {
@@ -116,20 +116,22 @@ class _TabButtonState<T> extends State<_TabButton<T>> with TickerProviderStateMi
     bool showDashed = false,
   }) {
     var theme = TTheme.of(context);
+    var buttonStyle = TTabsStyle.of(context).buttonStyle;
     var colorScheme = theme.colorScheme;
     var size = widget.size ?? theme.size;
     var isCard = widget.theme == TTabsTheme.card;
 
     // 鼠标
-    final effectiveMouseCursor = MaterialStateProperty.resolveWith<MouseCursor>((states) {
-      if (states.contains(MaterialState.disabled)) {
-        return SystemMouseCursors.noDrop;
-      }
-      return SystemMouseCursors.click;
-    });
+    final effectiveMouseCursor = buttonStyle?.cursor ??
+        MaterialStateProperty.resolveWith<MouseCursor>((states) {
+          if (states.contains(MaterialState.disabled)) {
+            return SystemMouseCursors.noDrop;
+          }
+          return SystemMouseCursors.click;
+        });
 
     // 字体颜色
-    final textColor = MaterialStateProperty.resolveWith((states) {
+    MaterialStateProperty<Color> textColor = MaterialStateProperty.resolveWith((states) {
       if (states.contains(MaterialState.dragged)) {
         if (states.contains(MaterialState.selected)) {
           return colorScheme.brandColorDisabled;
@@ -213,6 +215,23 @@ class _TabButtonState<T> extends State<_TabButton<T>> with TickerProviderStateMi
         });
         break;
     }
+
+    if(buttonStyle?.backgroundColor != null) {
+      effectiveBgColor = MaterialStateProperty.resolveWith((states) {
+        return MaterialStateProperty.resolveAs(buttonStyle!.backgroundColor!, states);
+      });
+    }
+    if(buttonStyle?.textColor != null) {
+      textColor = MaterialStateProperty.resolveWith((states) {
+        return MaterialStateProperty.resolveAs(buttonStyle!.textColor!, states);
+      });
+    }
+    if(buttonStyle?.closeIconColor != null) {
+      effectiveIconColor = MaterialStateProperty.resolveWith((states) {
+        return MaterialStateProperty.resolveAs(buttonStyle!.closeIconColor!, states);
+      });
+    }
+    fixedRippleColor = buttonStyle?.rippleColor ?? fixedRippleColor;
 
     var isNotTap = widget.disabled || widget.checked;
 

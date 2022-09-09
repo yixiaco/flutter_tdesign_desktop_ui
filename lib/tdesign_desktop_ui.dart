@@ -54,6 +54,7 @@ export 'src/components/dropdown/types.dart';
 /// 选项卡
 export 'src/components/tabs/tabs.dart';
 export 'src/components/tabs/types.dart';
+export 'src/components/tabs/tabs_style.dart';
 /// 跳转
 export 'src/components/jumper/jumper.dart';
 /// 菜单

@@ -20,7 +20,6 @@ class _THeadMenuItem<T> extends StatelessWidget {
     var colorScheme = theme.colorScheme;
 
     var menuProps = props.currentProps as TMenuItemProps<T>;
-    var count = props.menus.length;
     var index = props.index;
     var isFirst = index == 0;
     var controller = props.controller;
@@ -30,6 +29,9 @@ class _THeadMenuItem<T> extends StatelessWidget {
     var fixedRippleColor = theme.isLight ? colorScheme.gray3 : colorScheme.gray11;
 
     var textColor = MaterialStateProperty.resolveWith((states) {
+      if(states.contains(MaterialState.selected) && isPopup && props.level > 1) {
+        return theme.isLight ? colorScheme.brandColor : colorScheme.textColorAnti;
+      }
       if (states.contains(MaterialState.selected)) {
         return theme.isLight ? colorScheme.fontGray1 : colorScheme.textColorAnti;
       }
@@ -41,17 +43,28 @@ class _THeadMenuItem<T> extends StatelessWidget {
 
     var menuBackgroundColor = MaterialStateProperty.resolveWith((states) {
       if (states.contains(MaterialState.selected)) {
+        if (isPopup && props.level > 1) {
+          return theme.isLight ? const Color(0xffecf2fe) : colorScheme.gray10;
+        }
         return theme.isLight ? colorScheme.gray2 : colorScheme.gray9;
       }
       if (states.contains(MaterialState.hovered)) {
         return theme.isLight ? colorScheme.gray2 : colorScheme.gray9;
       }
     });
-    Alignment alignment;
+    Alignment? alignment;
+    EdgeInsets? margin;
+    EdgeInsets? padding;
     Widget? content;
     Widget? icon = menuProps.icon;
 
-    alignment = Alignment.center;
+    if(isPopup && props.level > 1){
+      margin = EdgeInsets.only(top: isFirst ? 0 : 4);
+      padding = const EdgeInsets.symmetric(horizontal: 16);
+    } else {
+      alignment = Alignment.center;
+      margin = EdgeInsets.only(left: isFirst ? 0 : 4);
+    }
     content = menuProps.content;
     if (content != null && icon != null) {
       content = Padding(
@@ -60,8 +73,8 @@ class _THeadMenuItem<T> extends StatelessWidget {
       );
     }
 
-    return Padding(
-      padding: EdgeInsets.only(left: isFirst ? 0 : 4),
+    return Container(
+      padding:margin,
       child: TRipple(
         disabled: disabled,
         selected: isActive,
@@ -87,6 +100,7 @@ class _THeadMenuItem<T> extends StatelessWidget {
                 constraints: const BoxConstraints(minHeight: 40, maxHeight: 40, minWidth: 104),
                 child: Container(
                   alignment: alignment,
+                  padding: padding,
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [

@@ -1,4 +1,4 @@
-part of 'tabs.dart';
+part of '../tabs.dart';
 
 /// 选项卡面板
 class _TabPanel<T> extends StatefulWidget {

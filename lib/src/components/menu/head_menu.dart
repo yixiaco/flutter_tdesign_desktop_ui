@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
-part 'part/head_menu/head_menu_layout.dart';
+part 'components/head_menu/head_menu_layout.dart';
 
-part 'part/head_menu/head_menu_props.dart';
+part 'components/head_menu/head_menu_props.dart';
 
-part 'part/head_menu/sub_head_menu.dart';
+part 'components/head_menu/sub_head_menu.dart';
 
-part 'part/head_menu/head_menu_item.dart';
+part 'components/head_menu/head_menu_item.dart';
 
 /// 导航菜单-顶部导航
 /// 用于承载网站的架构，并提供跳转的菜单列表。
@@ -32,7 +32,7 @@ class THeadMenu<T> extends StatefulWidget {
   final Widget? logo;
 
   /// 导航操作区域。
-  final List<Widget>? operations;
+  final Widget? operations;
 
   /// 菜单风格
   final TMenuTheme? theme;
@@ -92,13 +92,16 @@ class _THeadMenuState<T> extends State<THeadMenu<T>> {
 
   void _notifyUpdate() {
     var expandType = widget.expandType ?? headMenuTheme.expandType ?? TMenuExpandType.normal;
-    if (expandType == TMenuExpandType.normal && widget.controller.expanded.isNotEmpty) {
-      var first = widget.controller.expanded.first;
-      for (var element in widget.menus) {
-        var props = element as TSubMenuProps<T>;
-        if (first == props.value) {
-          tabsChildren = props.children;
-          break;
+    if (expandType == TMenuExpandType.normal) {
+      tabsChildren.clear();
+      if (widget.controller.expanded.isNotEmpty) {
+        var first = widget.controller.expanded.first;
+        for (var element in widget.menus) {
+          var props = element as TSubMenuProps<T>;
+          if (first == props.value) {
+            tabsChildren.addAll(props.children);
+            break;
+          }
         }
       }
     }
@@ -159,10 +162,7 @@ class _THeadMenuState<T> extends State<THeadMenu<T>> {
             theme: menuTheme,
             expandType: expandType,
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: widget.operations!,
-          ),
+          child: widget.operations!,
         ),
       );
     }
@@ -172,20 +172,7 @@ class _THeadMenuState<T> extends State<THeadMenu<T>> {
         decoration: BoxDecoration(
           border: Border(top: stroke),
         ),
-        child: TTabs<T>(
-          softWrap: false,
-          value: widget.controller.value,
-          list: List.generate(tabsChildren.length, (index) {
-            var tab = tabsChildren[index];
-            if (tab is TMenuItemProps<T>) {
-              return TTabsPanel(label: tab.content!, value: tab.value);
-            } else if (tab is TSubMenuProps<T>) {
-              return TTabsPanel(label: tab.title!, value: tab.value);
-            } else {
-              throw FlutterError('不支持TMenuGroupProps或其他对象');
-            }
-          }),
-        ),
+        child: _buildTabs(theme, colorScheme),
       );
     }
 
@@ -207,7 +194,16 @@ class _THeadMenuState<T> extends State<THeadMenu<T>> {
                 child: Row(
                   children: [
                     if (logo != null) logo,
-                    _buildWrapTextStyle(theme, textColor, Expanded(child: Row(children: children))),
+                    _buildWrapTextStyle(
+                      theme,
+                      textColor,
+                      Expanded(
+                        child: TSingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(children: children),
+                        ),
+                      ),
+                    ),
                     if (operations != null) operations,
                   ],
                 ),
@@ -215,6 +211,57 @@ class _THeadMenuState<T> extends State<THeadMenu<T>> {
               if (tabs != null) _buildWrapTextStyle(theme, textColor, tabs),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  /// 构建选项卡
+  Widget _buildTabs(TThemeData theme, TColorScheme colorScheme) {
+    return TTabsStyle(
+      data: TTabsStyleData(
+        backgroundColor: theme.isLight ? null : colorScheme.gray11,
+        buttonStyle: TTabsButtonStyle(
+          textColor: MaterialStateColor.resolveWith((states) {
+            if (states.contains(MaterialState.disabled)) {
+              return colorScheme.textColorDisabled;
+            }
+            if (states.contains(MaterialState.selected)) {
+              return colorScheme.brandColor;
+            }
+            return theme.isLight ? colorScheme.textColorSecondary : Colors.white;
+          }),
+          backgroundColor: MaterialStateColor.resolveWith((states) {
+            if (states.contains(MaterialState.selected)) {
+              return Colors.transparent;
+            }
+            if (states.contains(MaterialState.hovered)) {
+              return theme.isLight ? colorScheme.bgColorContainerHover : colorScheme.gray10;
+            }
+            return Colors.transparent;
+          }),
+          rippleColor: theme.isLight ? null : colorScheme.gray9,
+        ),
+      ),
+      child: TTabs<T>(
+        size: TComponentSize.small,
+        softWrap: false,
+        value: widget.controller.value,
+        onChange: (value) {
+          widget.controller.value = value;
+        },
+        list: List.generate(
+          tabsChildren.length,
+          (index) {
+            var tab = tabsChildren[index];
+            if (tab is TMenuItemProps<T>) {
+              return TTabsPanel(label: tab.content!, value: tab.value);
+            } else if (tab is TSubMenuProps<T>) {
+              return TTabsPanel(label: tab.title!, value: tab.value);
+            } else {
+              throw FlutterError('二级菜单只支持TMenuItemProps和TSubMenuProps，不支持TMenuGroupProps或其他对象');
+            }
+          },
         ),
       ),
     );

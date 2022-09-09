@@ -4,14 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// 弹出层示例
-class PopupExample extends StatefulWidget {
-  const PopupExample({Key? key}) : super(key: key);
+class TPopupExample extends StatefulWidget {
+  const TPopupExample({Key? key}) : super(key: key);
 
   @override
-  State<PopupExample> createState() => _PopupExampleState();
+  State<TPopupExample> createState() => _TPopupExampleState();
 }
 
-class _PopupExampleState extends State<PopupExample> {
+class _TPopupExampleState extends State<TPopupExample> {
   ValueNotifier<int> i = ValueNotifier(0);
   ValueNotifier<Color> backgroundColor = ValueNotifier(Colors.blue);
   late var children2 = [
