@@ -58,7 +58,13 @@ class TLayout extends StatelessWidget {
         color: theme.colorScheme.textColorPrimary,
         fontSize: theme.fontSize,
       ),
-      child: child,
+      child: IconTheme(
+        data: IconThemeData(
+          color: theme.colorScheme.textColorPrimary,
+          size: theme.fontSize,
+        ),
+        child: child,
+      ),
     );
   }
 }

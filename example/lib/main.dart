@@ -2,6 +2,7 @@ import 'package:example/components/button/button_example.dart';
 import 'package:example/components/checkbox/checkbox_example.dart';
 import 'package:example/components/collapse/collapse_example.dart';
 import 'package:example/components/dropdown/dropdown_example.dart';
+import 'package:example/components/icon/icon_example.dart';
 import 'package:example/components/input/input_example.dart';
 import 'package:example/components/jumper/jumper_example.dart';
 import 'package:example/components/loading/loading_example.dart';
@@ -81,10 +82,14 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
             });
           },
         ),
-        const TMenuItemProps(
+        TMenuItemProps(
           value: 'icon',
-          disabled: true,
-          content: Text('Icon 图标'),
+          content: const Text('Icon 图标'),
+          onClick: () {
+            setState(() {
+              content = const TIconExample();
+            });
+          },
         ),
         TMenuItemProps(
           value: 'link',
@@ -283,7 +288,12 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
         aside: _buildAside(theme),
         header: _buildHeader(theme, semantics, size),
         footer: const TFooter(child: Text('Flutter TDesign Desktop UI')),
-        content: TContent(child: content),
+        content: TContent(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: content,
+          ),
+        ),
       ),
     );
     if (semantics) {
