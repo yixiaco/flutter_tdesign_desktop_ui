@@ -1,4 +1,4 @@
-part of 'tabs.dart';
+part of '../tabs.dart';
 
 /// 标签 normal模式下的下划线 painter
 class _LabelPainter extends AnimationChangeNotifierPainter {

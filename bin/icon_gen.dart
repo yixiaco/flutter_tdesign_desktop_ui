@@ -57,6 +57,7 @@ void main() async {
   final Map<String, dynamic> iconsJson = json.decode(iconsString);
 
   final StringBuffer dartFileBuffer = StringBuffer();
+  final StringBuffer allIconsMapBuffer = StringBuffer();
   final family = iconsJson['iconName'];
   final icons = iconsJson['icons'] as List;
 
@@ -67,6 +68,7 @@ void main() async {
     dartFileBuffer.writeln('\n  /// <icon name="$iconName" /> or <${toPascalCase(varName)}Icon />');
     dartFileBuffer
         .writeln('  static const IconData $varName = _$outClassName(0x$codepoint);');
+    allIconsMapBuffer.writeln('    \'$varName\': $varName,');
   }
 
   var fileContent = """
@@ -100,10 +102,13 @@ class _$outClassName extends IconData {
 ///  * <https://github.com/Tencent/tdesign-icons>
 class $outClassName {
   const $outClassName._();
-  
+
   // BEGIN GENERATED ICONS
 ${dartFileBuffer.toString()}
-  // END GENERATED ICONS
+  static const Map<String, IconData> allIcons = {
+${allIconsMapBuffer.toString()}
+  };
+// END GENERATED ICONS
 }
 """;
 

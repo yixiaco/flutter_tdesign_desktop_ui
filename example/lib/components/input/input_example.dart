@@ -3,8 +3,8 @@ import 'package:flutter/widgets.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// 输入框示例
-class InputExample extends StatelessWidget {
-  const InputExample({Key? key}) : super(key: key);
+class TInputExample extends StatelessWidget {
+  const TInputExample({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

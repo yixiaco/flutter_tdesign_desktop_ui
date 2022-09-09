@@ -55,6 +55,9 @@ class TThemeData with Diagnosticable {
     TCheckboxThemeData? checkboxThemeData,
     TInputThemeData? inputThemeData,
     TPopupThemeData? popupThemeData,
+    TMenuThemeData? menuThemeData,
+    THeadMenuThemeData? headMenuThemeData,
+    TTabsStyleData? tabsStyleData,
   }) {
     var family = fontFamily ?? 'Microsoft YaHei';
     return TThemeData.raw(
@@ -68,6 +71,9 @@ class TThemeData with Diagnosticable {
       checkboxThemeData: checkboxThemeData ?? const TCheckboxThemeData(),
       inputThemeData: inputThemeData ?? const TInputThemeData(),
       popupThemeData: popupThemeData ?? const TPopupThemeData(),
+      menuThemeData: menuThemeData ?? const TMenuThemeData(),
+      headMenuThemeData: headMenuThemeData ?? const THeadMenuThemeData(),
+      tabsStyleData: tabsStyleData ?? const TTabsStyleData(),
     );
   }
 
@@ -82,6 +88,9 @@ class TThemeData with Diagnosticable {
     required this.checkboxThemeData,
     required this.inputThemeData,
     required this.popupThemeData,
+    required this.menuThemeData,
+    required this.headMenuThemeData,
+    required this.tabsStyleData,
   });
 
   /// 描述主题或调色板的对比度。
@@ -113,6 +122,15 @@ class TThemeData with Diagnosticable {
 
   /// 弹出层主题数据
   final TPopupThemeData popupThemeData;
+
+  /// 导航菜单主题数据
+  final TMenuThemeData menuThemeData;
+
+  /// 顶部导航菜单主题数据
+  final THeadMenuThemeData headMenuThemeData;
+
+  /// 选项卡主题数据
+  final TTabsStyleData tabsStyleData;
 
   /// 基础/下层 投影 hover 使用的组件包括：表格 /
   List<BoxShadow> get shadow1 => colorScheme.shadow1;
@@ -152,6 +170,9 @@ class TThemeData with Diagnosticable {
         large: () => fontData.fontSizeL,
       );
 
+  /// 是否是亮色主题
+  bool get isLight => brightness == Brightness.light;
+
   TThemeData copyWith({
     Brightness? brightness,
     TColorScheme? colorScheme,
@@ -162,6 +183,7 @@ class TThemeData with Diagnosticable {
     TCheckboxThemeData? checkboxThemeData,
     TInputThemeData? inputThemeData,
     TPopupThemeData? popupThemeData,
+    TMenuThemeData? menuThemeData,
   }) {
     return TThemeData(
       brightness: brightness ?? this.brightness,
@@ -173,6 +195,7 @@ class TThemeData with Diagnosticable {
       checkboxThemeData: checkboxThemeData ?? this.checkboxThemeData,
       inputThemeData: inputThemeData ?? this.inputThemeData,
       popupThemeData: popupThemeData ?? this.popupThemeData,
+      menuThemeData: menuThemeData ?? this.menuThemeData,
     );
   }
 
@@ -189,7 +212,8 @@ class TThemeData with Diagnosticable {
           buttonThemeData == other.buttonThemeData &&
           checkboxThemeData == other.checkboxThemeData &&
           inputThemeData == other.inputThemeData &&
-          popupThemeData == other.popupThemeData;
+          popupThemeData == other.popupThemeData &&
+          menuThemeData == other.menuThemeData;
 
   @override
   int get hashCode =>
@@ -201,7 +225,8 @@ class TThemeData with Diagnosticable {
       buttonThemeData.hashCode ^
       checkboxThemeData.hashCode ^
       inputThemeData.hashCode ^
-      popupThemeData.hashCode;
+      popupThemeData.hashCode ^
+      menuThemeData.hashCode;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -216,5 +241,6 @@ class TThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<TCheckboxThemeData>('checkboxThemeData', checkboxThemeData, defaultValue: null));
     properties.add(DiagnosticsProperty<TInputThemeData>('inputThemeData', inputThemeData, defaultValue: null));
     properties.add(DiagnosticsProperty<TPopupThemeData>('popupThemeData', popupThemeData, defaultValue: null));
+    properties.add(DiagnosticsProperty<TMenuThemeData>('menuThemeData', menuThemeData, defaultValue: null));
   }
 }

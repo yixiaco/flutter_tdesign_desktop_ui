@@ -267,7 +267,7 @@ class _TDropdownMenuState<T> extends State<_TDropdownMenu<T>> {
 }
 
 /// 下拉菜单面板子项
-class _TDropdownItem<T> extends StatefulWidget {
+class _TDropdownItem<T> extends StatelessWidget {
   const _TDropdownItem({
     Key? key,
     required this.option,
@@ -301,23 +301,6 @@ class _TDropdownItem<T> extends StatefulWidget {
   final bool highlight;
 
   @override
-  State<_TDropdownItem<T>> createState() => _TDropdownItemState<T>();
-}
-
-class _TDropdownItemState<T> extends State<_TDropdownItem<T>> with MaterialStateMixin {
-  @override
-  void initState() {
-    super.initState();
-    setMaterialState(MaterialState.disabled, widget.option.disabled);
-  }
-
-  @override
-  void didUpdateWidget(covariant _TDropdownItem<T> oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    setMaterialState(MaterialState.disabled, widget.option.disabled);
-  }
-
-  @override
   Widget build(BuildContext context) {
     var theme = TTheme.of(context);
     var colorScheme = theme.colorScheme;
@@ -333,70 +316,71 @@ class _TDropdownItemState<T> extends State<_TDropdownItem<T>> with MaterialState
       if (states.contains(MaterialState.disabled)) {
         return colorScheme.textColorDisabled;
       }
-      return widget.highlight ? colorScheme.brandColor : colorScheme.textColorPrimary;
+      if (states.contains(MaterialState.selected)) {
+        return colorScheme.brandColor;
+      }
+      return colorScheme.textColorPrimary;
     });
 
-    // 覆盖色
-    final MaterialStateProperty<Color?> overlayColor = MaterialStateProperty.resolveWith((states) {
+    // 背景色
+    final MaterialStateProperty<Color?> bgColor = MaterialStateProperty.resolveWith((states) {
+      if (states.contains(MaterialState.selected)) {
+        return colorScheme.brandColorLight;
+      }
       if (states.contains(MaterialState.hovered)) {
         return colorScheme.bgColorContainerHover;
-      }
-      if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
-        return colorScheme.bgColorContainerActive;
       }
       return null;
     });
 
-    Widget? suffix;
-    if (widget.option.children?.isNotEmpty ?? false) {
-      suffix = Icon(
-        TIcons.chevronRight,
-        size: theme.fontData.fontSizeL,
-        color: effectiveTextColor.resolve(materialStates),
-      );
-    }
     return ConstrainedBox(
       constraints: BoxConstraints(
-        minWidth: widget.minColumnWidth,
-        maxWidth: widget.maxColumnWidth,
+        minWidth: minColumnWidth,
+        maxWidth: maxColumnWidth,
       ),
       child: Padding(
         padding: EdgeInsets.symmetric(vertical: TVar.spacer * .5, horizontal: TVar.spacer),
-        child: Material(
-          textStyle: TextStyle(
-            fontFamily: theme.fontFamily,
-            color: effectiveTextColor.resolve(materialStates),
-            overflow: TextOverflow.ellipsis,
-          ),
-          color: widget.highlight ? colorScheme.brandColorLight : Colors.transparent,
-          borderRadius: BorderRadius.circular(TVar.borderRadiusDefault),
-          clipBehavior: Clip.antiAlias,
-          child: InkWell(
-            onTap: widget.option.disabled ? null : () => widget.onPressed?.call(),
-            onHighlightChanged: updateMaterialState(MaterialState.pressed),
-            onHover: updateMaterialState(
-              MaterialState.hovered,
-              onChanged: widget.onHover,
-            ),
-            mouseCursor: effectiveCursor.resolve(materialStates),
-            enableFeedback: true,
-            canRequestFocus: !widget.option.disabled,
-            splashFactory: InkBevelAngle.splashFactory,
-            overlayColor: overlayColor,
-            highlightColor: Colors.transparent,
-            borderRadius: BorderRadius.circular(TVar.borderRadiusDefault),
-            child: AnimatedPadding(
-              padding: EdgeInsets.symmetric(vertical: 9, horizontal: TVar.spacer),
-              duration: TVar.animDurationBase,
-              curve: TVar.animTimeFnEaseIn,
-              child: TDecorationBox(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                suffix: suffix,
-                child: widget.option.content,
+        child: TRipple(
+          fixedRippleColor: colorScheme.bgColorContainerActive,
+          disabled: option.disabled,
+          cursor: effectiveCursor,
+          onTap: onPressed,
+          selected: highlight,
+          backgroundColor: bgColor,
+          onHover: onHover,
+          radius: BorderRadius.circular(TVar.borderRadiusDefault),
+          builder: (context, states) {
+            Widget? suffix;
+            if (option.children?.isNotEmpty ?? false) {
+              suffix = Icon(
+                TIcons.chevronRight,
+                size: theme.fontData.fontSizeL,
+                color: effectiveTextColor.resolve(states),
+              );
+            }
+
+            return DefaultTextStyle(
+              style: TextStyle(
+                fontFamily: theme.fontFamily,
+                color: effectiveTextColor.resolve(states),
+                overflow: TextOverflow.ellipsis,
               ),
-            ),
-          ),
-        ),
+              child: AnimatedPadding(
+                padding: EdgeInsets.symmetric(vertical: 9, horizontal: TVar.spacer),
+                duration: TVar.animDurationBase,
+                curve: TVar.animTimeFnEaseIn,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Flexible(child: option.content),
+                    if(suffix != null) suffix,
+                  ],
+                ),
+              ),
+            );
+          },
+        )
       ),
     );
   }

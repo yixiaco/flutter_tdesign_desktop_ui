@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// 按钮示例
-class ButtonExample extends StatelessWidget {
-  const ButtonExample({Key? key}) : super(key: key);
+class TButtonExample extends StatelessWidget {
+  const TButtonExample({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

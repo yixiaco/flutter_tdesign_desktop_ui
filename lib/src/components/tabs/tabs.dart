@@ -5,19 +5,19 @@ import 'package:flutter/scheduler.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// 标签按钮
-part '_tab_button.dart';
+part 'components/tab_button.dart';
 
 /// 标签icon按钮
-part '_tab_icon_button.dart';
+part 'components/tab_icon_button.dart';
 
 /// 标签Label
-part '_tab_label.dart';
+part 'components/tab_label.dart';
 
 /// 标签下划线
-part '_tab_painter.dart';
+part 'components/tab_painter.dart';
 
 /// 面板
-part '_tab_panel.dart';
+part 'components/tab_panel.dart';
 
 /// 选项卡
 /// 用于承载同一层级下不同页面或类别的组件，方便用户在同一个页面框架下进行快速切换。
@@ -116,11 +116,12 @@ class _TTabsState<T> extends State<TTabs<T>> {
   @override
   Widget build(BuildContext context) {
     var theme = TTheme.of(context);
+    var style = TTabsStyle.of(context);
     var colorScheme = theme.colorScheme;
     var size = widget.size ?? theme.size;
 
     Widget child = _buildLabel();
-    var panel = _TabPanel(
+    Widget panel = _TabPanel(
       list: widget.list,
       index: widget._index,
       value: widget.value,
@@ -135,6 +136,9 @@ class _TTabsState<T> extends State<TTabs<T>> {
           crossAxisAlignment ??= CrossAxisAlignment.start;
         } else {
           crossAxisAlignment ??= CrossAxisAlignment.stretch;
+        }
+        if(mainAxisSize == MainAxisSize.max) {
+          panel = Expanded(child: panel);
         }
         child = FixedCrossFlex(
           mainAxisAlignment: mainAxisAlignment ?? MainAxisAlignment.start,
@@ -151,6 +155,9 @@ class _TTabsState<T> extends State<TTabs<T>> {
         } else {
           crossAxisAlignment ??= CrossAxisAlignment.stretch;
         }
+        if(mainAxisSize == MainAxisSize.max) {
+          panel = Expanded(child: panel);
+        }
         child = FixedCrossFlex(
           mainAxisAlignment: mainAxisAlignment ?? MainAxisAlignment.spaceBetween,
           direction: Axis.vertical,
@@ -165,6 +172,9 @@ class _TTabsState<T> extends State<TTabs<T>> {
           mainAxisSize ??= MainAxisSize.min;
         } else {
           mainAxisSize ??= MainAxisSize.max;
+        }
+        if(mainAxisSize == MainAxisSize.max) {
+          panel = Expanded(child: panel);
         }
         child = FixedCrossFlex(
           mainAxisAlignment: mainAxisAlignment ?? MainAxisAlignment.start,
@@ -181,6 +191,9 @@ class _TTabsState<T> extends State<TTabs<T>> {
         } else {
           mainAxisSize ??= MainAxisSize.max;
         }
+        if(mainAxisSize == MainAxisSize.max) {
+          panel = Expanded(child: panel);
+        }
         child = FixedCrossFlex(
           mainAxisAlignment: mainAxisAlignment ?? MainAxisAlignment.spaceBetween,
           direction: Axis.horizontal,
@@ -191,7 +204,7 @@ class _TTabsState<T> extends State<TTabs<T>> {
         break;
     }
     return Container(
-      color: colorScheme.bgColorContainer,
+      color: style.backgroundColor ?? colorScheme.bgColorContainer,
       child: IconTheme(
         data: IconThemeData(
           size: theme.fontData.fontSizeL,

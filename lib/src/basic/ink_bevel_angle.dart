@@ -79,12 +79,12 @@ class InkBevelAngle extends InteractiveInkFeature {
         targetRadius = radius ?? _getTargetRadius(referenceBox, containedInkWell, rectCallback, position),
         _clipCallback = _getClipCallback(referenceBox, containedInkWell, rectCallback),
         super(controller: controller, referenceBox: referenceBox, color: color, onRemoved: onRemoved) {
-    _angle = AnimationController(duration: const Duration(milliseconds: 200), vsync: controller.vsync)
+    _angleController = AnimationController(duration: const Duration(milliseconds: 200), vsync: controller.vsync)
       ..addListener(controller.markNeedsPaint)
       ..forward();
 
-    // tan((180d / 22) = 8d) * 临边 = 对边
-    _angleWidth = _angle.drive(Tween<double>(
+    // tan((180d / 22) = 8°) * 临边 = 对边
+    _angleWidth = _angleController.drive(Tween<double>(
       begin: 0,
       end: referenceBox.size.width + tan(pi / 22) * referenceBox.size.height,
     ).chain(CurveTween(curve: TVar.animTimeFnEasing)));
@@ -94,9 +94,9 @@ class InkBevelAngle extends InteractiveInkFeature {
       ..addStatusListener(_handleAlphaStatusChanged);
 
     _fadeOut = _fadeOutController.drive(
-      Tween(
-        begin: color.opacity,
-        end: 0.0,
+      IntTween(
+        begin: color.alpha,
+        end: 0,
       ).chain(_fadeOutIntervalTween)
       .chain(CurveTween(curve: Curves.linear)),
     );
@@ -113,11 +113,11 @@ class InkBevelAngle extends InteractiveInkFeature {
   final RectCallback? _clipCallback;
   final TextDirection _textDirection;
 
-  late AnimationController _angle;
+  late AnimationController _angleController;
   late Animation<double> _angleWidth;
 
   late AnimationController _fadeOutController;
-  late Animation<double> _fadeOut;
+  late Animation<int> _fadeOut;
   static final Animatable<double> _fadeOutIntervalTween = CurveTween(curve: const Interval(.25, 1));
 
   void _handleAlphaStatusChanged(AnimationStatus status) {
@@ -129,18 +129,19 @@ class InkBevelAngle extends InteractiveInkFeature {
   ///当鼠标左键放开时
   @override
   void confirm() {
-    _angle.forward();
+    _angleController.forward();
     _fadeOutController.animateTo(1.0, duration: _kFadeOutDuration);
   }
 
   @override
   void cancel() {
+    _angleController.stop();
     _fadeOutController.animateTo(1.0, duration: _kFadeOutDuration);
   }
 
   @override
   void dispose() {
-    _angle.dispose();
+    _angleController.dispose();
     _fadeOutController.dispose();
     super.dispose();
   }
@@ -156,7 +157,7 @@ class InkBevelAngle extends InteractiveInkFeature {
   @override
   void paintFeature(Canvas canvas, Matrix4 transform) {
     final Paint paint = Paint()
-      ..color = color.withOpacity(_fadeOut.value);
+      ..color = color.withAlpha(_fadeOut.value);
 
     final Offset? originOffset = MatrixUtils.getAsTranslation(transform);
     canvas.save();

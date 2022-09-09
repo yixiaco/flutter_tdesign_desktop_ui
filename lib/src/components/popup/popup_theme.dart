@@ -379,7 +379,7 @@ enum TPopupPlacement {
   }
 }
 
-/// 触发浮层出现的方式。可选项：hover/click/focus/context-menu
+/// 触发浮层出现的方式。可选项：hover/click/focus/contextMenu
 enum TPopupTrigger {
   /// 悬浮时触发
   hover,

@@ -22,6 +22,7 @@ class TDivider extends StatelessWidget {
     this.space,
     this.thickness,
     this.margin,
+    this.color,
   }) : super(key: key);
 
   /// 文本位置（仅在水平分割线有效）
@@ -42,7 +43,11 @@ class TDivider extends StatelessWidget {
   /// 线条厚度
   final double? thickness;
 
+  /// 外边距
   final EdgeInsetsGeometry? margin;
+
+  /// 线条颜色
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
@@ -118,7 +123,7 @@ class TDivider extends StatelessWidget {
     return CustomPaint(
       size: Size(width, height),
       painter: TDividerCustomPainter(
-        color: colorScheme.borderLevel1Color,
+        color: color ?? colorScheme.borderLevel1Color,
         dashed: dashed,
         direction: layout,
       ),

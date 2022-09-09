@@ -19,7 +19,7 @@ class _TTabsExampleState extends State<TTabsExample> {
   @override
   void initState() {
     super.initState();
-    panels = List.generate(3, (index) {
+    panels = List.generate(10, (index) {
       this.index++;
       return TTabsPanel(
         label: Text('选项卡$index'),
@@ -86,6 +86,7 @@ class _TTabsExampleState extends State<TTabsExample> {
               theme: theme,
               placement: placement,
               addable: true,
+              softWrap: false,
               list: [
                 TTabsPanel(
                   label: Row(
@@ -174,7 +175,6 @@ class _TTabsExampleState extends State<TTabsExample> {
                 placement: placement,
                 addable: true,
                 dragSort: true,
-                softWrap: false,
                 onRemove: (value, index) {
                   setState(() {
                     panels.removeAt(index);

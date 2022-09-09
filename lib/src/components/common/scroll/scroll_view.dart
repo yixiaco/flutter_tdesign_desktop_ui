@@ -24,6 +24,7 @@ class TSingleChildScrollView extends StatefulWidget {
     this.showScroll = true,
     this.thumbVisibility = true,
     this.onShowScroll,
+    this.alwaysShowPadding = false,
   }) : super(key: key);
 
   /// The axis along which the scroll view scrolls.
@@ -131,6 +132,9 @@ class TSingleChildScrollView extends StatefulWidget {
   /// 显示滚动条事件
   final void Function(bool showScroll)? onShowScroll;
 
+  /// 一直显示padding
+  final bool alwaysShowPadding;
+
   @override
   State<TSingleChildScrollView> createState() => _TSingleChildScrollViewState();
 }
@@ -212,7 +216,7 @@ class _TSingleChildScrollViewState extends State<TSingleChildScrollView> {
           physics: widget.physics,
           reverse: widget.reverse,
           scrollDirection: widget.scrollDirection,
-          padding: _showPadding ? padding : null,
+          padding: _showPadding || widget.alwaysShowPadding ? padding : null,
           child: widget.child,
         ),
       ),

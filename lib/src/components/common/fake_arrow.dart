@@ -4,6 +4,16 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
+const _kFakeArrowSvg = '''<svg
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            >
+            <path d="M3.75 5.7998L7.99274 10.0425L12.2361 5.79921" stroke="black" stroke-opacity="0.9" stroke-width="1.3" />
+            </svg>''';
+
 /// 箭头方向
 enum TFakeArrowPlacement {
   /// 左
@@ -25,6 +35,9 @@ class TFakeArrow extends StatefulWidget {
     Key? key,
     this.placement = TFakeArrowPlacement.right,
     this.child,
+    this.color,
+    this.width,
+    this.height,
   }) : super(key: key);
 
   /// 方向
@@ -33,13 +46,22 @@ class TFakeArrow extends StatefulWidget {
   /// 替换icon图标
   final Widget? child;
 
+  /// 颜色
+  final Color? color;
+
+  /// 宽度
+  final double? width;
+
+  /// 高度
+  final double? height;
+
   @override
   State<TFakeArrow> createState() => _TFakeArrowState();
 }
 
 class _TFakeArrowState extends State<TFakeArrow> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late CurvedAnimation animated;
+  late CurvedAnimation _animated;
 
   @override
   void initState() {
@@ -49,7 +71,7 @@ class _TFakeArrowState extends State<TFakeArrow> with SingleTickerProviderStateM
       duration: TVar.animDurationSlow,
       value: 1,
     );
-    animated = CurvedAnimation(
+    _animated = CurvedAnimation(
       parent: _controller,
       curve: Curves.ease,
     );
@@ -65,8 +87,9 @@ class _TFakeArrowState extends State<TFakeArrow> with SingleTickerProviderStateM
 
   @override
   void dispose() {
-    super.dispose();
     _controller.dispose();
+    _animated.dispose();
+    super.dispose();
   }
 
   @override
@@ -78,37 +101,32 @@ class _TFakeArrowState extends State<TFakeArrow> with SingleTickerProviderStateM
         Matrix4 matrix4;
         switch (widget.placement) {
           case TFakeArrowPlacement.left:
-            matrix4 = Matrix4.rotationY(pi * animated.value)..rotateZ(-pi / 2);
+            matrix4 = Matrix4.rotationY(pi * _animated.value)..rotateZ(-pi / 2);
             break;
           case TFakeArrowPlacement.right:
-            matrix4 = Matrix4.rotationY(pi * animated.value)..rotateZ(pi / 2);
+            matrix4 = Matrix4.rotationY(pi * _animated.value)..rotateZ(pi / 2);
             break;
           case TFakeArrowPlacement.top:
-            matrix4 = Matrix4.rotationX(pi * animated.value)..rotateZ(pi);
+            matrix4 = Matrix4.rotationX(pi * _animated.value)..rotateZ(pi);
             break;
           case TFakeArrowPlacement.bottom:
-            matrix4 = Matrix4.rotationX(pi * animated.value);
+            matrix4 = Matrix4.rotationX(pi * _animated.value);
             break;
         }
         return Transform(
           transform: matrix4,
           alignment: Alignment.center,
           filterQuality: FilterQuality.medium,
-          child: widget.child ?? SvgPicture.string(
-            '''<svg
-            width="16"
-            height="16"
-            viewBox="0 0 16 16"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            >
-            <path d="M3.75 5.7998L7.99274 10.0425L12.2361 5.79921" stroke="black" stroke-opacity="0.9" stroke-width="1.3" />
-            </svg>''',
-            color: colorScheme.textColorPrimary,
-          ),
+          child: widget.child ??
+              SvgPicture.string(
+                _kFakeArrowSvg,
+                color: widget.color ?? colorScheme.textColorPrimary,
+                width: widget.width,
+                height: widget.height,
+              ),
         );
       },
-      animation: animated,
+      animation: _animated,
     );
   }
 }

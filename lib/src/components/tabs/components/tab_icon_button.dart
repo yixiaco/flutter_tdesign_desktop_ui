@@ -1,4 +1,4 @@
-part of 'tabs.dart';
+part of '../tabs.dart';
 
 /// 图标
 class _TabIconButton extends StatelessWidget {
@@ -29,9 +29,14 @@ class _TabIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var theme = TTheme.of(context);
+    var style = TTabsStyle.of(context);
     var colorScheme = theme.colorScheme;
     var size = this.size ?? theme.size;
+    var iconButtonStyle = style.iconButtonStyle;
     var iconBgColor = MaterialStateProperty.resolveWith((states) {
+      if (iconButtonStyle?.backgroundColor != null) {
+        return MaterialStateProperty.resolveAs(iconButtonStyle!.backgroundColor, states);
+      }
       if (states.contains(MaterialState.hovered)) {
         return colorScheme.bgColorSecondaryContainerHover;
       }
@@ -61,12 +66,16 @@ class _TabIconButton extends StatelessWidget {
       }
       border = Border(right: borderSide, bottom: borderSide);
     }
+    boxShadow = iconButtonStyle?.boxShadow ?? boxShadow;
+    border = iconButtonStyle?.border ?? border;
+    var width = iconButtonStyle?.width ?? _kIconWidth;
+    var height = iconButtonStyle?.height ?? size.sizeOf(small: 48, medium: 48, large: 64);
     return TMaterialStateBuilder(
       onTap: onTap,
       builder: (BuildContext context, Set<MaterialState> states) {
         return Container(
-          width: _kIconWidth,
-          height: size.sizeOf(small: 48, medium: 48, large: 64),
+          width: width,
+          height: height,
           decoration: BoxDecoration(
             color: iconBgColor.resolve(states),
             border: border,
@@ -74,8 +83,8 @@ class _TabIconButton extends StatelessWidget {
           ),
           child: Icon(
             icon,
-            size: theme.fontData.fontSizeBodyLarge,
-            color: colorScheme.textColorSecondary,
+            size: iconButtonStyle?.iconSize ?? theme.fontData.fontSizeBodyLarge,
+            color: MaterialStateProperty.resolveAs(iconButtonStyle?.iconColor ?? colorScheme.textColorSecondary, states),
           ),
         );
       },

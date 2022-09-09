@@ -1,19 +1,80 @@
 import 'package:flutter/material.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
+/// 定义按钮颜色变量
+Map<String, Color> _variables(TColorScheme scheme) {
+  return {
+    // 状态色 - 主色
+    'btn-color-primary': scheme.brandColor,
+    'btn-color-primary-hover': scheme.brandColorHover,
+    'btn-color-primary-active': scheme.brandColorActive,
+    'btn-color-primary-disabled': scheme.brandColorDisabled,
+    // 状态色 - 成功
+    'btn-color-success': scheme.successColor,
+    'btn-color-success-hover': scheme.successColorHover,
+    'btn-color-success-active': scheme.successColorActive,
+    'btn-color-success-disabled': scheme.successColorDisabled,
+    // 状态色 - 警告
+    'btn-color-warning': scheme.warningColor,
+    'btn-color-warning-hover': scheme.warningColorHover,
+    'btn-color-warning-active': scheme.warningColorActive,
+    'btn-color-warning-disabled': scheme.warningColorDisabled,
+    // 状态色 - 危险
+    'btn-color-danger': scheme.errorColor,
+    'btn-color-danger-hover': scheme.errorColorHover,
+    'btn-color-danger-active': scheme.errorColorActive,
+    'btn-color-danger-disabled': scheme.errorColorDisabled,
+    // 状态色 - 白 背景
+    // input 输入框需要在浅色主题下有默认白色背景，而在暗色等其他主题下 transparent 适配背景色，因此不使用通用背景 token
+    'btn-color-white-bg': scheme.bgColorSpecialComponent,
+    'btn-color-white-bg-hover': scheme.bgColorSpecialComponent,
+    'btn-color-white-bg-active': scheme.bgColorContainerActive,
+    'btn-color-white-bg-disabled': scheme.bgColorComponentDisabled,
+    // 状态色 - 白 ghost
+    'btn-color-white-ghost': scheme.textColorAnti,
+    'btn-color-white-ghost-hover': scheme.brandColorHover,
+    'btn-color-white-ghost-active': scheme.brandColorActive,
+    'btn-color-white-ghost-disabled': scheme.borderLevel2Color,
+    // 状态色 - 灰 背景
+    'btn-color-gray-bg': scheme.bgColorComponent,
+    'btn-color-gray-bg-hover': scheme.bgColorComponentHover,
+    'btn-color-gray-bg-active': scheme.bgColorComponentActive,
+    'btn-color-gray-bg-disabled': scheme.bgColorComponentDisabled,
+    // 状态色 - 无框背景 - 既文字背景
+    'btn-color-text-bg': Colors.transparent,
+    'btn-color-text-bg-hover': scheme.bgColorContainerHover,
+    'btn-color-text-bg-active': scheme.bgColorContainerActive,
+    'btn-color-text-bg-disabled': Colors.transparent,
+    // 状态色 - border 灰
+    'btn-color-border-gray': scheme.borderLevel2Color,
+    'btn-color-border-gray-hover': scheme.brandColorHover,
+    'btn-color-border-gray-active': scheme.brandColorActive,
+    'btn-color-border-gray-disabled': scheme.borderLevel2Color,
+    // 状态色 - 文字 for 描边
+    'btn-color-text': scheme.textColorPrimary,
+    'btn-color-text-hover': scheme.brandColorHover,
+    'btn-color-text-active': scheme.brandColorActive,
+    'btn-color-text-disabled': scheme.textColorDisabled,
+    // 状态色 - 灰字 for base default | 灰色文字按钮
+    'btn-color-text-gray': scheme.textColorPrimary,
+    'btn-color-text-gray-hover': scheme.textColorPrimary,
+    'btn-color-text-gray-active': scheme.textColorPrimary,
+    'btn-color-text-gray-disabled': scheme.textColorDisabled,
+
+    'btn-color-none': Colors.transparent,
+    'btn-color-none-hover': Colors.transparent,
+    'btn-color-none-active': Colors.transparent,
+    'btn-color-none-disabled': Colors.transparent,
+
+    // 文本
+    'btn-text-variant-base-color': scheme.textColorAnti,
+  };
+}
+
 /// 实现了填充按钮、描边按钮、虚框按钮、文字按钮
-class _TButton extends ButtonStyleButton {
+class _TButton extends StatelessWidget {
   const _TButton({
     Key? key,
-    required VoidCallback? onPressed,
-    VoidCallback? onLongPress,
-    ValueChanged<bool>? onHover,
-    ValueChanged<bool>? onFocusChange,
-    ButtonStyle? style,
-    FocusNode? focusNode,
-    bool autofocus = false,
-    Clip clipBehavior = Clip.none,
-    Widget? child,
     this.size,
     required this.variant,
     required this.themeStyle,
@@ -22,18 +83,47 @@ class _TButton extends ButtonStyleButton {
     this.side,
     this.radius,
     required this.softWrap,
-  }) : super(
-          key: key,
-          onPressed: onPressed,
-          onLongPress: onLongPress,
-          onHover: onHover,
-          onFocusChange: onFocusChange,
-          style: style,
-          focusNode: focusNode,
-          autofocus: autofocus,
-          clipBehavior: clipBehavior,
-          child: child,
-        );
+    this.child,
+    this.onPressed,
+    required this.disabled,
+    this.onLongPress,
+    this.onHover,
+    this.onFocusChange,
+    this.style,
+    this.focusNode,
+    required this.autofocus,
+    required this.clipBehavior,
+  }) : super(key: key);
+
+  ///按钮内容
+  final Widget? child;
+
+  ///	点击时触发
+  final VoidCallback? onPressed;
+
+  /// 是否禁用
+  final bool disabled;
+
+  /// 长按
+  final VoidCallback? onLongPress;
+
+  /// 鼠标经过
+  final ValueChanged<bool>? onHover;
+
+  /// 聚焦变更
+  final ValueChanged<bool>? onFocusChange;
+
+  /// 按钮样式
+  final TButtonStyle? style;
+
+  /// 焦点
+  final FocusNode? focusNode;
+
+  /// 自动聚焦
+  final bool autofocus;
+
+  /// 剪辑
+  final Clip clipBehavior;
 
   /// 组件尺寸。可选项：small/medium/large
   final TComponentSize? size;
@@ -66,83 +156,100 @@ class _TButton extends ButtonStyleButton {
     return size.sizeOf(small: TVar.spacer, medium: TVar.spacer * 2, large: TVar.spacer * 3);
   }
 
-  /// 定义按钮颜色变量
-  static Map<String, Color> _variables(TColorScheme scheme) {
-    return {
-      // 状态色 - 主色
-      'btn-color-primary': scheme.brandColor,
-      'btn-color-primary-hover': scheme.brandColorHover,
-      'btn-color-primary-active': scheme.brandColorActive,
-      'btn-color-primary-disabled': scheme.brandColorDisabled,
-      // 状态色 - 成功
-      'btn-color-success': scheme.successColor,
-      'btn-color-success-hover': scheme.successColorHover,
-      'btn-color-success-active': scheme.successColorActive,
-      'btn-color-success-disabled': scheme.successColorDisabled,
-      // 状态色 - 警告
-      'btn-color-warning': scheme.warningColor,
-      'btn-color-warning-hover': scheme.warningColorHover,
-      'btn-color-warning-active': scheme.warningColorActive,
-      'btn-color-warning-disabled': scheme.warningColorDisabled,
-      // 状态色 - 危险
-      'btn-color-danger': scheme.errorColor,
-      'btn-color-danger-hover': scheme.errorColorHover,
-      'btn-color-danger-active': scheme.errorColorActive,
-      'btn-color-danger-disabled': scheme.errorColorDisabled,
-      // 状态色 - 白 背景
-      // input 输入框需要在浅色主题下有默认白色背景，而在暗色等其他主题下 transparent 适配背景色，因此不使用通用背景 token
-      'btn-color-white-bg': scheme.bgColorSpecialComponent,
-      'btn-color-white-bg-hover': scheme.bgColorSpecialComponent,
-      'btn-color-white-bg-active': scheme.bgColorContainerActive,
-      'btn-color-white-bg-disabled': scheme.bgColorComponentDisabled,
-      // 状态色 - 白 ghost
-      'btn-color-white-ghost': scheme.textColorAnti,
-      'btn-color-white-ghost-hover': scheme.brandColorHover,
-      'btn-color-white-ghost-active': scheme.brandColorActive,
-      'btn-color-white-ghost-disabled': scheme.borderLevel2Color,
-      // 状态色 - 灰 背景
-      'btn-color-gray-bg': scheme.bgColorComponent,
-      'btn-color-gray-bg-hover': scheme.bgColorComponentHover,
-      'btn-color-gray-bg-active': scheme.bgColorComponentActive,
-      'btn-color-gray-bg-disabled': scheme.bgColorComponentDisabled,
-      // 状态色 - 无框背景 - 既文字背景
-      'btn-color-text-bg': Colors.transparent,
-      'btn-color-text-bg-hover': scheme.bgColorContainerHover,
-      'btn-color-text-bg-active': scheme.bgColorContainerActive,
-      'btn-color-text-bg-disabled': Colors.transparent,
-      // 状态色 - border 灰
-      'btn-color-border-gray': scheme.borderLevel2Color,
-      'btn-color-border-gray-hover': scheme.brandColorHover,
-      'btn-color-border-gray-active': scheme.brandColorActive,
-      'btn-color-border-gray-disabled': scheme.borderLevel2Color,
-      // 状态色 - 文字 for 描边
-      'btn-color-text': scheme.textColorPrimary,
-      'btn-color-text-hover': scheme.brandColorHover,
-      'btn-color-text-active': scheme.brandColorActive,
-      'btn-color-text-disabled': scheme.textColorDisabled,
-      // 状态色 - 灰字 for base default | 灰色文字按钮
-      'btn-color-text-gray': scheme.textColorPrimary,
-      'btn-color-text-gray-hover': scheme.textColorPrimary,
-      'btn-color-text-gray-active': scheme.textColorPrimary,
-      'btn-color-text-gray-disabled': scheme.textColorDisabled,
+  @override
+  Widget build(BuildContext context) {
+    var buttonStyle = defaultStyleOf(context).merge(themeStyleOf(context)).merge(style);
+    return Semantics(
+      container: true,
+      button: true,
+      enabled: !disabled,
+      child: TRipple(
+        fixedRippleColor: buttonStyle.fixedRippleColor,
+        enableFeedback: buttonStyle.enableFeedback,
+        onHover: onHover,
+        onLongPress: onLongPress,
+        onFocusChange: onFocusChange,
+        disabled: disabled,
+        cursor: buttonStyle.mouseCursor,
+        onTap: onPressed,
+        autofocus: autofocus,
+        focusNode: focusNode,
+        builder: (context, states) {
+          var foregroundColor = buttonStyle.foregroundColor?.resolve(states);
+          var padding = buttonStyle.padding?.resolve(states);
+          var textStyle = buttonStyle.textStyle?.resolve(states);
+          var shape = buttonStyle.shape?.resolve(states);
+          var side = buttonStyle.side?.resolve(states);
+          shape = shape?.copyWith(side: side);
 
-      'btn-color-none': Colors.transparent,
-      'btn-color-none-hover': Colors.transparent,
-      'btn-color-none-active': Colors.transparent,
-      'btn-color-none-disabled': Colors.transparent,
+          return IconTheme.merge(
+            data: IconThemeData(color: foregroundColor),
+            child: DefaultTextStyle.merge(
+              style: textStyle?.merge(TextStyle(color: foregroundColor)),
+              child: AnimatedContainer(
+                padding: padding,
+                decoration: shape != null ? ShapeDecoration(shape: shape) : null,
+                duration: const Duration(milliseconds: 200),
+                alignment: buttonStyle.alignment,
+                child: child,
+              ),
+            ),
+          );
+        },
+        afterBuilder: (context, states, child) {
+          var fixedSize = buttonStyle.fixedSize?.resolve(states);
+          var minimumSize = buttonStyle.minimumSize?.resolve(states);
+          var maximumSize = buttonStyle.maximumSize?.resolve(states);
+          var shape = buttonStyle.shape?.resolve(states);
+          var side = buttonStyle.side?.resolve(states);
+          var backgroundColor = buttonStyle.backgroundColor?.resolve(states);
 
-      // 文本
-      'btn-text-variant-base-color': scheme.textColorAnti
-    };
+          BoxConstraints effectiveConstraints = BoxConstraints(
+            minWidth: minimumSize?.width ?? 0,
+            minHeight: minimumSize?.height ?? 0,
+            maxWidth: maximumSize?.width ?? double.infinity,
+            maxHeight: maximumSize?.height ?? double.infinity,
+          );
+          if (fixedSize != null) {
+            final Size size = effectiveConstraints.constrain(fixedSize);
+            if (size.width.isFinite) {
+              effectiveConstraints = effectiveConstraints.copyWith(
+                minWidth: size.width,
+                maxWidth: size.width,
+              );
+            }
+            if (size.height.isFinite) {
+              effectiveConstraints = effectiveConstraints.copyWith(
+                minHeight: size.height,
+                maxHeight: size.height,
+              );
+            }
+          }
+          shape = shape?.copyWith(side: side);
+          child = Container(
+            color: backgroundColor ?? Colors.transparent,
+            child: child,
+          );
+          if (shape != null) {
+            return ConstrainedBox(
+              constraints: effectiveConstraints,
+              child: ClipPath(
+                clipper: ShapeBorderClipper(shape: shape),
+                child: child,
+              ),
+            );
+          }
+          return child;
+        },
+      ),
+    );
   }
 
-  @override
-  ButtonStyle defaultStyleOf(BuildContext context) {
-    var ttheme = TTheme.of(context);
-    var theme = Theme.of(context);
-    var colorScheme = ttheme.colorScheme;
+  TButtonStyle defaultStyleOf(BuildContext context) {
+    var theme = TTheme.of(context);
+    var colorScheme = theme.colorScheme;
     var buttonTheme = TButtonTheme.of(context);
-    TComponentSize defaultSize = size ?? buttonTheme.size ?? ttheme.size;
+    TComponentSize defaultSize = size ?? buttonTheme.size ?? theme.size;
     var buttonThemeStyle = themeStyle;
     var isGhost = ghost ?? buttonTheme.ghost ?? false;
     var media = MediaQuery.of(context);
@@ -183,10 +290,10 @@ class _TButton extends ButtonStyleButton {
     MaterialStateProperty<TBorderSide?> borderSideResolve(String theme, {bool ghost = false}) {
       return MaterialStateProperty.resolveWith((states) {
         return TBorderSide(
-            width: 1 / devicePixelRatio,
-            color: resolve(theme, states, ghost: ghost) ?? Colors.transparent,
-            dashed: variant == TButtonVariant.dashed,
-          );
+          width: 1 / devicePixelRatio,
+          color: resolve(theme, states, ghost: ghost) ?? Colors.transparent,
+          dashed: variant == TButtonVariant.dashed,
+        );
       });
     }
 
@@ -398,31 +505,23 @@ class _TButton extends ButtonStyleButton {
         break;
     }
 
-    // 覆盖色
-    final MaterialStateProperty<Color?> overlayColor = MaterialStateProperty.resolveWith((states) {
-      if (states.contains(MaterialState.hovered)) {
-        return Colors.transparent;
+    // 波纹颜色
+    Color? fixedRippleColor;
+    if (isGhost) {
+      fixedRippleColor = colorScheme.gray10;
+    } else {
+      if (variant.contain(base: true)) {
+        fixedRippleColor = buttonThemeStyle.valueOf(
+          defaultStyle: variables['btn-color-gray-bg-active'],
+          primary: variables['btn-color-primary-active'],
+          danger: variables['btn-color-danger-active'],
+          warning: variables['btn-color-warning-active'],
+          success: variables['btn-color-success-active'],
+        );
+      } else {
+        fixedRippleColor = variables['btn-color-white-bg-active'];
       }
-      if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
-        if (isGhost) {
-          return colorScheme.gray10;
-        }
-        if (variant.contain(base: true)) {
-          return buttonThemeStyle.valueOf(
-            defaultStyle: variables['btn-color-gray-bg-active'],
-            primary: variables['btn-color-primary-active'],
-            danger: variables['btn-color-danger-active'],
-            warning: variables['btn-color-warning-active'],
-            success: variables['btn-color-success-active'],
-          );
-        } else {
-          if (!states.contains(MaterialState.disabled)) {
-            return variables['btn-color-white-bg-active'];
-          }
-        }
-      }
-      return null;
-    });
+    }
 
     // 鼠标样式
     final MaterialStateProperty<MouseCursor> mouseCursor = MaterialStateProperty.resolveWith((states) {
@@ -432,26 +531,22 @@ class _TButton extends ButtonStyleButton {
       return SystemMouseCursors.click;
     });
 
-    double btnHeight = defaultSize.sizeOf(small: 24 / devicePixelRatio, medium: 32 / devicePixelRatio, large: 40 / devicePixelRatio);
+    double btnHeight = defaultSize.sizeOf(small: 24, medium: 32, large: 40);
     var halfHeight = btnHeight / 2;
-    return ButtonStyle(
-      textStyle: ButtonStyleButton.allOrNull<TextStyle>(ttheme.fontData.fontBody(defaultSize)),
+    var padding = softWrap ? EdgeInsets.zero : _scaledPadding(context, defaultSize);
+    return TButtonStyle(
+      textStyle: ButtonStyleButton.allOrNull<TextStyle>(theme.fontData.fontBody(defaultSize)),
       backgroundColor: backgroundColor,
       foregroundColor: foregroundColor,
-      overlayColor: overlayColor,
-      shadowColor: ButtonStyleButton.allOrNull<Color>(Colors.transparent),
-      surfaceTintColor: ButtonStyleButton.allOrNull<Color>(Colors.transparent),
-      elevation: ButtonStyleButton.allOrNull<double>(0),
+      fixedRippleColor: fixedRippleColor,
       // 内容如果是一个icon，则不要给padding
-      padding: ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(softWrap ? EdgeInsets.zero : _scaledPadding(context, defaultSize)),
-      minimumSize: ButtonStyleButton.allOrNull<Size>(Size.square(btnHeight)),
+      padding: ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(padding),
       fixedSize: ButtonStyleButton.allOrNull<Size>(shape.valueOf(
         rectangle: Size.fromHeight(btnHeight),
         square: Size.square(btnHeight),
         round: Size.fromHeight(btnHeight),
         circle: Size.square(btnHeight),
       )),
-      maximumSize: ButtonStyleButton.allOrNull<Size>(Size.fromHeight(btnHeight)),
       side: MaterialStateProperty.resolveWith((states) => MaterialStateProperty.resolveAs(side, states) ?? borderSide.resolve(states)),
       shape: ButtonStyleButton.allOrNull<TRoundedRectangleBorder>(TRoundedRectangleBorder(
         borderRadius: radius ??
@@ -463,12 +558,8 @@ class _TButton extends ButtonStyleButton {
             )),
       )),
       mouseCursor: mouseCursor,
-      visualDensity: theme.visualDensity,
-      tapTargetSize: theme.materialTapTargetSize,
-      animationDuration: kThemeChangeDuration,
       enableFeedback: true,
       alignment: Alignment.center,
-      splashFactory: InkBevelAngle.splashFactory,
     );
   }
 
@@ -482,8 +573,7 @@ class _TButton extends ButtonStyleButton {
     );
   }
 
-  @override
-  ButtonStyle? themeStyleOf(BuildContext context) {
+  TButtonStyle? themeStyleOf(BuildContext context) {
     return TButtonTheme.of(context).style;
   }
 }
@@ -536,7 +626,7 @@ class TButton extends StatelessWidget {
   final ValueChanged<bool>? onFocusChange;
 
   /// 按钮样式
-  final ButtonStyle? style;
+  final TButtonStyle? style;
 
   /// 焦点
   final FocusNode? focusNode;
@@ -601,17 +691,17 @@ class TButton extends StatelessWidget {
     if (loading) {
       disabled = true;
       Color? loadingColor;
-      if(themeStyle == TButtonThemeStyle.defaultStyle) {
+      if (themeStyle == TButtonThemeStyle.defaultStyle) {
         loadingColor = colorScheme.textColorPrimary;
-      } else if(variant == TButtonVariant.base) {
+      } else if (variant == TButtonVariant.base) {
         loadingColor = colorScheme.textColorAnti;
-      } else if(themeStyle == TButtonThemeStyle.primary) {
+      } else if (themeStyle == TButtonThemeStyle.primary) {
         loadingColor = colorScheme.brandColor;
-      } else if(themeStyle == TButtonThemeStyle.warning) {
+      } else if (themeStyle == TButtonThemeStyle.warning) {
         loadingColor = colorScheme.warningColor;
-      } else if(themeStyle == TButtonThemeStyle.danger) {
+      } else if (themeStyle == TButtonThemeStyle.danger) {
         loadingColor = colorScheme.errorColor;
-      } else if(themeStyle == TButtonThemeStyle.success) {
+      } else if (themeStyle == TButtonThemeStyle.success) {
         loadingColor = colorScheme.successColor;
       }
       iconWidget = TLoading(
@@ -626,10 +716,10 @@ class TButton extends StatelessWidget {
     }
     result.add(iconWidget);
     result.add(child);
-    var pressed = disabled ? null : onPressed ?? () {};
 
     return _TButton(
-      onPressed: pressed,
+      disabled: disabled,
+      onPressed: onPressed,
       onLongPress: onLongPress,
       onHover: onHover,
       onFocusChange: onFocusChange,
