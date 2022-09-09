@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
@@ -46,6 +47,7 @@ class TLink extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var px = 1 / MediaQuery.of(context).devicePixelRatio;
     var theme = TTheme.of(context);
     var colorScheme = theme.colorScheme;
     var size = this.size ?? theme.size;
@@ -72,15 +74,78 @@ class TLink extends StatelessWidget {
       large: () => theme.fontData.fontLinkLarge,
     );
 
+    Color defaultColor;
+    Color disabledColor;
+    Color activeColor;
+    Color hoverColor;
+    switch (this.theme) {
+      case TLinkTheme.defaultTheme:
+        defaultColor = colorScheme.textColorPrimary;
+        hoverColor = colorScheme.brandColorHover;
+        activeColor = colorScheme.brandColorActive;
+        disabledColor = colorScheme.textColorDisabled;
+        break;
+      case TLinkTheme.primary:
+        defaultColor = colorScheme.brandColor;
+        hoverColor = colorScheme.brandColorHover;
+        activeColor = colorScheme.brandColorActive;
+        disabledColor = colorScheme.brandColorDisabled;
+        break;
+      case TLinkTheme.danger:
+        defaultColor = colorScheme.errorColor;
+        hoverColor = colorScheme.errorColorHover;
+        activeColor = colorScheme.errorColorActive;
+        disabledColor = colorScheme.errorColorDisabled;
+        break;
+      case TLinkTheme.warning:
+        defaultColor = colorScheme.warningColor;
+        hoverColor = colorScheme.warningColorHover;
+        activeColor = colorScheme.warningColorActive;
+        disabledColor = colorScheme.warningColorDisabled;
+        break;
+      case TLinkTheme.success:
+        defaultColor = colorScheme.successColor;
+        hoverColor = colorScheme.successColorHover;
+        activeColor = colorScheme.successColorActive;
+        disabledColor = colorScheme.successColorDisabled;
+        break;
+    }
+    MaterialStateProperty<Color> color = MaterialStateProperty.resolveWith((states) {
+      if (states.contains(MaterialState.disabled)) {
+        return disabledColor;
+      }
+      if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
+        return activeColor;
+      }
+      if (states.contains(MaterialState.hovered) && hover == TLinkHover.color) {
+        return hoverColor;
+      }
+      return defaultColor;
+    });
+
+    var borderSide = MaterialStateProperty.resolveWith((states) {
+      if (underline) {
+        return BorderSide(color: color.resolve(states), width: px);
+      } else if (hover == TLinkHover.color) {
+        return BorderSide.none;
+      } else if (states.contains(MaterialState.hovered)) {
+        return BorderSide(color: color.resolve(states), width: px);
+      }
+      return BorderSide.none;
+    });
+
     return TMaterialStateBuilder(
+      disabled: disabled,
+      onTap: onClick,
       builder: (context, states) {
+        var effectiveColor = color.resolve(states);
         return DefaultTextStyle(
-          style: textStyle,
+          style: textStyle.merge(TextStyle(color: effectiveColor)),
           child: IconTheme(
-            data: IconThemeData(size: textStyle.fontSize),
+            data: IconThemeData(size: textStyle.fontSize, color: effectiveColor),
             child: AnimatedContainer(
               duration: TVar.animDurationBase,
-              decoration: BoxDecoration(border: Border(bottom: BorderSide())),
+              decoration: BoxDecoration(border: Border(bottom: borderSide.resolve(states))),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
