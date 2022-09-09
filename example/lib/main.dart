@@ -21,6 +21,8 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
+import 'components/link/link_example.dart';
+
 void main() {
   // 初始化之前如果访问二进制文件，需要先初始化
   WidgetsFlutterBinding.ensureInitialized();
@@ -84,10 +86,14 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
           disabled: true,
           content: Text('Icon 图标'),
         ),
-        const TMenuItemProps(
-          value: 'icon',
-          disabled: true,
-          content: Text('Link 链接'),
+        TMenuItemProps(
+          value: 'link',
+          content: const Text('Link 链接'),
+          onClick: () {
+            setState(() {
+              content = const TLinkExample();
+            });
+          },
         ),
       ],
     ),
