@@ -40,6 +40,9 @@ export 'src/components/button/button_theme.dart';
 export 'src/components/button/types.dart';
 /// 图标
 export 'src/components/icons/t_icons.dart';
+/// 链接
+export 'src/components/link/link.dart';
+export 'src/components/link/props.dart';
 /// 分割线
 export 'src/components/divider/divider.dart';
 /// 栅格
