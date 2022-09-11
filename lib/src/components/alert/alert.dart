@@ -32,7 +32,7 @@ class TAlert extends StatefulWidget {
   final int maxLine;
 
   /// 内容（子元素）
-  final Widget? message;
+  final InlineSpan? message;
 
   /// 跟在告警内容后面的操作区。
   final Widget? operation;
@@ -58,10 +58,12 @@ class TAlert extends StatefulWidget {
 
 class _TAlertState extends State<TAlert> {
   late double _opacity;
+  late bool isExpand;
 
   @override
   void initState() {
     _opacity = 1;
+    isExpand = false;
     super.initState();
   }
 
@@ -142,27 +144,66 @@ class _TAlertState extends State<TAlert> {
     }
     //消息
     if (widget.message != null) {
-      message = DefaultTextStyle.merge(
-        style: TextStyle(
-          color: colorScheme.textColorSecondary,
-        ),
-        child: widget.message!,
+      message = TExpandableText(
+        inlineSpan: widget.message!,
+        maxLines: isExpand ? null : widget.maxLine,
+        builder: (context, child, isExpandable) {
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AnimatedCrossFade(
+                firstChild: DefaultTextStyle.merge(
+                  maxLines: widget.maxLine <= 0 ? null : widget.maxLine,
+                  style: TextStyle(
+                    color: colorScheme.textColorSecondary,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  child: child,
+                ),
+                secondChild: DefaultTextStyle.merge(
+                  style: TextStyle(color: colorScheme.textColorSecondary),
+                  child: child,
+                ),
+                crossFadeState: isExpand ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+                duration: const Duration(milliseconds: 200),
+              ),
+              if (isExpandable || isExpand)
+                Padding(
+                  padding: const EdgeInsets.only(top: 12),
+                  child: DefaultTextStyle.merge(
+                    style: TextStyle(color: colorScheme.brandColor),
+                    child: TMaterialStateBuilder(
+                      onTap: () {
+                        setState(() {
+                          isExpand = !isExpand;
+                        });
+                      },
+                      builder: (context, states) {
+                        return isExpand ? const Text('收起') : const Text('展开');
+                      },
+                    ),
+                  ),
+                ),
+            ],
+          );
+        },
       );
-      if (widget.title != null) {
-        message = Padding(
-          padding: EdgeInsets.only(top: TVar.spacer),
-          child: message,
-        );
-      }
     }
-    if(message != null || operation != null){
+    if (message != null || operation != null) {
       message = Row(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if(message != null) message,
-          if(operation != null) operation,
+          if (message != null) message,
+          if (operation != null) operation,
         ],
+      );
+    }
+    if (message != null && title != null) {
+      message = Padding(
+        padding: EdgeInsets.only(top: TVar.spacer),
+        child: message,
       );
     }
     // 关闭按钮
