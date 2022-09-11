@@ -97,6 +97,9 @@ export 'src/components/tag/check_tag.dart';
 export 'src/components/tag/types.dart';
 /// 文字提示
 export 'src/components/tooltip/tooltip.dart';
+/// 警告
+export 'src/components/alert/alert.dart';
+export 'src/components/alert/props.dart';
 /// 弹出层
 export 'src/components/popup/popup.dart';
 export 'src/components/popup/popup_theme.dart';
