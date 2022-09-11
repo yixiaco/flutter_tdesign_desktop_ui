@@ -1,3 +1,4 @@
+import 'package:example/components/alert/alert_example.dart';
 import 'package:example/components/breadcrumb/breadcrumb_example.dart';
 import 'package:example/components/button/button_example.dart';
 import 'package:example/components/checkbox/checkbox_example.dart';
@@ -45,11 +46,11 @@ class MyApp extends HookConsumerWidget {
     return TTheme(
       data: theme.copyWith(size: size),
       child: MaterialApp(
-        title: 'Flutter Demo',
+        title: 'TDesign Desktop UI Demo',
         theme: ThemeData(
           primarySwatch: Colors.blue,
         ),
-        home: const MyHomePage(title: 'Flutter Demo Home Page'),
+        home: const MyHomePage(title: 'TDesign Desktop UI Demo Home Page'),
       ),
     );
   }
@@ -261,6 +262,15 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
     TMenuGroupProps(
       title: const Text('消息提醒'),
       children: [
+        TMenuItemProps(
+          value: 'alert',
+          content: const Text('Alert 告警提醒'),
+          onClick: () {
+            setState(() {
+              content = const TAlertExample();
+            });
+          },
+        ),
         TMenuItemProps(
           value: 'popup',
           content: const Text('Popup 弹出层'),

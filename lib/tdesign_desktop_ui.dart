@@ -34,6 +34,7 @@ export 'src/components/common/scroll/scroll_view.dart';
 export 'src/components/common/material_state_builder.dart';
 export 'src/components/common/fake_arrow.dart';
 export 'src/components/common/angle_ripple.dart';
+export 'src/components/common/expandable_text.dart';
 /// 按钮
 export 'src/components/button/button.dart';
 export 'src/components/button/button_theme.dart';
@@ -97,6 +98,9 @@ export 'src/components/tag/check_tag.dart';
 export 'src/components/tag/types.dart';
 /// 文字提示
 export 'src/components/tooltip/tooltip.dart';
+/// 警告
+export 'src/components/alert/alert.dart';
+export 'src/components/alert/props.dart';
 /// 弹出层
 export 'src/components/popup/popup.dart';
 export 'src/components/popup/popup_theme.dart';
