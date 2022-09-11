@@ -51,6 +51,9 @@ export 'src/components/grid/grid.dart';
 export 'src/components/layout/layout.dart';
 /// 间距
 export 'src/components/space/space.dart';
+/// 面包屑
+export 'src/components/breadcrumb/breadcrumb.dart';
+export 'src/components/breadcrumb/props.dart';
 /// 下拉菜单
 export 'src/components/dropdown/dropdown.dart';
 export 'src/components/dropdown/types.dart';

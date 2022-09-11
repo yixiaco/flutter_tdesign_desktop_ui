@@ -331,6 +331,10 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    Widget child = widget.child;
+    if(widget.disabled) {
+      return child;
+    }
     // 窗口变更时，通知到组件
     MediaQuery.of(context);
     // 在下一帧时，更新浮层
@@ -341,7 +345,6 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
         }
       });
     }
-    Widget child = widget.child;
     if (widget.trigger == TPopupTrigger.hover) {
       child = MouseRegion(
         hitTestBehavior: HitTestBehavior.translucent,
