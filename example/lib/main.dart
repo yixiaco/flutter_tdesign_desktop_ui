@@ -1,3 +1,4 @@
+import 'package:example/components/breadcrumb/breadcrumb_example.dart';
 import 'package:example/components/button/button_example.dart';
 import 'package:example/components/checkbox/checkbox_example.dart';
 import 'package:example/components/collapse/collapse_example.dart';
@@ -119,6 +120,15 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
     TMenuGroupProps(
       title: const Text('导航'),
       children: [
+        TMenuItemProps(
+          value: 'breadcrumb',
+          content: const Text('Breadcrumb 面包屑'),
+          onClick: () {
+            setState(() {
+              content = const TBreadcrumbExample();
+            });
+          },
+        ),
         TMenuItemProps(
           value: 'dropdown',
           content: const Text('Dropdown 下拉菜单'),

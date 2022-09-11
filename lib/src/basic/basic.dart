@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
+import 'package:url_launcher/link.dart';
 
 /// 组件大小
 enum TComponentSize {
@@ -72,5 +73,22 @@ enum TLayoutSize {
     return values.firstWhere((element) {
       return element.minBreakpoint <= width && width < element.maxBreakpoint;
     }, orElse: () => TLayoutSize.lg);
+  }
+}
+
+enum TLinkTarget {
+  defaultTarget,
+  self,
+  blank;
+
+  LinkTarget get linkTarget {
+    switch(this) {
+      case TLinkTarget.defaultTarget:
+        return LinkTarget.defaultTarget;
+      case TLinkTarget.self:
+        return LinkTarget.self;
+      case TLinkTarget.blank:
+        return LinkTarget.blank;
+    }
   }
 }

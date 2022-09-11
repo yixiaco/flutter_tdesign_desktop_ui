@@ -24,19 +24,24 @@ enum TTooltipTheme {
 
 /// 文字提示
 /// 用于文字提示的气泡框
-class TTooltip extends StatefulWidget {
+class TTooltip extends StatelessWidget {
   const TTooltip({
     Key? key,
+    this.disabled = false,
     this.destroyOnClose = true,
     this.duration,
     this.placement = TPopupPlacement.top,
     this.showArrow = true,
     this.theme = TTooltipTheme.defaultTheme,
     this.message,
+    this.richMessage,
     this.trigger = TPopupTrigger.hover,
     this.padding,
     required this.child,
   }) : super(key: key);
+
+  /// 是否禁用组件
+  final bool disabled;
 
   /// 是否在关闭浮层时销毁浮层
   final bool destroyOnClose;
@@ -56,6 +61,9 @@ class TTooltip extends StatefulWidget {
   /// 提示消息
   final String? message;
 
+  /// 富文本消息，比[message]优先级高
+  final InlineSpan? richMessage;
+
   /// 触发方式
   final TPopupTrigger trigger;
 
@@ -66,20 +74,15 @@ class TTooltip extends StatefulWidget {
   final Widget child;
 
   @override
-  State<TTooltip> createState() => _TTooltipState();
-}
-
-class _TTooltipState extends State<TTooltip> {
-  @override
   Widget build(BuildContext context) {
-    if (widget.message == null) {
-      return widget.child;
+    if (message == null && richMessage == null) {
+      return child;
     }
     var theme = TTheme.of(context);
     var colorScheme = theme.colorScheme;
     Color? backgroundColor;
     Color? textColor;
-    switch (widget.theme) {
+    switch (this.theme) {
       case TTooltipTheme.defaultTheme:
         // tooltip 背景色不随组件库浅色/深色模式切换而改变，因此使用固定色值变量
         backgroundColor = colorScheme.gray12;
@@ -107,26 +110,38 @@ class _TTooltipState extends State<TTooltip> {
         break;
     }
 
-    var padding = widget.padding ?? EdgeInsets.symmetric(horizontal: TVar.spacer, vertical: TVar.spacerS);
+    var padding = this.padding ?? EdgeInsets.symmetric(horizontal: TVar.spacer, vertical: TVar.spacerS);
 
+    var textStyle = TextStyle(
+      fontSize: theme.fontSize,
+      fontFamily: theme.fontFamily,
+      color: textColor,
+    );
+    Widget content;
+    if (richMessage != null) {
+      content = Text.rich(richMessage!, style: textStyle);
+    } else {
+      content = Text(
+        message!,
+        style: textStyle,
+      );
+    }
+    content = IconTheme(
+      data: IconThemeData(size: theme.fontSize, color: textColor),
+      child: content,
+    );
     return TPopup(
+      disabled: disabled,
       style: TPopupStyle(
         backgroundColor: backgroundColor,
         padding: padding,
       ),
-      showArrow: widget.showArrow,
-      placement: widget.placement,
-      destroyOnClose: widget.destroyOnClose,
-      trigger: widget.trigger,
-      content: Text(
-        widget.message!,
-        style: TextStyle(
-          fontSize: theme.fontSize,
-          fontFamily: theme.fontFamily,
-          color: textColor,
-        ),
-      ),
-      child: widget.child,
+      showArrow: showArrow,
+      placement: placement,
+      destroyOnClose: destroyOnClose,
+      trigger: trigger,
+      content: content,
+      child: child,
     );
   }
 }
