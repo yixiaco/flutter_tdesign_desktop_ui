@@ -101,6 +101,9 @@ export 'src/components/tooltip/tooltip.dart';
 /// 警告
 export 'src/components/alert/alert.dart';
 export 'src/components/alert/props.dart';
+/// 对话框
+export 'src/components/dialog/dialog.dart';
+export 'src/components/dialog/props.dart';
 /// 弹出层
 export 'src/components/popup/popup.dart';
 export 'src/components/popup/popup_theme.dart';
