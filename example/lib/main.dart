@@ -3,6 +3,7 @@ import 'package:example/components/breadcrumb/breadcrumb_example.dart';
 import 'package:example/components/button/button_example.dart';
 import 'package:example/components/checkbox/checkbox_example.dart';
 import 'package:example/components/collapse/collapse_example.dart';
+import 'package:example/components/dialog/dialog_example.dart';
 import 'package:example/components/dropdown/dropdown_example.dart';
 import 'package:example/components/icon/icon_example.dart';
 import 'package:example/components/input/input_example.dart';
@@ -268,6 +269,15 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
           onClick: () {
             setState(() {
               content = const TAlertExample();
+            });
+          },
+        ),
+        TMenuItemProps(
+          value: 'dialog',
+          content: const Text('Dialog 对话框'),
+          onClick: () {
+            setState(() {
+              content = const TDialogExample();
             });
           },
         ),
