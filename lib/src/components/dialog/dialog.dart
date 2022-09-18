@@ -166,13 +166,13 @@ class TDialog extends StatelessWidget {
     Widget? cancelBtn = this.cancelBtn ??
         TButton(
           onPressed: onCancel,
-          child: Text(cancelText ?? '取消'),
+          child: Text(cancelText ?? GlobalTDesignLocalizations.of(context).dialogCancel),
         );
     Widget? confirmBtn = this.confirmBtn ??
         TButton(
           themeStyle: TButtonThemeStyle.primary,
           onPressed: onConfirm,
-          child: Text(confirmText ?? '确定'),
+          child: Text(confirmText ?? GlobalTDesignLocalizations.of(context).dialogConfirm),
         );
     Widget closeIcon = TMaterialStateBuilder(
       onTap: onCloseBtnClick,

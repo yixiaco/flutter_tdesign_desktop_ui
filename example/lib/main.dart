@@ -48,9 +48,11 @@ class MyApp extends HookConsumerWidget {
       data: theme.copyWith(size: size),
       child: MaterialApp(
         title: 'TDesign Desktop UI Demo',
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-        ),
+        locale: const Locale('zh', 'CN'),
+        supportedLocales: GlobalTDesignLocalizations.delegate.supportedLocales,
+        localizationsDelegates: const [
+          GlobalTDesignLocalizations.delegate,
+        ],
         home: const MyHomePage(title: 'TDesign Desktop UI Demo Home Page'),
       ),
     );

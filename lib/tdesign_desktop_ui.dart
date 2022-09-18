@@ -1,5 +1,7 @@
 library tdesign_desktop_ui;
 
+/// 国际化
+export 'src/localization.dart';
 /// 主题
 export 'src/theme/theme.dart';
 export 'src/theme/theme_data.dart';
