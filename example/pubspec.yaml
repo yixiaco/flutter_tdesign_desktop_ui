@@ -29,6 +29,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations: #国际化
+    sdk: flutter
   hooks_riverpod: ^1.0.4 #状态共享
   tdesign_desktop_ui:
     path: ../

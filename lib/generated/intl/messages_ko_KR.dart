@@ -240,9 +240,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "uploadProgressSuccessText":
             MessageLookupByLibrary.simpleMessage("성공적으로 업로드됨"),
         "uploadProgressUploadingText":
-            MessageLookupByLibrary.simpleMessage("上传中"),
-        "uploadProgressWaitingText":
             MessageLookupByLibrary.simpleMessage("업로드"),
+        "uploadProgressWaitingText":
+            MessageLookupByLibrary.simpleMessage("업로드 보류 중"),
         "uploadSizeLimitMessage": m22,
         "uploadTriggerUploadTextContinueUpload":
             MessageLookupByLibrary.simpleMessage("계속 업로드"),
@@ -257,6 +257,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "uploadTriggerUploadTextReupload":
             MessageLookupByLibrary.simpleMessage("재업로드"),
         "uploadTriggerUploadTextUploading":
-            MessageLookupByLibrary.simpleMessage("업로드 중")
+            MessageLookupByLibrary.simpleMessage("업로드")
       };
 }

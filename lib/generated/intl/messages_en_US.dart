@@ -277,6 +277,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "uploadTriggerUploadTextReupload":
             MessageLookupByLibrary.simpleMessage("ReUpload"),
         "uploadTriggerUploadTextUploading":
-            MessageLookupByLibrary.simpleMessage("uploading")
+            MessageLookupByLibrary.simpleMessage("Uploading")
       };
 }
