@@ -192,6 +192,7 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
     _visible?.dispose();
     // 销毁浮层
     _removeEntry(force: true);
+    _controller.dispose();
     super.dispose();
   }
 
