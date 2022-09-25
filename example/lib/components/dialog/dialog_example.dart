@@ -10,18 +10,24 @@ class TDialogExample extends StatefulWidget {
 }
 
 class _TDialogExampleState extends State<TDialogExample> {
-  late TDialogController _controller;
+  late TDialogController _normalController;
+  late TDialogController _modalController;
+  late TDialogController _modelessController;
 
   @override
   void initState() {
     super.initState();
-    _controller = TDialogController();
+    _normalController = TDialogController();
+    _modalController = TDialogController();
+    _modelessController = TDialogController();
   }
 
   @override
   void dispose() {
+    _normalController.dispose();
+    _modalController.dispose();
+    _modelessController.dispose();
     super.dispose();
-    _controller.dispose();
   }
 
   @override
@@ -51,16 +57,39 @@ class _TDialogExampleState extends State<TDialogExample> {
                 },
               ),
               TButton(
-                child: const Text('打开弹窗(嵌入模式)'),
+                child: const Text('模态对话框'),
                 onPressed: () {
-                  _controller.visible = true;
+                  _modalController.visible = true;
+                },
+              ),
+              TButton(
+                child: const Text('非模态对话框'),
+                onPressed: () {
+                  _modelessController.visible = true;
+                },
+              ),
+              TButton(
+                child: const Text('普通弹窗'),
+                onPressed: () {
+                  _normalController.visible = true;
                 },
               ),
             ],
           ),
           TDialog(
-            controller: _controller,
-            body: const Text('对话框内容'),
+            controller: _modalController,
+            mode: TDialogMode.modal,
+            body: const TInput(),
+          ),
+          TDialog(
+            controller: _modelessController,
+            mode: TDialogMode.modeless,
+            body: const TInput(),
+          ),
+          TDialog(
+            controller: _normalController,
+            mode: TDialogMode.normal,
+            body: const TInput(),
           ),
           const TRawDialog(
             body: Text('对话框内容'),

@@ -182,10 +182,10 @@ class _TButton extends StatelessWidget {
           var side = buttonStyle.side?.resolve(states);
           shape = shape?.copyWith(side: side);
 
-          return IconTheme.merge(
+          return IconTheme(
             data: IconThemeData(color: foregroundColor),
-            child: DefaultTextStyle.merge(
-              style: textStyle?.merge(TextStyle(color: foregroundColor)),
+            child: DefaultTextStyle(
+              style: TextStyle(color: foregroundColor).merge(textStyle),
               child: AnimatedContainer(
                 padding: padding,
                 decoration: shape != null ? ShapeDecoration(shape: shape) : null,

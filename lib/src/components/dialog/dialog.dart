@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 class TDialogController extends ChangeNotifier {
@@ -30,8 +31,8 @@ class TDialog extends StatefulWidget {
     this.closeBtn,
     this.closeText,
     this.close = true,
-    this.closeOnEscKeyDown = false,
-    this.closeOnOverlayClick = false,
+    this.closeOnEscKeyDown = true,
+    this.closeOnOverlayClick = true,
     this.confirmBtn,
     this.confirmText,
     this.confirm = true,
@@ -164,16 +165,55 @@ class TDialog extends StatefulWidget {
   State<TDialog> createState() => _TDialogState();
 }
 
-class _TDialogState extends State<TDialog> {
+class _TDialogState extends State<TDialog> with SingleTickerProviderStateMixin {
+  /// 动画控制器
+  late AnimationController _controller;
+
+  /// 默认淡入持续时间
+  static const Duration _duration = Duration(milliseconds: 200);
+
   /// 浮层对象
   OverlayEntry? _entry;
-  final GlobalKey<_TRawDialogState> _key = GlobalKey();
+
+  late CurvedAnimation _scaleAnimation;
+  late CurvedAnimation _opacityAnimation;
+  late TThemeData theme;
+  bool _existHandlerKeyboard = false;
 
   @override
   void initState() {
     super.initState();
+    _controller = AnimationController(
+      duration: _duration,
+      vsync: this,
+    )..addStatusListener(_handleStatusChanged);
     widget.controller.addListener(_updateListener);
     _updateListener();
+    _opacityAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: const Cubic(.55, 0, .55, .2),
+      reverseCurve: const Cubic(.55, 0, .55, .2).flipped,
+    );
+    _scaleAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: const Cubic(.55, 0, .55, .2),
+      reverseCurve: const Cubic(.55, 0, .55, .2).flipped,
+    );
+  }
+
+  void _handleStatusChanged(AnimationStatus status) {
+    if (status == AnimationStatus.completed) {
+      widget.onOpened?.call();
+    } else if (status == AnimationStatus.dismissed) {
+      _closed();
+      widget.onClosed?.call();
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    theme = TTheme.of(context);
   }
 
   @override
@@ -183,40 +223,95 @@ class _TDialogState extends State<TDialog> {
       oldWidget.controller.removeListener(_updateListener);
       widget.controller.addListener(_updateListener);
     }
+    if (widget.mode != oldWidget.mode) {
+      _removeEntry();
+    }
   }
 
   @override
   void dispose() {
-    super.dispose();
+    _opacityAnimation.dispose();
+    _scaleAnimation.dispose();
+    _controller.dispose();
     widget.controller.removeListener(_updateListener);
-    _entry?.remove();
+    _removeEntry();
+    HardwareKeyboard.instance.removeHandler(_handlerKeyboard);
+    _existHandlerKeyboard = false;
+    super.dispose();
+  }
+
+  /// 执行显示动画
+  void show() {
+    if (!_existHandlerKeyboard && widget.mode != TDialogMode.normal) {
+      _existHandlerKeyboard = true;
+      HardwareKeyboard.instance.addHandler(_handlerKeyboard);
+    }
+    _controller.forward();
+  }
+
+  /// 执行关闭动画
+  void hide() {
+    if (_existHandlerKeyboard) {
+      _existHandlerKeyboard = false;
+      HardwareKeyboard.instance.removeHandler(_handlerKeyboard);
+    }
+    _controller.reverse();
+  }
+
+  /// 快捷键监听处理
+  bool _handlerKeyboard(KeyEvent event) {
+    if (event.physicalKey == PhysicalKeyboardKey.escape) {
+      // esc退出
+      if (widget.closeOnEscKeyDown) {
+        hide();
+      }
+      widget.onEscKeyDown?.call();
+    } else if (event.physicalKey == PhysicalKeyboardKey.enter) {
+      // 回车
+      if (widget.confirmOnEnter) {
+        widget.onConfirm?.call();
+      }
+    }
+    return true;
   }
 
   /// 浮层显示状态事件
   void _updateListener() {
     if (widget.controller.visible) {
-      if (_entry == null) {
+      if (_entry == null && widget.mode != TDialogMode.normal) {
         _createEntry();
-      } else {
-        _key.currentState?.show();
       }
+      show();
     } else {
-      _key.currentState?.hide();
+      hide();
     }
+  }
+
+  /// 处理关闭事件
+  void _handleOnClose() {
+    hide();
+    widget.onClose?.call();
   }
 
   /// 关闭浮层时，执行的动作
   void _closed() {
     if (widget.destroyOnClose) {
       /// 销毁
-      _entry?.remove();
-      _entry = null;
+      _removeEntry();
     }
     widget.controller._visible = false;
   }
 
+  void _removeEntry() {
+    _entry?.remove();
+    _entry = null;
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (widget.mode == TDialogMode.normal) {
+      return _buildDialog();
+    }
     return Container();
   }
 
@@ -226,55 +321,113 @@ class _TDialogState extends State<TDialog> {
       context,
       debugRequiredFor: widget,
     )!;
+    var colorScheme = theme.colorScheme;
 
     _entry = OverlayEntry(
       builder: (BuildContext context) {
-        return TRawDialog(
-          key: _key,
-          body: widget.body,
-          cancelBtn: widget.cancelBtn,
-          cancelText: widget.cancelText,
-          cancel: widget.cancel,
-          closeBtn: widget.closeBtn,
-          closeText: widget.closeText,
-          close: widget.close,
-          closeOnEscKeyDown: widget.closeOnEscKeyDown,
-          closeOnOverlayClick: widget.closeOnOverlayClick,
-          confirmBtn: widget.confirmBtn,
-          confirmText: widget.confirmText,
-          confirm: widget.confirm,
-          confirmOnEnter: widget.confirmOnEnter,
-          draggable: widget.draggable,
-          showFooter: widget.showFooter,
-          footer: widget.footer,
-          headerText: widget.headerText,
-          header: widget.header,
-          showHeader: widget.showHeader,
-          alignment: widget.alignment,
-          showOverlay: widget.showOverlay,
-          theme: widget.theme,
-          width: widget.width,
-          mode: widget.mode,
-          onCancel: widget.onCancel,
-          onClose: widget.onClose,
-          onCloseBtnClick: widget.onCloseBtnClick,
-          onClosed: () {
-            _closed();
-            widget.onClosed?.call();
-          },
-          onConfirm: widget.onConfirm,
-          onEscKeyDown: widget.onEscKeyDown,
-          onOpened: widget.onOpened,
-          onOverlayClick: widget.onOverlayClick,
+        Widget child = _buildDialog();
+
+        child = Stack(
+          children: [
+            if (widget.mode == TDialogMode.modal) _buildBarrier(colorScheme, _controller),
+            child,
+          ],
+        );
+
+        return Positioned.fill(
+          child: child,
         );
       },
     );
     overlayState.insert(_entry!);
   }
+
+  Widget _buildDialog() {
+    Widget child = TRawDialog(
+      body: widget.body,
+      cancelBtn: widget.cancelBtn,
+      cancelText: widget.cancelText,
+      cancel: widget.cancel,
+      closeBtn: widget.closeBtn,
+      closeText: widget.closeText,
+      close: widget.close,
+      closeOnEscKeyDown: widget.closeOnEscKeyDown,
+      confirmBtn: widget.confirmBtn,
+      confirmText: widget.confirmText,
+      confirm: widget.confirm,
+      confirmOnEnter: widget.confirmOnEnter,
+      draggable: widget.draggable,
+      showFooter: widget.showFooter,
+      footer: widget.footer,
+      headerText: widget.headerText,
+      header: widget.header,
+      showHeader: widget.showHeader,
+      alignment: widget.alignment,
+      theme: widget.theme,
+      width: widget.width,
+      onCancel: () {
+        _handleOnClose();
+        widget.onCancel?.call();
+      },
+      onCloseBtnClick: () {
+        _handleOnClose();
+        widget.onCloseBtnClick?.call();
+      },
+      onConfirm: widget.onConfirm,
+      onEscKeyDown: widget.onEscKeyDown,
+    );
+    child = buildTransition(child, _controller);
+    return child;
+  }
+
+  /// 遮罩
+  Widget _buildBarrier(TColorScheme colorScheme, Animation<double> animation) {
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (context, child) {
+        return Visibility(
+          visible: animation.value != 0,
+          child: Opacity(
+            opacity: _opacityAnimation.value,
+            child: ModalBarrier(
+              color: colorScheme.maskActive,
+              barrierSemanticsDismissible: widget.showOverlay,
+              dismissible: widget.closeOnOverlayClick,
+              onDismiss: () {
+                _handleOnClose();
+                widget.onOverlayClick?.call();
+              },
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  /// 动画
+  Widget buildTransition(Widget child, Animation<double> animation) {
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (context, child) {
+        return Opacity(
+          opacity: _opacityAnimation.value,
+          child: Transform.scale(
+            scale: _scaleAnimation.value,
+            child: Visibility(
+              maintainState: !widget.destroyOnClose,
+              visible: animation.value != 0,
+              child: child!,
+            ),
+          ),
+        );
+      },
+      child: child,
+    );
+  }
 }
 
 /// 对话框
-class TRawDialog extends StatefulWidget {
+class TRawDialog extends StatelessWidget {
   const TRawDialog({
     Key? key,
     required this.body,
@@ -285,7 +438,6 @@ class TRawDialog extends StatefulWidget {
     this.closeText,
     this.close = true,
     this.closeOnEscKeyDown = false,
-    this.closeOnOverlayClick = false,
     this.confirmBtn,
     this.confirmText,
     this.confirm = true,
@@ -297,18 +449,12 @@ class TRawDialog extends StatefulWidget {
     this.header,
     this.showHeader = true,
     this.alignment = const Alignment(0, -.6),
-    this.showOverlay = true,
     this.theme = TDialogTheme.defaultTheme,
     this.width,
-    this.mode = TDialogMode.normal,
     this.onCancel,
-    this.onClose,
     this.onCloseBtnClick,
-    this.onClosed,
     this.onConfirm,
     this.onEscKeyDown,
-    this.onOpened,
-    this.onOverlayClick,
   }) : super(key: key);
 
   /// 对话框内容
@@ -334,9 +480,6 @@ class TRawDialog extends StatefulWidget {
 
   /// 按下 ESC 时是否触发对话框关闭事件
   final bool closeOnEscKeyDown;
-
-  /// 点击蒙层时是否触发关闭事件
-  final bool closeOnOverlayClick;
 
   /// 确认按钮，这会覆盖[confirmText]的行为
   final Widget? confirmBtn;
@@ -371,41 +514,23 @@ class TRawDialog extends StatefulWidget {
   /// 对话框位置
   final Alignment alignment;
 
-  /// 是否显示遮罩层
-  final bool showOverlay;
-
   /// 对话框风格
   final TDialogTheme theme;
 
   /// 对话框宽度
   final double? width;
 
-  /// 对话框模式
-  final TDialogMode mode;
-
   /// 如果“取消”按钮存在，则点击“取消”按钮时触发，同时触发关闭事件
   final VoidCallback? onCancel;
 
-  /// 关闭事件，点击取消按钮、点击关闭按钮、点击蒙层、按下 ESC 等场景下触发
-  final VoidCallback? onClose;
-
   /// 点击右上角关闭按钮时触发
   final VoidCallback? onCloseBtnClick;
-
-  /// 对话框消失动画效果结束后触发
-  final VoidCallback? onClosed;
 
   /// 如果“确认”按钮存在，则点击“确认”按钮时触发，或者键盘按下回车键时触发
   final VoidCallback? onConfirm;
 
   /// 按下 ESC 时触发事件
   final VoidCallback? onEscKeyDown;
-
-  /// 对话框弹出动画效果结束后触发
-  final VoidCallback? onOpened;
-
-  /// 如果蒙层存在，点击蒙层时触发
-  final VoidCallback? onOverlayClick;
 
   /// 显示对话框
   static Future<T?> dialog<T extends Object?>({
@@ -458,51 +583,6 @@ class TRawDialog extends StatefulWidget {
   }
 
   @override
-  State<TRawDialog> createState() => _TRawDialogState();
-}
-
-class _TRawDialogState extends State<TRawDialog> with SingleTickerProviderStateMixin {
-  /// 动画控制器
-  late AnimationController _controller;
-
-  /// 默认淡入持续时间
-  static const Duration _duration = Duration(milliseconds: 200);
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: _duration,
-      vsync: this,
-    )..addStatusListener(_handleStatusChanged);
-    show();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _handleStatusChanged(AnimationStatus status) {
-    if (status == AnimationStatus.completed) {
-      widget.onOpened?.call();
-    } else if (status == AnimationStatus.dismissed) {
-      widget.onClosed?.call();
-    }
-  }
-
-  /// 执行显示动画
-  void show() {
-    _controller.forward();
-  }
-
-  /// 执行关闭动画
-  void hide() {
-    _controller.reverse();
-  }
-
-  @override
   Widget build(BuildContext context) {
     var theme = TTheme.of(context);
     var colorScheme = theme.colorScheme;
@@ -520,7 +600,7 @@ class _TRawDialogState extends State<TRawDialog> with SingleTickerProviderStateM
       left: TVar.spacer4,
     );
     EdgeInsetsGeometry footerPadding = EdgeInsets.only(top: TVar.spacer2);
-    double width = widget.width ?? 480;
+    double width = this.width ?? 480;
     double iconSize = 24;
     double closeIconSize = 20;
     var closeBgColor = MaterialStateProperty.resolveWith((states) {
@@ -532,26 +612,20 @@ class _TRawDialogState extends State<TRawDialog> with SingleTickerProviderStateM
       }
     });
     Widget? icon;
-    Widget? header = widget.header ?? (widget.headerText != null ? Text(widget.headerText!) : null);
-    Widget? cancelBtn = widget.cancelBtn ??
+    Widget? header = this.header ?? (headerText != null ? Text(headerText!) : null);
+    Widget? cancelBtn = this.cancelBtn ??
         TButton(
-          onPressed: () {
-            hide();
-            widget.onCancel?.call();
-          },
-          child: Text(widget.cancelText ?? GlobalTDesignLocalizations.of(context).dialogCancel),
+          onPressed: onCancel,
+          child: Text(cancelText ?? GlobalTDesignLocalizations.of(context).dialogCancel),
         );
-    Widget? confirmBtn = widget.confirmBtn ??
+    Widget? confirmBtn = this.confirmBtn ??
         TButton(
           themeStyle: TButtonThemeStyle.primary,
-          onPressed: widget.onConfirm,
-          child: Text(widget.confirmText ?? GlobalTDesignLocalizations.of(context).dialogConfirm),
+          onPressed: onConfirm,
+          child: Text(confirmText ?? GlobalTDesignLocalizations.of(context).dialogConfirm),
         );
     Widget closeIcon = TMaterialStateBuilder(
-      onTap: () {
-        hide();
-        widget.onCloseBtnClick?.call();
-      },
+      onTap: onCloseBtnClick,
       builder: (context, states) {
         return DefaultTextStyle(
           style: TextStyle(color: colorScheme.textColorSecondary, fontSize: closeIconSize),
@@ -563,7 +637,7 @@ class _TRawDialogState extends State<TRawDialog> with SingleTickerProviderStateM
                 color: closeBgColor.resolve(states),
                 borderRadius: BorderRadius.circular(TVar.borderRadiusDefault),
               ),
-              child: widget.closeBtn ?? (widget.closeText != null ? Text(widget.closeText!) : const Icon(TIcons.close)),
+              child: closeBtn ?? (closeText != null ? Text(closeText!) : const Icon(TIcons.close)),
             ),
           ),
         );
@@ -572,7 +646,7 @@ class _TRawDialogState extends State<TRawDialog> with SingleTickerProviderStateM
 
     Color backgroundColor = colorScheme.bgColorContainer;
 
-    switch (widget.theme) {
+    switch (this.theme) {
       case TDialogTheme.defaultTheme:
         break;
       case TDialogTheme.info:
@@ -589,110 +663,79 @@ class _TRawDialogState extends State<TRawDialog> with SingleTickerProviderStateM
         break;
     }
 
-    Widget child = Container(
-      padding: padding,
-      width: width,
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        border: Border.all(color: colorScheme.borderLevel1Color),
-        borderRadius: BorderRadius.circular(TVar.borderRadiusLarge),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (widget.showHeader)
-            Row(
-              children: [
-                if (icon != null)
-                  Padding(
-                    padding: EdgeInsets.only(right: TVar.spacer),
-                    child: icon,
-                  ),
-                if (header != null)
-                  DefaultTextStyle(
-                    style: theme.fontData.fontTitleMedium.merge(TextStyle(
-                      color: colorScheme.textColorPrimary,
-                    )),
-                    child: header,
-                  ),
-              ],
-            ),
-          Padding(
-            padding: icon != null ? bodyIconPadding : bodyPadding,
-            child: DefaultTextStyle(
-              style: theme.fontData.fontBodyMedium.merge(TextStyle(
-                color: icon != null ? colorScheme.textColorPrimary : colorScheme.textColorSecondary,
-              )),
-              child: widget.body,
-            ),
-          ),
-          if (widget.showFooter)
-            Padding(
-              padding: footerPadding,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+    Widget child = Material(
+      color: Colors.transparent,
+      elevation: 0,
+      child: Container(
+        padding: padding,
+        width: width,
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          border: Border.all(color: colorScheme.borderLevel1Color),
+          borderRadius: BorderRadius.circular(TVar.borderRadiusLarge),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (showHeader)
+              Row(
                 children: [
-                  if (widget.cancel) cancelBtn,
-                  if (widget.confirm)
+                  if (icon != null)
                     Padding(
-                      padding: EdgeInsets.only(left: TVar.spacer),
-                      child: confirmBtn,
+                      padding: EdgeInsets.only(right: TVar.spacer),
+                      child: icon,
+                    ),
+                  if (header != null)
+                    DefaultTextStyle(
+                      style: theme.fontData.fontTitleMedium.merge(TextStyle(
+                        color: colorScheme.textColorPrimary,
+                      )),
+                      child: header,
                     ),
                 ],
               ),
+            Padding(
+              padding: icon != null ? bodyIconPadding : bodyPadding,
+              child: DefaultTextStyle(
+                style: theme.fontData.fontBodyMedium.merge(TextStyle(
+                  color: icon != null ? colorScheme.textColorPrimary : colorScheme.textColorSecondary,
+                )),
+                child: body,
+              ),
+            ),
+            if (showFooter)
+              Padding(
+                padding: footerPadding,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    if (cancel) cancelBtn,
+                    if (confirm)
+                      Padding(
+                        padding: EdgeInsets.only(left: TVar.spacer),
+                        child: confirmBtn,
+                      ),
+                  ],
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+
+    return Align(
+      alignment: alignment,
+      child: Stack(
+        children: [
+          child,
+          if (close)
+            Positioned(
+              top: TVar.spacer3,
+              right: TVar.spacer3,
+              child: closeIcon,
             ),
         ],
-      ),
-    );
-
-    child = Stack(
-      children: [
-        if (widget.mode == TDialogMode.modal) Positioned.fill(child: _buildBarrier(colorScheme)),
-        child,
-        if (widget.close)
-          Positioned(
-            top: TVar.spacer3,
-            right: TVar.spacer3,
-            child: closeIcon,
-          ),
-      ],
-    );
-
-    child = Align(
-      alignment: widget.alignment,
-      child: child,
-    );
-
-    return buildTransition(child, _controller);
-  }
-
-  Widget _buildBarrier(TColorScheme colorScheme) {
-    return ModalBarrier(
-      color: colorScheme.maskActive,
-      barrierSemanticsDismissible: widget.showOverlay,
-      dismissible: widget.closeOnOverlayClick,
-      onDismiss: () {
-        hide();
-        widget.onOverlayClick?.call();
-      },
-    );
-  }
-
-  Widget buildTransition(Widget child, Animation<double> animation) {
-    return FadeTransition(
-      opacity: CurvedAnimation(
-        parent: animation,
-        curve: const Cubic(.55, 0, .55, .2),
-        reverseCurve: const Cubic(.55, 0, .55, .2).flipped,
-      ),
-      child: ScaleTransition(
-        scale: CurvedAnimation(
-          parent: animation,
-          curve: const Cubic(.08, .82, .17, 1),
-          reverseCurve: const Cubic(.6, .04, .98, .34).flipped,
-        ),
-        child: child,
       ),
     );
   }
