@@ -242,20 +242,20 @@ class _TDialogState extends State<TDialog> with SingleTickerProviderStateMixin {
 
   /// 执行显示动画
   void show() {
+    _controller.forward();
     if (!_existHandlerKeyboard && widget.mode != TDialogMode.normal) {
       _existHandlerKeyboard = true;
       HardwareKeyboard.instance.addHandler(_handlerKeyboard);
     }
-    _controller.forward();
   }
 
   /// 执行关闭动画
   void hide() {
+    _controller.reverse();
     if (_existHandlerKeyboard) {
       _existHandlerKeyboard = false;
       HardwareKeyboard.instance.removeHandler(_handlerKeyboard);
     }
-    _controller.reverse();
   }
 
   /// 快捷键监听处理
@@ -272,7 +272,7 @@ class _TDialogState extends State<TDialog> with SingleTickerProviderStateMixin {
         widget.onConfirm?.call();
       }
     }
-    return true;
+    return false;
   }
 
   /// 浮层显示状态事件
