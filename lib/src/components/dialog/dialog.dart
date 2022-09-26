@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 class TDialogController extends ChangeNotifier {
@@ -178,7 +177,7 @@ class _TDialogState extends State<TDialog> with SingleTickerProviderStateMixin {
   late CurvedAnimation _scaleAnimation;
   late CurvedAnimation _opacityAnimation;
   late TThemeData theme;
-  bool _existHandlerKeyboard = false;
+  final FocusScopeNode focusScopeNode = FocusScopeNode(debugLabel: '$_TDialogState Focus Scope');
 
   @override
   void initState() {
@@ -235,44 +234,18 @@ class _TDialogState extends State<TDialog> with SingleTickerProviderStateMixin {
     _controller.dispose();
     widget.controller.removeListener(_updateListener);
     _removeEntry();
-    HardwareKeyboard.instance.removeHandler(_handlerKeyboard);
-    _existHandlerKeyboard = false;
     super.dispose();
   }
 
   /// 执行显示动画
   void show() {
     _controller.forward();
-    if (!_existHandlerKeyboard && widget.mode != TDialogMode.normal) {
-      _existHandlerKeyboard = true;
-      HardwareKeyboard.instance.addHandler(_handlerKeyboard);
-    }
+    Navigator.of(context).focusScopeNode.setFirstFocus(focusScopeNode);
   }
 
   /// 执行关闭动画
   void hide() {
     _controller.reverse();
-    if (_existHandlerKeyboard) {
-      _existHandlerKeyboard = false;
-      HardwareKeyboard.instance.removeHandler(_handlerKeyboard);
-    }
-  }
-
-  /// 快捷键监听处理
-  bool _handlerKeyboard(KeyEvent event) {
-    if (event.physicalKey == PhysicalKeyboardKey.escape) {
-      // esc退出
-      if (widget.closeOnEscKeyDown) {
-        hide();
-      }
-      widget.onEscKeyDown?.call();
-    } else if (event.physicalKey == PhysicalKeyboardKey.enter) {
-      // 回车
-      if (widget.confirmOnEnter) {
-        widget.onConfirm?.call();
-      }
-    }
-    return false;
   }
 
   /// 浮层显示状态事件
@@ -335,7 +308,26 @@ class _TDialogState extends State<TDialog> with SingleTickerProviderStateMixin {
         );
 
         return Positioned.fill(
-          child: child,
+          child: Actions(
+            actions: <Type, Action<Intent>>{
+              DismissIntent: _DismissModalAction(() {
+                if (widget.closeOnEscKeyDown) {
+                  hide();
+                }
+                widget.onEscKeyDown?.call();
+              }),
+              ActivateIntent: _ActivateIntent(widget.confirmOnEnter, () => widget.onConfirm?.call()),
+            },
+            child: FocusScope(
+              node: focusScopeNode,
+              child: FocusTrap(
+                focusScopeNode: focusScopeNode,
+                child: RepaintBoundary(
+                  child: child,
+                ),
+              ),
+            ),
+          ),
         );
       },
     );
@@ -423,6 +415,37 @@ class _TDialogState extends State<TDialog> with SingleTickerProviderStateMixin {
       },
       child: child,
     );
+  }
+}
+
+class _DismissModalAction extends DismissAction {
+  _DismissModalAction(this.callback);
+
+  final VoidCallback callback;
+
+  @override
+  Object? invoke(DismissIntent intent) {
+    callback();
+    return null;
+  }
+}
+
+class _ActivateIntent extends Action<ActivateIntent> {
+  _ActivateIntent(this.isEnable, this.callback);
+
+  final bool isEnable;
+
+  final VoidCallback callback;
+
+  @override
+  bool isEnabled(ActivateIntent intent) {
+    return isEnable;
+  }
+
+  @override
+  Object? invoke(ActivateIntent intent) {
+    callback();
+    return null;
   }
 }
 
