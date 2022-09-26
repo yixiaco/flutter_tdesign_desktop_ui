@@ -229,6 +229,7 @@ class _TDialogState extends State<TDialog> with SingleTickerProviderStateMixin {
 
   @override
   void dispose() {
+    focusScopeNode.dispose();
     _opacityAnimation.dispose();
     _scaleAnimation.dispose();
     _controller.dispose();
@@ -240,12 +241,13 @@ class _TDialogState extends State<TDialog> with SingleTickerProviderStateMixin {
   /// 执行显示动画
   void show() {
     _controller.forward();
-    Navigator.of(context).focusScopeNode.setFirstFocus(focusScopeNode);
+    Navigator.of(context).focusScopeNode.requestFocus(focusScopeNode);
   }
 
   /// 执行关闭动画
   void hide() {
     _controller.reverse();
+    Navigator.of(context).focusScopeNode.unfocus();
   }
 
   /// 浮层显示状态事件
@@ -255,7 +257,7 @@ class _TDialogState extends State<TDialog> with SingleTickerProviderStateMixin {
         _createEntry();
       }
       show();
-    } else {
+    } else if(_entry != null) {
       hide();
     }
   }
