@@ -164,6 +164,10 @@ class TDialog extends StatefulWidget {
   State<TDialog> createState() => _TDialogState();
 }
 
+const Curve _opacityCurve = Cubic(.55, 0, .55, .2);
+const Curve _scaleEnterCurve = Cubic(.08, .82, .17, 1);
+const Curve _scaleExitCurve = Cubic(.6, .04, .98, .34);
+
 class _TDialogState extends State<TDialog> with SingleTickerProviderStateMixin {
   /// 动画控制器
   late AnimationController _controller;
@@ -190,13 +194,13 @@ class _TDialogState extends State<TDialog> with SingleTickerProviderStateMixin {
     _updateListener();
     _opacityAnimation = CurvedAnimation(
       parent: _controller,
-      curve: const Cubic(.55, 0, .55, .2),
-      reverseCurve: const Cubic(.55, 0, .55, .2).flipped,
+      curve: _opacityCurve,
+      reverseCurve: _opacityCurve.flipped,
     );
     _scaleAnimation = CurvedAnimation(
       parent: _controller,
-      curve: const Cubic(.55, 0, .55, .2),
-      reverseCurve: const Cubic(.55, 0, .55, .2).flipped,
+      curve: _scaleEnterCurve,
+      reverseCurve: _scaleExitCurve.flipped,
     );
   }
 
@@ -229,25 +233,29 @@ class _TDialogState extends State<TDialog> with SingleTickerProviderStateMixin {
 
   @override
   void dispose() {
-    focusScopeNode.dispose();
     _opacityAnimation.dispose();
     _scaleAnimation.dispose();
     _controller.dispose();
     widget.controller.removeListener(_updateListener);
     _removeEntry();
+    focusScopeNode.dispose();
     super.dispose();
   }
 
   /// 执行显示动画
   void show() {
     _controller.forward();
-    Navigator.of(context).focusScopeNode.requestFocus(focusScopeNode);
+    if (widget.mode != TDialogMode.normal) {
+      Navigator.of(context).focusScopeNode.requestFocus(focusScopeNode);
+    }
   }
 
   /// 执行关闭动画
   void hide() {
     _controller.reverse();
-    Navigator.of(context).focusScopeNode.unfocus();
+    if (widget.mode != TDialogMode.normal) {
+      Navigator.of(context).focusScopeNode.unfocus();
+    }
   }
 
   /// 浮层显示状态事件
@@ -257,7 +265,7 @@ class _TDialogState extends State<TDialog> with SingleTickerProviderStateMixin {
         _createEntry();
       }
       show();
-    } else if(_entry != null) {
+    } else if (_entry != null) {
       hide();
     }
   }
