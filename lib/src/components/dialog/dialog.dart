@@ -663,6 +663,7 @@ class TRawDialog extends StatefulWidget {
 class _TRawDialogState extends State<TRawDialog> {
   /// 当前定位
   late Alignment _currentAlignment;
+  Alignment? _dragStartAlignment;
   Offset? _dragStart;
 
   @override
@@ -818,7 +819,7 @@ class _TRawDialogState extends State<TRawDialog> {
       child: Stack(
         children: [
           child,
-          draggableArea(),
+          if (widget.draggable) draggableArea(),
           if (widget.close)
             Positioned(
               top: TVar.spacer3,
@@ -830,22 +831,45 @@ class _TRawDialogState extends State<TRawDialog> {
     );
   }
 
+  /// 拖动区域
   Widget draggableArea() {
     return Positioned(
       height: TVar.spacer3,
       top: 0,
       left: 0,
       right: 0,
-      child: GestureDetector(
-        behavior: HitTestBehavior.translucent,
-        onVerticalDragStart: (details) => _dragStart = details.globalPosition,
-        onVerticalDragUpdate: (details) {
-          print(details.globalPosition);
-        },
-        onHorizontalDragUpdate: (details) {
-          print(details);
-        },
-        child: Container(),
+      child: MouseRegion(
+        cursor: SystemMouseCursors.move,
+        child: GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onPanStart: (details) {
+            _dragStartAlignment = _currentAlignment;
+            _dragStart = details.globalPosition;
+          },
+          onPanUpdate: (details) {
+            if (mounted && _dragStartAlignment != null) {
+              var height = context.size!.height;
+              var width = context.size!.width;
+              var centerY = height / 2;
+              var centerX = width / 2;
+              var offset = details.globalPosition - (_dragStart ?? Offset.zero);
+              var currentOffset = _dragStartAlignment!.alongSize(Size(width, height)) + offset;
+              var x = (currentOffset.dx - centerX) / centerX;
+              var y = (currentOffset.dy - centerY) / centerY;
+              var align = Alignment(x.clamp(-1.0, 1.0), y.clamp(-1.0, 1.0));
+              if (_currentAlignment != align) {
+                setState(() {
+                  _currentAlignment = align;
+                });
+              }
+            }
+          },
+          onPanEnd: (details) {
+            _dragStartAlignment = null;
+            _dragStart = null;
+          },
+          child: Container(),
+        ),
       ),
     );
   }

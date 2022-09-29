@@ -72,6 +72,7 @@ class _TDialogExampleState extends State<TDialogExample> {
             ],
           ),
           TDialog(
+            draggable: true,
             controller: _modalController,
             mode: TDialogMode.modal,
             body: const TInput(),
