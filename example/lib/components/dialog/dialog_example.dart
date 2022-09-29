@@ -42,17 +42,12 @@ class _TDialogExampleState extends State<TDialogExample> {
               TButton(
                 child: const Text('打开弹窗'),
                 onPressed: () {
-                  TRawDialog.dialog(
+                  TDialog.dialog(
                     context: context,
-                    onOpened: () {
-                      print('打开对话框');
+                    onClose: () {
+                      print('关闭弹窗');
                     },
-                    onClosed: () {
-                      print('关闭对话框');
-                    },
-                    dialog: const TRawDialog(
-                      body: Text('对话框内容'),
-                    ),
+                    body: const Text('对话框内容'),
                   );
                 },
               ),

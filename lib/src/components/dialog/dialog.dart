@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
+const Curve _opacityCurve = Cubic(.55, 0, .55, .2);
+const Curve _scaleEnterCurve = Cubic(.08, .82, .17, 1);
+const Curve _scaleExitCurve = Cubic(.6, .04, .98, .34);
+
 class TDialogController extends ChangeNotifier {
   bool _visible;
 
@@ -162,11 +166,113 @@ class TDialog extends StatefulWidget {
 
   @override
   State<TDialog> createState() => _TDialogState();
-}
 
-const Curve _opacityCurve = Cubic(.55, 0, .55, .2);
-const Curve _scaleEnterCurve = Cubic(.08, .82, .17, 1);
-const Curve _scaleExitCurve = Cubic(.6, .04, .98, .34);
+  /// 显示对话框
+  static Future<T?> dialog<T extends Object?>({
+    required BuildContext context,
+    required Widget body,
+    Widget? cancelBtn,
+    String? cancelText,
+    bool cancel = true,
+    Widget? closeBtn,
+    String? closeText,
+    bool close = true,
+    // bool closeOnEscKeyDown = false,
+    Widget? confirmBtn,
+    String? confirmText,
+    bool confirm = true,
+    bool confirmOnEnter = false,
+    bool draggable = false,
+    bool showFooter = true,
+    Widget? footer,
+    String? headerText,
+    Widget? header,
+    bool showHeader = true,
+    Alignment alignment = const Alignment(0, -.6),
+    TDialogTheme theme = TDialogTheme.defaultTheme,
+    double? width,
+    bool closeOnOverlayClick = true,
+    Color? barrierColor,
+    VoidCallback? onCancel,
+    VoidCallback? onCloseBtnClick,
+    VoidCallback? onConfirm,
+    // VoidCallback? onEscKeyDown,
+    VoidCallback? onClose,
+    bool useRootNavigator = true,
+    RouteSettings? routeSettings,
+    Offset? anchorPoint,
+    Duration? transitionDuration,
+  }) {
+    var globalTheme = TTheme.of(context);
+    var colorScheme = globalTheme.colorScheme;
+
+    Widget dialog = TRawDialog(
+      body: body,
+      cancelBtn: cancelBtn,
+      cancelText: cancelText,
+      cancel: cancel,
+      closeBtn: closeBtn,
+      closeText: closeText,
+      close: close,
+      confirmBtn: confirmBtn,
+      confirmText: confirmText,
+      confirm: confirm,
+      draggable: draggable,
+      showFooter: showFooter,
+      footer: footer,
+      headerText: headerText,
+      header: header,
+      showHeader: showHeader,
+      alignment: alignment,
+      theme: theme,
+      width: width,
+      onCancel: () {
+        Navigator.of(context).maybePop();
+        onCancel?.call();
+      },
+      onCloseBtnClick: () {
+        Navigator.of(context).maybePop();
+        onCloseBtnClick?.call();
+      },
+      onConfirm: onConfirm,
+    );
+
+    Future<T?> future = showGeneralDialog<T>(
+      context: context,
+      useRootNavigator: useRootNavigator,
+      routeSettings: routeSettings,
+      anchorPoint: anchorPoint,
+      transitionDuration: transitionDuration ?? TVar.animDurationBase,
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return dialog;
+      },
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        return FadeTransition(
+          opacity: CurvedAnimation(
+            parent: animation,
+            curve: _opacityCurve,
+            reverseCurve: _opacityCurve.flipped,
+          ),
+          child: ScaleTransition(
+            scale: CurvedAnimation(
+              parent: animation,
+              curve: _scaleEnterCurve,
+              reverseCurve: _scaleExitCurve.flipped,
+            ),
+            child: child,
+          ),
+        );
+      },
+      barrierColor: barrierColor ?? colorScheme.maskActive,
+      barrierDismissible: closeOnOverlayClick,
+      barrierLabel: '',
+    );
+
+    future.then((value) => onClose?.call());
+
+    return future;
+  }
+}
 
 class _TDialogState extends State<TDialog> with SingleTickerProviderStateMixin {
   /// 动画控制器
@@ -353,11 +459,9 @@ class _TDialogState extends State<TDialog> with SingleTickerProviderStateMixin {
       closeBtn: widget.closeBtn,
       closeText: widget.closeText,
       close: widget.close,
-      closeOnEscKeyDown: widget.closeOnEscKeyDown,
       confirmBtn: widget.confirmBtn,
       confirmText: widget.confirmText,
       confirm: widget.confirm,
-      confirmOnEnter: widget.confirmOnEnter,
       draggable: widget.draggable,
       showFooter: widget.showFooter,
       footer: widget.footer,
@@ -376,7 +480,6 @@ class _TDialogState extends State<TDialog> with SingleTickerProviderStateMixin {
         widget.onCloseBtnClick?.call();
       },
       onConfirm: widget.onConfirm,
-      onEscKeyDown: widget.onEscKeyDown,
     );
     child = buildTransition(child, _controller);
     return child;
@@ -460,7 +563,7 @@ class _ActivateIntent extends Action<ActivateIntent> {
 }
 
 /// 对话框
-class TRawDialog extends StatelessWidget {
+class TRawDialog extends StatefulWidget {
   const TRawDialog({
     Key? key,
     required this.body,
@@ -470,11 +573,9 @@ class TRawDialog extends StatelessWidget {
     this.closeBtn,
     this.closeText,
     this.close = true,
-    this.closeOnEscKeyDown = false,
     this.confirmBtn,
     this.confirmText,
     this.confirm = true,
-    this.confirmOnEnter = false,
     this.draggable = false,
     this.showFooter = true,
     this.footer,
@@ -487,7 +588,6 @@ class TRawDialog extends StatelessWidget {
     this.onCancel,
     this.onCloseBtnClick,
     this.onConfirm,
-    this.onEscKeyDown,
   }) : super(key: key);
 
   /// 对话框内容
@@ -511,9 +611,6 @@ class TRawDialog extends StatelessWidget {
   /// 显示关闭按钮
   final bool close;
 
-  /// 按下 ESC 时是否触发对话框关闭事件
-  final bool closeOnEscKeyDown;
-
   /// 确认按钮，这会覆盖[confirmText]的行为
   final Widget? confirmBtn;
 
@@ -522,9 +619,6 @@ class TRawDialog extends StatelessWidget {
 
   /// 显示确认按钮
   final bool confirm;
-
-  /// 是否在按下回车键时，触发确认事件
-  final bool confirmOnEnter;
 
   /// 对话框是否可以拖拽
   final bool draggable;
@@ -562,57 +656,19 @@ class TRawDialog extends StatelessWidget {
   /// 如果“确认”按钮存在，则点击“确认”按钮时触发，或者键盘按下回车键时触发
   final VoidCallback? onConfirm;
 
-  /// 按下 ESC 时触发事件
-  final VoidCallback? onEscKeyDown;
+  @override
+  State<TRawDialog> createState() => _TRawDialogState();
+}
 
-  /// 显示对话框
-  static Future<T?> dialog<T extends Object?>({
-    required BuildContext context,
-    required TRawDialog dialog,
+class _TRawDialogState extends State<TRawDialog> {
+  /// 当前定位
+  late Alignment _currentAlignment;
+  Offset? _dragStart;
 
-    /// 对话框弹出动画效果结束后触发
-    final VoidCallback? onOpened,
-
-    /// 对话框消失动画效果结束后触发
-    final VoidCallback? onClosed,
-  }) {
-    var theme = TTheme.of(context);
-    var colorScheme = theme.colorScheme;
-
-    return showGeneralDialog(
-      context: context,
-      transitionDuration: TVar.animDurationBase,
-      pageBuilder: (context, animation, secondaryAnimation) {
-        print('x,${animation.value}');
-        return Center(child: dialog);
-      },
-      transitionBuilder: (context, animation, secondaryAnimation, child) {
-        print(animation.value);
-        if (animation.isCompleted) {
-          onOpened?.call();
-        } else if (animation.isDismissed) {
-          onClosed?.call();
-        }
-        return FadeTransition(
-          opacity: CurvedAnimation(
-            parent: animation,
-            curve: const Cubic(.55, 0, .55, .2),
-            reverseCurve: const Cubic(.55, 0, .55, .2).flipped,
-          ),
-          child: ScaleTransition(
-            scale: CurvedAnimation(
-              parent: animation,
-              curve: const Cubic(.08, .82, .17, 1),
-              reverseCurve: const Cubic(.6, .04, .98, .34).flipped,
-            ),
-            child: child,
-          ),
-        );
-      },
-      barrierColor: colorScheme.maskActive,
-      barrierDismissible: true,
-      barrierLabel: '',
-    );
+  @override
+  void initState() {
+    _currentAlignment = widget.alignment;
+    super.initState();
   }
 
   @override
@@ -633,7 +689,7 @@ class TRawDialog extends StatelessWidget {
       left: TVar.spacer4,
     );
     EdgeInsetsGeometry footerPadding = EdgeInsets.only(top: TVar.spacer2);
-    double width = this.width ?? 480;
+    double width = widget.width ?? 480;
     double iconSize = 24;
     double closeIconSize = 20;
     var closeBgColor = MaterialStateProperty.resolveWith((states) {
@@ -645,20 +701,20 @@ class TRawDialog extends StatelessWidget {
       }
     });
     Widget? icon;
-    Widget? header = this.header ?? (headerText != null ? Text(headerText!) : null);
-    Widget? cancelBtn = this.cancelBtn ??
+    Widget? header = widget.header ?? (widget.headerText != null ? Text(widget.headerText!) : null);
+    Widget? cancelBtn = widget.cancelBtn ??
         TButton(
-          onPressed: onCancel,
-          child: Text(cancelText ?? GlobalTDesignLocalizations.of(context).dialogCancel),
+          onPressed: widget.onCancel,
+          child: Text(widget.cancelText ?? GlobalTDesignLocalizations.of(context).dialogCancel),
         );
-    Widget? confirmBtn = this.confirmBtn ??
+    Widget? confirmBtn = widget.confirmBtn ??
         TButton(
           themeStyle: TButtonThemeStyle.primary,
-          onPressed: onConfirm,
-          child: Text(confirmText ?? GlobalTDesignLocalizations.of(context).dialogConfirm),
+          onPressed: widget.onConfirm,
+          child: Text(widget.confirmText ?? GlobalTDesignLocalizations.of(context).dialogConfirm),
         );
     Widget closeIcon = TMaterialStateBuilder(
-      onTap: onCloseBtnClick,
+      onTap: widget.onCloseBtnClick,
       builder: (context, states) {
         return DefaultTextStyle(
           style: TextStyle(color: colorScheme.textColorSecondary, fontSize: closeIconSize),
@@ -670,7 +726,7 @@ class TRawDialog extends StatelessWidget {
                 color: closeBgColor.resolve(states),
                 borderRadius: BorderRadius.circular(TVar.borderRadiusDefault),
               ),
-              child: closeBtn ?? (closeText != null ? Text(closeText!) : const Icon(TIcons.close)),
+              child: widget.closeBtn ?? (widget.closeText != null ? Text(widget.closeText!) : const Icon(TIcons.close)),
             ),
           ),
         );
@@ -679,7 +735,7 @@ class TRawDialog extends StatelessWidget {
 
     Color backgroundColor = colorScheme.bgColorContainer;
 
-    switch (this.theme) {
+    switch (widget.theme) {
       case TDialogTheme.defaultTheme:
         break;
       case TDialogTheme.info:
@@ -711,7 +767,7 @@ class TRawDialog extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (showHeader)
+            if (widget.showHeader)
               Row(
                 children: [
                   if (icon != null)
@@ -734,17 +790,17 @@ class TRawDialog extends StatelessWidget {
                 style: theme.fontData.fontBodyMedium.merge(TextStyle(
                   color: icon != null ? colorScheme.textColorPrimary : colorScheme.textColorSecondary,
                 )),
-                child: body,
+                child: widget.body,
               ),
             ),
-            if (showFooter)
+            if (widget.showFooter)
               Padding(
                 padding: footerPadding,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    if (cancel) cancelBtn,
-                    if (confirm)
+                    if (widget.cancel) cancelBtn,
+                    if (widget.confirm)
                       Padding(
                         padding: EdgeInsets.only(left: TVar.spacer),
                         child: confirmBtn,
@@ -758,17 +814,38 @@ class TRawDialog extends StatelessWidget {
     );
 
     return Align(
-      alignment: alignment,
+      alignment: _currentAlignment,
       child: Stack(
         children: [
           child,
-          if (close)
+          draggableArea(),
+          if (widget.close)
             Positioned(
               top: TVar.spacer3,
               right: TVar.spacer3,
               child: closeIcon,
             ),
         ],
+      ),
+    );
+  }
+
+  Widget draggableArea() {
+    return Positioned(
+      height: TVar.spacer3,
+      top: 0,
+      left: 0,
+      right: 0,
+      child: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onVerticalDragStart: (details) => _dragStart = details.globalPosition,
+        onVerticalDragUpdate: (details) {
+          print(details.globalPosition);
+        },
+        onHorizontalDragUpdate: (details) {
+          print(details);
+        },
+        child: Container(),
       ),
     );
   }
