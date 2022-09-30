@@ -32,7 +32,7 @@ class TAlert extends StatefulWidget {
   final int maxLine;
 
   /// 内容（子元素）
-  final InlineSpan? message;
+  final String? message;
 
   /// 跟在告警内容后面的操作区。
   final Widget? operation;
@@ -145,7 +145,7 @@ class _TAlertState extends State<TAlert> {
     //消息
     if (widget.message != null) {
       message = TExpandableText(
-        inlineSpan: widget.message!,
+        text: widget.message!,
         maxLines: isExpand ? null : widget.maxLine,
         builder: (context, child, isExpandable) {
           return Column(
