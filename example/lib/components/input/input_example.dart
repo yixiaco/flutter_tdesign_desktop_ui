@@ -20,6 +20,7 @@ class TInputExample extends StatelessWidget {
           clearable: true,
           status: TInputStatus.defaultStatus,
           placeholder: 'brand',
+          tips: '普通文本提示',
           maxLength: 5,
         ),
         TInput(

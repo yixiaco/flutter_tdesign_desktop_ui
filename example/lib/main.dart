@@ -3,6 +3,7 @@ import 'package:example/components/breadcrumb/breadcrumb_example.dart';
 import 'package:example/components/button/button_example.dart';
 import 'package:example/components/checkbox/checkbox_example.dart';
 import 'package:example/components/collapse/collapse_example.dart';
+import 'package:example/components/dialog/dialog_example.dart';
 import 'package:example/components/dropdown/dropdown_example.dart';
 import 'package:example/components/icon/icon_example.dart';
 import 'package:example/components/input/input_example.dart';
@@ -17,10 +18,12 @@ import 'package:example/components/space/space_example.dart';
 import 'package:example/components/switch/switch_example.dart';
 import 'package:example/components/tabs/tabs_example.dart';
 import 'package:example/components/tag/tag_example.dart';
+import 'package:example/state/locale_state.dart';
 import 'package:example/state/semantics_state.dart';
 import 'package:example/state/size_state.dart';
 import 'package:example/state/theme_state.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
@@ -42,14 +45,18 @@ class MyApp extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     var theme = ref.watch(themeProvider);
     var size = ref.watch(sizeProvider);
+    var locale = ref.watch(localeProvider);
 
     return TTheme(
       data: theme.copyWith(size: size),
       child: MaterialApp(
         title: 'TDesign Desktop UI Demo',
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-        ),
+        locale: locale,
+        supportedLocales: GlobalTDesignLocalizations.delegate.supportedLocales,
+        localizationsDelegates: const [
+          GlobalTDesignLocalizations.delegate,
+          ...GlobalMaterialLocalizations.delegates,
+        ],
         home: const MyHomePage(title: 'TDesign Desktop UI Demo Home Page'),
       ),
     );
@@ -272,6 +279,15 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
           },
         ),
         TMenuItemProps(
+          value: 'dialog',
+          content: const Text('Dialog 对话框'),
+          onClick: () {
+            setState(() {
+              content = const TDialogExample();
+            });
+          },
+        ),
+        TMenuItemProps(
           value: 'popup',
           content: const Text('Popup 弹出层'),
           onClick: () {
@@ -301,12 +317,13 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
     var theme = ref.watch(themeProvider);
     var semantics = ref.watch(semanticsProvider);
     var size = ref.watch(sizeProvider);
+    var locale = ref.watch(localeProvider);
 
     Widget child = Scaffold(
       backgroundColor: theme.brightness == Brightness.light ? const Color(0xFFEEEEEE) : Colors.black,
       body: TLayout(
         aside: _buildAside(theme),
-        header: _buildHeader(theme, semantics, size),
+        header: _buildHeader(theme, semantics, size, locale),
         footer: const TFooter(child: Text('Flutter TDesign Desktop UI')),
         content: TContent(
           child: Padding(
@@ -324,7 +341,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
     return child;
   }
 
-  Widget _buildHeader(TThemeData theme, bool semantics, TComponentSize size) {
+  Widget _buildHeader(TThemeData theme, bool semantics, TComponentSize size, Locale locale) {
     return THeader(
       child: TSingleChildScrollView(
         scrollDirection: Axis.horizontal,
@@ -365,6 +382,24 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                   value: size,
                   onChange: (value) => ref.read(sizeProvider.notifier).state = value!,
                 ),
+              ],
+            ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('国际化：'),
+                DropdownButton<Locale>(
+                  value: locale,
+                  items: const [
+                    DropdownMenuItem(value: Locale('zh', 'CN'), child: Text('中文')),
+                    DropdownMenuItem(value: Locale('en', 'US'), child: Text('English')),
+                    DropdownMenuItem(value: Locale('ja', 'JP'), child: Text('日本語')),
+                    DropdownMenuItem(value: Locale('ko', 'KR'), child: Text('한글')),
+                  ],
+                  onChanged: (value) {
+                    ref.read(localeProvider.state).state = value!;
+                  },
+                )
               ],
             )
           ],

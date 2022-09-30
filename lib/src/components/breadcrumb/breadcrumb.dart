@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tdesign_desktop_ui/src/components/common/dynamic_overflow.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 import 'package:url_launcher/link.dart';
 
@@ -95,6 +96,27 @@ class TBreadcrumb extends StatelessWidget {
         _handleClick(followLink, option, context);
       },
       builder: (context, states) {
+        /// 消息浮层提示
+        Widget child = DynamicOverflow(
+          overflowWidget: TTooltip(
+            disabled: option.disabled,
+            richMessage: TextSpan(
+              children: [
+                WidgetSpan(
+                  child: DefaultTextStyle(
+                    style: theme.fontData.fontBodyMedium,
+                    child: IconTheme.merge(
+                      data: IconThemeData(size: theme.fontData.fontSizeL),
+                      child: option.child,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            child: option.child,
+          ),
+          children: [option.child],
+        );
         return DefaultTextStyle(
           style: TextStyle(
             color: textColor.resolve(states),
@@ -109,30 +131,11 @@ class TBreadcrumb extends StatelessWidget {
               constraints: BoxConstraints(
                 maxWidth: option.maxWidth ?? maxItemWidth ?? 120,
               ),
-              child: option.child,
+              child: child,
             ),
           ),
         );
       },
-    );
-
-    /// 消息浮层提示
-    child = TTooltip(
-      disabled: option.disabled,
-      richMessage: TextSpan(
-        children: [
-          WidgetSpan(
-            child: DefaultTextStyle(
-              style: theme.fontData.fontBodyMedium,
-              child: IconTheme.merge(
-                data: IconThemeData(size: theme.fontData.fontSizeL),
-                child: option.child,
-              ),
-            ),
-          ),
-        ],
-      ),
-      child: child,
     );
     return child;
   }

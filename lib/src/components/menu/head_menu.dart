@@ -105,12 +105,12 @@ class _THeadMenuState<T> extends State<THeadMenu<T>> {
         }
       }
     }
-    if (mounted) {
-      setState(() {});
-    } else {
-      SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
-        _notifyUpdate();
+    if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
+      SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
+        setState(() {});
       });
+    } else {
+      setState(() {});
     }
   }
 
