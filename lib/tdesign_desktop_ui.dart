@@ -73,10 +73,13 @@ export 'src/components/menu/menu_controller.dart';
 export 'src/components/menu/types.dart';
 export 'src/components/menu/menu_theme.dart';
 export 'src/components/menu/menu_icon_button.dart';
-/// 复选框
+/// 多选框
 export 'src/components/checkbox/checkbox.dart';
 export 'src/components/checkbox/checkbox_group.dart';
 export 'src/components/checkbox/checkbox_theme.dart';
+/// 表单
+export 'src/components/form/form.dart';
+export 'src/components/form/props.dart';
 /// 单选框
 export 'src/components/radio/radio.dart';
 export 'src/components/radio/radio_group.dart';
