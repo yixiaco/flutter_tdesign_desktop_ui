@@ -1,5 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'package:tdesign_desktop_ui/src/components/form/props.dart';
+import 'package:tdesign_desktop_ui/src/components/form/type.dart';
 
 /// 作为[TForm]的子项
 class TFormItem extends StatefulWidget {

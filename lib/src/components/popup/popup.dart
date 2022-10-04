@@ -13,7 +13,7 @@ part 'components/popup_overlay.dart';
 
 part 'components/popup_position_delegate.dart';
 
-part 'components/props.dart';
+part 'components/type.dart';
 
 typedef PopupPositionCallback = void Function(bool isReverse);
 

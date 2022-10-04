@@ -274,3 +274,16 @@ class TFormErrorMessage {
     this.validator,
   });
 }
+
+class TFormItemValidateMessage {
+  /// 提示消息类型
+  final TFormRuleType type;
+
+  /// 消息
+  final String message;
+
+  const TFormItemValidateMessage({
+    required this.type,
+    required this.message,
+  });
+}
