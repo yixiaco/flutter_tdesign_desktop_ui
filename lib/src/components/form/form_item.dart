@@ -1,5 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'package:tdesign_desktop_ui/src/components/form/type.dart';
+import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// 作为[TForm]的子项
 class TFormItem extends StatefulWidget {
@@ -39,7 +39,7 @@ class TFormItem extends StatefulWidget {
   final bool? requiredMark;
 
   /// 表单字段校验规则
-  final List<dynamic>? rules;
+  final List<TFormRule>? rules;
 
   /// 校验不通过时，是否显示错误提示信息，优先级高于 Form.showErrorMessage
   final bool? showErrorMessage;
@@ -59,6 +59,14 @@ class TFormItem extends StatefulWidget {
 }
 
 class _TFormItemState extends State<TFormItem> {
+  TFormState? _formState;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _formState = TForm.of(context);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container();

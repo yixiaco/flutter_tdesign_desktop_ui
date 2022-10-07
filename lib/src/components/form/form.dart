@@ -8,7 +8,7 @@ class TForm extends StatefulWidget {
     Key? key,
     required this.children,
     this.colon = false,
-    this.data = const {},
+    // this.data = const {},
     this.disabled,
     this.errorMessage,
     this.formControlledComponents,
@@ -33,8 +33,9 @@ class TForm extends StatefulWidget {
   /// 是否在表单标签字段右侧显示冒号
   final bool colon;
 
-  /// 表单数据。
-  final Object data;
+  //
+  // /// 表单数据。
+  // final Object data;
 
   /// 是否禁用整个表单
   final bool? disabled;
@@ -64,7 +65,7 @@ class TForm extends StatefulWidget {
   final TFormResetType resetType;
 
   /// 表单字段校验规则
-  final Map<String, List<dynamic>>? rules;
+  final Map<String, List<TFormRule>>? rules;
 
   /// 表单校验不通过时，是否自动滚动到第一个校验不通过的字段，平滑滚动或是瞬间直达。值为空则表示不滚动。可选项：''/smooth/auto
   final TFormScrollToFirstError? scrollToFirstError;
@@ -99,7 +100,15 @@ class TForm extends StatefulWidget {
 }
 
 class TFormState extends State<TForm> {
+  /// 表单数据
+  late Map<String, dynamic> _data;
   int _generation = 0;
+
+  @override
+  void initState() {
+    _data = {};
+    super.initState();
+  }
 
   void _forceRebuild() {
     setState(() {
@@ -115,6 +124,9 @@ class TFormState extends State<TForm> {
       child: Container(),
     );
   }
+
+  /// 获取表单数据
+  Map<String, dynamic> get data => _data;
 
   /// 清空校验结果。可使用 fields 指定清除部分字段的校验结果，fields 值为空则表示清除所有字段校验结果。
   /// 清除邮箱校验结果示例：clearValidate(['email'])
