@@ -182,20 +182,22 @@ class _TSwitchState<T> extends State<TSwitch<T>> with TickerProviderStateMixin, 
         child: Stack(
           children: [
             // 底部
-            AnimatedContainer(
-              constraints: BoxConstraints(
-                minWidth: minWidth,
-                minHeight: height,
-                maxHeight: height,
+            UnconstrainedBox(
+              child: AnimatedContainer(
+                constraints: BoxConstraints(
+                  minWidth: minWidth,
+                  minHeight: height,
+                  maxHeight: height,
+                ),
+                duration: TVar.animDurationBase,
+                curve: TVar.animTimeFnEaseOut,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(height / 2),
+                  color: checkColor.resolve(states),
+                ),
+                child: label,
               ),
-              duration: TVar.animDurationBase,
-              curve: TVar.animTimeFnEaseOut,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(height / 2),
-                color: checkColor.resolve(states),
-              ),
-              child: label,
             ),
             // 滑块
             Positioned.fill(

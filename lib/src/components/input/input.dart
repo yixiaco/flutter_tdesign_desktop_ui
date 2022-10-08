@@ -7,6 +7,7 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 class TInput extends StatefulWidget {
   const TInput({
     Key? key,
+    this.name,
     this.initialValue,
     this.controller,
     this.autofocus = false,
@@ -37,6 +38,9 @@ class TInput extends StatefulWidget {
     this.onMouseleave,
     this.scrollController,
   }) : super(key: key);
+
+  /// 注册表单项名称
+  final String? name;
 
   /// 控制正在编辑的文本。
   /// 如果为null，此小部件将创建自己的[TextEditingController]并用[initialValue]初始化其[TextEditingController.text]。
@@ -305,7 +309,10 @@ class _TInputState extends State<TInput> {
         MouseRegion(
           cursor: SystemMouseCursors.click,
           child: GestureDetector(
-            onTap: () => effectiveController.clear(),
+            onTap: () {
+              effectiveController.clear();
+              widget.onClear?.call();
+            },
             child: ValueListenableBuilder<bool>(
               valueListenable: showClearIcon,
               builder: (context, value, child) {
@@ -443,7 +450,7 @@ class _TInputState extends State<TInput> {
         showClearIcon.value = false;
         widget.onMouseleave?.call(event);
       },
-      child: TextFormField(
+      child: TextField(
         key: formFieldState,
         controller: effectiveController,
         autofocus: widget.autofocus,
@@ -464,8 +471,8 @@ class _TInputState extends State<TInput> {
         maxLength: widget.maxLength ?? inputTheme.maxLength,
         obscureText: widget.type == TInputType.password && !look,
         textAlignVertical: TextAlignVertical.center,
-        onFieldSubmitted: (value) => widget.onEnter?.call(value),
         scrollController: widget.scrollController,
+        onSubmitted: (value) => widget.onEnter?.call(value),
       ),
     );
   }

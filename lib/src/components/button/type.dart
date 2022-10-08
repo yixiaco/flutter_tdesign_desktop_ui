@@ -122,3 +122,15 @@ enum TButtonThemeStyle {
     }
   }
 }
+
+/// 按钮类型
+enum TButtonType {
+  /// 提交
+  submit,
+
+  /// 重置
+  reset,
+
+  /// 按钮
+  button;
+}

@@ -6,9 +6,8 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 class TForm extends StatefulWidget {
   const TForm({
     Key? key,
-    required this.children,
+    this.children = const [],
     this.colon = false,
-    // this.data = const {},
     this.disabled,
     this.errorMessage,
     this.formControlledComponents,
@@ -32,10 +31,6 @@ class TForm extends StatefulWidget {
 
   /// 是否在表单标签字段右侧显示冒号
   final bool colon;
-
-  //
-  // /// 表单数据。
-  // final Object data;
 
   /// 是否禁用整个表单
   final bool? disabled;
@@ -83,9 +78,9 @@ class TForm extends StatefulWidget {
   /// 表单重置时触发
   final VoidCallback? onReset;
 
-  /// 表单提交时触发。其中 context.validateResult 表示校验结果，context.firstError 表示校验不通过的第一个规则提醒。context.validateResult 值为 true 表示校验通过；如果校验不通过，context.validateResult 值为校验结果列表。
+  /// 表单提交时触发。其中 validate 表示校验结果，firstError 表示校验不通过的第一个规则提醒。校验不通过validateResult 值为校验结果列表。
   // 【注意】⚠️ 默认情况，输入框按下 Enter 键会自动触发提交事件，如果希望禁用这个默认行为，可以给输入框添加 enter 事件，并在事件中设置 e.preventDefault()
-  final VoidCallback? onSubmit;
+  final void Function(Map<String, dynamic> data, bool validate, List<String> validateResult, String firstError)? onSubmit;
 
   /// 校验结束后触发，result 值为 true 表示校验通过；如果校验不通过，result 值为校验结果列表
   final VoidCallback? onValidate;
@@ -118,10 +113,39 @@ class TFormState extends State<TForm> {
 
   @override
   Widget build(BuildContext context) {
+    Widget child;
+    List<Widget> children = widget.children;
+    children = List.generate(children.length, (index) {
+      if (index != children.length - 1) {
+        return Padding(
+          padding: EdgeInsets.only(bottom: TVar.spacer3),
+          child: children[index],
+        );
+      }
+      return children[index];
+    });
+    switch (widget.layout) {
+      case TFormLayout.vertical:
+        child = Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: children,
+        );
+        break;
+      case TFormLayout.inline:
+        child = Wrap(
+          crossAxisAlignment: WrapCrossAlignment.center,
+          alignment: WrapAlignment.start,
+          direction: Axis.horizontal,
+          children: children,
+        );
+        break;
+    }
+
     return _TFormScope(
       formState: this,
       generation: _generation,
-      child: Container(),
+      child: child,
     );
   }
 
@@ -136,15 +160,21 @@ class TFormState extends State<TForm> {
   /// 如果表单属性 resetType=TFormResetType.empty 或 type=TFormResetType.empty 会重置为空；
   /// 如果表单属性 resetType=TFormResetType.initial 或者 type=TFormResetType.initial 会重置为表单初始值。
   /// [fields] 用于设置具体重置哪些字段，示例：reset({ type: TFormResetType.initial, fields: ['name', 'age'] })
-  void reset({TFormResetType? type, List<String>? fields}) {}
+  void reset({TFormResetType? type, List<String>? fields}) {
+    widget.onReset?.call();
+  }
 
   /// 设置自定义校验结果，如远程校验信息直接呈现。
-  void setValidateMessage(Map<String, TFormItemValidateMessage> message) {}
+  void setValidateMessage(Map<String, TFormItemValidateMessage> message) {
+
+  }
 
   /// 提交表单，表单里面没有提交按钮<button type="submit" />时可以使用该方法。
   /// showErrorMessage 表示是否在提交校验不通过时显示校验不通过的原因，默认显示。
   /// 该方法会触发 submit 事件
-  void submit([bool showErrorMessage = true]) {}
+  void submit([bool showErrorMessage = true]) {
+    widget.onSubmit?.call(_data, false, [], '');
+  }
 
   /// 校验函数，包含错误文本提示等功能。
   /// 【关于参数】params.fields 表示校验字段，如果设置了 fields，本次校验将仅对这些字段进行校验。
@@ -152,7 +182,9 @@ class TFormState extends State<TForm> {
   /// 'params.trigger = change' 表示只触发校验规则设定为 trigger='change' 的字段，默认触发全范围校验。
   /// params.showErrorMessage 表示校验结束后是否显示错误文本提示，默认显示。
   /// 【关于返回值】返回值为 true 表示校验通过；如果校验不通过，返回值为校验结果列表
-  void validate({List<String>? fields, TFormRuleTrigger? trigger, bool showErrorMessage = true}) {}
+  void validate({List<String>? fields, TFormRuleTrigger? trigger, bool showErrorMessage = true}) {
+    widget.onValidate?.call();
+  }
 
   /// 纯净的校验函数，仅返回校验结果，不对组件进行任何操作
   void validateOnly({List<String>? fields, TFormRuleTrigger? trigger}) {}
