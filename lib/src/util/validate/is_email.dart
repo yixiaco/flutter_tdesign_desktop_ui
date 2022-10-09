@@ -1,3 +1,6 @@
+import 'package:tdesign_desktop_ui/src/util/validate/isFQDN.dart';
+import 'package:tdesign_desktop_ui/src/util/validate/is_byte_length.dart';
+import 'package:tdesign_desktop_ui/src/util/validate/is_ip.dart';
 import 'package:tdesign_desktop_ui/src/util/validate/validate_util.dart';
 
 const _defaultEmailOptions = {
@@ -50,119 +53,128 @@ bool validateDisplayName(String displayName) {
   return true;
 }
 
-//
-// bool isEmail(str, options) {
-//   assertString(str);
-//   options = merge(options, _defaultEmailOptions);
-//
-//   if (options.require_display_name || options.allow_display_name) {
-//     const display_email = str.match(splitNameAddress);
-//     if (display_email) {
-//       var display_name = display_email[1];
-//
-//       // Remove display name and angle brackets to get email address
-//       // Can be done in the regex but will introduce a ReDOS (See  #1597 for more info)
-//       str = str.replace(display_name, '').replace(/(^<|>$)/g, '');
-//
-//       // sometimes need to trim the last space to get the display name
-//       // because there may be a space between display name and email address
-//       // eg. myname <address@gmail.com>
-//       // the display name is `myname` instead of `myname `, so need to trim the last space
-//       if (display_name.endsWith(' ')) {
-//         display_name = display_name.slice(0, -1);
-//       }
-//
-//       if (!validateDisplayName(display_name)) {
-//         return false;
-//       }
-//     } else if (options.require_display_name) {
-//       return false;
-//     }
-//   }
-//   if (!options.ignore_max_length && str.length > defaultMaxEmailLength) {
-//     return false;
-//   }
-//
-//   const parts = str.split('@');
-//   const domain = parts.pop();
-//   const lower_domain = domain.toLowerCase();
-//
-//   if (options.host_blacklist.includes(lower_domain)) {
-//     return false;
-//   }
-//
-//   let user = parts.join('@');
-//
-//   if (options.domain_specific_validation && (lower_domain === 'gmail.com' || lower_domain === 'googlemail.com')) {
-//     /*
-//       Previously we removed dots for gmail addresses before validating.
-//       This was removed because it allows `multiple..dots@gmail.com`
-//       to be reported as valid, but it is not.
-//       Gmail only normalizes single dots, removing them from here is pointless,
-//       should be done in normalizeEmail
-//     */
-//     user = user.toLowerCase();
-//
-//     // Removing sub-address from username before gmail validation
-//     const username = user.split('+')[0];
-//
-//     // Dots are not included in gmail length restriction
-//     if (!isByteLength(username.replace(/\./g, ''), { min: 6, max: 30 })) {
-//       return false;
-//     }
-//
-//     const user_parts = username.split('.');
-//     for (let i = 0; i < user_parts.length; i++) {
-//       if (!gmailUserPart.test(user_parts[i])) {
-//         return false;
-//       }
-//     }
-//   }
-//
-//   if (options.ignore_max_length === false && (
-//     !isByteLength(user, { max: 64 }) ||
-//     !isByteLength(domain, { max: 254 }))
-//   ) {
-//     return false;
-//   }
-//
-//   if (!isFQDN(domain, { require_tld: options.require_tld })) {
-//     if (!options.allow_ip_domain) {
-//       return false;
-//     }
-//
-//     if (!isIP(domain)) {
-//       if (!domain.startsWith('[') || !domain.endsWith(']')) {
-//         return false;
-//       }
-//
-//       let noBracketdomain = domain.slice(1, -1);
-//
-//       if (noBracketdomain.length === 0 || !isIP(noBracketdomain)) {
-//         return false;
-//       }
-//     }
-//   }
-//
-//   if (user[0] === '"') {
-//     user = user.slice(1, user.length - 1);
-//     return options.allow_utf8_local_part ?
-//       quotedEmailUserUtf8.test(user) :
-//       quotedEmailUser.test(user);
-//   }
-//
-//   const pattern = options.allow_utf8_local_part ?
-//     emailUserUtf8Part : emailUserPart;
-//
-//   const user_parts = user.split('.');
-//   for (let i = 0; i < user_parts.length; i++) {
-//     if (!pattern.test(user_parts[i])) {
-//       return false;
-//     }
-//   }
-//   if (options.blacklisted_chars) {
-//     if (user.search(new RegExp(`[${options.blacklisted_chars}]+`, 'g')) !== -1) return false;
-//   }
-//
-//   return true;
-// }
+bool isEmail(input, options) {
+  assertString(input);
+  options = merge(options, _defaultEmailOptions);
+  String str = input as String;
+  bool requireDisplayName = options['require_display_name'];
+  bool allowDisplayName = options['allow_display_name'];
+  bool domainSpecificValidation = options['domain_specific_validation'] ?? false;
+  List hostBlacklist = options['host_blacklist'];
+  String blacklistedChars = options['blacklisted_chars'];
+  bool allowUtf8LocalPart = options['allow_utf8_local_part'];
+  bool requireTld = options['require_tld'];
+  bool ignoreMaxLength = options['ignore_max_length'];
+  bool allowIpDomain = options['allow_ip_domain'] ?? false;
+
+  if (requireDisplayName || allowDisplayName) {
+    var displayEmail = splitNameAddress.allMatches(str).map((e) => e.input).toList();
+    if (displayEmail.isNotEmpty) {
+      var displayName = displayEmail[1];
+
+      // Remove display name and angle brackets to get email address
+      // Can be done in the regex but will introduce a ReDOS (See  #1597 for more info)
+      str = str.replaceFirst(displayName, '').replaceAll(RegExp(r'(^<|>$)'), '');
+
+      // sometimes need to trim the last space to get the display name
+      // because there may be a space between display name and email address
+      // eg. myname <address@gmail.com>
+      // the display name is `myname` instead of `myname `, so need to trim the last space
+      if (displayName.endsWith(' ')) {
+        displayName = displayName.substring(0, displayName.length - 1);
+      }
+
+      if (!validateDisplayName(displayName)) {
+        return false;
+      }
+    } else if (requireDisplayName) {
+      return false;
+    }
+  }
+  if (!ignoreMaxLength && str.length > defaultMaxEmailLength) {
+    return false;
+  }
+
+  var parts = str.split('@');
+  var domain = parts.removeLast();
+  var lowerDomain = domain.toLowerCase();
+
+  if (hostBlacklist.contains(lowerDomain)) {
+    return false;
+  }
+
+  var user = parts.join('@');
+
+  if (domainSpecificValidation && (lowerDomain == 'gmail.com' || lowerDomain == 'googlemail.com')) {
+    /*
+      Previously we removed dots for gmail addresses before validating.
+      This was removed because it allows `multiple..dots@gmail.com`
+      to be reported as valid, but it is not.
+      Gmail only normalizes single dots, removing them from here is pointless,
+      should be done in normalizeEmail
+    */
+    user = user.toLowerCase();
+
+    // Removing sub-address from username before gmail validation
+    var username = user.split('+')[0];
+
+    // Dots are not included in gmail length restriction
+    if (!isByteLength(username.replaceAll(RegExp(r'\.'), ''), min: 6, max: 30)) {
+      return false;
+    }
+
+    var userParts = username.split('.');
+    for (var i = 0; i < userParts.length; i++) {
+      if (!gmailUserPart.hasMatch(userParts[i])) {
+        return false;
+      }
+    }
+  }
+
+  if (ignoreMaxLength == false && (
+    !isByteLength(user, max: 64 ) ||
+    !isByteLength(domain, max: 254 ))
+  ) {
+    return false;
+  }
+
+  if (!isFQDN(domain, { 'require_tld': requireTld })) {
+    if (!allowIpDomain) {
+      return false;
+    }
+
+    if (!isIP(domain)) {
+      if (!domain.startsWith('[') || !domain.endsWith(']')) {
+        return false;
+      }
+
+      var noBracketDomain = domain.substring(1, domain.length - 1);
+
+      if (noBracketDomain.isEmpty || !isIP(noBracketDomain)) {
+        return false;
+      }
+    }
+  }
+
+  if (user.isNotEmpty && user[0] == '"') {
+    user = user.substring(1, user.length - 1);
+    return allowUtf8LocalPart ?
+      quotedEmailUserUtf8.hasMatch(user) :
+      quotedEmailUser.hasMatch(user);
+  }
+
+  var pattern = allowUtf8LocalPart ?
+    emailUserUtf8Part : emailUserPart;
+
+  var userParts = user.split('.');
+  for (var i = 0; i < userParts.length; i++) {
+    if (!pattern.hasMatch(userParts[i])) {
+      return false;
+    }
+  }
+  if (blacklistedChars.isNotEmpty) {
+    if (user.contains(RegExp('[$blacklistedChars]+'))) return false;
+  }
+
+  return true;
+}
