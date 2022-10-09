@@ -58,17 +58,63 @@ class TFormItem extends StatefulWidget {
   /// 子组件
   final Widget child;
 
+  static TFormItemState? of(BuildContext context) {
+    final _TFormItemScope? scope = context.dependOnInheritedWidgetOfExactType<_TFormItemScope>();
+    return scope?._formItemState;
+  }
+
   @override
   State<TFormItem> createState() => TFormItemState();
 }
 
 class TFormItemState extends State<TFormItem> {
   TFormState? _formState;
+  TFormItemValidate? _field;
+
+  dynamic get value => _field?.value;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void didUpdateWidget(covariant TFormItem oldWidget) {
+    if (widget.name != oldWidget.name) {
+      if (oldWidget.name != null) {
+        _formState?.unregister(oldWidget.name!);
+      }
+      if (widget.name != null) {
+        _formState?.register(widget.name!, this);
+      }
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
+  void register(String name, TFormItemValidate field) {
+    if (widget.name == name) {
+      _field?.focusNode?.removeListener(focusChange);
+      _field = field;
+      _field?.focusNode?.addListener(focusChange);
+    }
+  }
+
+  void focusChange() {}
+
+  void unregister(String name) {
+    if (widget.name == name) {
+      _field?.focusNode?.removeListener(focusChange);
+      _field = null;
+    }
+  }
 
   @override
   void didChangeDependencies() {
-    super.didChangeDependencies();
     _formState = TForm.of(context);
+    if (widget.name != null) {
+      _formState?.register(widget.name!, this);
+    }
+    super.didChangeDependencies();
   }
 
   @override
@@ -177,6 +223,48 @@ class TFormItemState extends State<TFormItem> {
     }
     return rules;
   }
+
+  /// 清空校验结果。可使用 fields 指定清除部分字段的校验结果，fields 值为空则表示清除所有字段校验结果。
+  /// 清除邮箱校验结果示例：clearValidate(['email'])
+  void clearValidate() {
+    _field?.clearValidate();
+  }
+
+  /// 重置表单，表单里面没有重置按钮TButton(type: TButtonType.reset)时可以使用该方法，默认重置全部字段为空，该方法会触发 reset 事件。
+  /// 如果表单属性 resetType=TFormResetType.empty 或 type=TFormResetType.empty 会重置为空；
+  /// 如果表单属性 resetType=TFormResetType.initial 或者 type=TFormResetType.initial 会重置为表单初始值。
+  /// [fields] 用于设置具体重置哪些字段，示例：reset({ type: TFormResetType.initial, fields: ['name', 'age'] })
+  void reset(TFormResetType type) {
+    _field?.reset(type);
+  }
+
+  /// 设置自定义校验结果，如远程校验信息直接呈现。
+  void setValidateMessage(TFormItemValidateMessage message) {
+    _field?.setValidateMessage(message);
+  }
+
+  /// 提交表单，表单里面没有提交按钮TButton(type: TButtonType.submit)时可以使用该方法。
+  /// showErrorMessage 表示是否在提交校验不通过时显示校验不通过的原因，默认显示。
+  /// 该方法会触发 submit 事件
+  void submit([bool showErrorMessage = true]) {}
+
+  /// 校验函数，包含错误文本提示等功能。
+  /// 【关于参数】params.fields 表示校验字段，如果设置了 fields，本次校验将仅对这些字段进行校验。
+  /// params.trigger 表示本次触发校验的范围，'params.trigger = blur' 表示只触发校验规则设定为 trigger='blur' 的字段，
+  /// 'params.trigger = change' 表示只触发校验规则设定为 trigger='change' 的字段，默认触发全范围校验。
+  /// params.showErrorMessage 表示校验结束后是否显
+  /// 示错误文本提示，默认显示。
+  /// 【关于返回值】返回值为 true 表示校验通过；如果校验不通过，返回值为校验结果列表
+  TFormItemValidateResult validate({TFormRuleTrigger? trigger, bool showErrorMessage = true}) {
+    var result = validateOnly(trigger);
+    return result;
+  }
+
+  /// 纯净的校验函数，仅返回校验结果，不对组件进行任何操作
+  TFormItemValidateResult validateOnly(TFormRuleTrigger? trigger) {
+    var rules = _rules();
+    return TFormItemValidateResult(validate: false, errorMessage: '');
+  }
 }
 
 class _TFormItemScope extends InheritedWidget {
@@ -192,4 +280,54 @@ class _TFormItemScope extends InheritedWidget {
 
   @override
   bool updateShouldNotify(_TFormItemScope old) => formItem.name != old.formItem.name;
+}
+
+/// 注册表单项验证结果通知
+mixin TFormItemValidate<T extends StatefulWidget> on State<T> {
+  String? get name;
+
+  /// 当前值
+  dynamic get value;
+
+  /// 如果存在焦点
+  FocusNode? get focusNode;
+
+  /// 错误消息
+  TFormItemValidateMessage? message;
+
+  /// 清空校验结果。
+  @protected
+  @mustCallSuper
+  void clearValidate() {
+    setState(() {
+      message = null;
+    });
+  }
+
+  /// 重置表单，表单里面没有重置按钮TButton(type: TButtonType.reset)时可以使用该方法，默认重置全部字段为空，该方法会触发 reset 事件。
+  /// 如果表单属性 resetType=TFormResetType.empty 或 type=TFormResetType.empty 会重置为空；
+  /// 如果表单属性 resetType=TFormResetType.initial 或者 type=TFormResetType.initial 会重置为表单初始值。
+  /// [fields] 用于设置具体重置哪些字段，示例：reset({ type: TFormResetType.initial })
+  @protected
+  @mustCallSuper
+  void reset(TFormResetType type) {
+    message = null;
+  }
+
+  /// 设置校验结果
+  @protected
+  @mustCallSuper
+  void setValidateMessage(TFormItemValidateMessage message) {
+    setState(() {
+      this.message = message;
+    });
+  }
+
+  @override
+  void deactivate() {
+    if (name != null) {
+      TFormItem.of(context)?.unregister(name!);
+    }
+    super.deactivate();
+  }
 }

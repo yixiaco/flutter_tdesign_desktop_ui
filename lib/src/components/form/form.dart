@@ -80,7 +80,7 @@ class TForm extends StatefulWidget {
 
   /// 表单提交时触发。其中 validate 表示校验结果，firstError 表示校验不通过的第一个规则提醒。校验不通过validateResult 值为校验结果列表。
   // 【注意】⚠️ 默认情况，输入框按下 Enter 键会自动触发提交事件，如果希望禁用这个默认行为，可以给输入框添加 enter 事件，并在事件中设置 e.preventDefault()
-  final void Function(Map<String, dynamic> data, bool validate, List<String> validateResult, String firstError)? onSubmit;
+  final void Function(Map<String, dynamic> data, bool validate, Map<String, String> validateResult, String? firstError)? onSubmit;
 
   /// 校验结束后触发，result 值为 true 表示校验通过；如果校验不通过，result 值为校验结果列表
   final VoidCallback? onValidate;
@@ -95,13 +95,19 @@ class TForm extends StatefulWidget {
 }
 
 class TFormState extends State<TForm> {
-  /// 表单数据
-  late Map<String, dynamic> _data;
   int _generation = 0;
+  final Map<String, TFormItemState> _fields = {};
+
+  void register(String name, TFormItemState field) {
+    _fields[name] = field;
+  }
+
+  void unregister(String name) {
+    _fields.remove(name);
+  }
 
   @override
   void initState() {
-    _data = {};
     super.initState();
   }
 
@@ -150,30 +156,42 @@ class TFormState extends State<TForm> {
   }
 
   /// 获取表单数据
-  Map<String, dynamic> get data => _data;
+  Map<String, dynamic> get data {
+    return _fields.map((key, value) => MapEntry(key, value.value));
+  }
 
   /// 清空校验结果。可使用 fields 指定清除部分字段的校验结果，fields 值为空则表示清除所有字段校验结果。
   /// 清除邮箱校验结果示例：clearValidate(['email'])
-  void clearValidate(List<String> fields) {}
+  void clearValidate([List<String> fields = const []]) {
+    _fields.entries.where((element) => fields.isEmpty || fields.contains(element.key)).forEach((element) => element.value.clearValidate());
+  }
 
   /// 重置表单，表单里面没有重置按钮TButton(type: TButtonType.reset)时可以使用该方法，默认重置全部字段为空，该方法会触发 reset 事件。
   /// 如果表单属性 resetType=TFormResetType.empty 或 type=TFormResetType.empty 会重置为空；
   /// 如果表单属性 resetType=TFormResetType.initial 或者 type=TFormResetType.initial 会重置为表单初始值。
   /// [fields] 用于设置具体重置哪些字段，示例：reset({ type: TFormResetType.initial, fields: ['name', 'age'] })
-  void reset({TFormResetType? type, List<String>? fields}) {
+  void reset({TFormResetType type = TFormResetType.empty, List<String> fields = const []}) {
+    _fields.entries.where((element) => fields.isEmpty || fields.contains(element.key)).forEach((element) => element.value.reset(type));
     widget.onReset?.call();
   }
 
   /// 设置自定义校验结果，如远程校验信息直接呈现。
   void setValidateMessage(Map<String, TFormItemValidateMessage> message) {
-
+    _fields.entries
+        .where((element) => message.keys.contains(element.key))
+        .forEach((element) => element.value.setValidateMessage(message[element.key]!));
   }
 
-  /// 提交表单，表单里面没有提交按钮<button type="submit" />时可以使用该方法。
+  /// 提交表单，表单里面没有提交按钮TButton(type: TButtonType.submit)时可以使用该方法。
   /// showErrorMessage 表示是否在提交校验不通过时显示校验不通过的原因，默认显示。
   /// 该方法会触发 submit 事件
   void submit([bool showErrorMessage = true]) {
-    widget.onSubmit?.call(_data, false, [], '');
+    var result = validate();
+    String? firstMessage;
+    if(result.errorMessage.isNotEmpty) {
+      firstMessage = result.errorMessage.entries.first.value;
+    }
+    widget.onSubmit?.call(data, result.validate, result.errorMessage, firstMessage);
   }
 
   /// 校验函数，包含错误文本提示等功能。
@@ -182,12 +200,15 @@ class TFormState extends State<TForm> {
   /// 'params.trigger = change' 表示只触发校验规则设定为 trigger='change' 的字段，默认触发全范围校验。
   /// params.showErrorMessage 表示校验结束后是否显示错误文本提示，默认显示。
   /// 【关于返回值】返回值为 true 表示校验通过；如果校验不通过，返回值为校验结果列表
-  void validate({List<String>? fields, TFormRuleTrigger? trigger, bool showErrorMessage = true}) {
+  TFormValidateResult validate({List<String>? fields, TFormRuleTrigger? trigger, bool showErrorMessage = true}) {
     widget.onValidate?.call();
+    return TFormValidateResult(validate: true, errorMessage: {});
   }
 
   /// 纯净的校验函数，仅返回校验结果，不对组件进行任何操作
-  void validateOnly({List<String>? fields, TFormRuleTrigger? trigger}) {}
+  TFormValidateResult validateOnly({List<String>? fields, TFormRuleTrigger? trigger}) {
+    return TFormValidateResult(validate: true, errorMessage: {});
+  }
 }
 
 class _TFormScope extends InheritedWidget {

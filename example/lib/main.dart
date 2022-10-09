@@ -330,7 +330,8 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
     var locale = ref.watch(localeProvider);
 
     Widget child = Scaffold(
-      backgroundColor: theme.brightness == Brightness.light ? const Color(0xFFEEEEEE) : Colors.black,
+      // backgroundColor: theme.brightness == Brightness.light ? const Color(0xFFEEEEEE) : Colors.black,
+      backgroundColor: theme.brightness == Brightness.light ? Colors.white : Colors.black,
       body: TLayout(
         aside: _buildAside(theme),
         header: _buildHeader(theme, semantics, size, locale),

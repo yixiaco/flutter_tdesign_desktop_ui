@@ -8,7 +8,7 @@ class TInput extends StatefulWidget {
   const TInput({
     Key? key,
     this.name,
-    this.initialValue,
+    this.defaultValue,
     this.controller,
     this.autofocus = false,
     this.readonly = false,
@@ -43,13 +43,11 @@ class TInput extends StatefulWidget {
   final String? name;
 
   /// 控制正在编辑的文本。
-  /// 如果为null，此小部件将创建自己的[TextEditingController]并用[initialValue]初始化其[TextEditingController.text]。
+  /// 如果为null，此小部件将创建自己的[TextEditingController]并用[defaultValue]初始化其[TextEditingController.text]。
   final TextEditingController? controller;
 
-  /// 创建包含TextField的FormField。 指定控制器时，initialValue必须为null（默认值）。
-  /// 如果控制器为空，则将自动构造TextEditingController，并将其文本初始化为initialValue或空字符串。
-  /// 有关各种参数的文档，请参阅[TextField]类和[TextField]。
-  final String? initialValue;
+  /// 输入框的默认值
+  final String? defaultValue;
 
   /// 自动对焦
   final bool autofocus;
@@ -144,9 +142,7 @@ class TInput extends StatefulWidget {
   State<TInput> createState() => _TInputState();
 }
 
-class _TInputState extends State<TInput> {
-  var formFieldState = GlobalKey<FormFieldState<TextFormField>>();
-
+class _TInputState extends State<TInput> with TFormItemValidate {
   FocusNode? _focusNode;
 
   FocusNode get effectiveFocusNode => widget.focusNode ?? (_focusNode ??= FocusNode());
@@ -154,7 +150,7 @@ class _TInputState extends State<TInput> {
   TextEditingController? _controller;
 
   /// 有效文本控制器
-  TextEditingController get effectiveController => widget.controller ?? (_controller ??= TextEditingController(text: widget.initialValue));
+  TextEditingController get effectiveController => widget.controller ?? (_controller ??= TextEditingController(text: widget.defaultValue));
 
   /// 是否拥有焦点
   bool isFocused = false;
@@ -439,6 +435,9 @@ class _TInputState extends State<TInput> {
     } else if (widget.readonly) {
       cursor = SystemMouseCursors.click;
     }
+    if(widget.name != null) {
+      TFormItem.of(context)?.register(widget.name!, this);
+    }
     return MouseRegion(
       onEnter: (event) {
         isHover = true;
@@ -451,7 +450,6 @@ class _TInputState extends State<TInput> {
         widget.onMouseleave?.call(event);
       },
       child: TextField(
-        key: formFieldState,
         controller: effectiveController,
         autofocus: widget.autofocus,
         readOnly: widget.readonly,
@@ -475,5 +473,27 @@ class _TInputState extends State<TInput> {
         onSubmitted: (value) => widget.onEnter?.call(value),
       ),
     );
+  }
+
+  @override
+  get name => widget.name;
+
+  @override
+  FocusNode? get focusNode => effectiveFocusNode;
+
+  @override
+  get value => effectiveController.text;
+
+  @override
+  void reset(TFormResetType type) {
+    super.reset(type);
+    switch(type) {
+      case TFormResetType.empty:
+        effectiveController.text = '';
+        break;
+      case TFormResetType.initial:
+        effectiveController.text = widget.defaultValue ?? '';
+        break;
+    }
   }
 }

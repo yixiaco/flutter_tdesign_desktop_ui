@@ -287,3 +287,43 @@ class TFormItemValidateMessage {
     required this.message,
   });
 }
+
+/// 验证结果
+class TFormItemValidateResult {
+  /// 验证结果是否通过
+  final bool validate;
+  ///错误消息
+  final String errorMessage;
+
+  const TFormItemValidateResult({
+    required this.validate,
+    required this.errorMessage,
+  });
+}
+
+/// 表单验证结果
+class TFormValidateResult {
+  /// 验证结果是否通过
+  final bool validate;
+  ///错误消息
+  final Map<String, String> errorMessage;
+
+  const TFormValidateResult({
+    required this.validate,
+    required this.errorMessage,
+  });
+}
+
+/// 校验器
+class Validate {
+  final dynamic value;
+
+  final List<TFormRule> rules;
+
+  const Validate({
+    required this.value,
+    required this.rules,
+  });
+
+
+}
