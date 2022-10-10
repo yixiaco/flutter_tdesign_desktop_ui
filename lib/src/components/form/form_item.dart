@@ -343,6 +343,7 @@ class TFormItemState extends State<TFormItem> {
   TFormItemValidateResult validate({TFormRuleTrigger? trigger, bool? showErrorMessage}) {
     showErrorMessage ??= widget.showErrorMessage ?? _formState?.widget.showErrorMessage ?? true;
     var result = validateOnly(trigger);
+    clearValidate();
     if (!result.validate) {
       setValidateMessage(TFormItemValidateMessage(
         type: result.type!,
