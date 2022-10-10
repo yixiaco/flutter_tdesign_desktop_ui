@@ -329,11 +329,11 @@ class TFormItemValidateMessage {
   final TFormRuleType type;
 
   /// 消息
-  final String message;
+  final String? message;
 
   const TFormItemValidateMessage({
     required this.type,
-    required this.message,
+    this.message,
   });
 }
 
@@ -345,9 +345,13 @@ class TFormItemValidateResult {
   ///错误消息
   final String? errorMessage;
 
+  /// 提示消息类型
+  final TFormRuleType? type;
+
   const TFormItemValidateResult({
     required this.validate,
     this.errorMessage,
+    this.type,
   });
 }
 
@@ -356,12 +360,20 @@ class TFormValidateResult {
   /// 验证结果是否通过
   final bool validate;
 
-  ///错误消息
+  /// 错误消息
   final Map<String, String> errorMessage;
+
+  /// 验证结果列表
+  final Map<String, TFormItemValidateResult> validateResult;
+
+  /// 第一条错误消息
+  final String? firstMessage;
 
   const TFormValidateResult({
     required this.validate,
     required this.errorMessage,
+    required this.validateResult,
+    this.firstMessage,
   });
 }
 
@@ -478,14 +490,14 @@ class Validator {
       message ??= errorMessage?.pattern?.replaceAll(r'${name}', name) ??
           GlobalTDesignLocalizations.of(context).formErrorMessagePattern(name);
     }
-    return TFormItemValidateResult(validate: validate, errorMessage: validate ? null : message);
+    return TFormItemValidateResult(validate: validate, errorMessage: validate ? null : message, type: rule.type);
   }
 
   /// 校验
   TFormItemValidateResult validate(TFormRuleTrigger? trigger) {
     trigger ??= TFormRuleTrigger.all;
     var rules = this.rules.where((element) {
-      switch(trigger!) {
+      switch (trigger!) {
         case TFormRuleTrigger.change:
           return element.trigger == TFormRuleTrigger.change;
         case TFormRuleTrigger.blur:

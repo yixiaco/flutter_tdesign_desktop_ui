@@ -27,8 +27,10 @@ class _TFormExampleState extends State<TFormExample> {
       onReset: () {
         print('重置');
       },
-      onSubmit: (data, validate, validateResult, firstError) {
-        print('提交: $data,校验结果：$validate => $validateResult');
+      onSubmit: (data, result) {
+        var validate = result.validate;
+        var errorMessage = result.errorMessage;
+        print('提交: $data,校验结果：$validate => $errorMessage');
       },
       children: [
         TFormItem(

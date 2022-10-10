@@ -1,3 +1,4 @@
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
@@ -8,6 +9,7 @@ class TFormItem extends StatefulWidget {
     this.help,
     this.label,
     this.labelText,
+    this.showLabel = true,
     this.labelAlign,
     this.labelWidth,
     this.requiredMark,
@@ -28,6 +30,9 @@ class TFormItem extends StatefulWidget {
   /// 校验字段时，显示的标签名称
   /// 当[label]为空时，默认值为该文本
   final String? labelText;
+
+  /// 是否显示label标签
+  final bool showLabel;
 
   /// 表单字段标签对齐方式：左对齐、右对齐、顶部对齐。
   /// 默认使用 Form 的对齐方式，优先级高于 [TForm.labelAlign]。
@@ -71,9 +76,22 @@ class TFormItem extends StatefulWidget {
 class TFormItemState extends State<TFormItem> {
   TFormState? _formState;
   TFormItemValidateState? _field;
+  Color? _borderColor;
+  List<BoxShadow>? _shadows;
 
+  /// 错误消息
+  TFormItemValidateMessage? _message;
+
+  /// 边框颜色
+  Color? get borderColor => _borderColor;
+
+  /// 边框阴影
+  List<BoxShadow>? get shadows => _shadows;
+
+  /// 当前注册组件值
   dynamic get value => _field?.value;
 
+  /// 当前注册组件名称
   String? get name => _field?.widget.name;
 
   @override
@@ -83,11 +101,17 @@ class TFormItemState extends State<TFormItem> {
 
   /// 注册表单字段项
   void register(String name, TFormItemValidateState field) {
-    assert(_field == null || _field == field, '表单项被其他组件覆盖');
     _field?.focusNode?.removeListener(focusChange);
     _field = field;
     _field?.focusNode?.addListener(focusChange);
     _formState?.register(name, this);
+    if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
+      SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
+        setState(() {});
+      });
+    } else {
+      setState(() {});
+    }
   }
 
   void focusChange() {}
@@ -139,10 +163,13 @@ class TFormItemState extends State<TFormItem> {
 
   /// 构建label
   Widget? _buildLabel(TThemeData theme, TColorScheme colorScheme, TFormLabelAlign labelAlign) {
+    if(!widget.showLabel) {
+      return null;
+    }
     var labelWidth = widget.labelWidth ?? _formState?.widget.labelWidth ?? 0;
     var colon = _formState?.widget.colon ?? false;
     Widget? child;
-    if (widget.label != null || widget.labelText != null) {
+    if ((widget.label != null || widget.labelText != null)) {
       Widget? before;
       Widget? after;
 
@@ -156,7 +183,10 @@ class TFormItemState extends State<TFormItem> {
       }
       // 冒号
       if (colon) {
-        after = const Text(':');
+        after = Padding(
+          padding: EdgeInsets.only(right: TVar.spacer, left: TVar.spacer / 4),
+          child: const Text(':'),
+        );
       }
 
       MainAxisAlignment mainAxisAlignment;
@@ -215,7 +245,11 @@ class TFormItemState extends State<TFormItem> {
   /// 清空校验结果。可使用 fields 指定清除部分字段的校验结果，fields 值为空则表示清除所有字段校验结果。
   /// 清除邮箱校验结果示例：clearValidate(['email'])
   void clearValidate() {
-    _field?.clearValidate();
+    setState(() {
+      _message = null;
+      _borderColor = null;
+      _shadows = null;
+    });
   }
 
   /// 重置表单，表单里面没有重置按钮TButton(type: TButtonType.reset)时可以使用该方法，默认重置全部字段为空，该方法会触发 reset 事件。
@@ -223,12 +257,25 @@ class TFormItemState extends State<TFormItem> {
   /// 如果表单属性 resetType=TFormResetType.initial 或者 type=TFormResetType.initial 会重置为表单初始值。
   /// [fields] 用于设置具体重置哪些字段，示例：reset({ type: TFormResetType.initial, fields: ['name', 'age'] })
   void reset(TFormResetType type) {
-    _field?.reset(type);
+    setState(() {
+      clearValidate();
+      _field?.reset(type);
+    });
   }
 
   /// 设置自定义校验结果，如远程校验信息直接呈现。
   void setValidateMessage(TFormItemValidateMessage message) {
-    _field?.setValidateMessage(message);
+    setState(() {
+      _message = message;
+      switch (_message!.type) {
+        case TFormRuleType.error:
+          _setStatus(error: true);
+          break;
+        case TFormRuleType.warning:
+          _setStatus(warning: true);
+          break;
+      }
+    });
   }
 
   /// 校验函数，包含错误文本提示等功能。
@@ -239,9 +286,18 @@ class TFormItemState extends State<TFormItem> {
   /// 示错误文本提示，默认显示。
   /// 【关于返回值】返回值为 true 表示校验通过；如果校验不通过，返回值为校验结果列表
   TFormItemValidateResult validate({TFormRuleTrigger? trigger, bool? showErrorMessage}) {
-    showErrorMessage = widget.showErrorMessage ?? true;
+    showErrorMessage ??= widget.showErrorMessage ?? _formState?.widget.showErrorMessage ?? true;
     var result = validateOnly(trigger);
-
+    if (!result.validate) {
+      setValidateMessage(TFormItemValidateMessage(
+        type: result.type!,
+        message: showErrorMessage ? result.errorMessage! : null,
+      ));
+    } else {
+      setState(() {
+        _setStatus(success: widget.successBorder);
+      });
+    }
     return result;
   }
 
@@ -252,6 +308,34 @@ class TFormItemState extends State<TFormItem> {
     var validator = Validator(
         name: widget.labelText ?? '', rules: rules, value: value, errorMessage: errorMessage, context: context);
     return validator.validate(trigger);
+  }
+
+  /// 设置状态值
+  void _setStatus({bool error = false, bool warning = false, bool success = false}) {
+    var theme = TTheme.of(context);
+    var colorScheme = theme.colorScheme;
+
+    Color? shadowColor;
+    if (success) {
+      _borderColor = colorScheme.successColor;
+      shadowColor = colorScheme.successColorFocus;
+    } else if (warning) {
+      _borderColor = colorScheme.warningColor;
+      shadowColor = colorScheme.warningColorFocus;
+    } else if (error) {
+      _borderColor = colorScheme.errorColor;
+      shadowColor = colorScheme.errorColorFocus;
+    }
+    if (shadowColor != null) {
+      _shadows = [
+        BoxShadow(
+          offset: const Offset(0, 0),
+          blurRadius: 0,
+          spreadRadius: 2,
+          color: shadowColor,
+        )
+      ];
+    }
   }
 }
 
@@ -267,7 +351,7 @@ class _TFormItemScope extends InheritedWidget {
   TFormItem get formItem => _formItemState.widget;
 
   @override
-  bool updateShouldNotify(_TFormItemScope old) => formItem != old.formItem;
+  bool updateShouldNotify(_TFormItemScope old) => _formItemState != old._formItemState;
 }
 
 abstract class TFormItemValidate extends StatefulWidget {
@@ -295,57 +379,34 @@ abstract class TFormItemValidateState<T extends TFormItemValidate> extends State
   /// 如果存在焦点
   FocusNode? get focusNode => widget.focusNode;
 
-  /// 错误消息
-  TFormItemValidateMessage? message;
-
-  TFormItemState? _formItemState;
-
-  /// 清空校验结果。
-  @protected
-  @mustCallSuper
-  void clearValidate() {
-    setState(() {
-      message = null;
-    });
-  }
+  /// 注册表单项
+  TFormItemState? formItemState;
 
   /// 重置表单，表单里面没有重置按钮TButton(type: TButtonType.reset)时可以使用该方法，默认重置全部字段为空，该方法会触发 reset 事件。
   /// 如果表单属性 resetType=TFormResetType.empty 或 type=TFormResetType.empty 会重置为空；
   /// 如果表单属性 resetType=TFormResetType.initial 或者 type=TFormResetType.initial 会重置为表单初始值。
   /// [fields] 用于设置具体重置哪些字段，示例：reset({ type: TFormResetType.initial })
   @protected
-  @mustCallSuper
-  void reset(TFormResetType type) {
-    message = null;
-  }
-
-  /// 设置校验结果
-  @protected
-  @mustCallSuper
-  void setValidateMessage(TFormItemValidateMessage message) {
-    setState(() {
-      this.message = message;
-    });
-  }
+  void reset(TFormResetType type) {}
 
   @override
   void didUpdateWidget(covariant T oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.name != oldWidget.name || widget.focusNode != oldWidget.focusNode) {
       if (oldWidget.name != null) {
-        _formItemState?.unregister(oldWidget.name!);
+        formItemState?.unregister(oldWidget.name!);
       }
       if (widget.name != null) {
-        _formItemState?.register(widget.name!, this);
+        formItemState?.register(widget.name!, this);
       }
     }
   }
 
   @override
   void didChangeDependencies() {
-    _formItemState = TFormItem.of(context);
+    formItemState = TFormItem.of(context);
     if (widget.name != null) {
-      _formItemState?.register(widget.name!, this);
+      formItemState?.register(widget.name!, this);
     }
     super.didChangeDependencies();
   }

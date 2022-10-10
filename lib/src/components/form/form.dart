@@ -80,11 +80,11 @@ class TForm extends StatefulWidget {
 
   /// 表单提交时触发。其中 validate 表示校验结果，firstError 表示校验不通过的第一个规则提醒。校验不通过validateResult 值为校验结果列表。
   // 【注意】⚠️ 默认情况，输入框按下 Enter 键会自动触发提交事件，如果希望禁用这个默认行为，可以给输入框添加 enter 事件，并在事件中设置 e.preventDefault()
-  final void Function(Map<String, dynamic> data, bool validate, Map<String, String> validateResult, String? firstError)?
+  final void Function(Map<String, dynamic> data, TFormValidateResult result)?
       onSubmit;
 
   /// 校验结束后触发，result 值为 true 表示校验通过；如果校验不通过，result 值为校验结果列表
-  final VoidCallback? onValidate;
+  final Function(TFormValidateResult result)? onValidate;
 
   static TFormState? of(BuildContext context) {
     final _TFormScope? scope = context.dependOnInheritedWidgetOfExactType<_TFormScope>();
@@ -184,11 +184,7 @@ class TFormState extends State<TForm> {
   /// 该方法会触发 submit 事件
   void submit([bool showErrorMessage = true]) {
     var result = validate();
-    String? firstMessage;
-    if (result.errorMessage.isNotEmpty) {
-      firstMessage = result.errorMessage.entries.first.value;
-    }
-    widget.onSubmit?.call(data, result.validate, result.errorMessage, firstMessage);
+    widget.onSubmit?.call(data, result);
   }
 
   /// 校验函数，包含错误文本提示等功能。
@@ -198,40 +194,47 @@ class TFormState extends State<TForm> {
   /// params.showErrorMessage 表示校验结束后是否显示错误文本提示，默认显示。
   /// 【关于返回值】返回值为 true 表示校验通过；如果校验不通过，返回值为校验结果列表
   TFormValidateResult validate({List<String> fields = const [], TFormRuleTrigger? trigger, bool? showErrorMessage}) {
-    showErrorMessage ??= widget.showErrorMessage;
-    bool validate = true;
-    Map<String, String> message = {};
-    for (var entry in _fields.entries.where((element) => fields.isEmpty || fields.contains(element.key))) {
-      var key = entry.key;
-      var value = entry.value;
-      var result = value.validate(trigger: trigger, showErrorMessage: showErrorMessage);
-      if(!result.validate) {
-        validate = result.validate;
-        if(result.errorMessage != null) {
-          message[key] = result.errorMessage!;
-        }
-      }
-    }
-    widget.onValidate?.call();
-    return TFormValidateResult(validate: validate, errorMessage: message);
+    var valid = _validate(fields: fields, trigger: trigger, showErrorMessage: showErrorMessage, only: false);
+    widget.onValidate?.call(valid);
+    return valid;
   }
 
   /// 纯净的校验函数，仅返回校验结果，不对组件进行任何操作
   TFormValidateResult validateOnly({List<String> fields = const [], TFormRuleTrigger? trigger}) {
+    return _validate(fields: fields, trigger: trigger, only: true);
+  }
+
+  /// 校验函数
+  TFormValidateResult _validate({
+    List<String> fields = const [],
+    TFormRuleTrigger? trigger,
+    bool? showErrorMessage,
+    required bool only,
+  }) {
     bool validate = true;
     Map<String, String> message = {};
+    Map<String, TFormItemValidateResult> validateResult = {};
+    String? firstMessage;
     for (var entry in _fields.entries.where((element) => fields.isEmpty || fields.contains(element.key))) {
       var key = entry.key;
       var value = entry.value;
-      var result = value.validateOnly(trigger);
-      if(!result.validate) {
+      TFormItemValidateResult result;
+      if (only) {
+        result = value.validateOnly(trigger);
+      } else {
+        result = value.validate(trigger: trigger, showErrorMessage: showErrorMessage);
+      }
+      if (!result.validate) {
         validate = result.validate;
-        if(result.errorMessage != null) {
+        validateResult[key] = result;
+        firstMessage ??= result.errorMessage;
+        if (result.errorMessage != null) {
           message[key] = result.errorMessage!;
         }
       }
     }
-    return TFormValidateResult(validate: validate, errorMessage: message);
+    return TFormValidateResult(
+        validate: validate, errorMessage: message, validateResult: validateResult, firstMessage: firstMessage);
   }
 }
 
