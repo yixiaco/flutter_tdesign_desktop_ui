@@ -35,6 +35,7 @@ class _TFormExampleState extends State<TFormExample> {
       children: [
         TFormItem(
           labelText: '姓名',
+          help: const Text('这是用户名字段帮助说明'),
           child: TInput(
             placeholder: '请输入内容',
             name: 'name',

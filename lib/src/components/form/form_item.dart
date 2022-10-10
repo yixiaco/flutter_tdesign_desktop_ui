@@ -136,34 +136,86 @@ class TFormItemState extends State<TFormItem> {
     var labelAlign = widget.labelAlign ?? _formState?.widget.labelAlign ?? TFormLabelAlign.right;
     Widget? label = _buildLabel(theme, colorScheme, labelAlign);
 
-    Widget child;
+    Widget child = ConstrainedBox(
+      constraints: BoxConstraints(minHeight: TVar.spacer4),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          widget.child,
+          if (widget.help != null) _buildHelp(theme, colorScheme),
+          if (_message?.message != null) _buildMessage(theme, colorScheme),
+        ],
+      ),
+    );
     if (labelAlign == TFormLabelAlign.top) {
       child = Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (label != null) label,
-          widget.child,
+          child,
         ],
       );
     } else {
       child = Row(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (label != null) label,
-          Flexible(child: widget.child),
+          Flexible(child: child),
         ],
       );
     }
+
+    var length = _formState?.widget.children.length ?? 0;
+    var i = _formState?.widget.children.indexOf(widget) ?? -1;
+    var isLast = i != -1 && i == length - 1;
+    var bottom = TVar.spacer3;
+    if (widget.help != null || _message?.message != null) {
+      bottom -= TVar.lineHeightS;
+    }
     return _TFormItemScope(
       formState: this,
-      child: child,
+      child: Padding(
+        padding: EdgeInsets.only(bottom: isLast ? 0 : bottom),
+        child: child,
+      ),
+    );
+  }
+
+  /// 构建帮助文本
+  Widget _buildHelp(TThemeData theme, TColorScheme colorScheme) {
+    return Container(
+      height: TVar.lineHeightS,
+      alignment: Alignment.centerLeft,
+      child: DefaultTextStyle(
+        style: theme.fontData.fontBodySmall.merge(TextStyle(
+          color: colorScheme.textColorPlaceholder,
+        )),
+        child: widget.help!,
+      ),
+    );
+  }
+
+  /// 构建验证消息
+  Widget _buildMessage(TThemeData theme, TColorScheme colorScheme) {
+    return Container(
+      height: TVar.lineHeightS,
+      alignment: Alignment.centerLeft,
+      child: DefaultTextStyle(
+        style: theme.fontData.fontBodySmall.merge(TextStyle(
+          color: borderColor,
+        )),
+        child: Text(_message!.message!),
+      ),
     );
   }
 
   /// 构建label
   Widget? _buildLabel(TThemeData theme, TColorScheme colorScheme, TFormLabelAlign labelAlign) {
-    if(!widget.showLabel) {
+    if (!widget.showLabel) {
       return null;
     }
     var labelWidth = widget.labelWidth ?? _formState?.widget.labelWidth ?? 0;
@@ -218,7 +270,7 @@ class TFormItemState extends State<TFormItem> {
     }
     return Container(
       width: labelWidth,
-      height: 32,
+      height: TVar.spacer4,
       padding: EdgeInsets.only(right: TVar.spacer3),
       child: child,
     );
@@ -249,6 +301,7 @@ class TFormItemState extends State<TFormItem> {
       _message = null;
       _borderColor = null;
       _shadows = null;
+      _field?.setState(() {});
     });
   }
 
@@ -260,6 +313,7 @@ class TFormItemState extends State<TFormItem> {
     setState(() {
       clearValidate();
       _field?.reset(type);
+      _field?.setState(() {});
     });
   }
 
@@ -275,6 +329,7 @@ class TFormItemState extends State<TFormItem> {
           _setStatus(warning: true);
           break;
       }
+      _field?.setState(() {});
     });
   }
 
@@ -296,6 +351,7 @@ class TFormItemState extends State<TFormItem> {
     } else {
       setState(() {
         _setStatus(success: widget.successBorder);
+        _field?.setState(() {});
       });
     }
     return result;
@@ -305,8 +361,7 @@ class TFormItemState extends State<TFormItem> {
   TFormItemValidateResult validateOnly(TFormRuleTrigger? trigger) {
     var rules = _rules();
     var errorMessage = _formState?.widget.errorMessage;
-    var validator = Validator(
-        name: widget.labelText ?? '', rules: rules, value: value, errorMessage: errorMessage, context: context);
+    var validator = Validator(name: widget.labelText ?? '', rules: rules, value: value, errorMessage: errorMessage, context: context);
     return validator.validate(trigger);
   }
 

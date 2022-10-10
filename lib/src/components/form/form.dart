@@ -107,29 +107,14 @@ class TFormState extends State<TForm> {
   }
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
     Widget child;
-    List<Widget> children = widget.children;
-    children = List.generate(children.length, (index) {
-      if (index != children.length - 1) {
-        return Padding(
-          padding: EdgeInsets.only(bottom: TVar.spacer3),
-          child: children[index],
-        );
-      }
-      return children[index];
-    });
     switch (widget.layout) {
       case TFormLayout.vertical:
         child = Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: children,
+          children: widget.children,
         );
         break;
       case TFormLayout.inline:
@@ -137,7 +122,7 @@ class TFormState extends State<TForm> {
           crossAxisAlignment: WrapCrossAlignment.center,
           alignment: WrapAlignment.start,
           direction: Axis.horizontal,
-          children: children,
+          children: widget.children,
         );
         break;
     }

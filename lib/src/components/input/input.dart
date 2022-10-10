@@ -232,7 +232,7 @@ class _TInputState extends TFormItemValidateState<TInput> {
 
     // 边框样式
     var border = MaterialStateOutlineInputBorder.resolveWith((states) {
-      List<BoxShadow> shadows = [];
+      List<BoxShadow>? shadows;
       Color color = widget.status.lazyValueOf(
         defaultStatus: () {
           if (states.contains(MaterialState.disabled)) {
@@ -242,7 +242,7 @@ class _TInputState extends TFormItemValidateState<TInput> {
               states.contains(MaterialState.focused) ||
               states.contains(MaterialState.pressed)) {
             if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
-              shadows = [
+              shadows ??= formItemState?.shadows ?? [
                 BoxShadow(
                     offset: const Offset(0, 0), blurRadius: 0, spreadRadius: 2, color: colorScheme.brandColorFocus)
               ];
@@ -253,7 +253,7 @@ class _TInputState extends TFormItemValidateState<TInput> {
         },
         success: () {
           if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
-            shadows = [
+            shadows ??= formItemState?.shadows ?? [
               BoxShadow(
                   offset: const Offset(0, 0), blurRadius: 0, spreadRadius: 2, color: colorScheme.successColorFocus)
             ];
@@ -262,7 +262,7 @@ class _TInputState extends TFormItemValidateState<TInput> {
         },
         warning: () {
           if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
-            shadows = [
+            shadows ??= formItemState?.shadows ?? [
               BoxShadow(
                   offset: const Offset(0, 0), blurRadius: 0, spreadRadius: 2, color: colorScheme.warningColorFocus)
             ];
@@ -271,7 +271,7 @@ class _TInputState extends TFormItemValidateState<TInput> {
         },
         error: () {
           if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
-            shadows = [
+            shadows ??= formItemState?.shadows ?? [
               BoxShadow(offset: const Offset(0, 0), blurRadius: 0, spreadRadius: 2, color: colorScheme.errorColorFocus)
             ];
           }
@@ -279,7 +279,7 @@ class _TInputState extends TFormItemValidateState<TInput> {
         },
       );
       return CustomOutlineInputBorder(
-        borderSide: BorderSide(width: onePx, color: color),
+        borderSide: BorderSide(width: onePx, color: formItemState?.borderColor ?? color),
         borderRadius: BorderRadius.circular(TVar.borderRadiusDefault),
         shadows: shadows,
       );
