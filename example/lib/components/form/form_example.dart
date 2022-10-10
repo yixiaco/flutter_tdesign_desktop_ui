@@ -21,19 +21,18 @@ class _TFormExampleState extends State<TFormExample> {
       // labelAlign: TFormLabelAlign.top,
       rules: const {
         'name': [
-          TFormRule(required: true, message: '姓名必填'),
+          TFormRule(required: true),
         ]
       },
       onReset: () {
         print('重置');
       },
       onSubmit: (data, validate, validateResult, firstError) {
-        print('提交: $data');
+        print('提交: $data,校验结果：$validate => $validateResult');
       },
       children: [
         TFormItem(
-          label: const Text('姓名'),
-          name: 'name',
+          labelText: '姓名',
           child: TInput(
             placeholder: '请输入内容',
             name: 'name',
@@ -43,8 +42,7 @@ class _TFormExampleState extends State<TFormExample> {
           ),
         ),
         TFormItem(
-          label: const Text('手机号'),
-          name: 'tel',
+          labelText: '手机号',
           child: TInput(
             placeholder: '请输入内容',
             name: 'tel',
@@ -54,8 +52,7 @@ class _TFormExampleState extends State<TFormExample> {
           ),
         ),
         TFormItem(
-          label: const Text('接收短信'),
-          name: 'status',
+          labelText: '接收短信',
           child: TSwitch<bool>(
             // name: 'status',
             // checkLabel: const Text('开'),
@@ -67,8 +64,7 @@ class _TFormExampleState extends State<TFormExample> {
           ),
         ),
         TFormItem(
-          label: const Text('性别'),
-          name: 'gender',
+          labelText: '性别',
           child: TRadioGroup<int>(
             options: [
               TRadioOption(label: const Text('男'), value: 1),
@@ -81,8 +77,7 @@ class _TFormExampleState extends State<TFormExample> {
           ),
         ),
         TFormItem(
-          label: const Text('课程'),
-          name: 'course',
+          labelText: '课程',
           child: TCheckboxGroup<int>(
             options: [
               TCheckboxOption(label: const Text('语文'), value: 1),

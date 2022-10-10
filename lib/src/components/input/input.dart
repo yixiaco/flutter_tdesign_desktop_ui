@@ -4,15 +4,15 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// 输入框
 /// 用于承载用户信息录入的文本框，常用于表单、对话框等场景，对不同内容的信息录入，可拓展形成多种信息录入形式
-class TInput extends StatefulWidget {
+class TInput extends TFormItemValidate {
   const TInput({
     Key? key,
-    this.name,
+    String? name,
     this.defaultValue,
     this.controller,
     this.autofocus = false,
     this.readonly = false,
-    this.focusNode,
+    FocusNode? focusNode,
     this.clearable = false,
     this.disabled = false,
     this.label,
@@ -37,10 +37,7 @@ class TInput extends StatefulWidget {
     this.onMouseenter,
     this.onMouseleave,
     this.scrollController,
-  }) : super(key: key);
-
-  /// 注册表单项名称
-  final String? name;
+  }) : super(key: key, name: name, focusNode: focusNode);
 
   /// 控制正在编辑的文本。
   /// 如果为null，此小部件将创建自己的[TextEditingController]并用[defaultValue]初始化其[TextEditingController.text]。
@@ -54,9 +51,6 @@ class TInput extends StatefulWidget {
 
   /// 是否只读
   final bool readonly;
-
-  /// 焦点
-  final FocusNode? focusNode;
 
   /// 是否可清空
   final bool clearable;
@@ -139,10 +133,10 @@ class TInput extends StatefulWidget {
   final ScrollController? scrollController;
 
   @override
-  State<TInput> createState() => _TInputState();
+  TFormItemValidateState createState() => _TInputState();
 }
 
-class _TInputState extends State<TInput> with TFormItemValidate {
+class _TInputState extends TFormItemValidateState<TInput> {
   FocusNode? _focusNode;
 
   FocusNode get effectiveFocusNode => widget.focusNode ?? (_focusNode ??= FocusNode());
@@ -150,7 +144,8 @@ class _TInputState extends State<TInput> with TFormItemValidate {
   TextEditingController? _controller;
 
   /// 有效文本控制器
-  TextEditingController get effectiveController => widget.controller ?? (_controller ??= TextEditingController(text: widget.defaultValue));
+  TextEditingController get effectiveController =>
+      widget.controller ?? (_controller ??= TextEditingController(text: widget.defaultValue));
 
   /// 是否拥有焦点
   bool isFocused = false;
@@ -243,9 +238,14 @@ class _TInputState extends State<TInput> with TFormItemValidate {
           if (states.contains(MaterialState.disabled)) {
             return colorScheme.borderLevel2Color;
           }
-          if (states.contains(MaterialState.hovered) || states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
+          if (states.contains(MaterialState.hovered) ||
+              states.contains(MaterialState.focused) ||
+              states.contains(MaterialState.pressed)) {
             if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
-              shadows = [BoxShadow(offset: const Offset(0, 0), blurRadius: 0, spreadRadius: 2, color: colorScheme.brandColorFocus)];
+              shadows = [
+                BoxShadow(
+                    offset: const Offset(0, 0), blurRadius: 0, spreadRadius: 2, color: colorScheme.brandColorFocus)
+              ];
             }
             return colorScheme.brandColor;
           }
@@ -253,19 +253,27 @@ class _TInputState extends State<TInput> with TFormItemValidate {
         },
         success: () {
           if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
-            shadows = [BoxShadow(offset: const Offset(0, 0), blurRadius: 0, spreadRadius: 2, color: colorScheme.successColorFocus)];
+            shadows = [
+              BoxShadow(
+                  offset: const Offset(0, 0), blurRadius: 0, spreadRadius: 2, color: colorScheme.successColorFocus)
+            ];
           }
           return colorScheme.successColor;
         },
         warning: () {
           if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
-            shadows = [BoxShadow(offset: const Offset(0, 0), blurRadius: 0, spreadRadius: 2, color: colorScheme.warningColorFocus)];
+            shadows = [
+              BoxShadow(
+                  offset: const Offset(0, 0), blurRadius: 0, spreadRadius: 2, color: colorScheme.warningColorFocus)
+            ];
           }
           return colorScheme.warningColor;
         },
         error: () {
           if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
-            shadows = [BoxShadow(offset: const Offset(0, 0), blurRadius: 0, spreadRadius: 2, color: colorScheme.errorColorFocus)];
+            shadows = [
+              BoxShadow(offset: const Offset(0, 0), blurRadius: 0, spreadRadius: 2, color: colorScheme.errorColorFocus)
+            ];
           }
           return colorScheme.errorColor;
         },
@@ -401,7 +409,8 @@ class _TInputState extends State<TInput> with TFormItemValidate {
       prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
       prefixIconColor: MaterialStateColor.resolveWith((states) {
         return widget.status.lazyValueOf(
-          defaultStatus: () => states.contains(MaterialState.focused) ? colorScheme.brandColor : colorScheme.borderLevel2Color,
+          defaultStatus: () =>
+              states.contains(MaterialState.focused) ? colorScheme.brandColor : colorScheme.borderLevel2Color,
           success: () => colorScheme.successColor,
           warning: () => colorScheme.warningColor,
           error: () => colorScheme.errorColor,
@@ -434,9 +443,6 @@ class _TInputState extends State<TInput> with TFormItemValidate {
       cursor = SystemMouseCursors.noDrop;
     } else if (widget.readonly) {
       cursor = SystemMouseCursors.click;
-    }
-    if(widget.name != null) {
-      TFormItem.of(context)?.register(widget.name!, this);
     }
     return MouseRegion(
       onEnter: (event) {
@@ -476,9 +482,6 @@ class _TInputState extends State<TInput> with TFormItemValidate {
   }
 
   @override
-  get name => widget.name;
-
-  @override
   FocusNode? get focusNode => effectiveFocusNode;
 
   @override
@@ -487,7 +490,7 @@ class _TInputState extends State<TInput> with TFormItemValidate {
   @override
   void reset(TFormResetType type) {
     super.reset(type);
-    switch(type) {
+    switch (type) {
       case TFormResetType.empty:
         effectiveController.text = '';
         break;

@@ -12,7 +12,8 @@ void assertString(dynamic input) {
   }
 }
 
-merge([Map obj = const {}, Map defaults = const {}]) {
+/// 参数合并
+Map merge([Map obj = const {}, Map defaults = const {}]) {
   for (var element in defaults.entries) {
     var key = element.key;
     if (obj[key] == null) {

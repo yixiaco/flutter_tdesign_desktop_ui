@@ -1,4 +1,4 @@
-import 'dart:math' as Math;
+import 'dart:math' as math;
 
 import 'package:tdesign_desktop_ui/src/util/validate/validate_util.dart';
 
@@ -10,13 +10,13 @@ const _defaultDateOptions = {
 
 bool _isValidFormat(format) {
   return RegExp(
-    r'(^(y{4}|y{2})[.\/-](m{1,2})[.\/-](d{1,2})$)|(^(m{1,2})[.\/-](d{1,2})[.\/-]((y{4}|y{2})$))|(^(d{1,2})[.\/-](m{1,2})[.\/-]((y{4}|y{2})$))',
+    r'(^(y{4}|y{2})[./-](m{1,2})[./-](d{1,2})$)|(^(m{1,2})[./-](d{1,2})[./-]((y{4}|y{2})$))|(^(d{1,2})[./-](m{1,2})[./-]((y{4}|y{2})$))',
     caseSensitive: false,
   ).hasMatch(format);
 }
 
 List<List<String>> _zip(List<String> date, List<String> format) {
-  var zippedArr = <List<String>>[], len = Math.min(date.length, format.length);
+  var zippedArr = <List<String>>[], len = math.min(date.length, format.length);
 
   for (var i = 0; i < len; i++) {
     zippedArr.add([date[i], format[i]]);
@@ -25,6 +25,7 @@ List<List<String>> _zip(List<String> date, List<String> format) {
   return zippedArr;
 }
 
+/// 验证是否是一个日期
 bool isDate(input, options) {
   if (options is String) {
     // Allow backward compatbility for old format isDate(input [, format])

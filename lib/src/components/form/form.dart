@@ -80,7 +80,8 @@ class TForm extends StatefulWidget {
 
   /// 表单提交时触发。其中 validate 表示校验结果，firstError 表示校验不通过的第一个规则提醒。校验不通过validateResult 值为校验结果列表。
   // 【注意】⚠️ 默认情况，输入框按下 Enter 键会自动触发提交事件，如果希望禁用这个默认行为，可以给输入框添加 enter 事件，并在事件中设置 e.preventDefault()
-  final void Function(Map<String, dynamic> data, bool validate, Map<String, String> validateResult, String? firstError)? onSubmit;
+  final void Function(Map<String, dynamic> data, bool validate, Map<String, String> validateResult, String? firstError)?
+      onSubmit;
 
   /// 校验结束后触发，result 值为 true 表示校验通过；如果校验不通过，result 值为校验结果列表
   final VoidCallback? onValidate;
@@ -95,7 +96,6 @@ class TForm extends StatefulWidget {
 }
 
 class TFormState extends State<TForm> {
-  int _generation = 0;
   final Map<String, TFormItemState> _fields = {};
 
   void register(String name, TFormItemState field) {
@@ -109,12 +109,6 @@ class TFormState extends State<TForm> {
   @override
   void initState() {
     super.initState();
-  }
-
-  void _forceRebuild() {
-    setState(() {
-      ++_generation;
-    });
   }
 
   @override
@@ -150,7 +144,6 @@ class TFormState extends State<TForm> {
 
     return _TFormScope(
       formState: this,
-      generation: _generation,
       child: child,
     );
   }
@@ -163,7 +156,9 @@ class TFormState extends State<TForm> {
   /// 清空校验结果。可使用 fields 指定清除部分字段的校验结果，fields 值为空则表示清除所有字段校验结果。
   /// 清除邮箱校验结果示例：clearValidate(['email'])
   void clearValidate([List<String> fields = const []]) {
-    _fields.entries.where((element) => fields.isEmpty || fields.contains(element.key)).forEach((element) => element.value.clearValidate());
+    _fields.entries
+        .where((element) => fields.isEmpty || fields.contains(element.key))
+        .forEach((element) => element.value.clearValidate());
   }
 
   /// 重置表单，表单里面没有重置按钮TButton(type: TButtonType.reset)时可以使用该方法，默认重置全部字段为空，该方法会触发 reset 事件。
@@ -171,7 +166,9 @@ class TFormState extends State<TForm> {
   /// 如果表单属性 resetType=TFormResetType.initial 或者 type=TFormResetType.initial 会重置为表单初始值。
   /// [fields] 用于设置具体重置哪些字段，示例：reset({ type: TFormResetType.initial, fields: ['name', 'age'] })
   void reset({TFormResetType type = TFormResetType.empty, List<String> fields = const []}) {
-    _fields.entries.where((element) => fields.isEmpty || fields.contains(element.key)).forEach((element) => element.value.reset(type));
+    _fields.entries
+        .where((element) => fields.isEmpty || fields.contains(element.key))
+        .forEach((element) => element.value.reset(type));
     widget.onReset?.call();
   }
 
@@ -188,7 +185,7 @@ class TFormState extends State<TForm> {
   void submit([bool showErrorMessage = true]) {
     var result = validate();
     String? firstMessage;
-    if(result.errorMessage.isNotEmpty) {
+    if (result.errorMessage.isNotEmpty) {
       firstMessage = result.errorMessage.entries.first.value;
     }
     widget.onSubmit?.call(data, result.validate, result.errorMessage, firstMessage);
@@ -200,14 +197,41 @@ class TFormState extends State<TForm> {
   /// 'params.trigger = change' 表示只触发校验规则设定为 trigger='change' 的字段，默认触发全范围校验。
   /// params.showErrorMessage 表示校验结束后是否显示错误文本提示，默认显示。
   /// 【关于返回值】返回值为 true 表示校验通过；如果校验不通过，返回值为校验结果列表
-  TFormValidateResult validate({List<String>? fields, TFormRuleTrigger? trigger, bool showErrorMessage = true}) {
+  TFormValidateResult validate({List<String> fields = const [], TFormRuleTrigger? trigger, bool? showErrorMessage}) {
+    showErrorMessage ??= widget.showErrorMessage;
+    bool validate = true;
+    Map<String, String> message = {};
+    for (var entry in _fields.entries.where((element) => fields.isEmpty || fields.contains(element.key))) {
+      var key = entry.key;
+      var value = entry.value;
+      var result = value.validate(trigger: trigger, showErrorMessage: showErrorMessage);
+      if(!result.validate) {
+        validate = result.validate;
+        if(result.errorMessage != null) {
+          message[key] = result.errorMessage!;
+        }
+      }
+    }
     widget.onValidate?.call();
-    return TFormValidateResult(validate: true, errorMessage: {});
+    return TFormValidateResult(validate: validate, errorMessage: message);
   }
 
   /// 纯净的校验函数，仅返回校验结果，不对组件进行任何操作
-  TFormValidateResult validateOnly({List<String>? fields, TFormRuleTrigger? trigger}) {
-    return TFormValidateResult(validate: true, errorMessage: {});
+  TFormValidateResult validateOnly({List<String> fields = const [], TFormRuleTrigger? trigger}) {
+    bool validate = true;
+    Map<String, String> message = {};
+    for (var entry in _fields.entries.where((element) => fields.isEmpty || fields.contains(element.key))) {
+      var key = entry.key;
+      var value = entry.value;
+      var result = value.validateOnly(trigger);
+      if(!result.validate) {
+        validate = result.validate;
+        if(result.errorMessage != null) {
+          message[key] = result.errorMessage!;
+        }
+      }
+    }
+    return TFormValidateResult(validate: validate, errorMessage: message);
   }
 }
 
@@ -215,19 +239,13 @@ class _TFormScope extends InheritedWidget {
   const _TFormScope({
     required super.child,
     required TFormState formState,
-    required int generation,
-  })  : _formState = formState,
-        _generation = generation;
+  }) : _formState = formState;
 
   final TFormState _formState;
-
-  /// Incremented every time a form field has changed. This lets us know when
-  /// to rebuild the form.
-  final int _generation;
 
   /// The [TForm] associated with this widget.
   TForm get form => _formState.widget;
 
   @override
-  bool updateShouldNotify(_TFormScope old) => _generation != old._generation;
+  bool updateShouldNotify(_TFormScope old) => this != old;
 }

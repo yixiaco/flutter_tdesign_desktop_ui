@@ -1,4 +1,4 @@
-import 'package:tdesign_desktop_ui/src/util/validate/isFQDN.dart';
+import 'package:tdesign_desktop_ui/src/util/validate/is_fqdn.dart';
 import 'package:tdesign_desktop_ui/src/util/validate/is_byte_length.dart';
 import 'package:tdesign_desktop_ui/src/util/validate/is_ip.dart';
 import 'package:tdesign_desktop_ui/src/util/validate/validate_util.dart';
@@ -13,20 +13,20 @@ const _defaultEmailOptions = {
   'host_blacklist': [],
 };
 
-final splitNameAddress = RegExp(r'^([^\x00-\x1F\x7F-\x9F\cX]+)<', caseSensitive: false);
-final emailUserPart = RegExp(r"^[a-z\d!#$%&'*+\-/=?^_`{|}~]+$", caseSensitive: false);
-final gmailUserPart = RegExp(r'^[a-z\d]+$');
-final quotedEmailUser = RegExp(
+final _splitNameAddress = RegExp(r'^([^\x00-\x1F\x7F-\x9F\cX]+)<', caseSensitive: false);
+final _emailUserPart = RegExp(r"^[a-z\d!#$%&'*+\-/=?^_`{|}~]+$", caseSensitive: false);
+final _gmailUserPart = RegExp(r'^[a-z\d]+$');
+final _quotedEmailUser = RegExp(
     r'^([\s\x01-\x08\x0b\x0c\x0e-\x1f\x7f\x21\x23-\x5b\x5d-\x7e]|(\\[\x01-\x09\x0b\x0c\x0d-\x7f]))*$', caseSensitive: false);
-final emailUserUtf8Part = RegExp(r"^[a-z\d!#$%&'*+\-/=?^_`{|}~\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+$", caseSensitive: false);
-final quotedEmailUserUtf8 = RegExp(
+final _emailUserUtf8Part = RegExp(r"^[a-z\d!#$%&'*+\-/=?^_`{|}~\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+$", caseSensitive: false);
+final _quotedEmailUserUtf8 = RegExp(
     r'^([\s\x01-\x08\x0b\x0c\x0e-\x1f\x7f\x21\x23-\x5b\x5d-\x7e\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]|(\\[\x01-\x09\x0b\x0c\x0d-\x7f\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))*$',
     caseSensitive: false);
-const defaultMaxEmailLength = 254;
+const _defaultMaxEmailLength = 254;
 
 /// Validate display name according to the RFC2822: https://tools.ietf.org/html/rfc2822#appendix-A.1.2
 /// @param {String} display_name
-bool validateDisplayName(String displayName) {
+bool _validateDisplayName(String displayName) {
   var displayNameWithoutQuotes = displayName.replaceAll(RegExp(r'^"(.+)"$'), r'$1');
   // display name with only spaces is not valid
   if (displayNameWithoutQuotes.trim().isEmpty) {
@@ -53,6 +53,7 @@ bool validateDisplayName(String displayName) {
   return true;
 }
 
+/// 验证是否是一个邮箱
 bool isEmail(input, options) {
   assertString(input);
   options = merge(options, _defaultEmailOptions);
@@ -68,7 +69,7 @@ bool isEmail(input, options) {
   bool allowIpDomain = options['allow_ip_domain'] ?? false;
 
   if (requireDisplayName || allowDisplayName) {
-    var displayEmail = splitNameAddress.allMatches(str).map((e) => e.input).toList();
+    var displayEmail = _splitNameAddress.allMatches(str).map((e) => e.input).toList();
     if (displayEmail.isNotEmpty) {
       var displayName = displayEmail[1];
 
@@ -84,14 +85,14 @@ bool isEmail(input, options) {
         displayName = displayName.substring(0, displayName.length - 1);
       }
 
-      if (!validateDisplayName(displayName)) {
+      if (!_validateDisplayName(displayName)) {
         return false;
       }
     } else if (requireDisplayName) {
       return false;
     }
   }
-  if (!ignoreMaxLength && str.length > defaultMaxEmailLength) {
+  if (!ignoreMaxLength && str.length > _defaultMaxEmailLength) {
     return false;
   }
 
@@ -125,7 +126,7 @@ bool isEmail(input, options) {
 
     var userParts = username.split('.');
     for (var i = 0; i < userParts.length; i++) {
-      if (!gmailUserPart.hasMatch(userParts[i])) {
+      if (!_gmailUserPart.hasMatch(userParts[i])) {
         return false;
       }
     }
@@ -159,12 +160,12 @@ bool isEmail(input, options) {
   if (user.isNotEmpty && user[0] == '"') {
     user = user.substring(1, user.length - 1);
     return allowUtf8LocalPart ?
-      quotedEmailUserUtf8.hasMatch(user) :
-      quotedEmailUser.hasMatch(user);
+      _quotedEmailUserUtf8.hasMatch(user) :
+      _quotedEmailUser.hasMatch(user);
   }
 
   var pattern = allowUtf8LocalPart ?
-    emailUserUtf8Part : emailUserPart;
+    _emailUserUtf8Part : _emailUserPart;
 
   var userParts = user.split('.');
   for (var i = 0; i < userParts.length; i++) {

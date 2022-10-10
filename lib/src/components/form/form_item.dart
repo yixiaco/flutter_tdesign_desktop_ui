@@ -7,9 +7,9 @@ class TFormItem extends StatefulWidget {
     Key? key,
     this.help,
     this.label,
+    this.labelText,
     this.labelAlign,
     this.labelWidth,
-    this.name,
     this.requiredMark,
     this.rules,
     this.showErrorMessage,
@@ -25,6 +25,10 @@ class TFormItem extends StatefulWidget {
   /// 字段标签名称
   final Widget? label;
 
+  /// 校验字段时，显示的标签名称
+  /// 当[label]为空时，默认值为该文本
+  final String? labelText;
+
   /// 表单字段标签对齐方式：左对齐、右对齐、顶部对齐。
   /// 默认使用 Form 的对齐方式，优先级高于 [TForm.labelAlign]。
   /// 可选项：left/right/top
@@ -32,9 +36,6 @@ class TFormItem extends StatefulWidget {
 
   /// 可以整体设置标签宽度，优先级高于 [TForm.labelWidth]
   final double? labelWidth;
-
-  /// 表单字段名称
-  final String? name;
 
   /// 是否显示必填符号（*），优先级高于 Form.requiredMark
   final bool? requiredMark;
@@ -69,51 +70,38 @@ class TFormItem extends StatefulWidget {
 
 class TFormItemState extends State<TFormItem> {
   TFormState? _formState;
-  TFormItemValidate? _field;
+  TFormItemValidateState? _field;
 
   dynamic get value => _field?.value;
+
+  String? get name => _field?.widget.name;
 
   @override
   void initState() {
     super.initState();
   }
 
-  @override
-  void didUpdateWidget(covariant TFormItem oldWidget) {
-    if (widget.name != oldWidget.name) {
-      if (oldWidget.name != null) {
-        _formState?.unregister(oldWidget.name!);
-      }
-      if (widget.name != null) {
-        _formState?.register(widget.name!, this);
-      }
-    }
-    super.didUpdateWidget(oldWidget);
-  }
-
-  void register(String name, TFormItemValidate field) {
-    if (widget.name == name) {
-      _field?.focusNode?.removeListener(focusChange);
-      _field = field;
-      _field?.focusNode?.addListener(focusChange);
-    }
+  /// 注册表单字段项
+  void register(String name, TFormItemValidateState field) {
+    assert(_field == null || _field == field, '表单项被其他组件覆盖');
+    _field?.focusNode?.removeListener(focusChange);
+    _field = field;
+    _field?.focusNode?.addListener(focusChange);
+    _formState?.register(name, this);
   }
 
   void focusChange() {}
 
+  /// 注销表单字段项
   void unregister(String name) {
-    if (widget.name == name) {
-      _field?.focusNode?.removeListener(focusChange);
-      _field = null;
-    }
+    _field?.focusNode?.removeListener(focusChange);
+    _field = null;
+    _formState?.unregister(name);
   }
 
   @override
   void didChangeDependencies() {
     _formState = TForm.of(context);
-    if (widget.name != null) {
-      _formState?.register(widget.name!, this);
-    }
     super.didChangeDependencies();
   }
 
@@ -154,7 +142,7 @@ class TFormItemState extends State<TFormItem> {
     var labelWidth = widget.labelWidth ?? _formState?.widget.labelWidth ?? 0;
     var colon = _formState?.widget.colon ?? false;
     Widget? child;
-    if (widget.label != null) {
+    if (widget.label != null || widget.labelText != null) {
       Widget? before;
       Widget? after;
 
@@ -192,7 +180,7 @@ class TFormItemState extends State<TFormItem> {
           mainAxisAlignment: mainAxisAlignment,
           children: [
             if (before != null) before,
-            widget.label!,
+            widget.label ?? Text(widget.labelText!),
             if (after != null) after,
           ],
         ),
@@ -215,8 +203,8 @@ class TFormItemState extends State<TFormItem> {
   /// 校验规则
   List<TFormRule> _rules() {
     var rules = widget.rules ?? [];
-    if (widget.name != null) {
-      var formRules = _formState?.widget.rules?[widget.name];
+    if (name != null) {
+      var formRules = _formState?.widget.rules?[name!];
       if (formRules != null) {
         rules.addAll(formRules);
       }
@@ -243,11 +231,6 @@ class TFormItemState extends State<TFormItem> {
     _field?.setValidateMessage(message);
   }
 
-  /// 提交表单，表单里面没有提交按钮TButton(type: TButtonType.submit)时可以使用该方法。
-  /// showErrorMessage 表示是否在提交校验不通过时显示校验不通过的原因，默认显示。
-  /// 该方法会触发 submit 事件
-  void submit([bool showErrorMessage = true]) {}
-
   /// 校验函数，包含错误文本提示等功能。
   /// 【关于参数】params.fields 表示校验字段，如果设置了 fields，本次校验将仅对这些字段进行校验。
   /// params.trigger 表示本次触发校验的范围，'params.trigger = blur' 表示只触发校验规则设定为 trigger='blur' 的字段，
@@ -255,15 +238,20 @@ class TFormItemState extends State<TFormItem> {
   /// params.showErrorMessage 表示校验结束后是否显
   /// 示错误文本提示，默认显示。
   /// 【关于返回值】返回值为 true 表示校验通过；如果校验不通过，返回值为校验结果列表
-  TFormItemValidateResult validate({TFormRuleTrigger? trigger, bool showErrorMessage = true}) {
+  TFormItemValidateResult validate({TFormRuleTrigger? trigger, bool? showErrorMessage}) {
+    showErrorMessage = widget.showErrorMessage ?? true;
     var result = validateOnly(trigger);
+
     return result;
   }
 
   /// 纯净的校验函数，仅返回校验结果，不对组件进行任何操作
   TFormItemValidateResult validateOnly(TFormRuleTrigger? trigger) {
     var rules = _rules();
-    return TFormItemValidateResult(validate: false, errorMessage: '');
+    var errorMessage = _formState?.widget.errorMessage;
+    var validator = Validator(
+        name: widget.labelText ?? '', rules: rules, value: value, errorMessage: errorMessage, context: context);
+    return validator.validate(trigger);
   }
 }
 
@@ -279,21 +267,38 @@ class _TFormItemScope extends InheritedWidget {
   TFormItem get formItem => _formItemState.widget;
 
   @override
-  bool updateShouldNotify(_TFormItemScope old) => formItem.name != old.formItem.name;
+  bool updateShouldNotify(_TFormItemScope old) => formItem != old.formItem;
+}
+
+abstract class TFormItemValidate extends StatefulWidget {
+  const TFormItemValidate({
+    Key? key,
+    this.name,
+    this.focusNode,
+  }) : super(key: key);
+
+  /// 表单字段名称
+  final String? name;
+
+  /// 焦点
+  final FocusNode? focusNode;
+
+  @override
+  TFormItemValidateState createState();
 }
 
 /// 注册表单项验证结果通知
-mixin TFormItemValidate<T extends StatefulWidget> on State<T> {
-  String? get name;
-
+abstract class TFormItemValidateState<T extends TFormItemValidate> extends State<T> {
   /// 当前值
   dynamic get value;
 
   /// 如果存在焦点
-  FocusNode? get focusNode;
+  FocusNode? get focusNode => widget.focusNode;
 
   /// 错误消息
   TFormItemValidateMessage? message;
+
+  TFormItemState? _formItemState;
 
   /// 清空校验结果。
   @protected
@@ -324,9 +329,31 @@ mixin TFormItemValidate<T extends StatefulWidget> on State<T> {
   }
 
   @override
+  void didUpdateWidget(covariant T oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.name != oldWidget.name || widget.focusNode != oldWidget.focusNode) {
+      if (oldWidget.name != null) {
+        _formItemState?.unregister(oldWidget.name!);
+      }
+      if (widget.name != null) {
+        _formItemState?.register(widget.name!, this);
+      }
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    _formItemState = TFormItem.of(context);
+    if (widget.name != null) {
+      _formItemState?.register(widget.name!, this);
+    }
+    super.didChangeDependencies();
+  }
+
+  @override
   void deactivate() {
-    if (name != null) {
-      TFormItem.of(context)?.unregister(name!);
+    if (widget.name != null) {
+      TFormItem.of(context)?.unregister(widget.name!);
     }
     super.deactivate();
   }
