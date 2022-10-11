@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// 作为[TForm]的子项
+/// 注意：子组件不能指定多个name组件注册到该子项中。
 class TFormItem extends StatefulWidget {
   const TFormItem({
     Key? key,
@@ -78,6 +79,7 @@ class TFormItemState extends State<TFormItem> {
   TFormItemValidateState? _field;
   Color? _borderColor;
   List<BoxShadow>? _shadows;
+  TFormItemStatus? _currentStatus;
 
   /// 错误消息
   TFormItemValidateMessage? _message;
@@ -94,17 +96,30 @@ class TFormItemState extends State<TFormItem> {
   /// 当前注册组件名称
   String? get name => _field?.widget.name;
 
-  @override
-  void initState() {
-    super.initState();
-  }
-
   /// 注册表单字段项
   void register(String name, TFormItemValidateState field) {
-    _field?.focusNode?.removeListener(focusChange);
+    _field?.focusNode?.removeListener(_focusChange);
     _field = field;
-    _field?.focusNode?.addListener(focusChange);
+    _field?.focusNode?.addListener(_focusChange);
     _formState?.register(name, this);
+    _needNotifyUpdate();
+  }
+
+  void _focusChange() {
+    if (!_field!.focusNode!.hasFocus) {
+      validate();
+    }
+  }
+
+  /// 注销表单字段项
+  void unregister(String name) {
+    _field?.focusNode?.removeListener(_focusChange);
+    _field = null;
+    _formState?.unregister(name);
+    _needNotifyUpdate();
+  }
+
+  void _needNotifyUpdate() {
     if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
       SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
         setState(() {});
@@ -114,13 +129,12 @@ class TFormItemState extends State<TFormItem> {
     }
   }
 
-  void focusChange() {}
-
-  /// 注销表单字段项
-  void unregister(String name) {
-    _field?.focusNode?.removeListener(focusChange);
-    _field = null;
-    _formState?.unregister(name);
+  @override
+  void didUpdateWidget(covariant TFormItem oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.rules != oldWidget.rules) {
+      clearValidate();
+    }
   }
 
   @override
@@ -135,6 +149,7 @@ class TFormItemState extends State<TFormItem> {
     var colorScheme = theme.colorScheme;
     var labelAlign = widget.labelAlign ?? _formState?.widget.labelAlign ?? TFormLabelAlign.right;
     Widget? label = _buildLabel(theme, colorScheme, labelAlign);
+    var showStatusIcon = widget.showStatusIcon ?? _formState?.widget.showStatusIcon ?? false;
 
     Widget child = ConstrainedBox(
       constraints: BoxConstraints(minHeight: TVar.spacer4),
@@ -143,7 +158,13 @@ class TFormItemState extends State<TFormItem> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          widget.child,
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(child: widget.child),
+              if (showStatusIcon) _buildStatusIcon(theme, colorScheme),
+            ],
+          ),
           if (widget.help != null) _buildHelp(theme, colorScheme),
           if (_message?.message != null) _buildMessage(theme, colorScheme),
         ],
@@ -213,6 +234,45 @@ class TFormItemState extends State<TFormItem> {
     );
   }
 
+  /// 构建验证消息
+  Widget _buildStatusIcon(TThemeData theme, TColorScheme colorScheme) {
+    Widget? defaultStatusIcon;
+    if (_currentStatus != null) {
+      switch (_currentStatus!) {
+        case TFormItemStatus.success:
+          defaultStatusIcon = Icon(
+            TIcons.checkCircleFilled,
+            size: TVar.lineHeightS,
+            color: colorScheme.successColor,
+          );
+          break;
+        case TFormItemStatus.error:
+          defaultStatusIcon = Icon(
+            TIcons.closeCircleFilled,
+            size: TVar.lineHeightS,
+            color: colorScheme.errorColor,
+          );
+          break;
+        case TFormItemStatus.warning:
+          defaultStatusIcon = Icon(
+            TIcons.errorCircleFilled,
+            size: TVar.lineHeightS,
+            color: colorScheme.warningColor,
+          );
+          break;
+      }
+    }
+    Widget? statusIcon = widget.statusIcon ?? _formState?.widget.statusIcon ?? defaultStatusIcon;
+    if(statusIcon != null) {
+      return Container(
+        height: TVar.lineHeightS,
+        margin: EdgeInsets.only(left: TVar.spacer),
+        child: statusIcon,
+      );
+    }
+    return Container();
+  }
+
   /// 构建label
   Widget? _buildLabel(TThemeData theme, TColorScheme colorScheme, TFormLabelAlign labelAlign) {
     if (!widget.showLabel) {
@@ -227,7 +287,7 @@ class TFormItemState extends State<TFormItem> {
 
       // 必填
       bool requiredMark = widget.requiredMark ?? _formState?.widget.requiredMark ?? false;
-      if (requiredMark && existRequired()) {
+      if (requiredMark && _existRequired()) {
         before = Padding(
           padding: EdgeInsets.only(right: TVar.spacer / 2),
           child: Text('*', style: TextStyle(color: colorScheme.errorColor)),
@@ -277,7 +337,7 @@ class TFormItemState extends State<TFormItem> {
   }
 
   /// 是否存在必填项
-  bool existRequired() {
+  bool _existRequired() {
     var rules = _rules();
     return rules.any((rule) => rule.required == true);
   }
@@ -301,6 +361,7 @@ class TFormItemState extends State<TFormItem> {
       _message = null;
       _borderColor = null;
       _shadows = null;
+      _currentStatus = null;
       _field?.setState(() {});
     });
   }
@@ -311,8 +372,8 @@ class TFormItemState extends State<TFormItem> {
   /// [fields] 用于设置具体重置哪些字段，示例：reset({ type: TFormResetType.initial, fields: ['name', 'age'] })
   void reset(TFormResetType type) {
     setState(() {
-      clearValidate();
       _field?.reset(type);
+      clearValidate();
       _field?.setState(() {});
     });
   }
@@ -323,10 +384,10 @@ class TFormItemState extends State<TFormItem> {
       _message = message;
       switch (_message!.type) {
         case TFormRuleType.error:
-          _setStatus(error: true);
+          _setStatus(TFormItemStatus.error);
           break;
         case TFormRuleType.warning:
-          _setStatus(warning: true);
+          _setStatus(TFormItemStatus.warning);
           break;
       }
       _field?.setState(() {});
@@ -340,47 +401,62 @@ class TFormItemState extends State<TFormItem> {
   /// params.showErrorMessage 表示校验结束后是否显
   /// 示错误文本提示，默认显示。
   /// 【关于返回值】返回值为 true 表示校验通过；如果校验不通过，返回值为校验结果列表
-  TFormItemValidateResult validate({TFormRuleTrigger? trigger, bool? showErrorMessage}) {
+  TFormItemValidateResult validate({TFormRuleTrigger trigger = TFormRuleTrigger.all, bool? showErrorMessage}) {
     showErrorMessage ??= widget.showErrorMessage ?? _formState?.widget.showErrorMessage ?? true;
     var result = validateOnly(trigger);
-    clearValidate();
-    if (!result.validate) {
-      setValidateMessage(TFormItemValidateMessage(
-        type: result.type!,
-        message: showErrorMessage ? result.errorMessage! : null,
-      ));
-    } else {
-      setState(() {
-        _setStatus(success: widget.successBorder);
-        _field?.setState(() {});
-      });
+    var rules = _rules();
+    // 如果规则中不存在change或burl，则不更新
+    // 例如，trigger=change，但是规则中不存在change，则会验证通过，并导致更新页面
+    var any = rules.any((element) {
+      return element.trigger == TFormRuleTrigger.all || trigger == TFormRuleTrigger.all || element.trigger == trigger;
+    });
+    if (any) {
+      clearValidate();
+      if (!result.validate) {
+        setValidateMessage(TFormItemValidateMessage(
+          type: result.type!,
+          message: showErrorMessage ? result.errorMessage! : null,
+        ));
+      } else {
+        setState(() {
+          _setStatus(widget.successBorder ? TFormItemStatus.success : null);
+          _field?.setState(() {});
+        });
+      }
     }
     return result;
   }
 
   /// 纯净的校验函数，仅返回校验结果，不对组件进行任何操作
-  TFormItemValidateResult validateOnly(TFormRuleTrigger? trigger) {
+  TFormItemValidateResult validateOnly([TFormRuleTrigger trigger = TFormRuleTrigger.all]) {
     var rules = _rules();
     var errorMessage = _formState?.widget.errorMessage;
-    var validator = Validator(name: widget.labelText ?? '', rules: rules, value: value, errorMessage: errorMessage, context: context);
+    var validator = Validator(
+        name: widget.labelText ?? '', rules: rules, value: value, errorMessage: errorMessage, context: context);
     return validator.validate(trigger);
   }
 
   /// 设置状态值
-  void _setStatus({bool error = false, bool warning = false, bool success = false}) {
+  void _setStatus(TFormItemStatus? status) {
     var theme = TTheme.of(context);
     var colorScheme = theme.colorScheme;
-
+    _currentStatus = status;
     Color? shadowColor;
-    if (success) {
-      _borderColor = colorScheme.successColor;
-      shadowColor = colorScheme.successColorFocus;
-    } else if (warning) {
-      _borderColor = colorScheme.warningColor;
-      shadowColor = colorScheme.warningColorFocus;
-    } else if (error) {
-      _borderColor = colorScheme.errorColor;
-      shadowColor = colorScheme.errorColorFocus;
+    if (status != null) {
+      switch (status) {
+        case TFormItemStatus.success:
+          _borderColor = colorScheme.successColor;
+          shadowColor = colorScheme.successColorFocus;
+          break;
+        case TFormItemStatus.error:
+          _borderColor = colorScheme.errorColor;
+          shadowColor = colorScheme.errorColorFocus;
+          break;
+        case TFormItemStatus.warning:
+          _borderColor = colorScheme.warningColor;
+          shadowColor = colorScheme.warningColorFocus;
+          break;
+      }
     }
     if (shadowColor != null) {
       _shadows = [

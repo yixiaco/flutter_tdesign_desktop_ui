@@ -32,6 +32,19 @@ enum TFormResetType {
 enum TFormScrollToFirstError {
   /// 平滑滚动
   smooth,
+
   /// 瞬间直达
   auto;
+}
+
+/// 表单项状态
+enum TFormItemStatus {
+  /// 成功
+  success,
+
+  /// 错误
+  error,
+
+  /// 告警
+  warning;
 }

@@ -80,8 +80,7 @@ class TForm extends StatefulWidget {
 
   /// 表单提交时触发。其中 validate 表示校验结果，firstError 表示校验不通过的第一个规则提醒。校验不通过validateResult 值为校验结果列表。
   // 【注意】⚠️ 默认情况，输入框按下 Enter 键会自动触发提交事件，如果希望禁用这个默认行为，可以给输入框添加 enter 事件，并在事件中设置 e.preventDefault()
-  final void Function(Map<String, dynamic> data, TFormValidateResult result)?
-      onSubmit;
+  final void Function(Map<String, dynamic> data, TFormValidateResult result)? onSubmit;
 
   /// 校验结束后触发，result 值为 true 表示校验通过；如果校验不通过，result 值为校验结果列表
   final Function(TFormValidateResult result)? onValidate;
@@ -104,6 +103,14 @@ class TFormState extends State<TForm> {
 
   void unregister(String name) {
     _fields.remove(name);
+  }
+
+  @override
+  void didUpdateWidget(covariant TForm oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.rules != oldWidget.rules) {
+      clearValidate();
+    }
   }
 
   @override
@@ -150,10 +157,11 @@ class TFormState extends State<TForm> {
   /// 如果表单属性 resetType=TFormResetType.empty 或 type=TFormResetType.empty 会重置为空；
   /// 如果表单属性 resetType=TFormResetType.initial 或者 type=TFormResetType.initial 会重置为表单初始值。
   /// [fields] 用于设置具体重置哪些字段，示例：reset({ type: TFormResetType.initial, fields: ['name', 'age'] })
-  void reset({TFormResetType type = TFormResetType.empty, List<String> fields = const []}) {
+  void reset({TFormResetType? type, List<String> fields = const []}) {
+    type ??= widget.resetType;
     _fields.entries
         .where((element) => fields.isEmpty || fields.contains(element.key))
-        .forEach((element) => element.value.reset(type));
+        .forEach((element) => element.value.reset(type!));
     widget.onReset?.call();
   }
 
@@ -178,21 +186,22 @@ class TFormState extends State<TForm> {
   /// 'params.trigger = change' 表示只触发校验规则设定为 trigger='change' 的字段，默认触发全范围校验。
   /// params.showErrorMessage 表示校验结束后是否显示错误文本提示，默认显示。
   /// 【关于返回值】返回值为 true 表示校验通过；如果校验不通过，返回值为校验结果列表
-  TFormValidateResult validate({List<String> fields = const [], TFormRuleTrigger? trigger, bool? showErrorMessage}) {
+  TFormValidateResult validate(
+      {List<String> fields = const [], TFormRuleTrigger trigger = TFormRuleTrigger.all, bool? showErrorMessage}) {
     var valid = _validate(fields: fields, trigger: trigger, showErrorMessage: showErrorMessage, only: false);
     widget.onValidate?.call(valid);
     return valid;
   }
 
   /// 纯净的校验函数，仅返回校验结果，不对组件进行任何操作
-  TFormValidateResult validateOnly({List<String> fields = const [], TFormRuleTrigger? trigger}) {
+  TFormValidateResult validateOnly({List<String> fields = const [], TFormRuleTrigger trigger = TFormRuleTrigger.all}) {
     return _validate(fields: fields, trigger: trigger, only: true);
   }
 
   /// 校验函数
   TFormValidateResult _validate({
     List<String> fields = const [],
-    TFormRuleTrigger? trigger,
+    TFormRuleTrigger trigger = TFormRuleTrigger.all,
     bool? showErrorMessage,
     required bool only,
   }) {

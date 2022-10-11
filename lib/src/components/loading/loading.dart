@@ -23,10 +23,10 @@ class TLoading extends StatefulWidget {
   /// 是否处于加载状态
   final bool loading;
 
-  /// 组件大小，和[boxSize]选择其中一项
+  /// 组件大小，可以指定[boxSize]控制更细的精度
   final TComponentSize? size;
 
-  /// 自定义大小，和[size]选择其中一项
+  /// 自定义大小，会覆盖[size]的默认值
   final Size? boxSize;
 
   /// 厚度
@@ -268,7 +268,8 @@ class _TLoadingPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..shader = gradient.createShader(Offset.zero & size);
-    canvas.drawCircle(size.center(Offset.zero), min(loadingSize.width, loadingSize.height) / 2 - strokeWidth / 2, paint);
+    canvas.drawCircle(
+        size.center(Offset.zero), min(loadingSize.width, loadingSize.height) / 2 - strokeWidth / 2, paint);
   }
 
   @override

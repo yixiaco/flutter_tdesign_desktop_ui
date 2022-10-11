@@ -384,8 +384,8 @@ final _validateMap = {
   'required': (val) => !isValueEmpty(val),
   'whitespace': (val) => !RegExp(r'^\s+$').hasMatch(val) || val == '',
   'boolean': (val) => val is bool,
-  'max': (val, num number) => (num.tryParse(val) != null ? val <= number : getCharacterLength(val).length <= number),
-  'min': (val, num number) => (num.tryParse(val) != null ? val >= number : getCharacterLength(val).length >= number),
+  'max': (val, num number) => (num.tryParse(val) != null ? num.parse(val) <= number : getCharacterLength(val).length <= number),
+  'min': (val, num number) => (num.tryParse(val) != null ? num.parse(val) >= number : getCharacterLength(val).length >= number),
   'len': (val, num number) => getCharacterLength(val).length == number,
   'number': (val) => num.tryParse(val) != null,
   'enum': (val, List<String> strs) => strs.contains(val),
@@ -497,6 +497,9 @@ class Validator {
   TFormItemValidateResult validate(TFormRuleTrigger? trigger) {
     trigger ??= TFormRuleTrigger.all;
     var rules = this.rules.where((element) {
+      if(element.trigger == TFormRuleTrigger.all) {
+        return true;
+      }
       switch (trigger!) {
         case TFormRuleTrigger.change:
           return element.trigger == TFormRuleTrigger.change;

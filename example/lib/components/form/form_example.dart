@@ -18,14 +18,20 @@ class _TFormExampleState extends State<TFormExample> {
   Widget build(BuildContext context) {
     return TForm(
       colon: true,
+      showStatusIcon: true,
       // labelAlign: TFormLabelAlign.top,
       rules: const {
         'name': [
-          TFormRule(required: true),
+          TFormRule(required: true, trigger: TFormRuleTrigger.blur),
+          TFormRule(max: 6, trigger: TFormRuleTrigger.change),
+          TFormRule(min: 3, trigger: TFormRuleTrigger.blur),
         ]
       },
       onReset: () {
         print('重置');
+      },
+      onValidate: (result) {
+        print('执行校验：${result.validate} => ${result.errorMessage}');
       },
       onSubmit: (data, result) {
         var validate = result.validate;
@@ -36,12 +42,13 @@ class _TFormExampleState extends State<TFormExample> {
         TFormItem(
           labelText: '姓名',
           help: const Text('这是用户名字段帮助说明'),
+          successBorder: true,
           child: TInput(
             placeholder: '请输入内容',
             name: 'name',
-            onEnter: (text) {
-              print('提交：$text');
-            },
+            // onEnter: (text) {
+            //   print('提交：$text');
+            // },
           ),
         ),
         TFormItem(

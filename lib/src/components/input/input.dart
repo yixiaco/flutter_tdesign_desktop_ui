@@ -158,8 +158,12 @@ class _TInputState extends TFormItemValidateState<TInput> {
 
   late ValueNotifier<bool> showClearIcon;
 
+  /// 缓存旧字符串
+  String? _text;
+
   @override
   void initState() {
+    _text = effectiveController.text;
     showClearIcon = ValueNotifier(false);
     effectiveFocusNode.onKeyEvent = _onKeyEvent;
     effectiveFocusNode.addListener(_focusChange);
@@ -174,6 +178,7 @@ class _TInputState extends TFormItemValidateState<TInput> {
 
   @override
   void dispose() {
+    _text = null;
     showClearIcon.dispose();
     effectiveFocusNode.onKeyEvent = null;
     effectiveFocusNode.removeListener(_focusChange);
@@ -197,12 +202,16 @@ class _TInputState extends TFormItemValidateState<TInput> {
 
   /// 文本发生变化时触发
   void _textChange() {
-    if (!widget.showClearIconOnEmpty && effectiveController.text.isEmpty) {
-      showClearIcon.value = false;
-    } else if (isHover) {
-      showClearIcon.value = true;
+    if(_text != effectiveController.text) {
+      _text = effectiveController.text;
+      if (!widget.showClearIconOnEmpty && effectiveController.text.isEmpty) {
+        showClearIcon.value = false;
+      } else if (isHover) {
+        showClearIcon.value = true;
+      }
+      formItemState?.validate(trigger: TFormRuleTrigger.change);
+      widget.onChange?.call(effectiveController.text);
     }
-    widget.onChange?.call(effectiveController.text);
   }
 
   @override
@@ -476,7 +485,13 @@ class _TInputState extends TFormItemValidateState<TInput> {
         obscureText: widget.type == TInputType.password && !look,
         textAlignVertical: TextAlignVertical.center,
         scrollController: widget.scrollController,
-        onSubmitted: (value) => widget.onEnter?.call(value),
+        onSubmitted: (value) {
+          if(widget.onEnter == null) {
+            TForm.of(context)?.submit();
+          } else {
+            widget.onEnter?.call(value);
+          }
+        },
       ),
     );
   }
@@ -489,7 +504,6 @@ class _TInputState extends TFormItemValidateState<TInput> {
 
   @override
   void reset(TFormResetType type) {
-    super.reset(type);
     switch (type) {
       case TFormResetType.empty:
         effectiveController.text = '';
