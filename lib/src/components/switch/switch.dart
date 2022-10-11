@@ -251,7 +251,7 @@ class _TSwitchState<T> extends TFormItemValidateState<TSwitch<T>> with TickerPro
   bool? get value => _value != null && (_value == widget.checkValue || _value == true);
 
   @override
-  bool get isInteractive => !widget.disabled && !widget.loading;
+  bool get isInteractive => !formDisabled && !widget.disabled && !widget.loading;
 
   @override
   void reset(TFormResetType type) {

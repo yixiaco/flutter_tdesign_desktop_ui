@@ -80,6 +80,7 @@ class TFormItemState extends State<TFormItem> {
   Color? _borderColor;
   List<BoxShadow>? _shadows;
   TFormItemStatus? _currentStatus;
+  int _version = 1;
 
   /// 错误消息
   TFormItemValidateMessage? _message;
@@ -122,7 +123,7 @@ class TFormItemState extends State<TFormItem> {
   void _needNotifyUpdate() {
     if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
       SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
-        if(mounted) {
+        if (mounted) {
           setState(() {});
         }
       });
@@ -201,6 +202,7 @@ class TFormItemState extends State<TFormItem> {
     }
     return _TFormItemScope(
       formState: this,
+      version: _version,
       child: Padding(
         padding: EdgeInsets.only(bottom: isLast ? 0 : bottom),
         child: child,
@@ -265,7 +267,7 @@ class TFormItemState extends State<TFormItem> {
       }
     }
     Widget? statusIcon = widget.statusIcon ?? _formState?.widget.statusIcon ?? defaultStatusIcon;
-    if(statusIcon != null) {
+    if (statusIcon != null) {
       return Container(
         height: TVar.lineHeightS,
         margin: EdgeInsets.only(left: TVar.spacer),
@@ -364,7 +366,7 @@ class TFormItemState extends State<TFormItem> {
       _borderColor = null;
       _shadows = null;
       _currentStatus = null;
-      _field?.setState(() {});
+      _version++;
     });
   }
 
@@ -376,7 +378,7 @@ class TFormItemState extends State<TFormItem> {
     setState(() {
       _field?.reset(type);
       clearValidate();
-      _field?.setState(() {});
+      _version++;
     });
   }
 
@@ -392,7 +394,7 @@ class TFormItemState extends State<TFormItem> {
           _setStatus(TFormItemStatus.warning);
           break;
       }
-      _field?.setState(() {});
+      _version++;
     });
   }
 
@@ -422,7 +424,6 @@ class TFormItemState extends State<TFormItem> {
       } else {
         setState(() {
           _setStatus(widget.successBorder ? TFormItemStatus.success : null);
-          _field?.setState(() {});
         });
       }
     }
@@ -470,6 +471,7 @@ class TFormItemState extends State<TFormItem> {
         )
       ];
     }
+    _version++;
   }
 }
 
@@ -477,15 +479,18 @@ class _TFormItemScope extends InheritedWidget {
   const _TFormItemScope({
     required super.child,
     required TFormItemState formState,
+    required this.version,
   }) : _formItemState = formState;
 
   final TFormItemState _formItemState;
+
+  final int version;
 
   /// The [TForm] associated with this widget.
   TFormItem get formItem => _formItemState.widget;
 
   @override
-  bool updateShouldNotify(_TFormItemScope old) => _formItemState != old._formItemState;
+  bool updateShouldNotify(_TFormItemScope old) => version != old.version;
 }
 
 abstract class TFormItemValidate extends StatefulWidget {
@@ -515,7 +520,33 @@ abstract class TFormItemValidateState<T extends TFormItemValidate> extends State
 
   /// 注册表单项
   TFormItemState? _formItemState;
+
   TFormItemState? get formItemState => widget.name == null ? null : _formItemState;
+
+  /// 当前组件名称
+  String get componentName => widget.runtimeType.toString().replaceFirst(RegExp(r'<.*>'), '');
+
+  /// 表单组件禁用状态
+  bool get formDisabled {
+    if(widget.name == null) {
+      return false;
+    }
+    var form = TForm.of(context)?.widget;
+    var disabled = form?.disabled ?? false;
+    if (disabled) {
+      var components = form?.formControlledComponents;
+      if (components != null) {
+        // 禁用指定组件
+        if (components.contains(componentName)) {
+          return true;
+        }
+      } else {
+        // 禁用全部组价
+        return true;
+      }
+    }
+    return false;
+  }
 
   /// 重置表单，表单里面没有重置按钮TButton(type: TButtonType.reset)时可以使用该方法，默认重置全部字段为空，该方法会触发 reset 事件。
   /// 如果表单属性 resetType=TFormResetType.empty 或 type=TFormResetType.empty 会重置为空；

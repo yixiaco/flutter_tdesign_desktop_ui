@@ -161,6 +161,9 @@ class _TInputState extends TFormItemValidateState<TInput> {
   /// 缓存旧字符串
   String? _text;
 
+  /// 组件禁用状态
+  bool get disabled => formDisabled || widget.disabled;
+
   @override
   void initState() {
     _text = effectiveController.text;
@@ -202,7 +205,7 @@ class _TInputState extends TFormItemValidateState<TInput> {
 
   /// 文本发生变化时触发
   void _textChange() {
-    if(_text != effectiveController.text) {
+    if (_text != effectiveController.text) {
       _text = effectiveController.text;
       if (!widget.showClearIconOnEmpty && effectiveController.text.isEmpty) {
         showClearIcon.value = false;
@@ -251,10 +254,11 @@ class _TInputState extends TFormItemValidateState<TInput> {
               states.contains(MaterialState.focused) ||
               states.contains(MaterialState.pressed)) {
             if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
-              shadows ??= formItemState?.shadows ?? [
-                BoxShadow(
-                    offset: const Offset(0, 0), blurRadius: 0, spreadRadius: 2, color: colorScheme.brandColorFocus)
-              ];
+              shadows ??= formItemState?.shadows ??
+                  [
+                    BoxShadow(
+                        offset: const Offset(0, 0), blurRadius: 0, spreadRadius: 2, color: colorScheme.brandColorFocus)
+                  ];
             }
             return colorScheme.brandColor;
           }
@@ -262,27 +266,31 @@ class _TInputState extends TFormItemValidateState<TInput> {
         },
         success: () {
           if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
-            shadows ??= formItemState?.shadows ?? [
-              BoxShadow(
-                  offset: const Offset(0, 0), blurRadius: 0, spreadRadius: 2, color: colorScheme.successColorFocus)
-            ];
+            shadows ??= formItemState?.shadows ??
+                [
+                  BoxShadow(
+                      offset: const Offset(0, 0), blurRadius: 0, spreadRadius: 2, color: colorScheme.successColorFocus)
+                ];
           }
           return colorScheme.successColor;
         },
         warning: () {
           if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
-            shadows ??= formItemState?.shadows ?? [
-              BoxShadow(
-                  offset: const Offset(0, 0), blurRadius: 0, spreadRadius: 2, color: colorScheme.warningColorFocus)
-            ];
+            shadows ??= formItemState?.shadows ??
+                [
+                  BoxShadow(
+                      offset: const Offset(0, 0), blurRadius: 0, spreadRadius: 2, color: colorScheme.warningColorFocus)
+                ];
           }
           return colorScheme.warningColor;
         },
         error: () {
           if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
-            shadows ??= formItemState?.shadows ?? [
-              BoxShadow(offset: const Offset(0, 0), blurRadius: 0, spreadRadius: 2, color: colorScheme.errorColorFocus)
-            ];
+            shadows ??= formItemState?.shadows ??
+                [
+                  BoxShadow(
+                      offset: const Offset(0, 0), blurRadius: 0, spreadRadius: 2, color: colorScheme.errorColorFocus)
+                ];
           }
           return colorScheme.errorColor;
         },
@@ -295,7 +303,7 @@ class _TInputState extends TFormItemValidateState<TInput> {
     });
 
     // 填充背景色
-    var fillColor = widget.disabled ? colorScheme.bgColorComponentDisabled : colorScheme.bgColorSpecialComponent;
+    var fillColor = disabled ? colorScheme.bgColorComponentDisabled : colorScheme.bgColorSpecialComponent;
     // tips颜色
     var tipsColor = widget.status.lazyValueOf(
       defaultStatus: () => colorScheme.textColorPlaceholder,
@@ -368,7 +376,7 @@ class _TInputState extends TFormItemValidateState<TInput> {
         style: TextStyle(
           fontFamily: theme.fontFamily,
           fontSize: getFontSize(theme, size),
-          color: widget.disabled ? colorScheme.textColorDisabled : colorScheme.textColorPrimary,
+          color: disabled ? colorScheme.textColorDisabled : colorScheme.textColorPrimary,
         ),
       ));
     }
@@ -394,7 +402,7 @@ class _TInputState extends TFormItemValidateState<TInput> {
     return InputDecoration(
       hintStyle: TextStyle(
         fontFamily: theme.fontFamily,
-        color: widget.disabled ? colorScheme.textColorDisabled : colorScheme.textColorPlaceholder,
+        color: disabled ? colorScheme.textColorDisabled : colorScheme.textColorPlaceholder,
       ),
       hintText: widget.placeholder ?? GlobalTDesignLocalizations.of(context).inputPlaceholder,
       border: border,
@@ -403,7 +411,7 @@ class _TInputState extends TFormItemValidateState<TInput> {
         horizontal: 8,
       ),
       isDense: true,
-      enabled: !widget.disabled,
+      enabled: !disabled,
       fillColor: fillColor,
       hoverColor: fillColor,
       filled: true,
@@ -448,7 +456,7 @@ class _TInputState extends TFormItemValidateState<TInput> {
 
     var fontSize = getFontSize(theme, size);
     MouseCursor? cursor;
-    if (widget.disabled) {
+    if (disabled) {
       cursor = SystemMouseCursors.noDrop;
     } else if (widget.readonly) {
       cursor = SystemMouseCursors.click;
@@ -465,6 +473,7 @@ class _TInputState extends TFormItemValidateState<TInput> {
         widget.onMouseleave?.call(event);
       },
       child: TextField(
+        enabled: !disabled,
         controller: effectiveController,
         autofocus: widget.autofocus,
         readOnly: widget.readonly,
@@ -476,7 +485,7 @@ class _TInputState extends TFormItemValidateState<TInput> {
           fontFamily: theme.fontFamily,
           fontSize: fontSize,
           textBaseline: TextBaseline.alphabetic,
-          color: widget.disabled ? colorScheme.textColorDisabled : colorScheme.textColorPrimary,
+          color: disabled ? colorScheme.textColorDisabled : colorScheme.textColorPrimary,
         ),
         textAlign: widget.align,
         mouseCursor: cursor,
@@ -486,7 +495,7 @@ class _TInputState extends TFormItemValidateState<TInput> {
         textAlignVertical: TextAlignVertical.center,
         scrollController: widget.scrollController,
         onSubmitted: (value) {
-          if(widget.onEnter == null) {
+          if (widget.onEnter == null) {
             TForm.of(context)?.submit();
           } else {
             widget.onEnter?.call(value);

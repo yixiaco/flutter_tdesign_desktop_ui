@@ -93,7 +93,7 @@ class TCheckboxGroupState<T> extends TFormItemValidateState<TCheckboxGroup<T>> {
     List<Widget> box = widget.options
         .map(
           (e) => TCheckbox<T>(
-            disabled: widget.disabled ? true : e.disabled,
+            disabled: formDisabled || widget.disabled || e.disabled,
             label: e.label,
             value: e.value,
             checked: widget.value.contains(e.value),

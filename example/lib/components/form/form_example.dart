@@ -13,6 +13,9 @@ class _TFormExampleState extends State<TFormExample> {
   bool status = false;
   int? gender = 1;
   List<int> course = [];
+  bool disabled = false;
+  bool? radioCheck;
+  bool? checkboxCheck;
 
   @override
   Widget build(BuildContext context) {
@@ -22,6 +25,8 @@ class _TFormExampleState extends State<TFormExample> {
       labelWidth: 120,
       resetType: TFormResetType.initial,
       // labelAlign: TFormLabelAlign.top,
+      disabled: disabled,
+      // formControlledComponents: const ['TInput'],
       rules: const {
         'name': [
           TFormRule(required: true, trigger: TFormRuleTrigger.blur),
@@ -44,13 +49,21 @@ class _TFormExampleState extends State<TFormExample> {
         print('提交: $data,校验结果：$validate => $errorMessage');
       },
       children: [
+        TFormItem(
+          child: TCheckbox(
+            checked: disabled,
+            label: const Text('是否禁用表单'),
+            onChange: (checked, indeterminate, value) => setState(() {
+              disabled = checked;
+            }),
+          ),
+        ),
         const TFormItem(
           labelText: '姓名',
           help: Text('这是用户名字段帮助说明'),
           successBorder: true,
           child: TInput(
             placeholder: '请输入内容',
-            defaultValue: '内容',
             name: 'name',
           ),
         ),
@@ -79,6 +92,20 @@ class _TFormExampleState extends State<TFormExample> {
           ),
         ),
         TFormItem(
+          labelText: '单选',
+          child: TRadio<int>(
+            name: 'radio',
+            label: const Text('选中'),
+            allowUncheck: true,
+            defaultChecked: true,
+            checked: radioCheck,
+            value: 2,
+            onChange: (checked, value) => setState(() {
+              radioCheck = checked;
+            }),
+          ),
+        ),
+        TFormItem(
           labelText: '性别',
           child: TRadioGroup<int>(
             name: 'gender',
@@ -92,6 +119,21 @@ class _TFormExampleState extends State<TFormExample> {
             onChange: (value) => setState(() {
               gender = value;
             }),
+          ),
+        ),
+        TFormItem(
+          labelText: '多选',
+          child: TCheckbox<String>(
+            name: 'checkbox',
+            label: const Text('多选'),
+            checked: checkboxCheck,
+            defaultChecked: true,
+            value: 'checkboxBox',
+            onChange: (checked, indeterminate, value) {
+              setState(() {
+                checkboxCheck = checked;
+              });
+            },
           ),
         ),
         TFormItem(

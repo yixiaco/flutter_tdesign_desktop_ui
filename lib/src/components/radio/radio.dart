@@ -3,25 +3,30 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// 单选框
 /// 单选框代表从一组互斥的选项中仅选择一个选项。
-class TRadio<T> extends StatefulWidget {
+class TRadio<T> extends TFormItemValidate {
   const TRadio({
     Key? key,
+    String? name,
+    FocusNode? focusNode,
     this.allowUncheck = false,
     this.checked,
+    this.defaultChecked,
     this.disabled = false,
     this.label,
     this.value,
     this.onChange,
     this.onClick,
-    this.focusNode,
     this.autofocus = false,
-  }) : super(key: key);
+  }) : super(key: key, name: name, focusNode: focusNode);
 
   /// 是否允许取消选中
   final bool allowUncheck;
 
   /// 是否选中
   final bool? checked;
+
+  /// 是否选中。非受控属性
+  final bool? defaultChecked;
 
   /// 是否为禁用态
   final bool disabled;
@@ -38,20 +43,19 @@ class TRadio<T> extends StatefulWidget {
   /// 点击时触发
   final TCallback? onClick;
 
-  /// 焦点
-  final FocusNode? focusNode;
-
   /// 自动聚焦
   final bool autofocus;
 
-  bool get _checked => checked == true;
-
   @override
-  State<TRadio<T>> createState() => _TRadioState<T>();
+  TFormItemValidateState<TRadio<T>> createState() => _TRadioState<T>();
 }
 
-class _TRadioState<T> extends State<TRadio<T>> with TickerProviderStateMixin, TToggleableStateMixin {
+class _TRadioState<T> extends TFormItemValidateState<TRadio<T>> with TickerProviderStateMixin, TToggleableStateMixin {
   final _TRadioPinter _painter = _TRadioPinter();
+
+  bool? _checked;
+
+  bool get checked => _checked ?? false;
 
   @override
   Duration get toggleDuration => TVar.animDurationBase;
@@ -62,6 +66,7 @@ class _TRadioState<T> extends State<TRadio<T>> with TickerProviderStateMixin, TT
 
   @override
   void initState() {
+    _checked = widget.checked ?? widget.defaultChecked;
     super.initState();
     _position = CurvedAnimation(
       parent: positionController,
@@ -80,7 +85,8 @@ class _TRadioState<T> extends State<TRadio<T>> with TickerProviderStateMixin, TT
   @override
   void didUpdateWidget(covariant TRadio<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget._checked != oldWidget._checked) {
+    if (widget.checked != oldWidget.checked && widget.checked != _checked) {
+      _checked = widget.checked;
       animateToValue();
     }
   }
@@ -124,7 +130,7 @@ class _TRadioState<T> extends State<TRadio<T>> with TickerProviderStateMixin, TT
 
     // 边框颜色
     final borderColor = MaterialStateProperty.resolveWith((states) {
-      Color color = widget.checked != null && widget.checked! ? colorScheme.brandColor : colorScheme.borderLevel2Color;
+      Color color = checked ? colorScheme.brandColor : colorScheme.borderLevel2Color;
       if (states.contains(MaterialState.hovered)) {
         color = colorScheme.brandColor;
       }
@@ -153,7 +159,7 @@ class _TRadioState<T> extends State<TRadio<T>> with TickerProviderStateMixin, TT
 
     return Semantics(
       inMutuallyExclusiveGroup: true,
-      checked: widget.checked,
+      checked: checked,
       child: buildToggleable(
         mouseCursor: effectiveMouseCursor,
         child: SizedBox(
@@ -187,7 +193,9 @@ class _TRadioState<T> extends State<TRadio<T>> with TickerProviderStateMixin, TT
 
   @override
   ValueChanged<bool?>? get onChanged {
-    return (value) => !widget.allowUncheck && widget._checked ? null : widget.onChange?.call(value ?? false, widget.value);
+    return (value) {
+      !tristate && checked ? null : widget.onChange?.call(value ?? false, widget.value);
+    };
   }
 
   /// 如果为 true，则value可以为 true、false 或 null，否则value必须为 true 或 false。
@@ -196,10 +204,27 @@ class _TRadioState<T> extends State<TRadio<T>> with TickerProviderStateMixin, TT
   bool get tristate => widget.allowUncheck;
 
   @override
-  bool? get value => widget.checked ?? false;
+  bool? get value => checked;
 
   @override
-  bool get isInteractive => !widget.disabled;
+  bool get isInteractive => !formDisabled && !widget.disabled;
+
+  @override
+  get formItemValue => value! ? widget.value : null;
+
+  @override
+  void reset(TFormResetType type) {
+    switch (type) {
+      case TFormResetType.empty:
+        widget.onChange?.call(false, null);
+        break;
+      case TFormResetType.initial:
+        if (tristate || widget.defaultChecked == true) {
+          widget.onChange?.call(widget.defaultChecked ?? false, widget.defaultChecked == true ? widget.value : null);
+        }
+        break;
+    }
+  }
 }
 
 class _TRadioPinter extends ToggleablePainter {

@@ -116,6 +116,8 @@ class _TRadioGroupState<T> extends TFormItemValidateState<TRadioGroup<T>> with S
   late CurvedAnimation _position;
   T? _value;
 
+  bool get disabled => formDisabled || widget.disabled;
+
   @override
   void initState() {
     _value = widget.value ?? widget.defaultValue;
@@ -217,7 +219,7 @@ class _TRadioGroupState<T> extends TFormItemValidateState<TRadioGroup<T>> with S
     }
     var box = List<Widget>.generate(widget.options.length, (index) {
       var option = widget.options[index];
-      var disabled = widget.disabled ? true : option.disabled;
+      var disabled = this.disabled || option.disabled;
       if (widget.variant == TRadioVariant.primaryFilled) {
         blockColor = disabled ? colorScheme.brandColorDisabled : colorScheme.brandColor;
       } else if (widget.variant == TRadioVariant.defaultFilled) {
@@ -230,7 +232,7 @@ class _TRadioGroupState<T> extends TFormItemValidateState<TRadioGroup<T>> with S
           value: option.value,
           textColor: textColor,
           disabled: disabled,
-          allowUncheck: widget.allowUncheck ? true : option.allowUncheck,
+          allowUncheck: widget.allowUncheck || option.allowUncheck,
           checked: _value == option.value,
           size: widget.size,
           onChange: _valueChange,
@@ -263,8 +265,8 @@ class _TRadioGroupState<T> extends TFormItemValidateState<TRadioGroup<T>> with S
   Widget radio() {
     List<Widget> box = widget.options
         .map((option) => TRadio<T>(
-              disabled: widget.disabled ? true : option.disabled,
-              allowUncheck: widget.allowUncheck ? true : option.allowUncheck,
+              disabled: disabled || option.disabled,
+              allowUncheck: widget.allowUncheck || option.allowUncheck,
               label: option.label,
               value: option.value,
               checked: _value == option.value,
@@ -339,13 +341,13 @@ class _TRadioGroupState<T> extends TFormItemValidateState<TRadioGroup<T>> with S
           value: option.value,
           textColor: textColor,
           backgroundColor: backgroundColor,
-          disabled: widget.disabled ? true : option.disabled,
+          disabled: disabled || option.disabled,
           allowUncheck: widget.allowUncheck ? true : option.allowUncheck,
           checked: _value == option.value,
           size: widget.size,
           onChange: _valueChange,
         ),
-        disabled: widget.disabled ? true : option.disabled,
+        disabled: disabled || option.disabled,
         checked: _value == option.value,
       );
     });

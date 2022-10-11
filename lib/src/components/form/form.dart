@@ -79,7 +79,7 @@ class TForm extends StatefulWidget {
   final VoidCallback? onReset;
 
   /// 表单提交时触发。其中 validate 表示校验结果，firstError 表示校验不通过的第一个规则提醒。校验不通过validateResult 值为校验结果列表。
-  // 【注意】⚠️ 默认情况，输入框按下 Enter 键会自动触发提交事件，如果希望禁用这个默认行为，可以给输入框添加 enter 事件，并在事件中设置 e.preventDefault()
+  // 【注意】⚠️ 默认情况，输入框按下 Enter 键会自动触发提交事件，如果希望禁用这个默认行为，可以给输入框添加 enter 事件
   final void Function(Map<String, dynamic> data, TFormValidateResult result)? onSubmit;
 
   /// 校验结束后触发，result 值为 true 表示校验通过；如果校验不通过，result 值为校验结果列表
@@ -97,6 +97,7 @@ class TForm extends StatefulWidget {
 
 class TFormState extends State<TForm> {
   final Map<String, TFormItemState> _fields = {};
+  int _version = 1;
 
   void register(String name, TFormItemState field) {
     _fields[name] = field;
@@ -111,6 +112,9 @@ class TFormState extends State<TForm> {
     super.didUpdateWidget(oldWidget);
     if (widget.rules != oldWidget.rules) {
       clearValidate();
+    }
+    if (widget.disabled != oldWidget.disabled) {
+      _version++;
     }
   }
 
@@ -138,6 +142,7 @@ class TFormState extends State<TForm> {
 
     return _TFormScope(
       formState: this,
+      version: _version,
       child: TSingleChildScrollView(
         // alwaysShowPadding: true,
         child: child,
@@ -241,13 +246,16 @@ class _TFormScope extends InheritedWidget {
   const _TFormScope({
     required super.child,
     required TFormState formState,
+    required this.version,
   }) : _formState = formState;
 
   final TFormState _formState;
+
+  final int version;
 
   /// The [TForm] associated with this widget.
   TForm get form => _formState.widget;
 
   @override
-  bool updateShouldNotify(_TFormScope old) => this != old;
+  bool updateShouldNotify(_TFormScope old) => version != old.version;
 }
