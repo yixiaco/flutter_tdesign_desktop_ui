@@ -85,6 +85,7 @@ class TForm extends StatefulWidget {
   /// 校验结束后触发，result 值为 true 表示校验通过；如果校验不通过，result 值为校验结果列表
   final Function(TFormValidateResult result)? onValidate;
 
+  /// 获取离当前组件最近的父级TForm组件
   static TFormState? of(BuildContext context) {
     final _TFormScope? scope = context.dependOnInheritedWidgetOfExactType<_TFormScope>();
     return scope?._formState;
@@ -116,12 +117,13 @@ class TFormState extends State<TForm> {
   @override
   Widget build(BuildContext context) {
     Widget child;
+    List<Widget> children = KeyedSubtree.ensureUniqueKeysForList(widget.children);
     switch (widget.layout) {
       case TFormLayout.vertical:
         child = Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: widget.children,
+          children: children,
         );
         break;
       case TFormLayout.inline:
@@ -129,14 +131,17 @@ class TFormState extends State<TForm> {
           crossAxisAlignment: WrapCrossAlignment.center,
           alignment: WrapAlignment.start,
           direction: Axis.horizontal,
-          children: widget.children,
+          children: children,
         );
         break;
     }
 
     return _TFormScope(
       formState: this,
-      child: child,
+      child: TSingleChildScrollView(
+        // alwaysShowPadding: true,
+        child: child,
+      ),
     );
   }
 

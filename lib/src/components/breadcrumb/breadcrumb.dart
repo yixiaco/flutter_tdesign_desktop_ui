@@ -36,7 +36,7 @@ class TBreadcrumb extends StatelessWidget {
       if (states.contains(MaterialState.disabled)) {
         return colorScheme.textColorDisabled;
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(MaterialState.hovered) || states.contains(MaterialState.focused)) {
         return colorScheme.brandColor;
       }
       if (states.contains(MaterialState.selected)) {

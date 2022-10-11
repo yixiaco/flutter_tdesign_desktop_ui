@@ -12,7 +12,6 @@ class TCheckbox<T> extends StatefulWidget {
     this.indeterminate = false,
     this.label,
     this.readonly = false,
-    this.prop,
     this.value,
     this.onChange,
     this.focusNode,
@@ -36,9 +35,6 @@ class TCheckbox<T> extends StatefulWidget {
 
   /// 多选框的值
   final T? value;
-
-  /// 表单验证中的属性名称
-  final String? prop;
 
   /// 值变化时触发
   final TCheckValueChange<T?>? onChange;

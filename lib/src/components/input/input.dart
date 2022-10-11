@@ -396,7 +396,7 @@ class _TInputState extends TFormItemValidateState<TInput> {
         fontFamily: theme.fontFamily,
         color: widget.disabled ? colorScheme.textColorDisabled : colorScheme.textColorPlaceholder,
       ),
-      hintText: widget.placeholder,
+      hintText: widget.placeholder ?? GlobalTDesignLocalizations.of(context).inputPlaceholder,
       border: border,
       contentPadding: EdgeInsets.symmetric(
         vertical: size.sizeOf(small: inputHeightS, medium: inputHeightDefault, large: inputHeightL),
@@ -500,7 +500,7 @@ class _TInputState extends TFormItemValidateState<TInput> {
   FocusNode? get focusNode => effectiveFocusNode;
 
   @override
-  get value => effectiveController.text;
+  get formItemValue => effectiveController.text;
 
   @override
   void reset(TFormResetType type) {

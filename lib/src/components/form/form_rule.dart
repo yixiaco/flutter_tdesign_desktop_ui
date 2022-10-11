@@ -3,6 +3,7 @@ import 'package:tdesign_desktop_ui/src/localization.dart';
 import 'package:tdesign_desktop_ui/src/util/helper.dart';
 import 'package:tdesign_desktop_ui/src/util/validate/is_date.dart';
 import 'package:tdesign_desktop_ui/src/util/validate/is_email.dart';
+import 'package:tdesign_desktop_ui/src/util/validate/is_number.dart';
 import 'package:tdesign_desktop_ui/src/util/validate/is_url.dart';
 import 'package:tdesign_desktop_ui/src/util/validate/is_value_empty.dart';
 
@@ -384,10 +385,10 @@ final _validateMap = {
   'required': (val) => !isValueEmpty(val),
   'whitespace': (val) => !RegExp(r'^\s+$').hasMatch(val) || val == '',
   'boolean': (val) => val is bool,
-  'max': (val, num number) => (num.tryParse(val) != null ? num.parse(val) <= number : getCharacterLength(val).length <= number),
-  'min': (val, num number) => (num.tryParse(val) != null ? num.parse(val) >= number : getCharacterLength(val).length >= number),
-  'len': (val, num number) => getCharacterLength(val).length == number,
-  'number': (val) => num.tryParse(val) != null,
+  'max': (val, num number) => (isNumber(val) ? num.parse(val.toString()) <= number : getCharacterLength(val?.toString()).length <= number),
+  'min': (val, num number) => (isNumber(val) ? num.parse(val.toString()) >= number : getCharacterLength(val?.toString()).length >= number),
+  'len': (val, num number) => getCharacterLength(val?.toString()).length == number,
+  'number': (val) => isNumber(val),
   'enum': (val, List<String> strs) => strs.contains(val),
   'idcard': (val) => RegExp(r'^(\d{18}|\d{15}|\d{17}x)$', caseSensitive: false).hasMatch(val),
   'telnumber': (val) => RegExp(r'^1[3-9]\d{9}$').hasMatch(val),

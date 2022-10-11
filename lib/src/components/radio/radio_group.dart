@@ -26,8 +26,12 @@ class TRadioOption<T> {
     return TRadioOption<String>(label: Text(label), value: label, disabled: disabled, allowUncheck: allowUncheck);
   }
 
-  static List<TRadioOption<String>> strings({required List<String> labels, bool disabled = false, bool allowUncheck = false}) {
-    return labels.map((label) => TRadioOption<String>(label: Text(label), value: label, disabled: disabled, allowUncheck: allowUncheck)).toList();
+  static List<TRadioOption<String>> strings(
+      {required List<String> labels, bool disabled = false, bool allowUncheck = false}) {
+    return labels
+        .map((label) =>
+            TRadioOption<String>(label: Text(label), value: label, disabled: disabled, allowUncheck: allowUncheck))
+        .toList();
   }
 
   @override
@@ -60,17 +64,19 @@ enum TRadioVariant {
 }
 
 /// 单选框组
-class TRadioGroup<T> extends StatefulWidget {
+class TRadioGroup<T> extends TFormItemValidate {
   const TRadioGroup({
     Key? key,
+    String? name,
     this.disabled = false,
     required this.options,
     required this.value,
+    this.defaultValue,
     this.onChange,
     this.size,
     this.variant = TRadioVariant.radio,
     this.allowUncheck = false,
-  }) : super(key: key);
+  }) : super(key: key, name: name);
 
   /// 是否禁用组件
   final bool disabled;
@@ -80,6 +86,9 @@ class TRadioGroup<T> extends StatefulWidget {
 
   /// 选中值
   final T? value;
+
+  /// 初始默认值，变更时不会更新组件值
+  final T? defaultValue;
 
   /// 值变化时触发
   final TValueChange<T?>? onChange;
@@ -97,17 +106,19 @@ class TRadioGroup<T> extends StatefulWidget {
   int get _index => value == null ? -1 : options.indexWhere((option) => option.value == value);
 
   @override
-  State<TRadioGroup<T>> createState() => _TRadioGroupState<T>();
+  TFormItemValidateState<TRadioGroup<T>> createState() => _TRadioGroupState<T>();
 }
 
-class _TRadioGroupState<T> extends State<TRadioGroup<T>> with SingleTickerProviderStateMixin {
+class _TRadioGroupState<T> extends TFormItemValidateState<TRadioGroup<T>> with SingleTickerProviderStateMixin {
   final _IndicatorBlockPainter _indicatorPainter = _IndicatorBlockPainter();
   late List<GlobalKey> _optionKeys;
   late AnimationController _controller;
   late CurvedAnimation _position;
+  T? _value;
 
   @override
   void initState() {
+    _value = widget.value ?? widget.defaultValue;
     super.initState();
     _controller = AnimationController(
       vsync: this,
@@ -139,6 +150,9 @@ class _TRadioGroupState<T> extends State<TRadioGroup<T>> with SingleTickerProvid
       _optionKeys.addAll(List<GlobalKey>.generate(delta, (int n) => GlobalKey()));
     } else if (widget.options.length < _optionKeys.length) {
       _optionKeys.removeRange(widget.options.length, _optionKeys.length);
+    }
+    if (widget.value != oldWidget.value) {
+      _value = widget.value;
     }
     if (widget.options.length != _optionKeys.length || widget.value != oldWidget.value) {
       _indicatorPainter._oldRect = _indicatorPainter._currentRect;
@@ -175,7 +189,9 @@ class _TRadioGroupState<T> extends State<TRadioGroup<T>> with SingleTickerProvid
         if (states.contains(MaterialState.disabled)) {
           return colorScheme.textColorDisabled;
         }
-        if (states.contains(MaterialState.hovered) || states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
+        if (states.contains(MaterialState.hovered) ||
+            states.contains(MaterialState.focused) ||
+            states.contains(MaterialState.pressed)) {
           return colorScheme.textColorPrimary;
         }
         return colorScheme.textColorSecondary;
@@ -191,7 +207,9 @@ class _TRadioGroupState<T> extends State<TRadioGroup<T>> with SingleTickerProvid
         if (states.contains(MaterialState.disabled)) {
           return colorScheme.textColorDisabled;
         }
-        if (states.contains(MaterialState.hovered) || states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
+        if (states.contains(MaterialState.hovered) ||
+            states.contains(MaterialState.focused) ||
+            states.contains(MaterialState.pressed)) {
           return colorScheme.textColorPrimary;
         }
         return colorScheme.textColorSecondary;
@@ -213,7 +231,7 @@ class _TRadioGroupState<T> extends State<TRadioGroup<T>> with SingleTickerProvid
           textColor: textColor,
           disabled: disabled,
           allowUncheck: widget.allowUncheck ? true : option.allowUncheck,
-          checked: widget.value == option.value,
+          checked: _value == option.value,
           size: widget.size,
           onChange: _valueChange,
         ),
@@ -249,7 +267,7 @@ class _TRadioGroupState<T> extends State<TRadioGroup<T>> with SingleTickerProvid
               allowUncheck: widget.allowUncheck ? true : option.allowUncheck,
               label: option.label,
               value: option.value,
-              checked: widget.value == option.value,
+              checked: _value == option.value,
               onChange: _valueChange,
             ))
         .toList();
@@ -264,7 +282,7 @@ class _TRadioGroupState<T> extends State<TRadioGroup<T>> with SingleTickerProvid
   void _valueChange(checked, value) {
     if (checked) {
       widget.onChange?.call(value);
-    } else if (!checked && widget.value == value) {
+    } else if (!checked && _value == value) {
       widget.onChange?.call(null);
     }
   }
@@ -293,7 +311,9 @@ class _TRadioGroupState<T> extends State<TRadioGroup<T>> with SingleTickerProvid
       if (states.contains(MaterialState.selected)) {
         return colorScheme.brandColor;
       }
-      if (states.contains(MaterialState.hovered) || states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
+      if (states.contains(MaterialState.hovered) ||
+          states.contains(MaterialState.focused) ||
+          states.contains(MaterialState.pressed)) {
         return colorScheme.brandColorHover;
       }
       return colorScheme.textColorPrimary;
@@ -321,12 +341,12 @@ class _TRadioGroupState<T> extends State<TRadioGroup<T>> with SingleTickerProvid
           backgroundColor: backgroundColor,
           disabled: widget.disabled ? true : option.disabled,
           allowUncheck: widget.allowUncheck ? true : option.allowUncheck,
-          checked: widget.value == option.value,
+          checked: _value == option.value,
           size: widget.size,
           onChange: _valueChange,
         ),
         disabled: widget.disabled ? true : option.disabled,
-        checked: widget.value == option.value,
+        checked: _value == option.value,
       );
     });
     return THollow(
@@ -336,6 +356,25 @@ class _TRadioGroupState<T> extends State<TRadioGroup<T>> with SingleTickerProvid
       children: box,
     );
   }
+
+  @override
+  void reset(TFormResetType type) {
+    switch (type) {
+      case TFormResetType.empty:
+        if(widget.allowUncheck) {
+          _valueChange(true, null);
+        }
+        break;
+      case TFormResetType.initial:
+        if(widget.allowUncheck || widget.defaultValue != null) {
+          _valueChange(true, widget.defaultValue);
+        }
+        break;
+    }
+  }
+
+  @override
+  get formItemValue => _value;
 }
 
 /// 滑块指示器
@@ -577,7 +616,8 @@ class _TRadioButtonState<T> extends State<_TRadioButton<T>> with TickerProviderS
 
   @override
   ValueChanged<bool?>? get onChanged {
-    return (value) => !widget.allowUncheck && widget._checked ? null : widget.onChange?.call(value ?? false, widget.value);
+    return (value) =>
+        !widget.allowUncheck && widget._checked ? null : widget.onChange?.call(value ?? false, widget.value);
   }
 
   @override

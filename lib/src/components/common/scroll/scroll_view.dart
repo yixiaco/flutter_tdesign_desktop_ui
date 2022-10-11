@@ -216,7 +216,7 @@ class _TSingleChildScrollViewState extends State<TSingleChildScrollView> {
           physics: widget.physics,
           reverse: widget.reverse,
           scrollDirection: widget.scrollDirection,
-          padding: _showPadding || widget.alwaysShowPadding ? padding : null,
+          padding: _showPadding || widget.alwaysShowPadding ? padding : EdgeInsets.zero,
           child: widget.child,
         ),
       ),

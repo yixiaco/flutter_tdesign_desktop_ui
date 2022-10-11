@@ -91,7 +91,7 @@ class TFormItemState extends State<TFormItem> {
   List<BoxShadow>? get shadows => _shadows;
 
   /// 当前注册组件值
-  dynamic get value => _field?.value;
+  dynamic get value => _field?.formItemValue;
 
   /// 当前注册组件名称
   String? get name => _field?.widget.name;
@@ -122,7 +122,9 @@ class TFormItemState extends State<TFormItem> {
   void _needNotifyUpdate() {
     if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
       SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
-        setState(() {});
+        if(mounted) {
+          setState(() {});
+        }
       });
     } else {
       setState(() {});
@@ -151,24 +153,24 @@ class TFormItemState extends State<TFormItem> {
     Widget? label = _buildLabel(theme, colorScheme, labelAlign);
     var showStatusIcon = widget.showStatusIcon ?? _formState?.widget.showStatusIcon ?? false;
 
-    Widget child = ConstrainedBox(
-      constraints: BoxConstraints(minHeight: TVar.spacer4),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+    Widget child = Column(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ConstrainedBox(
+          constraints: BoxConstraints(minHeight: TVar.spacer4),
+          child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Flexible(child: widget.child),
+              Flexible(child: KeyedSubtree(child: widget.child)),
               if (showStatusIcon) _buildStatusIcon(theme, colorScheme),
             ],
           ),
-          if (widget.help != null) _buildHelp(theme, colorScheme),
-          if (_message?.message != null) _buildMessage(theme, colorScheme),
-        ],
-      ),
+        ),
+        if (widget.help != null) _buildHelp(theme, colorScheme),
+        if (_message?.message != null) _buildMessage(theme, colorScheme),
+      ],
     );
     if (labelAlign == TFormLabelAlign.top) {
       child = Column(
@@ -234,7 +236,7 @@ class TFormItemState extends State<TFormItem> {
     );
   }
 
-  /// 构建验证消息
+  /// 构建icon
   Widget _buildStatusIcon(TThemeData theme, TColorScheme colorScheme) {
     Widget? defaultStatusIcon;
     if (_currentStatus != null) {
@@ -506,39 +508,40 @@ abstract class TFormItemValidate extends StatefulWidget {
 /// 注册表单项验证结果通知
 abstract class TFormItemValidateState<T extends TFormItemValidate> extends State<T> {
   /// 当前值
-  dynamic get value;
+  dynamic get formItemValue;
 
   /// 如果存在焦点
   FocusNode? get focusNode => widget.focusNode;
 
   /// 注册表单项
-  TFormItemState? formItemState;
+  TFormItemState? _formItemState;
+  TFormItemState? get formItemState => widget.name == null ? null : _formItemState;
 
   /// 重置表单，表单里面没有重置按钮TButton(type: TButtonType.reset)时可以使用该方法，默认重置全部字段为空，该方法会触发 reset 事件。
   /// 如果表单属性 resetType=TFormResetType.empty 或 type=TFormResetType.empty 会重置为空；
   /// 如果表单属性 resetType=TFormResetType.initial 或者 type=TFormResetType.initial 会重置为表单初始值。
   /// [fields] 用于设置具体重置哪些字段，示例：reset({ type: TFormResetType.initial })
   @protected
-  void reset(TFormResetType type) {}
+  void reset(TFormResetType type);
 
   @override
   void didUpdateWidget(covariant T oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.name != oldWidget.name || widget.focusNode != oldWidget.focusNode) {
       if (oldWidget.name != null) {
-        formItemState?.unregister(oldWidget.name!);
+        _formItemState?.unregister(oldWidget.name!);
       }
       if (widget.name != null) {
-        formItemState?.register(widget.name!, this);
+        _formItemState?.register(widget.name!, this);
       }
     }
   }
 
   @override
   void didChangeDependencies() {
-    formItemState = TFormItem.of(context);
+    _formItemState = TFormItem.of(context);
     if (widget.name != null) {
-      formItemState?.register(widget.name!, this);
+      _formItemState?.register(widget.name!, this);
     }
     super.didChangeDependencies();
   }

@@ -45,7 +45,7 @@ class TMenuIconButton extends StatelessWidget {
       if (this.backgroundColor != null) {
         return MaterialStateProperty.resolveAs(this.backgroundColor, states);
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(MaterialState.hovered) || states.contains(MaterialState.focused)) {
         if (menuTheme.isLight) {
           return colorScheme.gray2;
         } else {
