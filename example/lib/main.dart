@@ -218,7 +218,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
         ),
         TMenuItemProps(
           value: 'input_adornment',
-          content: const Text('InputAdornment 输入框装饰器'),
+          content: const Text('InputAdornment 输入装饰器'),
           onClick: () {
             setState(() {
               content = const TInputAdornmentExample();
@@ -453,6 +453,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
     return FractionallySizedBox(
       heightFactor: 1,
       child: TMenu(
+        width: 260,
         collapsed: collapsed,
         controller: menuController,
         menus: menus,

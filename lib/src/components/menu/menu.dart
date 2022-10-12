@@ -55,7 +55,7 @@ class TMenu<T> extends StatefulWidget {
   /// 选项控制
   final TMenuController<T> controller;
 
-  /// 菜单展开时的宽度
+  /// 菜单展开时的宽度，默认232
   final double? width;
 
   /// 菜单折叠时的宽度
