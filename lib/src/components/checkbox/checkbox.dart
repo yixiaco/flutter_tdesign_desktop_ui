@@ -160,7 +160,16 @@ class _TCheckboxState<T> extends TFormItemValidateState<TCheckbox<T>>
 
     // 背景填充颜色
     final bgColor = MaterialStateProperty.resolveWith((states) {
-      Color color = _checked ? colorScheme.brandColor : colorScheme.bgColorContainer;
+      Color color = colorScheme.bgColorContainer;
+      if (states.contains(MaterialState.disabled)) {
+        color = colorScheme.bgColorComponentDisabled;
+      }
+      return color;
+    });
+
+    // 选中背景填充颜色
+    final checkBgColor = MaterialStateProperty.resolveWith((states) {
+      Color color = colorScheme.brandColor;
       if (states.contains(MaterialState.disabled)) {
         color = colorScheme.bgColorComponentDisabled;
       }
@@ -224,8 +233,8 @@ class _TCheckboxState<T> extends TFormItemValidateState<TCheckbox<T>>
                     size: const Size.square(16),
                     painter: _painter
                       ..backgroundColor = bgColor.resolve(states)
+                      ..checkBackgroundColor = checkBgColor.resolve(states)
                       ..checked = checked
-                      ..disabled = disabled
                       ..indeterminate = widget.indeterminate
                       ..checkColor = checkColor.resolve(states),
                   ),
@@ -321,15 +330,15 @@ class _TCheckboxPaint extends ChangeNotifier implements CustomPainter {
     notifyListeners();
   }
 
-  /// 是否禁用
-  bool get disabled => _disabled!;
-  bool? _disabled;
+  /// 选中背景颜色
+  Color get checkBackgroundColor => _checkBackgroundColor!;
+  Color? _checkBackgroundColor;
 
-  set disabled(bool value) {
-    if (_disabled == value) {
+  set checkBackgroundColor(Color value) {
+    if (_checkBackgroundColor == value) {
       return;
     }
-    _disabled = value;
+    _checkBackgroundColor = value;
     notifyListeners();
   }
 
@@ -406,13 +415,15 @@ class _TCheckboxPaint extends ChangeNotifier implements CustomPainter {
 
   /// 绘制背景
   void drawBackground(Canvas canvas, Size size) {
+    canvas.drawRect(
+      const Offset(0, 0) & size,
+      Paint()..color = backgroundColor,
+    );
     if (indeterminate || checked) {
-      var opacity = backgroundColor.opacity;
-
-      print(disabled);
+      var opacity = checkBackgroundColor.opacity;
       canvas.drawRect(
         const Offset(0, 0) & size,
-        Paint()..color = backgroundColor.withOpacity(opacity * (disabled ? 1 : t)),
+        Paint()..color = checkBackgroundColor.withOpacity(opacity * t),
       );
     }
   }

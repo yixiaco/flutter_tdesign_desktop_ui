@@ -17,7 +17,7 @@ class TForm extends StatefulWidget {
     this.requiredMark = true,
     this.resetType = TFormResetType.empty,
     this.rules,
-    this.scrollToFirstError,
+    // this.scrollToFirstError,
     this.showErrorMessage = true,
     this.statusIcon,
     this.showStatusIcon = false,
@@ -63,7 +63,7 @@ class TForm extends StatefulWidget {
   final Map<String, List<TFormRule>>? rules;
 
   /// 表单校验不通过时，是否自动滚动到第一个校验不通过的字段，平滑滚动或是瞬间直达。值为空则表示不滚动。可选项：''/smooth/auto
-  final TFormScrollToFirstError? scrollToFirstError;
+  // TODO final TFormScrollToFirstError? scrollToFirstError;
 
   /// 校验不通过时，是否显示错误提示信息，统一控制全部表单项。如果希望控制单个表单项，请给 FormItem 设置该属性
   final bool showErrorMessage;
@@ -191,11 +191,10 @@ class TFormState extends State<TForm> {
   }
 
   /// 校验函数，包含错误文本提示等功能。
-  /// 【关于参数】params.fields 表示校验字段，如果设置了 fields，本次校验将仅对这些字段进行校验。
-  /// params.trigger 表示本次触发校验的范围，'params.trigger = blur' 表示只触发校验规则设定为 trigger='blur' 的字段，
-  /// 'params.trigger = change' 表示只触发校验规则设定为 trigger='change' 的字段，默认触发全范围校验。
-  /// params.showErrorMessage 表示校验结束后是否显示错误文本提示，默认显示。
-  /// 【关于返回值】返回值为 true 表示校验通过；如果校验不通过，返回值为校验结果列表
+  /// 【关于参数】fields 表示校验字段，如果设置了 fields，本次校验将仅对这些字段进行校验。
+  /// trigger 表示本次触发校验的范围，'trigger = blur' 表示只触发校验规则设定为 trigger='blur' 的字段，
+  /// 'trigger = change' 表示只触发校验规则设定为 trigger='change' 的字段，默认触发全范围校验。
+  /// showErrorMessage 表示校验结束后是否显示错误文本提示，默认显示。
   TFormValidateResult validate(
       {List<String> fields = const [], TFormRuleTrigger trigger = TFormRuleTrigger.all, bool? showErrorMessage}) {
     var valid = _validate(fields: fields, trigger: trigger, showErrorMessage: showErrorMessage, only: false);

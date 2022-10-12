@@ -106,8 +106,9 @@ class TFormItemState extends State<TFormItem> {
     _needNotifyUpdate();
   }
 
+  /// 焦点变更事件
   void _focusChange() {
-    if (!_field!.focusNode!.hasFocus) {
+    if (!_field!.focusNode!.hasFocus && _field!.focusNode?.canRequestFocus == true) {
       validate();
     }
   }
@@ -521,6 +522,9 @@ abstract class TFormItemValidateState<T extends TFormItemValidate> extends State
   /// 注册表单项
   TFormItemState? _formItemState;
 
+  // 表单
+  TFormState? _formState;
+
   TFormItemState? get formItemState => widget.name == null ? null : _formItemState;
 
   /// 当前组件名称
@@ -528,10 +532,10 @@ abstract class TFormItemValidateState<T extends TFormItemValidate> extends State
 
   /// 表单组件禁用状态
   bool get formDisabled {
-    if(widget.name == null) {
+    if (widget.name == null) {
       return false;
     }
-    var form = TForm.of(context)?.widget;
+    var form = _formState?.widget;
     var disabled = form?.disabled ?? false;
     if (disabled) {
       var components = form?.formControlledComponents;
@@ -559,6 +563,8 @@ abstract class TFormItemValidateState<T extends TFormItemValidate> extends State
   void didUpdateWidget(covariant T oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.name != oldWidget.name || widget.focusNode != oldWidget.focusNode) {
+      _formItemState ??= TFormItem.of(context);
+      _formState ??= TForm.of(context);
       if (oldWidget.name != null) {
         _formItemState?.unregister(oldWidget.name!);
       }
@@ -570,9 +576,12 @@ abstract class TFormItemValidateState<T extends TFormItemValidate> extends State
 
   @override
   void didChangeDependencies() {
-    _formItemState = TFormItem.of(context);
     if (widget.name != null) {
-      _formItemState?.register(widget.name!, this);
+      _formItemState = TFormItem.of(context);
+      _formState = TForm.of(context);
+      if (_formItemState?._field != this) {
+        _formItemState?.register(widget.name!, this);
+      }
     }
     super.didChangeDependencies();
   }
@@ -580,7 +589,7 @@ abstract class TFormItemValidateState<T extends TFormItemValidate> extends State
   @override
   void deactivate() {
     if (widget.name != null) {
-      TFormItem.of(context)?.unregister(widget.name!);
+      _formItemState?.unregister(widget.name!);
     }
     super.deactivate();
   }

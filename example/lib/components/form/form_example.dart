@@ -33,6 +33,9 @@ class _TFormExampleState extends State<TFormExample> {
           TFormRule(max: 6, trigger: TFormRuleTrigger.change),
           TFormRule(min: 3, trigger: TFormRuleTrigger.blur),
         ],
+        'tel': [
+          TFormRule(required: true, trigger: TFormRuleTrigger.blur),
+        ],
         'gender': [
           TFormRule(required: true, trigger: TFormRuleTrigger.change),
         ]
