@@ -1,4 +1,3 @@
-
 import 'package:tdesign_desktop_ui/src/util/validate/is_fqdn.dart';
 import 'package:tdesign_desktop_ui/src/util/validate/is_ip.dart';
 import 'package:tdesign_desktop_ui/src/util/validate/validate_util.dart';
@@ -21,7 +20,7 @@ const _defaultUrlOptions = {
 final _wrappedIpv6 = RegExp(r'^\[([^\]]+)\](?::([0-9]+))?$');
 
 bool _isRegExp(obj) {
-  return obj is  RegExp;
+  return obj is RegExp;
 }
 
 bool _checkHost(host, List<Pattern> matches) {
@@ -36,7 +35,7 @@ bool _checkHost(host, List<Pattern> matches) {
 
 /// 字符串是否是URL
 bool isURL(url, options) {
-  if(url is! String){
+  if (url is! String) {
     return false;
   }
   if (url.isEmpty || RegExp(r'[\s<>]').hasMatch(url)) {
@@ -129,7 +128,7 @@ bool isURL(url, options) {
       return false;
     }
     var auths = auth.split(':');
-    if(auths.length >= 2) {
+    if (auths.length >= 2) {
       if (auths[0] == '' && auths[1] == '') {
         return false;
       }

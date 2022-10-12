@@ -17,8 +17,10 @@ final _splitNameAddress = RegExp(r'^([^\x00-\x1F\x7F-\x9F\cX]+)<', caseSensitive
 final _emailUserPart = RegExp(r"^[a-z\d!#$%&'*+\-/=?^_`{|}~]+$", caseSensitive: false);
 final _gmailUserPart = RegExp(r'^[a-z\d]+$');
 final _quotedEmailUser = RegExp(
-    r'^([\s\x01-\x08\x0b\x0c\x0e-\x1f\x7f\x21\x23-\x5b\x5d-\x7e]|(\\[\x01-\x09\x0b\x0c\x0d-\x7f]))*$', caseSensitive: false);
-final _emailUserUtf8Part = RegExp(r"^[a-z\d!#$%&'*+\-/=?^_`{|}~\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+$", caseSensitive: false);
+    r'^([\s\x01-\x08\x0b\x0c\x0e-\x1f\x7f\x21\x23-\x5b\x5d-\x7e]|(\\[\x01-\x09\x0b\x0c\x0d-\x7f]))*$',
+    caseSensitive: false);
+final _emailUserUtf8Part =
+    RegExp(r"^[a-z\d!#$%&'*+\-/=?^_`{|}~\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+$", caseSensitive: false);
 final _quotedEmailUserUtf8 = RegExp(
     r'^([\s\x01-\x08\x0b\x0c\x0e-\x1f\x7f\x21\x23-\x5b\x5d-\x7e\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]|(\\[\x01-\x09\x0b\x0c\x0d-\x7f\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))*$',
     caseSensitive: false);
@@ -132,14 +134,11 @@ bool isEmail(input, options) {
     }
   }
 
-  if (ignoreMaxLength == false && (
-    !isByteLength(user, max: 64 ) ||
-    !isByteLength(domain, max: 254 ))
-  ) {
+  if (ignoreMaxLength == false && (!isByteLength(user, max: 64) || !isByteLength(domain, max: 254))) {
     return false;
   }
 
-  if (!isFQDN(domain, { 'require_tld': requireTld })) {
+  if (!isFQDN(domain, {'require_tld': requireTld})) {
     if (!allowIpDomain) {
       return false;
     }
@@ -159,13 +158,10 @@ bool isEmail(input, options) {
 
   if (user.isNotEmpty && user[0] == '"') {
     user = user.substring(1, user.length - 1);
-    return allowUtf8LocalPart ?
-      _quotedEmailUserUtf8.hasMatch(user) :
-      _quotedEmailUser.hasMatch(user);
+    return allowUtf8LocalPart ? _quotedEmailUserUtf8.hasMatch(user) : _quotedEmailUser.hasMatch(user);
   }
 
-  var pattern = allowUtf8LocalPart ?
-    _emailUserUtf8Part : _emailUserPart;
+  var pattern = allowUtf8LocalPart ? _emailUserUtf8Part : _emailUserPart;
 
   var userParts = user.split('.');
   for (var i = 0; i < userParts.length; i++) {
