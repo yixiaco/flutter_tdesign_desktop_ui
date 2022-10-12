@@ -1,33 +1,67 @@
-<!-- 
-这个 README 描述了这个包。如果您将此包发布到 pub.dev，则此 README 的内容将显示在您的包的登录页面上。
+<p align="center">
+  <a href="https://tdesign.tencent.com/" target="_blank">
+    <img alt="TDesign Logo" width="200" src="https://tdesign.gtimg.com/site/TDesign.png">
+  </a>
+</p>
 
-有关如何编写好的包 README 的信息，请参阅指南
-[writing package pages](https://dart.dev/guides/libraries/writing-package-pages). 
+<p align="center">
+  <a href="https://github.com/yixiaco/flutter_tdesign_desktop_ui/blob/master/LICENSE">
+    <img src="https://img.shields.io/npm/l/tdesign-vue-next.svg?sanitize=true" alt="License">
+  </a>
+  <a href="https://pub.dev/packages/flutter_tdesign_desktop_ui">
+    <img src="https://img.shields.io/badge/pub-v0.0.1-sanitize" alt="Version">
+  </a>
+</p>
 
-有关开发包的一般信息，请参阅 Dart 指南
-[creating packages](https://dart.dev/guides/libraries/create-library-packages)
-和 Flutter 指南
-[developing packages and plugins](https://flutter.dev/developing-packages). 
--->
+TDesign 适配桌面端的组件库，适合在 Flutter 3.x 技术栈项目中使用。
 
-TODO: 在此处对软件包进行简短描述，以帮助潜在用户了解此软件包是否对他们有用。
+### 🎉 特性
 
-## Features
+- 适配桌面端交互
+- 基于 Flutter 3.x
+- 支持暗黑模式及其他主题定制
 
-TODO: 列出你的包可以做什么。可能包括图像、GIF 或视频。
+### 安装
 
-## Getting started
-
-TODO: 列出先决条件并提供或指出有关如何开始使用该软件包的信息。
-
-## Usage
-
-TODO: 为软件包用户提供简短且有用的示例。将更长的示例添加到`/example`文件夹。 
-
-```dart
-const like = 'sample';
+```yaml
+dependencies:
+  bubble_box: ^0.0.1
 ```
 
-## Additional information
+### 基础使用
 
-TODO: 告诉用户更多关于包的信息：在哪里可以找到更多信息、如何为包做出贡献、如何提交问题、他们可以从包作者那里得到什么响应等等。
+```dart
+void main() {
+  // 初始化之前如果访问二进制文件，需要先初始化
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(const ProviderScope(
+    child: MyApp(),
+  ));
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
+  // This widget is the root of your application.
+  @override
+  Widget build(BuildContext context) {
+
+    return TTheme(
+      child: MaterialApp(
+        title: 'TDesign Desktop UI Demo',
+        locale: Locale('zh_CN'),
+        supportedLocales: GlobalTDesignLocalizations.delegate.supportedLocales,
+        localizationsDelegates: const [
+          GlobalTDesignLocalizations.delegate,
+          ...GlobalMaterialLocalizations.delegates,
+        ],
+        home: const MyHomePage(title: 'TDesign Desktop UI Demo Home Page'),
+      ),
+    );
+  }
+}
+```
+
+### 开源协议
+
+TDesign 遵循 [MIT 协议](https://github.com/yixiaco/flutter_tdesign_desktop_ui/blob/master/LICENSE) 。
