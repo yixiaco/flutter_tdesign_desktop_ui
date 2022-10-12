@@ -91,6 +91,10 @@ export 'src/components/switch/switch.dart';
 export 'src/components/input/input.dart';
 export 'src/components/input/custom_outline_input_border.dart';
 export 'src/components/input/input_theme.dart';
+export 'src/components/input/input_base.dart';
+export 'src/components/input/input_box.dart';
+/// 输入框装饰器
+export 'src/components/input_adornment/input_adornment.dart';
 /// 折叠面板
 export 'src/components/collapse/collapse.dart';
 export 'src/components/collapse/type.dart';
