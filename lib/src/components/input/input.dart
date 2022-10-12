@@ -4,14 +4,15 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// 输入框
 /// 用于承载用户信息录入的文本框，常用于表单、对话框等场景，对不同内容的信息录入，可拓展形成多种信息录入形式
-class TInput extends StatefulWidget {
+class TInput extends TFormItemValidate {
   const TInput({
     Key? key,
-    this.initialValue,
+    String? name,
+    this.defaultValue,
     this.controller,
     this.autofocus = false,
     this.readonly = false,
-    this.focusNode,
+    FocusNode? focusNode,
     this.clearable = false,
     this.disabled = false,
     this.label,
@@ -36,25 +37,20 @@ class TInput extends StatefulWidget {
     this.onMouseenter,
     this.onMouseleave,
     this.scrollController,
-  }) : super(key: key);
+  }) : super(key: key, name: name, focusNode: focusNode);
 
   /// 控制正在编辑的文本。
-  /// 如果为null，此小部件将创建自己的[TextEditingController]并用[initialValue]初始化其[TextEditingController.text]。
+  /// 如果为null，此小部件将创建自己的[TextEditingController]并用[defaultValue]初始化其[TextEditingController.text]。
   final TextEditingController? controller;
 
-  /// 创建包含TextField的FormField。 指定控制器时，initialValue必须为null（默认值）。
-  /// 如果控制器为空，则将自动构造TextEditingController，并将其文本初始化为initialValue或空字符串。
-  /// 有关各种参数的文档，请参阅[TextField]类和[TextField]。
-  final String? initialValue;
+  /// 输入框的默认值
+  final String? defaultValue;
 
   /// 自动对焦
   final bool autofocus;
 
   /// 是否只读
   final bool readonly;
-
-  /// 焦点
-  final FocusNode? focusNode;
 
   /// 是否可清空
   final bool clearable;
@@ -137,12 +133,10 @@ class TInput extends StatefulWidget {
   final ScrollController? scrollController;
 
   @override
-  State<TInput> createState() => _TInputState();
+  TFormItemValidateState createState() => _TInputState();
 }
 
-class _TInputState extends State<TInput> {
-  var formFieldState = GlobalKey<FormFieldState<TextFormField>>();
-
+class _TInputState extends TFormItemValidateState<TInput> {
   FocusNode? _focusNode;
 
   FocusNode get effectiveFocusNode => widget.focusNode ?? (_focusNode ??= FocusNode());
@@ -150,7 +144,8 @@ class _TInputState extends State<TInput> {
   TextEditingController? _controller;
 
   /// 有效文本控制器
-  TextEditingController get effectiveController => widget.controller ?? (_controller ??= TextEditingController(text: widget.initialValue));
+  TextEditingController get effectiveController =>
+      widget.controller ?? (_controller ??= TextEditingController(text: widget.defaultValue));
 
   /// 是否拥有焦点
   bool isFocused = false;
@@ -163,8 +158,15 @@ class _TInputState extends State<TInput> {
 
   late ValueNotifier<bool> showClearIcon;
 
+  /// 缓存旧字符串
+  String? _text;
+
+  /// 组件禁用状态
+  bool get disabled => formDisabled || widget.disabled;
+
   @override
   void initState() {
+    _text = effectiveController.text;
     showClearIcon = ValueNotifier(false);
     effectiveFocusNode.onKeyEvent = _onKeyEvent;
     effectiveFocusNode.addListener(_focusChange);
@@ -179,6 +181,7 @@ class _TInputState extends State<TInput> {
 
   @override
   void dispose() {
+    _text = null;
     showClearIcon.dispose();
     effectiveFocusNode.onKeyEvent = null;
     effectiveFocusNode.removeListener(_focusChange);
@@ -202,12 +205,16 @@ class _TInputState extends State<TInput> {
 
   /// 文本发生变化时触发
   void _textChange() {
-    if (!widget.showClearIconOnEmpty && effectiveController.text.isEmpty) {
-      showClearIcon.value = false;
-    } else if (isHover) {
-      showClearIcon.value = true;
+    if (_text != effectiveController.text) {
+      _text = effectiveController.text;
+      if (!widget.showClearIconOnEmpty && effectiveController.text.isEmpty) {
+        showClearIcon.value = false;
+      } else if (isHover) {
+        showClearIcon.value = true;
+      }
+      formItemState?.validate(trigger: TFormRuleTrigger.change);
+      widget.onChange?.call(effectiveController.text);
     }
-    widget.onChange?.call(effectiveController.text);
   }
 
   @override
@@ -237,15 +244,21 @@ class _TInputState extends State<TInput> {
 
     // 边框样式
     var border = MaterialStateOutlineInputBorder.resolveWith((states) {
-      List<BoxShadow> shadows = [];
+      List<BoxShadow>? shadows;
       Color color = widget.status.lazyValueOf(
         defaultStatus: () {
           if (states.contains(MaterialState.disabled)) {
             return colorScheme.borderLevel2Color;
           }
-          if (states.contains(MaterialState.hovered) || states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
+          if (states.contains(MaterialState.hovered) ||
+              states.contains(MaterialState.focused) ||
+              states.contains(MaterialState.pressed)) {
             if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
-              shadows = [BoxShadow(offset: const Offset(0, 0), blurRadius: 0, spreadRadius: 2, color: colorScheme.brandColorFocus)];
+              shadows ??= formItemState?.shadows ??
+                  [
+                    BoxShadow(
+                        offset: const Offset(0, 0), blurRadius: 0, spreadRadius: 2, color: colorScheme.brandColorFocus)
+                  ];
             }
             return colorScheme.brandColor;
           }
@@ -253,32 +266,44 @@ class _TInputState extends State<TInput> {
         },
         success: () {
           if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
-            shadows = [BoxShadow(offset: const Offset(0, 0), blurRadius: 0, spreadRadius: 2, color: colorScheme.successColorFocus)];
+            shadows ??= formItemState?.shadows ??
+                [
+                  BoxShadow(
+                      offset: const Offset(0, 0), blurRadius: 0, spreadRadius: 2, color: colorScheme.successColorFocus)
+                ];
           }
           return colorScheme.successColor;
         },
         warning: () {
           if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
-            shadows = [BoxShadow(offset: const Offset(0, 0), blurRadius: 0, spreadRadius: 2, color: colorScheme.warningColorFocus)];
+            shadows ??= formItemState?.shadows ??
+                [
+                  BoxShadow(
+                      offset: const Offset(0, 0), blurRadius: 0, spreadRadius: 2, color: colorScheme.warningColorFocus)
+                ];
           }
           return colorScheme.warningColor;
         },
         error: () {
           if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
-            shadows = [BoxShadow(offset: const Offset(0, 0), blurRadius: 0, spreadRadius: 2, color: colorScheme.errorColorFocus)];
+            shadows ??= formItemState?.shadows ??
+                [
+                  BoxShadow(
+                      offset: const Offset(0, 0), blurRadius: 0, spreadRadius: 2, color: colorScheme.errorColorFocus)
+                ];
           }
           return colorScheme.errorColor;
         },
       );
       return CustomOutlineInputBorder(
-        borderSide: BorderSide(width: onePx, color: color),
+        borderSide: BorderSide(width: onePx, color: formItemState?.borderColor ?? color),
         borderRadius: BorderRadius.circular(TVar.borderRadiusDefault),
         shadows: shadows,
       );
     });
 
     // 填充背景色
-    var fillColor = widget.disabled ? colorScheme.bgColorComponentDisabled : colorScheme.bgColorSpecialComponent;
+    var fillColor = disabled ? colorScheme.bgColorComponentDisabled : colorScheme.bgColorSpecialComponent;
     // tips颜色
     var tipsColor = widget.status.lazyValueOf(
       defaultStatus: () => colorScheme.textColorPlaceholder,
@@ -305,7 +330,10 @@ class _TInputState extends State<TInput> {
         MouseRegion(
           cursor: SystemMouseCursors.click,
           child: GestureDetector(
-            onTap: () => effectiveController.clear(),
+            onTap: () {
+              effectiveController.clear();
+              widget.onClear?.call();
+            },
             child: ValueListenableBuilder<bool>(
               valueListenable: showClearIcon,
               builder: (context, value, child) {
@@ -348,7 +376,7 @@ class _TInputState extends State<TInput> {
         style: TextStyle(
           fontFamily: theme.fontFamily,
           fontSize: getFontSize(theme, size),
-          color: widget.disabled ? colorScheme.textColorDisabled : colorScheme.textColorPrimary,
+          color: disabled ? colorScheme.textColorDisabled : colorScheme.textColorPrimary,
         ),
       ));
     }
@@ -374,16 +402,16 @@ class _TInputState extends State<TInput> {
     return InputDecoration(
       hintStyle: TextStyle(
         fontFamily: theme.fontFamily,
-        color: widget.disabled ? colorScheme.textColorDisabled : colorScheme.textColorPlaceholder,
+        color: disabled ? colorScheme.textColorDisabled : colorScheme.textColorPlaceholder,
       ),
-      hintText: widget.placeholder,
+      hintText: widget.placeholder ?? GlobalTDesignLocalizations.of(context).inputPlaceholder,
       border: border,
       contentPadding: EdgeInsets.symmetric(
         vertical: size.sizeOf(small: inputHeightS, medium: inputHeightDefault, large: inputHeightL),
         horizontal: 8,
       ),
       isDense: true,
-      enabled: !widget.disabled,
+      enabled: !disabled,
       fillColor: fillColor,
       hoverColor: fillColor,
       filled: true,
@@ -398,7 +426,8 @@ class _TInputState extends State<TInput> {
       prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
       prefixIconColor: MaterialStateColor.resolveWith((states) {
         return widget.status.lazyValueOf(
-          defaultStatus: () => states.contains(MaterialState.focused) ? colorScheme.brandColor : colorScheme.borderLevel2Color,
+          defaultStatus: () =>
+              states.contains(MaterialState.focused) ? colorScheme.brandColor : colorScheme.borderLevel2Color,
           success: () => colorScheme.successColor,
           warning: () => colorScheme.warningColor,
           error: () => colorScheme.errorColor,
@@ -427,7 +456,7 @@ class _TInputState extends State<TInput> {
 
     var fontSize = getFontSize(theme, size);
     MouseCursor? cursor;
-    if (widget.disabled) {
+    if (disabled) {
       cursor = SystemMouseCursors.noDrop;
     } else if (widget.readonly) {
       cursor = SystemMouseCursors.click;
@@ -443,8 +472,8 @@ class _TInputState extends State<TInput> {
         showClearIcon.value = false;
         widget.onMouseleave?.call(event);
       },
-      child: TextFormField(
-        key: formFieldState,
+      child: TextField(
+        enabled: !disabled,
         controller: effectiveController,
         autofocus: widget.autofocus,
         readOnly: widget.readonly,
@@ -456,7 +485,7 @@ class _TInputState extends State<TInput> {
           fontFamily: theme.fontFamily,
           fontSize: fontSize,
           textBaseline: TextBaseline.alphabetic,
-          color: widget.disabled ? colorScheme.textColorDisabled : colorScheme.textColorPrimary,
+          color: disabled ? colorScheme.textColorDisabled : colorScheme.textColorPrimary,
         ),
         textAlign: widget.align,
         mouseCursor: cursor,
@@ -464,9 +493,33 @@ class _TInputState extends State<TInput> {
         maxLength: widget.maxLength ?? inputTheme.maxLength,
         obscureText: widget.type == TInputType.password && !look,
         textAlignVertical: TextAlignVertical.center,
-        onFieldSubmitted: (value) => widget.onEnter?.call(value),
         scrollController: widget.scrollController,
+        onSubmitted: (value) {
+          if (widget.onEnter == null) {
+            TForm.of(context)?.submit();
+          } else {
+            widget.onEnter?.call(value);
+          }
+        },
       ),
     );
+  }
+
+  @override
+  FocusNode? get focusNode => effectiveFocusNode;
+
+  @override
+  get formItemValue => effectiveController.text;
+
+  @override
+  void reset(TFormResetType type) {
+    switch (type) {
+      case TFormResetType.empty:
+        effectiveController.text = '';
+        break;
+      case TFormResetType.initial:
+        effectiveController.text = widget.defaultValue ?? '';
+        break;
+    }
   }
 }

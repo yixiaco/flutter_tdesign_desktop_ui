@@ -3,10 +3,12 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// 开关组件
 /// 用于两个互斥选项，用来打开或关闭选项的选择控件
-class TSwitch<T> extends StatefulWidget {
+class TSwitch<T> extends TFormItemValidate {
   const TSwitch({
     Key? key,
     required this.value,
+    this.defaultValue,
+    String? name,
     this.disabled = false,
     this.checkLabel,
     this.uncheckLabel,
@@ -15,12 +17,15 @@ class TSwitch<T> extends StatefulWidget {
     this.loading = false,
     this.size,
     this.onChange,
-    this.focusNode,
+    FocusNode? focusNode,
     this.autofocus = false,
-  }) : super(key: key);
+  }) : super(key: key, name: name, focusNode: focusNode);
 
   /// 开关值, 可选[bool]、[checkValue]、[uncheckValue]
   final dynamic value;
+
+  /// 默认开关值
+  final dynamic defaultValue;
 
   /// 是否禁用组件
   final bool disabled;
@@ -46,17 +51,14 @@ class TSwitch<T> extends StatefulWidget {
   /// 数据发生变化时触发
   final void Function(dynamic value)? onChange;
 
-  /// 焦点
-  final FocusNode? focusNode;
-
   /// 自动聚焦
   final bool autofocus;
 
   @override
-  State<TSwitch<T>> createState() => _TSwitchState<T>();
+  TFormItemValidateState<TSwitch<T>> createState() => _TSwitchState<T>();
 }
 
-class _TSwitchState<T> extends State<TSwitch<T>> with TickerProviderStateMixin, TToggleableStateMixin {
+class _TSwitchState<T> extends TFormItemValidateState<TSwitch<T>> with TickerProviderStateMixin, TToggleableStateMixin {
   @override
   Duration get toggleDuration => TVar.animDurationBase;
 
@@ -64,14 +66,25 @@ class _TSwitchState<T> extends State<TSwitch<T>> with TickerProviderStateMixin, 
   CurvedAnimation get position => _position;
   late CurvedAnimation _position;
 
+  dynamic _value;
+
   @override
   void initState() {
     super.initState();
+    _value = widget.value ?? widget.defaultValue;
     _position = CurvedAnimation(
       parent: positionController,
       curve: TVar.animTimeFnEasing,
       reverseCurve: TVar.animTimeFnEasing.flipped,
     );
+  }
+
+  @override
+  void didUpdateWidget(covariant TSwitch<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.value != oldWidget.value) {
+      _value = widget.value;
+    }
   }
 
   @override
@@ -182,20 +195,22 @@ class _TSwitchState<T> extends State<TSwitch<T>> with TickerProviderStateMixin, 
         child: Stack(
           children: [
             // 底部
-            AnimatedContainer(
-              constraints: BoxConstraints(
-                minWidth: minWidth,
-                minHeight: height,
-                maxHeight: height,
+            UnconstrainedBox(
+              child: AnimatedContainer(
+                constraints: BoxConstraints(
+                  minWidth: minWidth,
+                  minHeight: height,
+                  maxHeight: height,
+                ),
+                duration: TVar.animDurationBase,
+                curve: TVar.animTimeFnEaseOut,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(height / 2),
+                  color: checkColor.resolve(states),
+                ),
+                child: label,
               ),
-              duration: TVar.animDurationBase,
-              curve: TVar.animTimeFnEaseOut,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(height / 2),
-                color: checkColor.resolve(states),
-              ),
-              child: label,
             ),
             // 滑块
             Positioned.fill(
@@ -225,14 +240,31 @@ class _TSwitchState<T> extends State<TSwitch<T>> with TickerProviderStateMixin, 
   }
 
   @override
-  ValueChanged<bool?>? get onChanged => (value) => widget.onChange?.call(value! ? widget.checkValue ?? value : widget.uncheckValue ?? value);
+  ValueChanged<bool?>? get onChanged {
+    return (value) => widget.onChange?.call(value! ? widget.checkValue ?? value : widget.uncheckValue ?? value);
+  }
 
   @override
   bool get tristate => false;
 
   @override
-  bool? get value => widget.value == widget.checkValue || widget.value == true;
+  bool? get value => _value != null && (_value == widget.checkValue || _value == true);
 
   @override
-  bool get isInteractive => !widget.disabled && !widget.loading;
+  bool get isInteractive => !formDisabled && !widget.disabled && !widget.loading;
+
+  @override
+  void reset(TFormResetType type) {
+    switch (type) {
+      case TFormResetType.empty:
+        widget.onChange?.call(widget.uncheckValue ?? false);
+        break;
+      case TFormResetType.initial:
+        widget.onChange?.call(widget.defaultValue ?? widget.uncheckValue ?? false);
+        break;
+    }
+  }
+
+  @override
+  get formItemValue => _value;
 }

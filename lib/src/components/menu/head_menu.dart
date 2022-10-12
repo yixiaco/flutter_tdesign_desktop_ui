@@ -107,7 +107,9 @@ class _THeadMenuState<T> extends State<THeadMenu<T>> {
     }
     if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
       SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
-        setState(() {});
+        if(mounted) {
+          setState(() {});
+        }
       });
     } else {
       setState(() {});

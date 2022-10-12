@@ -5,6 +5,7 @@ import 'package:example/components/checkbox/checkbox_example.dart';
 import 'package:example/components/collapse/collapse_example.dart';
 import 'package:example/components/dialog/dialog_example.dart';
 import 'package:example/components/dropdown/dropdown_example.dart';
+import 'package:example/components/form/form_example.dart';
 import 'package:example/components/icon/icon_example.dart';
 import 'package:example/components/input/input_example.dart';
 import 'package:example/components/jumper/jumper_example.dart';
@@ -197,6 +198,15 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
           },
         ),
         TMenuItemProps(
+          value: 'form',
+          content: const Text('Form 表单'),
+          onClick: () {
+            setState(() {
+              content = const TFormExample();
+            });
+          },
+        ),
+        TMenuItemProps(
           value: 'input',
           content: const Text('Input 输入框'),
           onClick: () {
@@ -320,7 +330,8 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
     var locale = ref.watch(localeProvider);
 
     Widget child = Scaffold(
-      backgroundColor: theme.brightness == Brightness.light ? const Color(0xFFEEEEEE) : Colors.black,
+      // backgroundColor: theme.brightness == Brightness.light ? const Color(0xFFEEEEEE) : Colors.black,
+      backgroundColor: theme.brightness == Brightness.light ? Colors.white : Colors.black,
       body: TLayout(
         aside: _buildAside(theme),
         header: _buildHeader(theme, semantics, size, locale),

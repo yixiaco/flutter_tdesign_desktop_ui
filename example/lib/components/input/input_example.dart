@@ -40,7 +40,7 @@ class TInputExample extends StatelessWidget {
         TInput(
           clearable: true,
           label: '价格：',
-          initialValue: '错误状态',
+          defaultValue: '错误状态',
           status: TInputStatus.error,
           placeholder: 'error',
           tips: '校验存在严重问题文本提示',

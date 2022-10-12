@@ -33,6 +33,12 @@ class TVar {
   static double spacer9 = spacer * 9; // 间距-大-48
   static double spacer10 = spacer * 10; // 间距-大-80
 
+  static double lineHeightS = 20;
+  static double lineHeightBase = 22;
+  static double lineHeightL = 24;
+  static double lineHeightXl = 28;
+  static double lineHeightXxl = 44;
+
   // 动画
   static Curve animTimeFnEasing = const Cubic(.38, 0, .24, 1);
   static Curve animTimeFnEaseOut = const Cubic(0, 0, .15, 1);

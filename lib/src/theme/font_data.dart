@@ -20,22 +20,23 @@ const double _kFontSizeHeadlineLarge = 36;
 const double _kFontSizeDisplayMedium = 48;
 const double _kFontSizeDisplayLarge = 64;
 // 字体行高 token
-// const _kLineHeightLinkSmall = 20 / _kFontSizeLinkSmall;
-// const _kLineHeightLinkMedium = 22 / _kFontSizeLinkMedium;
-// const _kLineHeightLinkLarge = 24 / _kFontSizeLinkLarge;
-// const _kLineHeightMarkSmall = 20 / _kFontSizeMarkSmall;
-// const _kLineHeightMarkMedium = 22 / _kFontSizeMarkMedium;
-// const _kLineHeightBodySmall = 20 / _kFontSizeBodySmall;
-// const _kLineHeightBodyMedium = 22 / _kFontSizeBodyMedium;
-// const _kLineHeightBodyLarge = 24 / _kFontSizeBodyLarge;
-// const _kLineHeightTitleSmall = 22 / _kFontSizeTitleSmall;
-// const _kLineHeightTitleMedium = 24 / _kFontSizeTitleMedium;
-// const _kLineHeightTitleLarge = 28 / _kFontSizeTitleLarge;
-// const _kLineHeightHeadlineSmall = 32 / _kFontSizeHeadlineSmall;
-// const _kLineHeightHeadlineMedium = 36 / _kFontSizeHeadlineMedium;
-// const _kLineHeightHeadlineLarge = 44 / _kFontSizeHeadlineLarge;
-// const _kLineHeightDisplayMedium = 56 / _kFontSizeDisplayMedium;
-// const _kLineHeightDisplayLarge = 72 / _kFontSizeDisplayLarge;
+const _kDifference = 5;
+const _kLineHeightLinkSmall = (20 - _kDifference) / _kFontSizeLinkSmall;
+const _kLineHeightLinkMedium = (22 - _kDifference) / _kFontSizeLinkMedium;
+const _kLineHeightLinkLarge = (24 - _kDifference) / _kFontSizeLinkLarge;
+const _kLineHeightMarkSmall = (20 - _kDifference) / _kFontSizeMarkSmall;
+const _kLineHeightMarkMedium = (22 - _kDifference) / _kFontSizeMarkMedium;
+const _kLineHeightBodySmall = (20 - _kDifference) / _kFontSizeBodySmall;
+const _kLineHeightBodyMedium = (22 - _kDifference) / _kFontSizeBodyMedium;
+const _kLineHeightBodyLarge = (24 - _kDifference) / _kFontSizeBodyLarge;
+const _kLineHeightTitleSmall = (22 - _kDifference) / _kFontSizeTitleSmall;
+const _kLineHeightTitleMedium = (24 - _kDifference) / _kFontSizeTitleMedium;
+const _kLineHeightTitleLarge = (28 - _kDifference) / _kFontSizeTitleLarge;
+const _kLineHeightHeadlineSmall = (32 - _kDifference) / _kFontSizeHeadlineSmall;
+const _kLineHeightHeadlineMedium = (36 - _kDifference) / _kFontSizeHeadlineMedium;
+const _kLineHeightHeadlineLarge = (44 - _kDifference) / _kFontSizeHeadlineLarge;
+const _kLineHeightDisplayMedium = (56 - _kDifference) / _kFontSizeDisplayMedium;
+const _kLineHeightDisplayLarge = (72 - _kDifference) / _kFontSizeDisplayLarge;
 
 /// 字体相关
 class TFontData with Diagnosticable {
@@ -236,22 +237,22 @@ class TFontData with Diagnosticable {
       fontSizeHeadlineLarge: _kFontSizeHeadlineLarge,
       fontSizeDisplayMedium: _kFontSizeDisplayMedium,
       fontSizeDisplayLarge: _kFontSizeDisplayLarge,
-      fontLinkSmall: TextStyle(fontSize: _kFontSizeLinkSmall, fontFamily: fontFamily),
-      fontLinkMedium: TextStyle(fontSize: _kFontSizeLinkMedium, fontFamily: fontFamily),
-      fontLinkLarge: TextStyle(fontSize: _kFontSizeLinkLarge, fontFamily: fontFamily),
-      fontMarkSmall: TextStyle(fontSize: _kFontSizeMarkSmall, fontFamily: fontFamily, fontWeight: FontWeight.w600),
-      fontMarkMedium: TextStyle(fontSize: _kFontSizeMarkMedium, fontFamily: fontFamily, fontWeight: FontWeight.w600),
-      fontBodySmall: TextStyle(fontSize: _kFontSizeBodySmall, fontFamily: fontFamily),
-      fontBodyMedium: TextStyle(fontSize: _kFontSizeBodyMedium, fontFamily: fontFamily),
-      fontBodyLarge: TextStyle(fontSize: _kFontSizeBodyLarge, fontFamily: fontFamily),
-      fontTitleSmall: TextStyle(fontSize: _kFontSizeTitleSmall, fontFamily: fontFamily, fontWeight: FontWeight.w600),
-      fontTitleMedium: TextStyle(fontSize: _kFontSizeTitleMedium, fontFamily: fontFamily, fontWeight: FontWeight.w600),
-      fontTitleLarge: TextStyle(fontSize: _kFontSizeTitleLarge, fontFamily: fontFamily, fontWeight: FontWeight.w600),
-      fontHeadlineSmall: TextStyle(fontSize: _kFontSizeHeadlineSmall, fontFamily: fontFamily, fontWeight: FontWeight.w600),
-      fontHeadlineMedium: TextStyle(fontSize: _kFontSizeHeadlineMedium, fontFamily: fontFamily, fontWeight: FontWeight.w600),
-      fontHeadlineLarge: TextStyle(fontSize: _kFontSizeHeadlineLarge, fontFamily: fontFamily, fontWeight: FontWeight.w600),
-      fontDisplayMedium: TextStyle(fontSize: _kFontSizeDisplayMedium, fontFamily: fontFamily, fontWeight: FontWeight.w600),
-      fontDisplayLarge: TextStyle(fontSize: _kFontSizeDisplayLarge, fontFamily: fontFamily, fontWeight: FontWeight.w600),
+      fontLinkSmall: TextStyle(fontSize: _kFontSizeLinkSmall, height: _kLineHeightLinkSmall, fontFamily: fontFamily),
+      fontLinkMedium: TextStyle(fontSize: _kFontSizeLinkMedium, height: _kLineHeightLinkMedium, fontFamily: fontFamily),
+      fontLinkLarge: TextStyle(fontSize: _kFontSizeLinkLarge, height: _kLineHeightLinkLarge, fontFamily: fontFamily),
+      fontMarkSmall: TextStyle(fontSize: _kFontSizeMarkSmall, height: _kLineHeightMarkSmall, fontFamily: fontFamily, fontWeight: FontWeight.w600),
+      fontMarkMedium: TextStyle(fontSize: _kFontSizeMarkMedium, height: _kLineHeightMarkMedium, fontFamily: fontFamily, fontWeight: FontWeight.w600),
+      fontBodySmall: TextStyle(fontSize: _kFontSizeBodySmall, height: _kLineHeightBodySmall, fontFamily: fontFamily),
+      fontBodyMedium: TextStyle(fontSize: _kFontSizeBodyMedium, height: _kLineHeightBodyMedium, fontFamily: fontFamily),
+      fontBodyLarge: TextStyle(fontSize: _kFontSizeBodyLarge, height: _kLineHeightBodyLarge, fontFamily: fontFamily),
+      fontTitleSmall: TextStyle(fontSize: _kFontSizeTitleSmall, height: _kLineHeightTitleSmall, fontFamily: fontFamily, fontWeight: FontWeight.w600),
+      fontTitleMedium: TextStyle(fontSize: _kFontSizeTitleMedium, height: _kLineHeightTitleMedium, fontFamily: fontFamily, fontWeight: FontWeight.w600),
+      fontTitleLarge: TextStyle(fontSize: _kFontSizeTitleLarge, height: _kLineHeightTitleLarge, fontFamily: fontFamily, fontWeight: FontWeight.w600),
+      fontHeadlineSmall: TextStyle(fontSize: _kFontSizeHeadlineSmall, height: _kLineHeightHeadlineSmall, fontFamily: fontFamily, fontWeight: FontWeight.w600),
+      fontHeadlineMedium: TextStyle(fontSize: _kFontSizeHeadlineMedium, height: _kLineHeightHeadlineMedium, fontFamily: fontFamily, fontWeight: FontWeight.w600),
+      fontHeadlineLarge: TextStyle(fontSize: _kFontSizeHeadlineLarge, height: _kLineHeightHeadlineLarge, fontFamily: fontFamily, fontWeight: FontWeight.w600),
+      fontDisplayMedium: TextStyle(fontSize: _kFontSizeDisplayMedium, height: _kLineHeightDisplayMedium, fontFamily: fontFamily, fontWeight: FontWeight.w600),
+      fontDisplayLarge: TextStyle(fontSize: _kFontSizeDisplayLarge, height: _kLineHeightDisplayLarge, fontFamily: fontFamily, fontWeight: FontWeight.w600),
     );
   }
 

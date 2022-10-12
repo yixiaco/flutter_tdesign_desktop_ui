@@ -13,7 +13,7 @@ part 'components/popup_overlay.dart';
 
 part 'components/popup_position_delegate.dart';
 
-part 'components/props.dart';
+part 'components/type.dart';
 
 typedef PopupPositionCallback = void Function(bool isReverse);
 
@@ -196,7 +196,7 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  /// 判断[effectiveVisible.value]状态，显示和隐藏浮层
+  /// 判断[effectiveVisible.formItemValue]状态，显示和隐藏浮层
   void _showHidePopup({bool? immediately}) {
     immediately = immediately ?? widget.trigger != TPopupTrigger.hover;
     if (effectiveVisible.value) {

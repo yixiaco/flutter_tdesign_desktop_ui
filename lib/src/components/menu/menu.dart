@@ -8,7 +8,7 @@ part 'components/menu/menu_item.dart';
 
 part 'components/menu/menu_layout.dart';
 
-part 'components/menu/props.dart';
+part 'components/menu/type.dart';
 
 part 'components/menu/sub_menu.dart';
 

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tdesign_desktop_ui/src/components/menu/types.dart';
+import 'package:tdesign_desktop_ui/src/components/menu/type.dart';
 
 /// 菜单栏选中项及展开菜单控制
 class TMenuController<T> extends ChangeNotifier {

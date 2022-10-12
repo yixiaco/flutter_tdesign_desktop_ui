@@ -56,7 +56,7 @@ class _TMenuItem<T> extends StatelessWidget {
       if (states.contains(MaterialState.selected)) {
         return colorScheme.brandColor;
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(MaterialState.hovered) || states.contains(MaterialState.focused)) {
         return theme.isLight ? colorScheme.gray2 : colorScheme.gray9;
       }
     });

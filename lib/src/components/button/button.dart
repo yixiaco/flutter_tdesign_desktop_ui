@@ -602,6 +602,7 @@ class TButton extends StatelessWidget {
     this.side,
     this.radius,
     this.softWrap = false,
+    this.type = TButtonType.button,
   }) : super(key: key);
 
   ///按钮内容
@@ -665,6 +666,9 @@ class TButton extends StatelessWidget {
   /// 是否收紧包装
   final bool softWrap;
 
+  /// 按钮类型
+  final TButtonType type;
+
   /// icon大小
   double _btnIconSize(TThemeData theme, TComponentSize size) {
     return size.sizeOf(
@@ -719,7 +723,7 @@ class TButton extends StatelessWidget {
 
     return _TButton(
       disabled: disabled,
-      onPressed: onPressed,
+      onPressed: _onProxyPressed(context),
       onLongPress: onLongPress,
       onHover: onHover,
       onFocusChange: onFocusChange,
@@ -741,5 +745,25 @@ class TButton extends StatelessWidget {
         children: result,
       ),
     );
+  }
+
+  /// 返回代理事件
+  VoidCallback? _onProxyPressed(BuildContext context) {
+    switch (type) {
+      case TButtonType.submit:
+        var form = TForm.of(context);
+        return () {
+          form?.submit();
+          onPressed?.call();
+        };
+      case TButtonType.reset:
+        var form = TForm.of(context);
+        return () {
+          form?.reset();
+          onPressed?.call();
+        };
+      case TButtonType.button:
+        return onPressed;
+    }
   }
 }

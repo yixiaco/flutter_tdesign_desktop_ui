@@ -4,23 +4,27 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// 多选框
 /// 多选框是一个选择控件，允许用户通过单击在选中和未选中之间切换
-class TCheckbox<T> extends StatefulWidget {
+class TCheckbox<T> extends TFormItemValidate {
   const TCheckbox({
     Key? key,
-    this.checked = false,
+    String? name,
+    FocusNode? focusNode,
+    this.checked,
+    this.defaultChecked,
     this.disabled = false,
     this.indeterminate = false,
     this.label,
     this.readonly = false,
-    this.prop,
     this.value,
     this.onChange,
-    this.focusNode,
     this.autofocus = false,
-  }) : super(key: key);
+  }) : super(key: key, name: name, focusNode: focusNode);
 
   /// 是否选中
-  final bool checked;
+  final bool? checked;
+
+  /// 是否选中。非受控属性
+  final bool? defaultChecked;
 
   /// 是否禁用
   final bool disabled;
@@ -37,30 +41,27 @@ class TCheckbox<T> extends StatefulWidget {
   /// 多选框的值
   final T? value;
 
-  /// 表单验证中的属性名称
-  final String? prop;
-
   /// 值变化时触发
   final TCheckValueChange<T?>? onChange;
-
-  /// 焦点
-  final FocusNode? focusNode;
 
   /// 自动聚焦
   final bool autofocus;
 
   @override
-  State<TCheckbox<T>> createState() => _TCheckboxState<T>();
+  TFormItemValidateState<TCheckbox<T>> createState() => _TCheckboxState<T>();
 }
 
-class _TCheckboxState<T> extends State<TCheckbox<T>> with SingleTickerProviderStateMixin, MaterialStateMixin {
+class _TCheckboxState<T> extends TFormItemValidateState<TCheckbox<T>>
+    with SingleTickerProviderStateMixin, MaterialStateMixin {
   final _TCheckboxPaint _painter = _TCheckboxPaint();
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
+  late bool checked;
 
   @override
   void initState() {
     super.initState();
+    checked = widget.checked ?? widget.defaultChecked ?? false;
 
     _controller = AnimationController(
       vsync: this,
@@ -77,8 +78,6 @@ class _TCheckboxState<T> extends State<TCheckbox<T>> with SingleTickerProviderSt
       curve: TVar.animTimeFnEaseIn,
       reverseCurve: TVar.animTimeFnEaseIn.flipped,
     );
-
-    setMaterialState(MaterialState.disabled, widget.disabled);
   }
 
   @override
@@ -91,19 +90,21 @@ class _TCheckboxState<T> extends State<TCheckbox<T>> with SingleTickerProviderSt
   @override
   void didUpdateWidget(TCheckbox<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
-    setMaterialState(MaterialState.disabled, widget.disabled);
-    var oldChecked = oldWidget.checked || oldWidget.indeterminate;
-    var checked = widget.checked || widget.indeterminate;
+    var oldChecked = this.checked || oldWidget.indeterminate;
+    if (widget.checked != oldWidget.checked) {
+      this.checked = widget.checked ?? false;
+    }
+    var checked = this.checked || widget.indeterminate;
     if (checked != oldChecked) {
       _painter
-        ..checked = widget.checked
+        ..checked = this.checked
         ..indeterminate = widget.indeterminate;
       animationTo();
     }
   }
 
   void animationTo() {
-    var checked = widget.checked || widget.indeterminate;
+    var checked = this.checked || widget.indeterminate;
     if (checked) {
       _controller.forward();
     } else {
@@ -113,12 +114,18 @@ class _TCheckboxState<T> extends State<TCheckbox<T>> with SingleTickerProviderSt
 
   get states => materialStates;
 
-  bool get _checked {
-    return widget.indeterminate ? true : widget.checked;
-  }
+  bool get _checked => widget.indeterminate || checked;
+
+  bool get disabled => formDisabled || widget.disabled;
 
   @override
   Widget build(BuildContext context) {
+    var disabled = this.disabled;
+    if (disabled) {
+      materialStates.add(MaterialState.disabled);
+    } else {
+      materialStates.remove(MaterialState.disabled);
+    }
     var theme = TTheme.of(context);
     var colorScheme = theme.colorScheme;
     var themeData = TCheckboxTheme.of(context);
@@ -128,7 +135,8 @@ class _TCheckboxState<T> extends State<TCheckbox<T>> with SingleTickerProviderSt
     Map<Type, Action<Intent>> actionMap = activeMap(context);
 
     // 鼠标
-    final MaterialStateProperty<MouseCursor> effectiveMouseCursor = MaterialStateProperty.resolveWith<MouseCursor>((states) {
+    final MaterialStateProperty<MouseCursor> effectiveMouseCursor =
+        MaterialStateProperty.resolveWith<MouseCursor>((states) {
       if (states.contains(MaterialState.disabled)) {
         return SystemMouseCursors.noDrop;
       }
@@ -152,7 +160,16 @@ class _TCheckboxState<T> extends State<TCheckbox<T>> with SingleTickerProviderSt
 
     // 背景填充颜色
     final bgColor = MaterialStateProperty.resolveWith((states) {
-      Color color = _checked ? colorScheme.brandColor : colorScheme.bgColorContainer;
+      Color color = colorScheme.bgColorContainer;
+      if (states.contains(MaterialState.disabled)) {
+        color = colorScheme.bgColorComponentDisabled;
+      }
+      return color;
+    });
+
+    // 选中背景填充颜色
+    final checkBgColor = MaterialStateProperty.resolveWith((states) {
+      Color color = colorScheme.brandColor;
       if (states.contains(MaterialState.disabled)) {
         color = colorScheme.bgColorComponentDisabled;
       }
@@ -174,7 +191,7 @@ class _TCheckboxState<T> extends State<TCheckbox<T>> with SingleTickerProviderSt
         child: DefaultTextStyle(
           style: TextStyle(
             fontSize: theme.fontData.fontSizeBase,
-            color: widget.disabled ? colorScheme.textColorDisabled : colorScheme.textColorPrimary,
+            color: disabled ? colorScheme.textColorDisabled : colorScheme.textColorPrimary,
           ),
           child: label,
         ),
@@ -184,7 +201,7 @@ class _TCheckboxState<T> extends State<TCheckbox<T>> with SingleTickerProviderSt
     return Semantics(
       checked: widget.checked,
       child: FocusableActionDetector(
-        enabled: !widget.disabled,
+        enabled: !disabled,
         actions: actionMap,
         focusNode: widget.focusNode,
         autofocus: widget.autofocus,
@@ -216,7 +233,8 @@ class _TCheckboxState<T> extends State<TCheckbox<T>> with SingleTickerProviderSt
                     size: const Size.square(16),
                     painter: _painter
                       ..backgroundColor = bgColor.resolve(states)
-                      ..checked = widget.checked
+                      ..checkBackgroundColor = checkBgColor.resolve(states)
+                      ..checked = checked
                       ..indeterminate = widget.indeterminate
                       ..checkColor = checkColor.resolve(states),
                   ),
@@ -232,13 +250,13 @@ class _TCheckboxState<T> extends State<TCheckbox<T>> with SingleTickerProviderSt
 
   /// 处理选中事件
   void _handleTap() {
-    if (!widget.readonly && !widget.disabled) {
+    if (!widget.readonly && !disabled) {
       if (widget.indeterminate) {
         // 半选=>选中
         widget.onChange?.call(true, !widget.indeterminate, widget.value);
       } else {
         // 选中=>未选中
-        widget.onChange?.call(!widget.checked, false, widget.value);
+        widget.onChange?.call(!checked, false, null);
       }
     }
   }
@@ -262,6 +280,25 @@ class _TCheckboxState<T> extends State<TCheckbox<T>> with SingleTickerProviderSt
 
   void _handleFocusHighlightChanged(bool value) {
     setMaterialState(MaterialState.focused, value);
+  }
+
+  @override
+  get formItemValue => checked ? widget.value : null;
+
+  @override
+  void reset(TFormResetType type) {
+    switch (type) {
+      case TFormResetType.empty:
+        widget.onChange?.call(false, false, null);
+        break;
+      case TFormResetType.initial:
+        if (widget.defaultChecked == true) {
+          widget.onChange?.call(true, false, widget.value);
+        } else {
+          widget.onChange?.call(false, false, null);
+        }
+        break;
+    }
   }
 }
 
@@ -290,6 +327,18 @@ class _TCheckboxPaint extends ChangeNotifier implements CustomPainter {
       return;
     }
     _backgroundColor = value;
+    notifyListeners();
+  }
+
+  /// 选中背景颜色
+  Color get checkBackgroundColor => _checkBackgroundColor!;
+  Color? _checkBackgroundColor;
+
+  set checkBackgroundColor(Color value) {
+    if (_checkBackgroundColor == value) {
+      return;
+    }
+    _checkBackgroundColor = value;
     notifyListeners();
   }
 
@@ -366,12 +415,15 @@ class _TCheckboxPaint extends ChangeNotifier implements CustomPainter {
 
   /// 绘制背景
   void drawBackground(Canvas canvas, Size size) {
+    canvas.drawRect(
+      const Offset(0, 0) & size,
+      Paint()..color = backgroundColor,
+    );
     if (indeterminate || checked) {
-      var opacity = backgroundColor.opacity;
-
+      var opacity = checkBackgroundColor.opacity;
       canvas.drawRect(
         const Offset(0, 0) & size,
-        Paint()..color = backgroundColor.withOpacity(opacity * t),
+        Paint()..color = checkBackgroundColor.withOpacity(opacity * t),
       );
     }
   }
