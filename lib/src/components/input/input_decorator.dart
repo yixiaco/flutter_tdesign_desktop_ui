@@ -204,6 +204,9 @@ class TRenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
 
   @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
+    if (container != null) {
+      visitor(container!);
+    }
     if (prefix != null) {
       visitor(prefix!);
     }
@@ -218,9 +221,6 @@ class TRenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     }
     if (tips != null) {
       visitor(tips!);
-    }
-    if (container != null) {
-      visitor(container!);
     }
   }
 
@@ -383,6 +383,7 @@ class TRenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
         boxConstraints.copyWith(
           minWidth: 0,
           maxWidth: inputWidth,
+          minHeight: math.max(0.0, constraints.minHeight - _boxSize(tips).height),
         ),
       );
       boxToBaseline[input] = _layoutLineBox(
@@ -390,6 +391,7 @@ class TRenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
         boxConstraints.copyWith(
           minWidth: inputWidth,
           maxWidth: inputWidth,
+          minHeight: math.max(0.0, constraints.minHeight - _boxSize(tips).height),
         ),
       );
     } else {
@@ -401,6 +403,7 @@ class TRenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
         boxConstraints.copyWith(
           minWidth: 0,
           maxWidth: maxWidth,
+          minHeight: math.max(0.0, constraints.minHeight - _boxSize(tips).height),
         ),
       );
       boxToBaseline[input] = _layoutLineBox(
@@ -408,6 +411,7 @@ class TRenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
         boxConstraints.copyWith(
           minWidth: math.max(_boxSize(placeholder).width, minWidth),
           maxWidth: maxWidth,
+          minHeight: math.max(0.0, constraints.minHeight - _boxSize(tips).height),
         ),
       );
       inputWidth = _boxSize(input).width;

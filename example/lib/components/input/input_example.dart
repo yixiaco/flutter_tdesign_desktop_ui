@@ -39,7 +39,7 @@ class TInputExample extends StatelessWidget {
         ),
         TInput(
           clearable: true,
-          label: '价格：',
+          label: '价格:',
           defaultValue: '错误状态',
           status: TInputStatus.error,
           placeholder: 'error',
@@ -52,7 +52,7 @@ class TInputExample extends StatelessWidget {
           clearable: true,
           type: TInputType.password,
           placeholder: '密码框',
-          label: '价格：',
+          label: '价格:',
           maxLength: 10,
           suffix: Text('元'),
           prefixIcon: Icon(TIcons.time),

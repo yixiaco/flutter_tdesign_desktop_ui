@@ -519,7 +519,7 @@ class _TLinePrinter extends CustomPainter {
         paint.color = actionColor.withOpacity(tween.transform(value));
       }
       paint.shader = null;
-      paint.strokeCap = StrokeCap.square;
+      paint.strokeCap = StrokeCap.round;
       canvas.drawLine(p1, Offset(max(p1.dx, p2.dx * value), p2.dy), paint);
     }
   }
@@ -602,7 +602,7 @@ class _TCirclePainter extends CustomPainter {
         paint.color = actionColor.withOpacity(tween.transform(value));
       }
       paint.shader = null;
-      paint.strokeCap = StrokeCap.square;
+      paint.strokeCap = StrokeCap.round;
       canvas.drawArc(offset & effectiveSize, -pi / 2, endAngle * animation.value, false, paint);
     }
   }

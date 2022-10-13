@@ -231,212 +231,9 @@ class _TInputState extends TFormItemValidateState<TInput> {
     effectiveFocusNode.onKeyEvent = _onKeyEvent;
   }
 
-  static double inputHeightS = TVar.spacer * 0.8;
-  static double inputHeightDefault = TVar.spacer * 1.2;
-  static double inputHeightL = TVar.spacer * 2.5;
-
-  /// 默认装饰器
-  InputDecoration defaultDecoration(TComponentSize size) {
-    var theme = TTheme.of(context);
-    var colorScheme = theme.colorScheme;
-
-    var onePx = 1 / MediaQuery.of(context).devicePixelRatio;
-
-    // 边框样式
-    var border = MaterialStateOutlineInputBorder.resolveWith((states) {
-      List<BoxShadow>? shadows;
-      Color color = widget.status.lazyValueOf(
-        defaultStatus: () {
-          if (states.contains(MaterialState.disabled)) {
-            return colorScheme.borderLevel2Color;
-          }
-          if (states.contains(MaterialState.hovered) ||
-              states.contains(MaterialState.focused) ||
-              states.contains(MaterialState.pressed)) {
-            if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
-              shadows ??= formItemState?.shadows ??
-                  [
-                    BoxShadow(
-                        offset: const Offset(0, 0), blurRadius: 0, spreadRadius: 2, color: colorScheme.brandColorFocus)
-                  ];
-            }
-            return colorScheme.brandColor;
-          }
-          return colorScheme.borderLevel2Color;
-        },
-        success: () {
-          if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
-            shadows ??= formItemState?.shadows ??
-                [
-                  BoxShadow(
-                      offset: const Offset(0, 0), blurRadius: 0, spreadRadius: 2, color: colorScheme.successColorFocus)
-                ];
-          }
-          return colorScheme.successColor;
-        },
-        warning: () {
-          if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
-            shadows ??= formItemState?.shadows ??
-                [
-                  BoxShadow(
-                      offset: const Offset(0, 0), blurRadius: 0, spreadRadius: 2, color: colorScheme.warningColorFocus)
-                ];
-          }
-          return colorScheme.warningColor;
-        },
-        error: () {
-          if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
-            shadows ??= formItemState?.shadows ??
-                [
-                  BoxShadow(
-                      offset: const Offset(0, 0), blurRadius: 0, spreadRadius: 2, color: colorScheme.errorColorFocus)
-                ];
-          }
-          return colorScheme.errorColor;
-        },
-      );
-      return CustomOutlineInputBorder(
-        borderSide: BorderSide(width: onePx, color: formItemState?.borderColor ?? color),
-        borderRadius: BorderRadius.circular(TVar.borderRadiusDefault),
-        shadows: shadows,
-      );
-    });
-
-    // 填充背景色
-    var fillColor = disabled ? colorScheme.bgColorComponentDisabled : colorScheme.bgColorSpecialComponent;
-    // tips颜色
-    var tipsColor = widget.status.lazyValueOf(
-      defaultStatus: () => colorScheme.textColorPlaceholder,
-      success: () => colorScheme.successColor,
-      warning: () => colorScheme.warningColor,
-      error: () => colorScheme.errorColor,
-    );
-    // icon颜色
-    var iconColor = widget.status.lazyValueOf(
-      defaultStatus: () => isFocused ? colorScheme.brandColor : colorScheme.borderLevel2Color,
-      success: () => colorScheme.successColor,
-      warning: () => colorScheme.warningColor,
-      error: () => colorScheme.errorColor,
-    );
-
-    List<Widget?> prefixIconList = [];
-    List<Widget?> suffixIconList = [];
-    Widget? prefixIcon;
-    Widget? suffixIcon;
-
-    // 可清理icon
-    if (widget.clearable) {
-      suffixIconList.add(
-        MouseRegion(
-          cursor: SystemMouseCursors.click,
-          child: GestureDetector(
-            onTap: () {
-              effectiveController.clear();
-              widget.onClear?.call();
-            },
-            child: ValueListenableBuilder<bool>(
-              valueListenable: showClearIcon,
-              builder: (context, value, child) {
-                return Visibility(
-                  visible: value,
-                  child: Icon(TIcons.closeCircleFilled, size: 16, color: colorScheme.textColorPlaceholder),
-                );
-              },
-            ),
-          ),
-        ),
-      );
-    }
-
-    if (widget.prefixIcon != null) {
-      prefixIconList.add(widget.prefixIcon);
-    }
-    // 密码框icon
-    if (widget.type == TInputType.password) {
-      if (widget.prefixIcon == null) {
-        prefixIconList.add(Icon(TIcons.lockOn, size: 16, color: iconColor));
-      }
-      suffixIconList.add(
-        MouseRegion(
-          cursor: SystemMouseCursors.click,
-          child: GestureDetector(
-            onTap: () => setState(() {
-              look = !look;
-            }),
-            child: Icon(look ? TIcons.browse : TIcons.browseOff, size: 16, color: colorScheme.textColorPlaceholder),
-          ),
-        ),
-      );
-    }
-
-    // label
-    if (widget.label != null) {
-      prefixIconList.add(Text(
-        widget.label!,
-        style: TextStyle(
-          fontFamily: theme.fontFamily,
-          fontSize: getFontSize(theme, size),
-          color: disabled ? colorScheme.textColorDisabled : colorScheme.textColorPrimary,
-        ),
-      ));
-    }
-    if (prefixIconList.isNotEmpty) {
-      prefixIcon = Padding(
-        padding: const EdgeInsets.only(left: 8, right: 2),
-        child: TSpace(spacing: 2, children: prefixIconList),
-      );
-    }
-
-    suffixIconList.add(widget.suffixIcon);
-    suffixIconList.add(widget.suffix);
-
-    if (suffixIconList.isNotEmpty) {
-      suffixIcon = Padding(
-        padding: const EdgeInsets.only(right: 8.0),
-        child: TSpace(
-          spacing: 2,
-          children: suffixIconList.reversed.toList(),
-        ),
-      );
-    }
-    return InputDecoration(
-      hintStyle: TextStyle(
-        fontFamily: theme.fontFamily,
-        color: disabled ? colorScheme.textColorDisabled : colorScheme.textColorPlaceholder,
-      ),
-      hintText: widget.placeholder ?? GlobalTDesignLocalizations.of(context).inputPlaceholder,
-      border: border,
-      contentPadding: EdgeInsets.symmetric(
-        vertical: size.sizeOf(small: inputHeightS, medium: inputHeightDefault, large: inputHeightL),
-        horizontal: 8,
-      ),
-      isDense: true,
-      enabled: !disabled,
-      fillColor: fillColor,
-      hoverColor: fillColor,
-      filled: true,
-      helperText: widget.tips,
-      helperStyle: TextStyle(
-        fontFamily: theme.fontFamily,
-        fontSize: theme.fontData.fontSizeS,
-        color: tipsColor,
-        height: 0.5, // 通过压缩字体的高度，实现tips的高度缩小
-      ),
-      prefixIcon: prefixIcon,
-      prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
-      prefixIconColor: MaterialStateColor.resolveWith((states) {
-        return widget.status.lazyValueOf(
-          defaultStatus: () =>
-              states.contains(MaterialState.focused) ? colorScheme.brandColor : colorScheme.borderLevel2Color,
-          success: () => colorScheme.successColor,
-          warning: () => colorScheme.warningColor,
-          error: () => colorScheme.errorColor,
-        );
-      }),
-      suffixIcon: suffixIcon,
-      suffixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
-    );
-  }
+  static double inputHeightS = 4;
+  static double inputHeightDefault = 7;
+  static double inputHeightL = 9;
 
   /// 获取字体大小
   double getFontSize(TThemeData theme, TComponentSize size) {
@@ -461,6 +258,209 @@ class _TInputState extends TFormItemValidateState<TInput> {
     } else if (widget.readonly) {
       cursor = SystemMouseCursors.click;
     }
+    var onePx = 1 / MediaQuery.of(context).devicePixelRatio;
+
+    // 边框样式
+    var border = MaterialStateProperty.resolveWith((states) {
+      List<BoxShadow>? shadows;
+      Color color = widget.status.lazyValueOf(
+        defaultStatus: () {
+          if (states.contains(MaterialState.disabled)) {
+            return colorScheme.borderLevel2Color;
+          }
+          if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
+            shadows = formItemState?.shadows ??
+                [
+                  BoxShadow(
+                    offset: const Offset(0, 0),
+                    blurRadius: 0,
+                    spreadRadius: 2,
+                    color: colorScheme.brandColorFocus,
+                    blurStyle: BlurStyle.outer,
+                  )
+                ];
+          }
+          if (states.contains(MaterialState.hovered) ||
+              states.contains(MaterialState.focused) ||
+              states.contains(MaterialState.pressed)) {
+            return colorScheme.brandColor;
+          }
+          return colorScheme.borderLevel2Color;
+        },
+        success: () {
+          if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
+            shadows = formItemState?.shadows ??
+                [
+                  BoxShadow(
+                    offset: const Offset(0, 0),
+                    blurRadius: 0,
+                    spreadRadius: 2,
+                    color: colorScheme.successColorFocus,
+                    blurStyle: BlurStyle.outer,
+                  )
+                ];
+          }
+          return colorScheme.successColor;
+        },
+        warning: () {
+          if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
+            shadows = formItemState?.shadows ??
+                [
+                  BoxShadow(
+                    offset: const Offset(0, 0),
+                    blurRadius: 0,
+                    spreadRadius: 2,
+                    color: colorScheme.warningColorFocus,
+                    blurStyle: BlurStyle.outer,
+                  )
+                ];
+          }
+          return colorScheme.warningColor;
+        },
+        error: () {
+          if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
+            shadows = formItemState?.shadows ??
+                [
+                  BoxShadow(
+                    offset: const Offset(0, 0),
+                    blurRadius: 0,
+                    spreadRadius: 2,
+                    color: colorScheme.errorColorFocus,
+                    blurStyle: BlurStyle.outer,
+                  )
+                ];
+          }
+          return colorScheme.errorColor;
+        },
+      );
+      return BoxDecoration(
+        backgroundBlendMode: BlendMode.src,
+        border: Border.all(width: onePx, color: formItemState?.borderColor ?? color),
+        borderRadius: BorderRadius.circular(TVar.borderRadiusDefault),
+        boxShadow: shadows,
+        color: disabled ? colorScheme.bgColorComponentDisabled : colorScheme.bgColorSpecialComponent,
+      );
+    });
+    // tips颜色
+    var tipsColor = widget.status.lazyValueOf(
+      defaultStatus: () => colorScheme.textColorPlaceholder,
+      success: () => colorScheme.successColor,
+      warning: () => colorScheme.warningColor,
+      error: () => colorScheme.errorColor,
+    );
+    // icon颜色
+    var iconColor = widget.status.lazyValueOf(
+      defaultStatus: () => isFocused ? colorScheme.brandColor : colorScheme.borderLevel2Color,
+      success: () => colorScheme.successColor,
+      warning: () => colorScheme.warningColor,
+      error: () => colorScheme.errorColor,
+    );
+
+    List<Widget?> prefixIconList = [];
+    List<Widget?> suffixIconList = [];
+    Widget? prefixIcon;
+    Widget? suffixIcon;
+
+    if (widget.prefixIcon != null) {
+      prefixIconList.add(widget.prefixIcon);
+    }
+    // 密码框icon
+    if (widget.type == TInputType.password) {
+      if (widget.prefixIcon == null) {
+        prefixIconList.add(Icon(TIcons.lockOn, color: iconColor));
+      }
+      suffixIconList.add(
+        MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: GestureDetector(
+            onTap: () => setState(() {
+              look = !look;
+            }),
+            child: Icon(look ? TIcons.browse : TIcons.browseOff, color: colorScheme.textColorPlaceholder),
+          ),
+        ),
+      );
+    }
+
+    // 可清理icon
+    if (widget.clearable) {
+      suffixIconList.add(
+        MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: GestureDetector(
+            onTap: () {
+              effectiveController.clear();
+              widget.onClear?.call();
+            },
+            child: ValueListenableBuilder<bool>(
+              valueListenable: showClearIcon,
+              builder: (context, value, child) {
+                return Visibility(
+                  visible: value,
+                  child: Icon(TIcons.closeCircleFilled, color: colorScheme.textColorPlaceholder),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    // maxLength
+    if (widget.maxLength != null && widget.maxLength! > 0) {
+      suffixIconList.add(
+        AnimatedBuilder(
+          animation: effectiveController,
+          builder: (BuildContext context, Widget? child) {
+            return Text(
+              '${effectiveController.text.length}/${widget.maxLength}',
+              style: theme.fontData.fontBodyMedium.merge(TextStyle(
+                color: colorScheme.textColorPlaceholder,
+              )),
+            );
+          },
+        ),
+      );
+    }
+
+    // label
+    if (widget.label != null) {
+      prefixIconList.add(Text(
+        widget.label!,
+        style: TextStyle(
+          fontFamily: theme.fontFamily,
+          fontSize: getFontSize(theme, size),
+          color: disabled ? colorScheme.textColorDisabled : colorScheme.textColorPrimary,
+        ),
+      ));
+    }
+    if (prefixIconList.isNotEmpty) {
+      prefixIcon = Padding(
+        padding: const EdgeInsets.only(left: 8, right: 2),
+        child: TSpace(
+          breakLine: true,
+          spacing: 2,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: prefixIconList,
+        ),
+      );
+    }
+
+    suffixIconList.add(widget.suffixIcon);
+    suffixIconList.add(widget.suffix);
+
+    if (suffixIconList.isNotEmpty) {
+      suffixIcon = Padding(
+        padding: const EdgeInsets.only(right: 8.0),
+        child: TSpace(
+          breakLine: true,
+          spacing: 2,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: suffixIconList.reversed.toList(),
+        ),
+      );
+    }
+
     return MouseRegion(
       onEnter: (event) {
         isHover = true;
@@ -472,14 +472,12 @@ class _TInputState extends TFormItemValidateState<TInput> {
         showClearIcon.value = false;
         widget.onMouseleave?.call(event);
       },
-      child: TextField(
+      child: TInputBox(
         enabled: !disabled,
         controller: effectiveController,
         autofocus: widget.autofocus,
         readOnly: widget.readonly,
         focusNode: effectiveFocusNode,
-        decoration: inputTheme.decoration ?? defaultDecoration(size),
-        cursorColor: colorScheme.textColorPrimary,
         cursorWidth: 1,
         style: TextStyle(
           fontFamily: theme.fontFamily,
@@ -487,6 +485,7 @@ class _TInputState extends TFormItemValidateState<TInput> {
           textBaseline: TextBaseline.alphabetic,
           color: disabled ? colorScheme.textColorDisabled : colorScheme.textColorPrimary,
         ),
+        cursorColor: colorScheme.textColorPrimary,
         textAlign: widget.align,
         mouseCursor: cursor,
         keyboardAppearance: theme.brightness,
@@ -501,6 +500,50 @@ class _TInputState extends TFormItemValidateState<TInput> {
             widget.onEnter?.call(value);
           }
         },
+        border: border,
+        placeholder: widget.placeholder ?? GlobalTDesignLocalizations.of(context).inputPlaceholder,
+        placeholderStyle: MaterialStatePropertyAll(TextStyle(
+          fontFamily: theme.fontFamily,
+          fontSize: fontSize,
+          color: disabled ? colorScheme.textColorDisabled : colorScheme.textColorPlaceholder,
+        )),
+        padding: MaterialStatePropertyAll(EdgeInsets.symmetric(
+          vertical: size.sizeOf(small: inputHeightS, medium: inputHeightDefault, large: inputHeightL),
+          horizontal: 8,
+        )),
+        tips: MaterialStateProperty.resolveWith((states) {
+          if (widget.tips == null) return null;
+          return Text(
+            widget.tips!,
+            style: TextStyle(
+              fontFamily: theme.fontFamily,
+              fontSize: theme.fontData.fontSizeS,
+              color: tipsColor,
+            ),
+          );
+        }),
+        prefix: MaterialStateProperty.resolveWith((states) {
+          if (prefixIcon == null) return null;
+          return IconTheme(
+            data: IconThemeData(
+                size: 16,
+                color: widget.status.lazyValueOf(
+                  defaultStatus: () =>
+                      states.contains(MaterialState.focused) ? colorScheme.brandColor : colorScheme.borderLevel2Color,
+                  success: () => colorScheme.successColor,
+                  warning: () => colorScheme.warningColor,
+                  error: () => colorScheme.errorColor,
+                )),
+            child: prefixIcon,
+          );
+        }),
+        suffix: MaterialStateProperty.resolveWith((states) {
+          if (suffixIcon == null) return null;
+          return IconTheme(
+            data: const IconThemeData(size: 16),
+            child: suffixIcon,
+          );
+        }),
       ),
     );
   }

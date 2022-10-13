@@ -266,22 +266,22 @@ class TInputBox extends StatefulWidget {
   final String? placeholder;
 
   /// 前缀
-  final MaterialStateProperty<Widget>? prefix;
+  final MaterialStateProperty<Widget?>? prefix;
 
   /// 后缀
-  final MaterialStateProperty<Widget>? suffix;
+  final MaterialStateProperty<Widget?>? suffix;
 
   /// 边框
-  final MaterialStateProperty<BoxDecoration>? border;
+  final MaterialStateProperty<BoxDecoration?>? border;
 
   /// 内容内边距
-  final MaterialStateProperty<EdgeInsetsGeometry>? padding;
+  final MaterialStateProperty<EdgeInsetsGeometry?>? padding;
 
   /// 提示，位于边框外部
-  final MaterialStateProperty<Widget>? tips;
+  final MaterialStateProperty<Widget?>? tips;
 
   /// 占位符样式
-  final MaterialStateProperty<TextStyle>? placeholderStyle;
+  final MaterialStateProperty<TextStyle?>? placeholderStyle;
 
   @override
   State<TInputBox> createState() => _TInputBoxState();
@@ -371,8 +371,9 @@ class _TInputBoxState extends State<TInputBox> {
       suffix: widget.suffix?.resolve(context.states),
       padding: widget.padding?.resolve(context.states),
       placeholder: placeholder,
-      container: Container(
+      container: AnimatedContainer(
         decoration: widget.border?.resolve(context.states),
+        duration: const Duration(milliseconds: 100),
       ),
     );
   }
