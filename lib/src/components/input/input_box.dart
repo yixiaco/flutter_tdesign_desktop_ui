@@ -272,7 +272,7 @@ class TInputBox extends StatefulWidget {
   final MaterialStateProperty<Widget?>? suffix;
 
   /// 边框
-  final MaterialStateProperty<BoxDecoration?>? border;
+  final MaterialStateProperty<Decoration?>? border;
 
   /// 内容内边距
   final MaterialStateProperty<EdgeInsetsGeometry?>? padding;
@@ -371,9 +371,9 @@ class _TInputBoxState extends State<TInputBox> {
       suffix: widget.suffix?.resolve(context.states),
       padding: widget.padding?.resolve(context.states),
       placeholder: placeholder,
-      container: AnimatedContainer(
+      container: Container(
         decoration: widget.border?.resolve(context.states),
-        duration: const Duration(milliseconds: 100),
+        // duration: const Duration(milliseconds: 100),
       ),
     );
   }

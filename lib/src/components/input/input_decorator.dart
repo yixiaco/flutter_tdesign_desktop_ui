@@ -504,7 +504,7 @@ class TRenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       _boxParentData(tips!).offset = Offset(0, containerHeight);
       height += _boxSize(tips).height;
     }
-    size = Size(width, height);
+    size = Size(math.max(width, _boxSize(tips).width), height);
   }
 
   @override

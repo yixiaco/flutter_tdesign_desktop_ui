@@ -17,10 +17,11 @@ class TInput extends TFormItemValidate {
     this.disabled = false,
     this.label,
     this.maxLength,
-    this.prop,
     this.placeholder,
     this.prefixIcon,
     this.showClearIconOnEmpty = false,
+    this.showLimitNumber = false,
+    this.autoWidth = false,
     this.size,
     this.status = TInputStatus.defaultStatus,
     this.suffix,
@@ -71,9 +72,6 @@ class TInput extends TFormItemValidate {
   /// 如果[maxLengthEnforcement]为[MaxLengthEnforcement.none] ，则可以输入超过[maxLength]个字符，但是当超出限制时，错误计数器和分隔符将切换到[decoration]的[InputDecoration.errorStyle]
   final int? maxLength;
 
-  /// 表单验证中的属性名称
-  final String? prop;
-
   /// 占位符
   final String? placeholder;
 
@@ -82,6 +80,12 @@ class TInput extends TFormItemValidate {
 
   /// 输入框内容为空时，悬浮状态是否显示清空按钮，默认不显示
   final bool showClearIconOnEmpty;
+
+  /// 是否在右侧显示字数限制文本
+  final bool showLimitNumber;
+
+  /// 宽度随内容自适应
+  final bool autoWidth;
 
   /// 输入框尺寸。可选项：small/medium/large. 参考[TComponentSize]
   /// 默认值为[TThemeData.size]
@@ -336,9 +340,10 @@ class _TInputState extends TFormItemValidateState<TInput> {
       return BoxDecoration(
         backgroundBlendMode: BlendMode.src,
         border: Border.all(width: onePx, color: formItemState?.borderColor ?? color),
-        borderRadius: BorderRadius.circular(TVar.borderRadiusDefault),
+        borderRadius: inputTheme.borderRadius ?? BorderRadius.circular(TVar.borderRadiusDefault),
         boxShadow: shadows,
-        color: disabled ? colorScheme.bgColorComponentDisabled : colorScheme.bgColorSpecialComponent,
+        color: inputTheme.backgroundColor ??
+            (disabled ? colorScheme.bgColorComponentDisabled : colorScheme.bgColorSpecialComponent),
       );
     });
     // tips颜色
@@ -407,7 +412,7 @@ class _TInputState extends TFormItemValidateState<TInput> {
     }
 
     // maxLength
-    if (widget.maxLength != null && widget.maxLength! > 0) {
+    if (widget.maxLength != null && widget.maxLength! > 0 && widget.showLimitNumber) {
       suffixIconList.add(
         AnimatedBuilder(
           animation: effectiveController,
@@ -482,10 +487,10 @@ class _TInputState extends TFormItemValidateState<TInput> {
         style: TextStyle(
           fontFamily: theme.fontFamily,
           fontSize: fontSize,
-          textBaseline: TextBaseline.alphabetic,
           color: disabled ? colorScheme.textColorDisabled : colorScheme.textColorPrimary,
         ),
         cursorColor: colorScheme.textColorPrimary,
+        selectionColor: colorScheme.brandColor5,
         textAlign: widget.align,
         mouseCursor: cursor,
         keyboardAppearance: theme.brightness,
@@ -544,6 +549,7 @@ class _TInputState extends TFormItemValidateState<TInput> {
             child: suffixIcon,
           );
         }),
+        forceLine: !widget.autoWidth,
       ),
     );
   }

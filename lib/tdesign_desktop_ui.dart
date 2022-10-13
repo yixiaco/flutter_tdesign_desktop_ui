@@ -93,6 +93,7 @@ export 'src/components/input/custom_outline_input_border.dart';
 export 'src/components/input/input_theme.dart';
 export 'src/components/input/input_base.dart';
 export 'src/components/input/input_box.dart';
+export 'src/components/input/types.dart';
 /// 输入框装饰器
 export 'src/components/input_adornment/input_adornment.dart';
 /// 折叠面板

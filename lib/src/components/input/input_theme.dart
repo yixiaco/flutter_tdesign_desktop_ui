@@ -7,7 +7,8 @@ class TInputThemeData with Diagnosticable {
   const TInputThemeData({
     this.maxLength,
     this.size,
-    this.decoration,
+    this.borderRadius,
+    this.backgroundColor,
   });
 
   /// 用户最多可以输入的文本长度，一个中文等于一个计数长度。值小于等于 0 的时候，则表示不限制输入长度。
@@ -17,19 +18,32 @@ class TInputThemeData with Diagnosticable {
   /// 默认值为[TThemeData.size]
   final TComponentSize? size;
 
-  /// 装饰器
-  final InputDecoration? decoration;
+  /// 边框圆角样式
+  final BorderRadiusGeometry? borderRadius;
 
-  /// 复制属性
+  /// 背景颜色
+  final Color? backgroundColor;
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<int>('maxLength', maxLength, defaultValue: null));
+    properties.add(DiagnosticsProperty<TComponentSize>('size', size, defaultValue: null));
+    properties.add(DiagnosticsProperty<BorderRadiusGeometry>('borderRadius', borderRadius, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('backgroundColor', backgroundColor, defaultValue: null));
+  }
+
   TInputThemeData copyWith({
     int? maxLength,
     TComponentSize? size,
-    InputDecoration? decoration,
+    BorderRadiusGeometry? borderRadius,
+    Color? backgroundColor,
   }) {
     return TInputThemeData(
       maxLength: maxLength ?? this.maxLength,
       size: size ?? this.size,
-      decoration: decoration ?? this.decoration,
+      borderRadius: borderRadius ?? this.borderRadius,
+      backgroundColor: backgroundColor ?? this.backgroundColor,
     );
   }
 
@@ -40,18 +54,11 @@ class TInputThemeData with Diagnosticable {
           runtimeType == other.runtimeType &&
           maxLength == other.maxLength &&
           size == other.size &&
-          decoration == other.decoration;
+          borderRadius == other.borderRadius &&
+          backgroundColor == other.backgroundColor;
 
   @override
-  int get hashCode => maxLength.hashCode ^ size.hashCode ^ decoration.hashCode;
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<int>('maxLength', maxLength, defaultValue: null));
-    properties.add(DiagnosticsProperty<TComponentSize>('size', size, defaultValue: null));
-    properties.add(DiagnosticsProperty<InputDecoration>('decoration', decoration, defaultValue: null));
-  }
+  int get hashCode => maxLength.hashCode ^ size.hashCode ^ borderRadius.hashCode ^ backgroundColor.hashCode;
 }
 
 /// 弹出层主题
@@ -79,47 +86,4 @@ class TInputTheme extends InheritedTheme {
   Widget wrap(BuildContext context, Widget child) {
     return TInputTheme(data: data, child: child);
   }
-}
-
-/// 输入框状态
-enum TInputStatus {
-  /// 默认状态
-  defaultStatus,
-
-  /// 成功状态
-  success,
-
-  /// 告警状态
-  warning,
-
-  /// 错误状态
-  error;
-
-  /// 懒惰的返回值
-  T lazyValueOf<T>({
-    required TSupplier<T> defaultStatus,
-    required TSupplier<T> success,
-    required TSupplier<T> warning,
-    required TSupplier<T> error,
-  }) {
-    switch (this) {
-      case TInputStatus.defaultStatus:
-        return defaultStatus();
-      case TInputStatus.success:
-        return success();
-      case TInputStatus.warning:
-        return warning();
-      case TInputStatus.error:
-        return error();
-    }
-  }
-}
-
-/// 输入框类型
-enum TInputType {
-  /// 文本
-  text,
-
-  /// 密码
-  password;
 }
