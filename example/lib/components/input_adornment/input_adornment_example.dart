@@ -21,43 +21,54 @@ class _TInputAdornmentExampleState extends State<TInputAdornmentExample> {
 
   @override
   void dispose() {
+    super.dispose();
     _controller.dispose();
     _focusNode.dispose();
-    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     var theme = TTheme.of(context);
     var colorScheme = theme.colorScheme;
-    return Container(
-      alignment: Alignment.topLeft,
-      child: ConstrainedBox(
-        constraints: BoxConstraints(minWidth: 300),
-        child: TInputBox(
-          controller: _controller,
-          focusNode: _focusNode,
-          style: TextStyle(color: Colors.black,fontSize: 16),
-          selectionColor: colorScheme.brandColor8.withOpacity(.7),
-          enableInteractiveSelection: true,
-          selectionControls: desktopTextSelectionControls,
-          cursorColor: Colors.black,
-          cursorWidth: 1,
-          expands: false,
-          forceLine: false,
-          maxLines: 1,
-          placeholder: 'xxx',
-          border: MaterialStatePropertyAll(BoxDecoration(
-            border: Border.all(),
-            borderRadius: BorderRadius.circular(6),
-          )),
-          padding: MaterialStatePropertyAll(EdgeInsets.symmetric(horizontal: 6, vertical: 4)),
-          prefix: MaterialStatePropertyAll(Text('prefix')),
-          suffix: MaterialStatePropertyAll(Text('suffix')),
-          // tips: MaterialStatePropertyAll(Text('tips')),
-          // textAlign: TextAlign.center,
-        ),
-      ),
+    return TSpace(
+      direction: Axis.vertical,
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ConstrainedBox(
+          constraints: BoxConstraints(minWidth: 200,maxWidth: 300,maxHeight: 200),
+          child: TInputBox(
+            controller: _controller,
+            focusNode: _focusNode,
+            style: TextStyle(color: Colors.black,fontSize: 16),
+            selectionColor: colorScheme.brandColor8.withOpacity(.7),
+            enableInteractiveSelection: true,
+            selectionControls: desktopTextSelectionControls,
+            cursorColor: Colors.black,
+            cursorWidth: 1,
+            expands: false,
+            forceLine: false,
+            minLines: 1,
+            maxLines: 3,
+            placeholder: '请输入',
+            border: MaterialStatePropertyAll(BoxDecoration(
+              border: Border.all(width: 1),
+              borderRadius: BorderRadius.circular(6),
+            )),
+            padding: MaterialStatePropertyAll(EdgeInsets.symmetric(horizontal: 6, vertical: 4)),
+            prefix: MaterialStatePropertyAll(Text('prefix')),
+            suffix: MaterialStatePropertyAll(Text('suffix')),
+            tips: MaterialStatePropertyAll(Text('tips')),
+            placeholderStyle: MaterialStatePropertyAll(TextStyle(
+              color: Colors.black12,
+              fontSize: 16,
+              // overflow: TextOverflow.ellipsis,
+            )),
+            textAlign: TextAlign.end,
+            textDirection: TextDirection.rtl,
+          ),
+        )
+      ],
     );
   }
 }

@@ -4,6 +4,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:tdesign_desktop_ui/src/components/input/input_base.dart';
+import 'package:tdesign_desktop_ui/src/components/input/input_decorator.dart';
 
 export 'package:flutter/services.dart'
     show TextInputType, TextInputAction, TextCapitalization, SmartQuotesType, SmartDashesType;
@@ -73,7 +74,6 @@ class TInputBox extends StatefulWidget {
     this.padding,
     this.tips,
     this.placeholderStyle,
-    this.placeholderAlignment,
   }) : super(key: key);
 
   /// {@macro tdesign.components.inputBase.controller}
@@ -283,13 +283,6 @@ class TInputBox extends StatefulWidget {
   /// 占位符样式
   final MaterialStateProperty<TextStyle>? placeholderStyle;
 
-  /// 占位符定位
-  final MaterialStateProperty<AlignmentGeometry>? placeholderAlignment;
-
-  //
-  // /// 内容约束
-  // final BoxConstraints? contentConstraints;
-
   @override
   State<TInputBox> createState() => _TInputBoxState();
 }
@@ -297,8 +290,9 @@ class TInputBox extends StatefulWidget {
 class _TInputBoxState extends State<TInputBox> {
   @override
   Widget build(BuildContext context) {
+    var textDirection = widget.textDirection ?? Directionality.of(context);
     return TInputBase(
-      decorationBuilder: _buildDecoration,
+      decorationBuilder: (context) => _buildDecoration(context, textDirection),
       controller: widget.controller,
       focusNode: widget.focusNode,
       keyboardType: widget.keyboardType,
@@ -308,7 +302,7 @@ class _TInputBoxState extends State<TInputBox> {
       strutStyle: widget.strutStyle,
       textAlign: widget.textAlign,
       textAlignVertical: widget.textAlignVertical,
-      textDirection: widget.textDirection,
+      textDirection: textDirection,
       readOnly: widget.readOnly,
       toolbarOptions: widget.toolbarOptions,
       showCursor: widget.showCursor,
@@ -358,45 +352,28 @@ class _TInputBoxState extends State<TInputBox> {
   }
 
   /// 构建装饰器
-  Widget _buildDecoration(TextDecorationContext context) {
-    Widget child = context.child!;
+  Widget _buildDecoration(TextDecorationContext context, TextDirection textDirection) {
+    Widget? placeholder;
     if (widget.placeholder != null && context.controller.text.isEmpty) {
-      child = Stack(
-        fit: StackFit.loose,
-        children: [
-          child,
-          Text(
-            widget.placeholder!,
-            style: widget.placeholderStyle?.resolve(context.states) ?? widget.style,
-          ),
-        ],
+      placeholder = Text(
+        widget.placeholder!,
+        style: widget.placeholderStyle?.resolve(context.states) ?? widget.style,
       );
     }
-    child = Container(
-      decoration: widget.border?.resolve(context.states),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          if (widget.prefix != null) widget.prefix!.resolve(context.states),
-          Container(
-            padding: widget.padding?.resolve(context.states),
-            child: child,
-          ),
-          if (widget.suffix != null) widget.suffix!.resolve(context.states),
-        ],
+    return TDecorator(
+      input: context.child!,
+      textAlign: widget.textAlign,
+      forceLine: widget.forceLine,
+      direction: textDirection,
+      textBaseline: TextBaseline.alphabetic,
+      tips: widget.tips?.resolve(context.states),
+      prefix: widget.prefix?.resolve(context.states),
+      suffix: widget.suffix?.resolve(context.states),
+      padding: widget.padding?.resolve(context.states),
+      placeholder: placeholder,
+      container: Container(
+        decoration: widget.border?.resolve(context.states),
       ),
     );
-    if (widget.tips != null) {
-      child = Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          child,
-          widget.tips!.resolve(context.states),
-        ],
-      );
-    }
-    return child;
   }
 }
