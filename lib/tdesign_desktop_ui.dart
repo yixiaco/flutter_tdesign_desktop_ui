@@ -93,9 +93,13 @@ export 'src/components/input/custom_outline_input_border.dart';
 export 'src/components/input/input_theme.dart';
 export 'src/components/input/input_base.dart';
 export 'src/components/input/input_box.dart';
-export 'src/components/input/types.dart';
+export 'src/components/input/input_decorator.dart';
+export 'src/components/input/type.dart';
 /// 输入框装饰器
 export 'src/components/input_adornment/input_adornment.dart';
+/// 数字输入框
+export 'src/components/input_number/input_number.dart';
+export 'src/components/input_number/type.dart';
 /// 折叠面板
 export 'src/components/collapse/collapse.dart';
 export 'src/components/collapse/type.dart';

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
+/// 输入装饰器示例代码
 class TInputAdornmentExample extends StatefulWidget {
   const TInputAdornmentExample({Key? key}) : super(key: key);
 

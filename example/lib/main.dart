@@ -9,7 +9,9 @@ import 'package:example/components/form/form_example.dart';
 import 'package:example/components/icon/icon_example.dart';
 import 'package:example/components/input/input_example.dart';
 import 'package:example/components/input_adornment/input_adornment_example.dart';
+import 'package:example/components/input_number/input_number_example.dart';
 import 'package:example/components/jumper/jumper_example.dart';
+import 'package:example/components/link/link_example.dart';
 import 'package:example/components/loading/loading_example.dart';
 import 'package:example/components/menu/head_menu_example.dart';
 import 'package:example/components/menu/menu_example.dart';
@@ -28,8 +30,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
-
-import 'components/link/link_example.dart';
 
 void main() {
   // 初始化之前如果访问二进制文件，需要先初始化
@@ -222,6 +222,15 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
           onClick: () {
             setState(() {
               content = const TInputAdornmentExample();
+            });
+          },
+        ),
+        TMenuItemProps(
+          value: 'input_number',
+          content: const Text('InputNumber 数字输入框'),
+          onClick: () {
+            setState(() {
+              content = const TInputNumberExample();
             });
           },
         ),

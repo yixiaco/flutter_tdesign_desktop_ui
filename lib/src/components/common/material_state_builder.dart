@@ -1,6 +1,28 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
+abstract class MaterialStateWidget extends Widget implements MaterialStateProperty<Widget> {
+  const MaterialStateWidget({super.key});
+
+  static MaterialStateWidget resolveWith(MaterialPropertyResolver<Widget> callback) => _MaterialStateWidget(callback);
+
+  @override
+  Widget resolve(Set<MaterialState> states);
+}
+
+class _MaterialStateWidget extends MaterialStateWidget {
+  const _MaterialStateWidget(this._resolve) : super();
+  final MaterialPropertyResolver<Widget> _resolve;
+
+  @override
+  Widget resolve(Set<MaterialState> states) => _resolve(states);
+
+  @override
+  Element createElement() {
+    throw UnimplementedError();
+  }
+}
+
 /// 一个通用的状态构建器
 class TMaterialStateBuilder extends StatefulWidget {
   const TMaterialStateBuilder({
@@ -109,10 +131,10 @@ class _TMaterialStateBuilderState extends State<TMaterialStateBuilder> with Mate
   }
 
   bool get _isClick {
-    if(widget.disabled){
+    if (widget.disabled) {
       return false;
     }
-    if(widget.selected && !widget.selectedClick) {
+    if (widget.selected && !widget.selectedClick) {
       return false;
     }
     return true;
