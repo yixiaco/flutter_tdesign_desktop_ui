@@ -82,8 +82,9 @@ class _TSwitchState<T> extends TFormItemValidateState<TSwitch<T>> with TickerPro
   @override
   void didUpdateWidget(covariant TSwitch<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.value != oldWidget.value) {
+    if (widget.value != oldWidget.value && _value != widget.value) {
       _value = widget.value;
+      formChange();
     }
   }
 
@@ -192,6 +193,8 @@ class _TSwitchState<T> extends TFormItemValidateState<TSwitch<T>> with TickerPro
       checked: value,
       child: buildToggleable(
         mouseCursor: effectiveMouseCursor,
+        autofocus: widget.autofocus,
+        focusNode: widget.focusNode,
         child: Stack(
           children: [
             // 底部
@@ -257,12 +260,13 @@ class _TSwitchState<T> extends TFormItemValidateState<TSwitch<T>> with TickerPro
   void reset(TFormResetType type) {
     switch (type) {
       case TFormResetType.empty:
-        widget.onChange?.call(widget.uncheckValue ?? false);
+        _value = widget.uncheckValue ?? false;
         break;
       case TFormResetType.initial:
-        widget.onChange?.call(widget.defaultValue ?? widget.uncheckValue ?? false);
+        _value = widget.defaultValue ?? widget.uncheckValue ?? false;
         break;
     }
+    widget.onChange?.call(_value);
   }
 
   @override

@@ -1,5 +1,6 @@
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
@@ -65,6 +66,7 @@ class TInputNumber<T> extends TFormItemValidate {
     this.keyboardType,
     this.restorationId,
     this.autofocus = false,
+    this.autocorrect = true,
   })  : assert(T == num || T == String || T == int || T == double),
         super(key: key, name: name, focusNode: focusNode);
 
@@ -161,6 +163,9 @@ class TInputNumber<T> extends TFormItemValidate {
   /// 自动聚焦
   final bool autofocus;
 
+  /// 自动修正值在[min]和[max]之间，并自动格式化不规范的字符串
+  final bool autocorrect;
+
   @override
   TFormItemValidateState<TInputNumber<T>> createState() => _TInputNumberState<T>();
 }
@@ -201,9 +206,17 @@ class _TInputNumberState<T> extends TFormItemValidateState<TInputNumber<T>> {
   @override
   void didUpdateWidget(covariant TInputNumber<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.value != oldWidget.value) {
+    if (widget.value != oldWidget.value && _text != widget.value) {
       _controller.text = widget.value?.toString() ?? '';
       _handle();
+      _text = _controller.text;
+      if(_text != widget.value) {
+        SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+          if(mounted) {
+            _handleChange();
+          }
+        });
+      }
     }
   }
 
@@ -219,143 +232,82 @@ class _TInputNumberState<T> extends TFormItemValidateState<TInputNumber<T>> {
       warning: () => colorScheme.warningColor,
       error: () => colorScheme.errorColor,
     );
-
-    var buttonSize = Size(
-      size.sizeOf(
-        small: _kInputNumberButtonWidthS,
-        medium: _kInputNumberButtonWidth,
-        large: _kInputNumberButtonWidthL,
-      ),
-      size.sizeOf(
-        small: _kInputNumberButtonHeightS,
-        medium: _kInputNumberButtonHeight,
-        large: _kInputNumberButtonHeightL,
-      ),
-    );
+    Size? buttonSize;
+    TButtonStyle buttonStyle;
     TextAlign? align = widget.align;
-
+    Widget? suffixIcon;
     switch (widget.theme) {
       case TInputNumberTheme.column:
         align ??= TextAlign.center;
+        buttonSize = Size(
+          size.sizeOf(
+            small: _kInputNumberRightButtonWidthS,
+            medium: _kInputNumberRightButtonWidth,
+            large: _kInputNumberRightButtonWidthL,
+          ),
+          size.sizeOf(
+            small: _kInputNumberButtonColumnHeightS,
+            medium: _kInputNumberButtonColumnHeight,
+            large: _kInputNumberButtonColumnHeightL,
+          ),
+        );
+        buttonStyle = TButtonStyle(
+          fixedSize: MaterialStatePropertyAll(buttonSize),
+          backgroundColor: MaterialStateProperty.resolveWith((states) {
+            if (states.contains(MaterialState.hovered) || states.contains(MaterialState.focused)) {
+              return colorScheme.bgColorComponentHover;
+            }
+            return colorScheme.bgColorSecondaryContainer;
+          }),
+        );
+        suffixIcon = Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TButton(
+              disabled: _disabled || (_max != null && _current >= _max!),
+              style: buttonStyle,
+              radius: BorderRadius.zero,
+              softWrap: true,
+              onPressed: _handleAdd,
+              child: _buildRightIcon(colorScheme, size, theme, TIcons.chevronUp),
+            ),
+            const SizedBox(height: 2),
+            TButton(
+              disabled: _disabled || (_min != null && _current <= _min!),
+              style: buttonStyle,
+              radius: BorderRadius.zero,
+              softWrap: true,
+              onPressed: _handleRemove,
+              child: _buildRightIcon(colorScheme, size, theme, TIcons.chevronDown),
+            ),
+          ],
+        );
         break;
       case TInputNumberTheme.row:
         align ??= TextAlign.center;
+        buttonSize = Size(
+          size.sizeOf(
+            small: _kInputNumberButtonWidthS,
+            medium: _kInputNumberButtonWidth,
+            large: _kInputNumberButtonWidthL,
+          ),
+          size.sizeOf(
+            small: _kInputNumberButtonHeightS,
+            medium: _kInputNumberButtonHeight,
+            large: _kInputNumberButtonHeightL,
+          ),
+        );
         break;
       case TInputNumberTheme.normal:
         align ??= TextAlign.left;
+        break;
     }
-    Widget child = TSpace(
-      spacing: 4,
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (widget.theme == TInputNumberTheme.row)
-          TButton(
-            disabled: _disabled || (_min != null && _current <= _min!),
-            style: TButtonStyle(fixedSize: MaterialStatePropertyAll(buttonSize)),
-            variant: TButtonVariant.outline,
-            icon: TIcons.remove,
-            onPressed: _handleRemove,
-          ),
-        Expanded(child: _buildInput(theme, align)),
-        if (widget.theme == TInputNumberTheme.row)
-          TButton(
-            disabled: _disabled || (_max != null && _current >= _max!),
-            style: TButtonStyle(fixedSize: MaterialStatePropertyAll(buttonSize)),
-            variant: TButtonVariant.outline,
-            icon: TIcons.add,
-            onPressed: _handleAdd,
-          ),
-      ],
-    );
-    if (!widget.autoWidth) {
-      child = ConstrainedBox(
-        constraints: BoxConstraints(
-          minWidth: size.sizeOf(small: _kInputNumberWidthS, medium: _kInputNumberWidth, large: _kInputNumberWidthL),
-          maxWidth: size.sizeOf(small: _kInputNumberWidthS, medium: _kInputNumberWidth, large: _kInputNumberWidthL),
-        ),
-        child: child,
-      );
-    }
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        child,
-        if (widget.tips != null)
-          DefaultTextStyle(
-            style: TextStyle(
-              fontFamily: theme.fontFamily,
-              fontSize: theme.fontData.fontSizeS,
-              color: tipsColor,
-            ),
-            child: widget.tips!,
-          )
-      ],
-    );
-  }
 
-  /// 构建输入框
-  Widget _buildInput(TThemeData theme, TextAlign textAlign) {
-    var size = widget.size ?? theme.size;
-    var buttonSize = Size(
-      size.sizeOf(
-        small: _kInputNumberRightButtonWidthS,
-        medium: _kInputNumberRightButtonWidth,
-        large: _kInputNumberRightButtonWidthL,
-      ),
-      size.sizeOf(
-        small: _kInputNumberButtonColumnHeightS,
-        medium: _kInputNumberButtonColumnHeight,
-        large: _kInputNumberButtonColumnHeightL,
-      ),
-    );
-    Widget? suffixIcon;
-    if(widget.theme == TInputNumberTheme.column) {
-      suffixIcon = Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TButton(
-            disabled: _disabled || (_min != null && _current <= _min!),
-            style: TButtonStyle(fixedSize: MaterialStatePropertyAll(buttonSize)),
-            radius: BorderRadius.zero,
-            softWrap: true,
-            onPressed: _handleRemove,
-            child: MaterialStateWidget.resolveWith((states) {
-              return Center(
-                child: Icon(TIcons.chevronUp, size: size.sizeOf(
-                  small: theme.fontData.fontSize,
-                  medium: theme.fontData.fontSizeBase,
-                  large: theme.fontData.fontSizeL,
-                )),
-              );
-            }),
-          ),
-          const SizedBox(height: 2),
-          TButton(
-            disabled: _disabled || (_max != null && _current >= _max!),
-            style: TButtonStyle(fixedSize: MaterialStatePropertyAll(buttonSize)),
-            radius: BorderRadius.zero,
-            softWrap: true,
-            onPressed: _handleAdd,
-            child: MaterialStateWidget.resolveWith((states) {
-              return Center(
-                child: Icon(TIcons.chevronDown, size: size.sizeOf(
-                  small: theme.fontData.fontSize,
-                  medium: theme.fontData.fontSizeBase,
-                  large: theme.fontData.fontSizeL,
-                )),
-              );
-            }),
-          ),
-        ],
-      );
-    }
-    return TInput(
+    Widget child = TInput(
       disabled: _disabled,
       controller: _controller,
       focusNode: effectiveFocusNode,
-      align: textAlign,
+      align: align,
       size: size,
       onBlur: (text) {
         _handleFormat();
@@ -381,24 +333,114 @@ class _TInputNumberState<T> extends TFormItemValidateState<TInputNumber<T>> {
       scrollController: widget.scrollController,
       suffixPadding: widget.theme == TInputNumberTheme.column ? const EdgeInsets.only(right: 1) : null,
     );
+
+    switch (widget.theme) {
+      case TInputNumberTheme.column:
+        break;
+      case TInputNumberTheme.row:
+        child = TSpace(
+          spacing: 4,
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (widget.theme == TInputNumberTheme.row)
+              TButton(
+                disabled: _disabled || (_min != null && _current <= _min!),
+                style: TButtonStyle(fixedSize: MaterialStatePropertyAll(buttonSize)),
+                variant: TButtonVariant.outline,
+                icon: TIcons.remove,
+                onPressed: _handleRemove,
+              ),
+            Flexible(child: child),
+            if (widget.theme == TInputNumberTheme.row)
+              TButton(
+                disabled: _disabled || (_max != null && _current >= _max!),
+                style: TButtonStyle(fixedSize: MaterialStatePropertyAll(buttonSize)),
+                variant: TButtonVariant.outline,
+                icon: TIcons.add,
+                onPressed: _handleAdd,
+              ),
+          ],
+        );
+        break;
+      case TInputNumberTheme.normal:
+    }
+
+    if (!widget.autoWidth) {
+      double minWidth;
+      if (widget.theme == TInputNumberTheme.column) {
+        minWidth = size.sizeOf(
+            small: _kInputNumberRightWidthS, medium: _kInputNumberRightWidth, large: _kInputNumberRightWidthL);
+      } else {
+        minWidth = size.sizeOf(small: _kInputNumberWidthS, medium: _kInputNumberWidth, large: _kInputNumberWidthL);
+      }
+      child = ConstrainedBox(
+        constraints: BoxConstraints(
+          minWidth: minWidth,
+          maxWidth: minWidth,
+        ),
+        child: child,
+      );
+    }
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        child,
+        if (widget.tips != null)
+          DefaultTextStyle(
+            style: TextStyle(
+              fontFamily: theme.fontFamily,
+              fontSize: theme.fontData.fontSizeS,
+              color: tipsColor,
+            ),
+            child: widget.tips!,
+          )
+      ],
+    );
+  }
+
+  MaterialStateWidget _buildRightIcon(TColorScheme colorScheme, TComponentSize size, TThemeData theme, IconData icon) {
+    return MaterialStateWidget.resolveWith((states) {
+      Color color = colorScheme.textColorSecondary;
+      if (states.contains(MaterialState.hovered) || states.contains(MaterialState.focused)) {
+        color = colorScheme.textColorPrimary;
+      }
+      if (states.contains(MaterialState.disabled)) {
+        color = colorScheme.textColorDisabled;
+      }
+      return Center(
+        child: Icon(
+          icon,
+          size: size.sizeOf(
+            small: theme.fontData.fontSize,
+            medium: theme.fontData.fontSizeBase,
+            large: theme.fontData.fontSizeL,
+          ),
+          color: color,
+        ),
+      );
+    });
   }
 
   /// 处理递增事件
   void _handleAdd() {
     _handle(handle: (number) => number + _step);
-    widget.onChange?.call(formItemValue);
+    _handleChange();
   }
 
   /// 处理递减事件
   void _handleRemove() {
     _handle(handle: (number) => number - _step);
-    widget.onChange?.call(formItemValue);
+    _handleChange();
   }
 
   /// 格式化字符串
   void _handleFormat() {
     _handle();
-    widget.onChange?.call(formItemValue);
+    if(widget.value != _text) {
+      _handleChange();
+    }
   }
 
   void _handle({Decimal Function(Decimal number)? handle, String? text}) {
@@ -407,18 +449,31 @@ class _TInputNumberState<T> extends TFormItemValidateState<TInputNumber<T>> {
       var number = Decimal.tryParse(text);
       if (number != null) {
         var result = handle?.call(number) ?? number;
-        if (_min != null && result < _min!) {
+        bool exceedMaximum = _max != null && result > _max!;
+        bool belowMinimum = _min != null && result < _min!;
+        if (belowMinimum && widget.autocorrect) {
           result = _min!;
-        } else if (_max != null && result > _max!) {
+        } else if (exceedMaximum && widget.autocorrect) {
           result = _max!;
         }
         _controller.text = result.toString();
         _text = _controller.text;
+        widget.onValidate?.call(exceedMaximum, belowMinimum);
         return;
       }
     }
-    _handle(text: _text);
+    if(_text.isNotEmpty && widget.autocorrect) {
+      _handle(text: _text);
+    }
   }
+
+  void _handleChange() {
+    widget.onChange?.call(formItemValue);
+    formItemState?.validate(trigger: TFormRuleTrigger.change);
+  }
+
+  @override
+  FocusNode? get focusNode => effectiveFocusNode;
 
   @override
   get formItemValue {
@@ -447,5 +502,6 @@ class _TInputNumberState<T> extends TFormItemValidateState<TInputNumber<T>> {
         _text = _controller.text;
         break;
     }
+    widget.onChange?.call(formItemValue);
   }
 }

@@ -10,7 +10,7 @@ class TCheckbox<T> extends TFormItemValidate {
     String? name,
     FocusNode? focusNode,
     this.checked,
-    this.defaultChecked,
+    this.defaultChecked = false,
     this.disabled = false,
     this.indeterminate = false,
     this.label,
@@ -24,7 +24,7 @@ class TCheckbox<T> extends TFormItemValidate {
   final bool? checked;
 
   /// 是否选中。非受控属性
-  final bool? defaultChecked;
+  final bool defaultChecked;
 
   /// 是否禁用
   final bool disabled;
@@ -61,7 +61,7 @@ class _TCheckboxState<T> extends TFormItemValidateState<TCheckbox<T>>
   @override
   void initState() {
     super.initState();
-    checked = widget.checked ?? widget.defaultChecked ?? false;
+    checked = widget.checked ?? widget.defaultChecked;
 
     _controller = AnimationController(
       vsync: this,
@@ -90,17 +90,14 @@ class _TCheckboxState<T> extends TFormItemValidateState<TCheckbox<T>>
   @override
   void didUpdateWidget(TCheckbox<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
-    var oldChecked = this.checked || oldWidget.indeterminate;
-    if (widget.checked != oldWidget.checked) {
-      this.checked = widget.checked ?? false;
+    if (widget.checked != oldWidget.checked && checked != widget.checked) {
+      checked = widget.checked ?? false;
+      formChange();
     }
-    var checked = this.checked || widget.indeterminate;
-    if (checked != oldChecked) {
-      _painter
-        ..checked = this.checked
-        ..indeterminate = widget.indeterminate;
-      animationTo();
-    }
+    _painter
+      ..checked = checked
+      ..indeterminate = widget.indeterminate;
+    animationTo();
   }
 
   void animationTo() {
@@ -289,16 +286,13 @@ class _TCheckboxState<T> extends TFormItemValidateState<TCheckbox<T>>
   void reset(TFormResetType type) {
     switch (type) {
       case TFormResetType.empty:
-        widget.onChange?.call(false, false, null);
+        checked = false;
         break;
       case TFormResetType.initial:
-        if (widget.defaultChecked == true) {
-          widget.onChange?.call(true, false, widget.value);
-        } else {
-          widget.onChange?.call(false, false, null);
-        }
+        checked = widget.defaultChecked;
         break;
     }
+    widget.onChange?.call(checked, false, checked ? widget.value : null);
   }
 }
 

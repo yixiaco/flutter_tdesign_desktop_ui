@@ -1,4 +1,3 @@
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
@@ -11,7 +10,9 @@ class TInputNumberExample extends StatefulWidget {
 }
 
 class _TInputNumberExampleState extends State<TInputNumberExample> {
-  String? value = '10';
+  String? value0 = '10';
+  String? value1 = '10';
+  String? value2 = '10';
 
   @override
   Widget build(BuildContext context) {
@@ -19,34 +20,41 @@ class _TInputNumberExampleState extends State<TInputNumberExample> {
       direction: Axis.vertical,
       children: [
         TInputNumber<String>(
-          value: value,
+          value: value0,
           max: 5,
           min: -5,
+          autocorrect: false,
           onChange: (value) {
+            print(value);
             setState(() {
-              this.value = value;
+              value0 = value;
             });
+          },
+          onValidate: (exceedMaximum, belowMinimum) {
+            print('exceedMaximum: $exceedMaximum, belowMinimum: $belowMinimum');
           },
         ),
         TInputNumber<String>(
-          value: value,
+          value: value1,
           max: 5,
           min: -5,
           onChange: (value) {
+            print(value);
             setState(() {
-              this.value = value;
+              value1 = value;
             });
           },
           tips: Text('tips'),
         ),
         TInputNumber<String>(
-          value: value,
+          value: value2,
           max: 5,
           min: -5,
           theme: TInputNumberTheme.column,
           onChange: (value) {
+            print(value);
             setState(() {
-              this.value = value;
+              value2 = value;
             });
           },
         ),

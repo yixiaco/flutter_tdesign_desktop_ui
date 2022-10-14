@@ -85,8 +85,11 @@ class _TRadioState<T> extends TFormItemValidateState<TRadio<T>> with TickerProvi
   @override
   void didUpdateWidget(covariant TRadio<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.checked != oldWidget.checked && widget.checked != _checked) {
-      _checked = widget.checked;
+    if (widget.checked != oldWidget.checked) {
+      if(widget.checked != _checked) {
+        _checked = widget.checked;
+        formChange();
+      }
       animateToValue();
     }
   }
@@ -216,11 +219,13 @@ class _TRadioState<T> extends TFormItemValidateState<TRadio<T>> with TickerProvi
   void reset(TFormResetType type) {
     switch (type) {
       case TFormResetType.empty:
-        widget.onChange?.call(false, null);
+        _checked = false;
+        widget.onChange?.call(checked, null);
         break;
       case TFormResetType.initial:
         if (tristate || widget.defaultChecked == true) {
-          widget.onChange?.call(widget.defaultChecked ?? false, widget.defaultChecked == true ? widget.value : null);
+          _checked = widget.defaultChecked ?? false;
+          widget.onChange?.call(checked, checked ? widget.value : null);
         }
         break;
     }

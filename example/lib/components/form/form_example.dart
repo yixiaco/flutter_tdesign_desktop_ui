@@ -16,6 +16,7 @@ class _TFormExampleState extends State<TFormExample> {
   bool disabled = false;
   bool? radioCheck;
   bool? checkboxCheck;
+  int? number = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -33,12 +34,24 @@ class _TFormExampleState extends State<TFormExample> {
           TFormRule(max: 6, trigger: TFormRuleTrigger.change),
           TFormRule(min: 3, trigger: TFormRuleTrigger.blur),
         ],
-        'tel': [
+        'www': [
           TFormRule(required: true, trigger: TFormRuleTrigger.blur),
+        ],
+        'status': [
+          TFormRule(required: true, trigger: TFormRuleTrigger.change),
         ],
         'gender': [
           TFormRule(required: true, trigger: TFormRuleTrigger.change),
-        ]
+        ],
+        'radio': [
+          TFormRule(required: true, trigger: TFormRuleTrigger.change),
+        ],
+        'checkbox': [
+          TFormRule(required: true, trigger: TFormRuleTrigger.change),
+        ],
+        'course': [
+          TFormRule(required: true, trigger: TFormRuleTrigger.change),
+        ],
       },
       onReset: () {
         print('重置');
@@ -71,12 +84,16 @@ class _TFormExampleState extends State<TFormExample> {
           ),
         ),
         TFormItem(
-          labelText: '手机号',
-          child: TInput(
-            name: 'tel',
-            onEnter: (text) {
-              print('提交：$text');
-            },
+          labelText: '网址',
+          child: TInputAdornment(
+            prepend: const Text('https://'),
+            append: const Text('.com'),
+            child: TInput(
+              name: 'www',
+              onEnter: (text) {
+                print('提交：$text');
+              },
+            ),
           ),
         ),
         TFormItem(
@@ -154,6 +171,20 @@ class _TFormExampleState extends State<TFormExample> {
             onChange: (checked, current, options) {
               setState(() {
                 course = options;
+              });
+            },
+          ),
+        ),
+        TFormItem(
+          labelText: '数字',
+          child: TInputNumber<int>(
+            name: 'number',
+            value: number,
+            max: 5,
+            min: -5,
+            onChange: (value) {
+              setState(() {
+                number = value;
               });
             },
           ),
