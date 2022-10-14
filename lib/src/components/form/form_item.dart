@@ -469,6 +469,7 @@ class TFormItemState extends State<TFormItem> {
           blurRadius: 0,
           spreadRadius: 2,
           color: shadowColor,
+          blurStyle: BlurStyle.outer,
         )
       ];
     }

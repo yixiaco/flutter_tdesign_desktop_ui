@@ -8,6 +8,7 @@ import 'package:example/components/dropdown/dropdown_example.dart';
 import 'package:example/components/form/form_example.dart';
 import 'package:example/components/icon/icon_example.dart';
 import 'package:example/components/input/input_example.dart';
+import 'package:example/components/input_adornment/input_adornment_example.dart';
 import 'package:example/components/jumper/jumper_example.dart';
 import 'package:example/components/loading/loading_example.dart';
 import 'package:example/components/menu/head_menu_example.dart';
@@ -212,6 +213,15 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
           onClick: () {
             setState(() {
               content = const TInputExample();
+            });
+          },
+        ),
+        TMenuItemProps(
+          value: 'input_adornment',
+          content: const Text('InputAdornment 输入装饰器'),
+          onClick: () {
+            setState(() {
+              content = const TInputAdornmentExample();
             });
           },
         ),
@@ -443,6 +453,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
     return FractionallySizedBox(
       heightFactor: 1,
       child: TMenu(
+        width: 260,
         collapsed: collapsed,
         controller: menuController,
         menus: menus,
