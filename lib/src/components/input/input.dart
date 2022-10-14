@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
+
+const double _kInputHeightS = 4;
+const double _kInputHeightDefault = 7;
+const double _kInputHeightL = 9;
+
 /// 输入框
 /// 用于承载用户信息录入的文本框，常用于表单、对话框等场景，对不同内容的信息录入，可拓展形成多种信息录入形式
 class TInput extends TFormItemValidate {
@@ -234,10 +239,6 @@ class _TInputState extends TFormItemValidateState<TInput> {
     }
     effectiveFocusNode.onKeyEvent = _onKeyEvent;
   }
-
-  static double inputHeightS = 4;
-  static double inputHeightDefault = 7;
-  static double inputHeightL = 9;
 
   /// 获取字体大小
   double getFontSize(TThemeData theme, TComponentSize size) {
@@ -513,7 +514,7 @@ class _TInputState extends TFormItemValidateState<TInput> {
           color: disabled ? colorScheme.textColorDisabled : colorScheme.textColorPlaceholder,
         )),
         padding: MaterialStatePropertyAll(EdgeInsets.symmetric(
-          vertical: size.sizeOf(small: inputHeightS, medium: inputHeightDefault, large: inputHeightL),
+          vertical: size.sizeOf(small: _kInputHeightS, medium: _kInputHeightDefault, large: _kInputHeightL),
           horizontal: 8,
         )),
         tips: MaterialStateProperty.resolveWith((states) {
