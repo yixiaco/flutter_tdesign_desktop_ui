@@ -16,7 +16,7 @@ class _TFormExampleState extends State<TFormExample> {
   bool disabled = false;
   bool? radioCheck;
   bool? checkboxCheck;
-  int? number = 0;
+  int? number = 10;
 
   @override
   Widget build(BuildContext context) {
@@ -52,6 +52,10 @@ class _TFormExampleState extends State<TFormExample> {
         'course': [
           TFormRule(required: true, trigger: TFormRuleTrigger.change),
         ],
+        'number': [
+          TFormRule(required: true, trigger: TFormRuleTrigger.change),
+          TFormRule(max: 2, trigger: TFormRuleTrigger.change),
+        ]
       },
       onReset: () {
         print('重置');
@@ -176,6 +180,7 @@ class _TFormExampleState extends State<TFormExample> {
           ),
         ),
         TFormItem(
+          successBorder: true,
           labelText: '数字',
           child: TInputNumber<int>(
             name: 'number',

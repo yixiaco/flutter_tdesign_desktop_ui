@@ -88,7 +88,6 @@ class TCheckboxGroupState<T> extends TFormItemValidateState<TCheckboxGroup<T>> {
   @override
   void dispose() {
     super.dispose();
-    _value.clear();
   }
 
   @override

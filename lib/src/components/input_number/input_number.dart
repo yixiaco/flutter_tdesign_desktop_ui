@@ -28,6 +28,8 @@ const double _kInputNumberButtonColumnHeightS = 10; //  右侧调整数字操作
 const double _kInputNumberButtonColumnHeight = 14; //  右侧调整数字操作按钮的高度 中
 const double _kInputNumberButtonColumnHeightL = 18; //  右侧调整数字操作按钮的高度 大
 
+typedef TInputNumberFormatCallback = String Function(String value, String? fixedNumber);
+
 /// 数字输入框
 /// 数字输入框由增加、减少按钮、数值输入组成。每次点击增加按钮（或减少按钮），数字增长（或减少）的量是恒定的。
 class TInputNumber<T> extends TFormItemValidate {
@@ -37,9 +39,9 @@ class TInputNumber<T> extends TFormItemValidate {
     FocusNode? focusNode,
     this.align,
     this.autoWidth = false,
-    this.decimalPlaces = 0,
+    this.decimalPlaces,
     this.disabled = false,
-    this.inputFormatters,
+    this.format,
     this.label,
     this.max,
     this.min,
@@ -77,13 +79,13 @@ class TInputNumber<T> extends TFormItemValidate {
   final bool autoWidth;
 
   /// 小数位数
-  final int decimalPlaces;
+  final int? decimalPlaces;
 
   /// 禁用组件
   final bool disabled;
 
   /// {@macro flutter.widgets.editableText.inputFormatters}
-  final List<TextInputFormatter>? inputFormatters;
+  final TInputNumberFormatCallback? format;
 
   /// 左侧文本
   final Widget? label;
@@ -210,9 +212,9 @@ class _TInputNumberState<T> extends TFormItemValidateState<TInputNumber<T>> {
       _controller.text = widget.value?.toString() ?? '';
       _handle();
       _text = _controller.text;
-      if(_text != widget.value) {
+      if (_text != widget.value) {
         SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
-          if(mounted) {
+          if (mounted) {
             _handleChange();
           }
         });
@@ -302,36 +304,41 @@ class _TInputNumberState<T> extends TFormItemValidateState<TInputNumber<T>> {
         align ??= TextAlign.left;
         break;
     }
-
-    Widget child = TInput(
-      disabled: _disabled,
-      controller: _controller,
-      focusNode: effectiveFocusNode,
-      align: align,
-      size: size,
-      onBlur: (text) {
-        _handleFormat();
-        widget.onBlur?.call();
-      },
-      onEnter: (text) => widget.onEnter?.call(),
-      onFocus: (text) => widget.onFocus?.call(),
-      onKeyDown: (text, event) => widget.onKeyDown?.call(),
-      onMouseenter: widget.onMouseenter,
-      onMouseleave: widget.onMouseleave,
-      status: widget.status,
-      suffix: widget.suffix,
-      suffixIcon: suffixIcon,
-      label: widget.label,
-      placeholder: widget.placeholder,
-      readonly: widget.readonly,
-      restorationId: widget.restorationId,
-      inputFormatters: widget.inputFormatters,
-      keyboardType: widget.keyboardType,
-      autofocus: widget.autofocus,
-      autoWidth: widget.autoWidth,
-      tips: widget.inputTips,
-      scrollController: widget.scrollController,
-      suffixPadding: widget.theme == TInputNumberTheme.column ? const EdgeInsets.only(right: 1) : null,
+    Widget child = TInputTheme(
+      data: TInputThemeData(
+        borderColor: formItemState?.borderColor,
+        boxShadow: formItemState?.shadows,
+      ),
+      child: TInput(
+        disabled: _disabled,
+        controller: _controller,
+        focusNode: effectiveFocusNode,
+        align: align,
+        size: size,
+        onBlur: (text) {
+          _handleFormat();
+          widget.onBlur?.call();
+        },
+        format: widget.format != null ? (text) => widget.format!(text, _places(text)?.toString()) : null,
+        onEnter: (text) => widget.onEnter?.call(),
+        onFocus: (text) => widget.onFocus?.call(),
+        onKeyDown: (text, event) => widget.onKeyDown?.call(),
+        onMouseenter: widget.onMouseenter,
+        onMouseleave: widget.onMouseleave,
+        status: widget.status,
+        suffix: widget.suffix,
+        suffixIcon: suffixIcon,
+        label: widget.label,
+        placeholder: widget.placeholder,
+        readonly: widget.readonly,
+        restorationId: widget.restorationId,
+        keyboardType: widget.keyboardType,
+        autofocus: widget.autofocus,
+        autoWidth: widget.autoWidth,
+        tips: widget.inputTips,
+        scrollController: widget.scrollController,
+        suffixPadding: widget.theme == TInputNumberTheme.column ? const EdgeInsets.only(right: 1) : null,
+      ),
     );
 
     switch (widget.theme) {
@@ -425,12 +432,24 @@ class _TInputNumberState<T> extends TFormItemValidateState<TInputNumber<T>> {
 
   /// 处理递增事件
   void _handleAdd() {
+    if (widget.readonly) {
+      return;
+    }
+    if (_controller.text.isEmpty) {
+      _controller.text = '0';
+    }
     _handle(handle: (number) => number + _step);
     _handleChange();
   }
 
   /// 处理递减事件
   void _handleRemove() {
+    if (widget.readonly) {
+      return;
+    }
+    if (_controller.text.isEmpty) {
+      _controller.text = '0';
+    }
     _handle(handle: (number) => number - _step);
     _handleChange();
   }
@@ -438,7 +457,7 @@ class _TInputNumberState<T> extends TFormItemValidateState<TInputNumber<T>> {
   /// 格式化字符串
   void _handleFormat() {
     _handle();
-    if(widget.value != _text) {
+    if (widget.value != _text) {
       _handleChange();
     }
   }
@@ -456,20 +475,47 @@ class _TInputNumberState<T> extends TFormItemValidateState<TInputNumber<T>> {
         } else if (exceedMaximum && widget.autocorrect) {
           result = _max!;
         }
+        if (widget.decimalPlaces != null) {
+          result = result.floor(scale: widget.decimalPlaces!);
+        }
         _controller.text = result.toString();
         _text = _controller.text;
         widget.onValidate?.call(exceedMaximum, belowMinimum);
         return;
       }
     }
-    if(_text.isNotEmpty && widget.autocorrect) {
+    if (_text.isNotEmpty && widget.autocorrect) {
       _handle(text: _text);
     }
   }
 
   void _handleChange() {
     widget.onChange?.call(formItemValue);
-    formItemState?.validate(trigger: TFormRuleTrigger.change);
+    formChange();
+  }
+
+  Decimal? _places(String text) {
+    if (text.isEmpty) {
+      return null;
+    }
+    if (widget.decimalPlaces != null) {
+      return Decimal.tryParse(text)?.floor(scale: widget.decimalPlaces!);
+    }
+    return null;
+  }
+
+  T? _format(String text) {
+    if (text.isEmpty) {
+      return null;
+    }
+    if (T == int) {
+      return int.tryParse(text) as T?;
+    } else if (T == double) {
+      return double.tryParse(text) as T?;
+    } else if (T == num) {
+      return num.tryParse(text) as T?;
+    }
+    return text as T?;
   }
 
   @override
@@ -477,17 +523,7 @@ class _TInputNumberState<T> extends TFormItemValidateState<TInputNumber<T>> {
 
   @override
   get formItemValue {
-    if (_text.isEmpty) {
-      return null;
-    }
-    if (T == int) {
-      return int.parse(_text);
-    } else if (T == double) {
-      return double.parse(_text);
-    } else if (T == num) {
-      return num.parse(_text);
-    }
-    return _text;
+    return _format(_text);
   }
 
   @override
