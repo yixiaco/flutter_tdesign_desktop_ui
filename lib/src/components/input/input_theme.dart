@@ -9,6 +9,8 @@ class TInputThemeData with Diagnosticable {
     this.size,
     this.borderRadius,
     this.backgroundColor,
+    this.borderColor,
+    this.boxShadow,
   });
 
   /// 用户最多可以输入的文本长度，一个中文等于一个计数长度。值小于等于 0 的时候，则表示不限制输入长度。
@@ -24,6 +26,12 @@ class TInputThemeData with Diagnosticable {
   /// 背景颜色
   final Color? backgroundColor;
 
+  /// 边框颜色
+  final Color? borderColor;
+
+  /// 边框阴影
+  final List<BoxShadow>? boxShadow;
+
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
@@ -31,6 +39,8 @@ class TInputThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<TComponentSize>('size', size, defaultValue: null));
     properties.add(DiagnosticsProperty<BorderRadiusGeometry>('borderRadius', borderRadius, defaultValue: null));
     properties.add(DiagnosticsProperty<Color>('backgroundColor', backgroundColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('borderColor', borderColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<List<BoxShadow>>('boxShadow', boxShadow, defaultValue: null));
   }
 
   TInputThemeData copyWith({
@@ -38,12 +48,16 @@ class TInputThemeData with Diagnosticable {
     TComponentSize? size,
     BorderRadiusGeometry? borderRadius,
     Color? backgroundColor,
+    Color? borderColor,
+    List<BoxShadow>? boxShadow,
   }) {
     return TInputThemeData(
       maxLength: maxLength ?? this.maxLength,
       size: size ?? this.size,
       borderRadius: borderRadius ?? this.borderRadius,
       backgroundColor: backgroundColor ?? this.backgroundColor,
+      borderColor: borderColor ?? this.borderColor,
+      boxShadow: boxShadow ?? this.boxShadow,
     );
   }
 
@@ -55,10 +69,18 @@ class TInputThemeData with Diagnosticable {
           maxLength == other.maxLength &&
           size == other.size &&
           borderRadius == other.borderRadius &&
-          backgroundColor == other.backgroundColor;
+          backgroundColor == other.backgroundColor &&
+          borderColor == other.borderColor &&
+          boxShadow == other.boxShadow;
 
   @override
-  int get hashCode => maxLength.hashCode ^ size.hashCode ^ borderRadius.hashCode ^ backgroundColor.hashCode;
+  int get hashCode =>
+      maxLength.hashCode ^
+      size.hashCode ^
+      borderRadius.hashCode ^
+      backgroundColor.hashCode ^
+      borderColor.hashCode ^
+      boxShadow.hashCode;
 }
 
 /// 弹出层主题

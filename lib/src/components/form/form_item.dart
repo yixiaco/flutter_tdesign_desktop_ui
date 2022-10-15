@@ -361,42 +361,43 @@ class TFormItemState extends State<TFormItem> {
 
   /// 清空校验结果。可使用 fields 指定清除部分字段的校验结果，fields 值为空则表示清除所有字段校验结果。
   /// 清除邮箱校验结果示例：clearValidate(['email'])
-  void clearValidate() {
-    setState(() {
-      _message = null;
-      _borderColor = null;
-      _shadows = null;
-      _currentStatus = null;
-      _version++;
-    });
+  void clearValidate([bool update = true]) {
+    _message = null;
+    _borderColor = null;
+    _shadows = null;
+    _currentStatus = null;
+    _version++;
+    if (update) {
+      _needNotifyUpdate();
+    }
   }
 
   /// 重置表单，表单里面没有重置按钮TButton(type: TButtonType.reset)时可以使用该方法，默认重置全部字段为空，该方法会触发 reset 事件。
   /// 如果表单属性 resetType=TFormResetType.empty 或 type=TFormResetType.empty 会重置为空；
   /// 如果表单属性 resetType=TFormResetType.initial 或者 type=TFormResetType.initial 会重置为表单初始值。
   /// [fields] 用于设置具体重置哪些字段，示例：reset({ type: TFormResetType.initial, fields: ['name', 'age'] })
-  void reset(TFormResetType type) {
-    setState(() {
-      _field?.reset(type);
-      clearValidate();
-      _version++;
-    });
+  void reset(TFormResetType type, [bool update = true]) {
+    _field?.reset(type);
+    clearValidate(false);
+    _version++;
+    if (update) {
+      _needNotifyUpdate();
+    }
   }
 
   /// 设置自定义校验结果，如远程校验信息直接呈现。
   void setValidateMessage(TFormItemValidateMessage message) {
-    setState(() {
-      _message = message;
-      switch (_message!.type) {
-        case TFormRuleType.error:
-          _setStatus(TFormItemStatus.error);
-          break;
-        case TFormRuleType.warning:
-          _setStatus(TFormItemStatus.warning);
-          break;
-      }
-      _version++;
-    });
+    _message = message;
+    switch (_message!.type) {
+      case TFormRuleType.error:
+        _setStatus(TFormItemStatus.error);
+        break;
+      case TFormRuleType.warning:
+        _setStatus(TFormItemStatus.warning);
+        break;
+    }
+    _version++;
+    _needNotifyUpdate();
   }
 
   /// 校验函数，包含错误文本提示等功能。
@@ -416,16 +417,17 @@ class TFormItemState extends State<TFormItem> {
       return element.trigger == TFormRuleTrigger.all || trigger == TFormRuleTrigger.all || element.trigger == trigger;
     });
     if (any) {
-      clearValidate();
+      clearValidate(false);
       if (!result.validate) {
         setValidateMessage(TFormItemValidateMessage(
           type: result.type!,
           message: showErrorMessage ? result.errorMessage! : null,
         ));
       } else {
-        setState(() {
-          _setStatus(widget.successBorder ? TFormItemStatus.success : null);
-        });
+        if (widget.successBorder) {
+          _setStatus(TFormItemStatus.success);
+        }
+        _needNotifyUpdate();
       }
     }
     return result;
@@ -559,6 +561,16 @@ abstract class TFormItemValidateState<T extends TFormItemValidate> extends State
   /// [fields] 用于设置具体重置哪些字段，示例：reset({ type: TFormResetType.initial })
   @protected
   void reset(TFormResetType type);
+
+  /// 执行值变更事件
+  void formChange() {
+    formItemState?.validate(trigger: TFormRuleTrigger.change);
+  }
+
+  /// 执行失去焦点事件
+  void formBurl() {
+    formItemState?.validate();
+  }
 
   @override
   void didUpdateWidget(covariant T oldWidget) {

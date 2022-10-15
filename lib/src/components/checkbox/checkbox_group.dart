@@ -48,7 +48,7 @@ class TCheckboxGroup<T> extends TFormItemValidate {
     this.disabled = false,
     this.max,
     required this.options,
-    required this.value,
+    this.value,
     this.defaultValue = const [],
     String? name,
     this.onChange,
@@ -64,7 +64,7 @@ class TCheckboxGroup<T> extends TFormItemValidate {
   final List<TCheckboxOption<T>> options;
 
   /// 选中值
-  final List<T> value;
+  final List<T>? value;
 
   /// 表单重置时的初始化默认值
   final List<T> defaultValue;
@@ -77,9 +77,31 @@ class TCheckboxGroup<T> extends TFormItemValidate {
 }
 
 class TCheckboxGroupState<T> extends TFormItemValidateState<TCheckboxGroup<T>> {
+  late List<T> _value;
+
+  @override
+  void initState() {
+    _value = widget.value ?? widget.defaultValue;
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(covariant TCheckboxGroup<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.value != oldWidget.value && _value != widget.value) {
+      _value = widget.value ?? [];
+      formChange();
+    }
+  }
+
   /// 根据当前选项值，全选或全不选
   void checkAll() {
-    if (widget.options.every((element) => widget.value.contains(element))) {
+    if (widget.options.every((element) => _value.contains(element))) {
       // 全选=>全不选
       widget.onChange?.call(false, null, []);
     } else {
@@ -90,27 +112,30 @@ class TCheckboxGroupState<T> extends TFormItemValidateState<TCheckboxGroup<T>> {
 
   @override
   Widget build(BuildContext context) {
+    var formDisabled = this.formDisabled;
     List<Widget> box = widget.options
         .map(
-          (e) => TCheckbox<T>(
+          (e) {
+            return TCheckbox<T>(
             disabled: formDisabled || widget.disabled || e.disabled,
             label: e.label,
             value: e.value,
-            checked: widget.value.contains(e.value),
+            checked: _value.contains(e.value),
             onChange: (checked, indeterminate, value) {
               List<T>? list;
               if (checked) {
-                if (widget.max == null || widget.value.length < widget.max!) {
-                  list = [...widget.value, e.value];
+                if (widget.max == null || _value.length < widget.max!) {
+                  list = [..._value, e.value];
                 }
               } else {
-                list = widget.value.where((element) => element != e.value).toList();
+                list = _value.where((element) => element != e.value).toList();
               }
               if (list != null) {
                 widget.onChange?.call(checked, e, list);
               }
             },
-          ),
+          );
+          },
         )
         .toList();
 
@@ -122,17 +147,19 @@ class TCheckboxGroupState<T> extends TFormItemValidateState<TCheckboxGroup<T>> {
   }
 
   @override
-  get formItemValue => widget.value;
+  get formItemValue => _value;
 
   @override
   void reset(TFormResetType type) {
     switch (type) {
       case TFormResetType.empty:
-        widget.onChange?.call(false, null, []);
+        _value = [];
         break;
       case TFormResetType.initial:
-        widget.onChange?.call(false, null, widget.defaultValue);
+        _value = widget.defaultValue;
         break;
     }
+    widget.onChange?.call(false, null, _value);
+
   }
 }

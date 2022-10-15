@@ -153,8 +153,9 @@ class _TRadioGroupState<T> extends TFormItemValidateState<TRadioGroup<T>> with S
     } else if (widget.options.length < _optionKeys.length) {
       _optionKeys.removeRange(widget.options.length, _optionKeys.length);
     }
-    if (widget.value != oldWidget.value) {
+    if (widget.value != oldWidget.value && _value != widget.value) {
       _value = widget.value;
+      formChange();
     }
     if (widget.options.length != _optionKeys.length || widget.value != oldWidget.value) {
       _indicatorPainter._oldRect = _indicatorPainter._currentRect;
@@ -364,11 +365,13 @@ class _TRadioGroupState<T> extends TFormItemValidateState<TRadioGroup<T>> with S
     switch (type) {
       case TFormResetType.empty:
         if(widget.allowUncheck) {
+          _value = null;
           _valueChange(true, null);
         }
         break;
       case TFormResetType.initial:
         if(widget.allowUncheck || widget.defaultValue != null) {
+          _value = widget.defaultValue;
           _valueChange(true, widget.defaultValue);
         }
         break;

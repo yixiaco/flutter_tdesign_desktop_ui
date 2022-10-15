@@ -1,5 +1,5 @@
 name: tdesign_desktop_ui
-description: tdesign的flutter实现
+description: TDesign的Flutter实现,适配桌面端的组件库
 version: 0.0.1
 homepage: https://github.com/yixiaco/flutter_tdesign_desktop_ui
 
@@ -13,7 +13,8 @@ dependencies:
   intl: ^0.17.0 #多语言
   flutter_svg: ^1.1.5
   animations: ^2.0.7
-  boxy: ^2.0.6+2
+#  boxy: ^2.0.6+2
+  decimal: ^2.3.0
   url_launcher: ^6.1.6
 
 dev_dependencies:

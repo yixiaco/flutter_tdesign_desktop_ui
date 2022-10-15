@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
-
 const double _kInputHeightS = 4;
 const double _kInputHeightDefault = 7;
-const double _kInputHeightL = 9;
+const double _kInputHeightL = 9.5;
 
 /// 输入框
 /// 用于承载用户信息录入的文本框，常用于表单、对话框等场景，对不同内容的信息录入，可拓展形成多种信息录入形式
@@ -39,10 +38,17 @@ class TInput extends TFormItemValidate {
     this.onEnter,
     this.onFocus,
     this.onKeyDown,
-    this.align = TextAlign.start,
+    this.align = TextAlign.left,
     this.onMouseenter,
     this.onMouseleave,
     this.scrollController,
+    this.inputFormatters,
+    this.keyboardType,
+    this.restorationId,
+    this.obscuringCharacter = '•',
+    this.prefixPadding,
+    this.suffixPadding,
+    this.format,
   }) : super(key: key, name: name, focusNode: focusNode);
 
   /// 控制正在编辑的文本。
@@ -52,7 +58,7 @@ class TInput extends TFormItemValidate {
   /// 输入框的默认值
   final String? defaultValue;
 
-  /// 自动对焦
+  /// 自动聚焦
   final bool autofocus;
 
   /// 是否只读
@@ -65,7 +71,7 @@ class TInput extends TFormItemValidate {
   final bool disabled;
 
   /// 左侧文本
-  final String? label;
+  final Widget? label;
 
   /// 用户最多可以输入的最大字符数（Unicode 标量值）。
   /// 如果设置，字符计数器将显示在字段下方，显示已输入的字符数。如果设置为大于 0 的数字，它还将显示允许的最大数字。
@@ -106,7 +112,7 @@ class TInput extends TFormItemValidate {
   final Widget? suffixIcon;
 
   /// 输入框下方提示文本，会根据不同的 status 呈现不同的样式。
-  final String? tips;
+  final Widget? tips;
 
   /// 输入框类型。可选项：text/password
   final TInputType type;
@@ -141,6 +147,27 @@ class TInput extends TFormItemValidate {
   /// 滚动控制器
   final ScrollController? scrollController;
 
+  /// {@macro flutter.widgets.editableText.inputFormatters}
+  final List<TextInputFormatter>? inputFormatters;
+
+  /// {@macro flutter.widgets.editableText.keyboardType}
+  final TextInputType? keyboardType;
+
+  /// {@macro tdesign.components.inputBase.restorationId}
+  final String? restorationId;
+
+  /// {@macro flutter.widgets.editableText.obscuringCharacter}
+  final String obscuringCharacter;
+
+  /// 前缀内边距
+  final EdgeInsetsGeometry? prefixPadding;
+
+  /// 后缀内边距
+  final EdgeInsetsGeometry? suffixPadding;
+
+  /// 指定输入框展示值的格式
+  final String Function(String text)? format;
+
   @override
   TFormItemValidateState createState() => _TInputState();
 }
@@ -151,6 +178,8 @@ class _TInputState extends TFormItemValidateState<TInput> {
   FocusNode get effectiveFocusNode => widget.focusNode ?? (_focusNode ??= FocusNode());
 
   TextEditingController? _controller;
+
+  late TextEditingController _formatController;
 
   /// 有效文本控制器
   TextEditingController get effectiveController =>
@@ -180,6 +209,7 @@ class _TInputState extends TFormItemValidateState<TInput> {
     effectiveFocusNode.onKeyEvent = _onKeyEvent;
     effectiveFocusNode.addListener(_focusChange);
     effectiveController.addListener(_textChange);
+    _formatController = TextEditingController(text: widget.format?.call(effectiveController.text) ?? effectiveController.text);
     super.initState();
   }
 
@@ -197,6 +227,7 @@ class _TInputState extends TFormItemValidateState<TInput> {
     effectiveController.removeListener(_textChange);
     _focusNode?.dispose();
     _controller?.dispose();
+    _formatController.dispose();
     super.dispose();
   }
 
@@ -216,6 +247,7 @@ class _TInputState extends TFormItemValidateState<TInput> {
   void _textChange() {
     if (_text != effectiveController.text) {
       _text = effectiveController.text;
+      _formatController.text = widget.format?.call(effectiveController.text) ?? effectiveController.text;
       if (!widget.showClearIconOnEmpty && effectiveController.text.isEmpty) {
         showClearIcon.value = false;
       } else if (isHover) {
@@ -268,79 +300,88 @@ class _TInputState extends TFormItemValidateState<TInput> {
     // 边框样式
     var border = MaterialStateProperty.resolveWith((states) {
       List<BoxShadow>? shadows;
-      Color color = widget.status.lazyValueOf(
-        defaultStatus: () {
-          if (states.contains(MaterialState.disabled)) {
-            return colorScheme.borderLevel2Color;
-          }
+      Color color;
+      switch (widget.status) {
+        case TInputStatus.defaultStatus:
           if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
-            shadows = formItemState?.shadows ??
-                [
-                  BoxShadow(
-                    offset: const Offset(0, 0),
-                    blurRadius: 0,
-                    spreadRadius: 2,
-                    color: colorScheme.brandColorFocus,
-                    blurStyle: BlurStyle.outer,
-                  )
-                ];
+            shadows = [
+              BoxShadow(
+                offset: const Offset(0, 0),
+                blurRadius: 0,
+                spreadRadius: 2,
+                color: colorScheme.brandColorFocus,
+                blurStyle: BlurStyle.outer,
+              )
+            ];
           }
+          color = colorScheme.borderLevel2Color;
           if (states.contains(MaterialState.hovered) ||
               states.contains(MaterialState.focused) ||
               states.contains(MaterialState.pressed)) {
-            return colorScheme.brandColor;
+            color = colorScheme.brandColor;
           }
-          return colorScheme.borderLevel2Color;
-        },
-        success: () {
+          if (states.contains(MaterialState.disabled)) {
+            color = colorScheme.borderLevel2Color;
+          }
+          break;
+        case TInputStatus.success:
           if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
-            shadows = formItemState?.shadows ??
-                [
-                  BoxShadow(
-                    offset: const Offset(0, 0),
-                    blurRadius: 0,
-                    spreadRadius: 2,
-                    color: colorScheme.successColorFocus,
-                    blurStyle: BlurStyle.outer,
-                  )
-                ];
+            shadows = [
+              BoxShadow(
+                offset: const Offset(0, 0),
+                blurRadius: 0,
+                spreadRadius: 2,
+                color: colorScheme.successColorFocus,
+                blurStyle: BlurStyle.outer,
+              )
+            ];
           }
-          return colorScheme.successColor;
-        },
-        warning: () {
+          color = colorScheme.successColor;
+          if (states.contains(MaterialState.disabled) && states.contains(MaterialState.hovered)) {
+            color = colorScheme.borderLevel2Color;
+          }
+          break;
+        case TInputStatus.warning:
           if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
-            shadows = formItemState?.shadows ??
-                [
-                  BoxShadow(
-                    offset: const Offset(0, 0),
-                    blurRadius: 0,
-                    spreadRadius: 2,
-                    color: colorScheme.warningColorFocus,
-                    blurStyle: BlurStyle.outer,
-                  )
-                ];
+            shadows = [
+              BoxShadow(
+                offset: const Offset(0, 0),
+                blurRadius: 0,
+                spreadRadius: 2,
+                color: colorScheme.warningColorFocus,
+                blurStyle: BlurStyle.outer,
+              )
+            ];
           }
-          return colorScheme.warningColor;
-        },
-        error: () {
+          color = colorScheme.warningColor;
+          if (states.contains(MaterialState.disabled) && states.contains(MaterialState.hovered)) {
+            color = colorScheme.borderLevel2Color;
+          }
+          break;
+        case TInputStatus.error:
           if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
-            shadows = formItemState?.shadows ??
-                [
-                  BoxShadow(
-                    offset: const Offset(0, 0),
-                    blurRadius: 0,
-                    spreadRadius: 2,
-                    color: colorScheme.errorColorFocus,
-                    blurStyle: BlurStyle.outer,
-                  )
-                ];
+            shadows = [
+              BoxShadow(
+                offset: const Offset(0, 0),
+                blurRadius: 0,
+                spreadRadius: 2,
+                color: colorScheme.errorColorFocus,
+                blurStyle: BlurStyle.outer,
+              )
+            ];
           }
-          return colorScheme.errorColor;
-        },
-      );
+          color = colorScheme.errorColor;
+          if (states.contains(MaterialState.disabled) && states.contains(MaterialState.hovered)) {
+            color = colorScheme.borderLevel2Color;
+          }
+          break;
+      }
+      if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
+        shadows = formItemState?.shadows ?? inputTheme.boxShadow ?? shadows;
+      }
       return BoxDecoration(
         backgroundBlendMode: BlendMode.src,
-        border: Border.all(width: onePx, color: formItemState?.borderColor ?? color),
+        border: Border.all(width: onePx, color: formItemState?.borderColor ?? inputTheme.borderColor ?? color),
         borderRadius: inputTheme.borderRadius ?? BorderRadius.circular(TVar.borderRadiusDefault),
         boxShadow: shadows,
         color: inputTheme.backgroundColor ??
@@ -431,18 +472,18 @@ class _TInputState extends TFormItemValidateState<TInput> {
 
     // label
     if (widget.label != null) {
-      prefixIconList.add(Text(
-        widget.label!,
+      prefixIconList.add(DefaultTextStyle(
         style: TextStyle(
           fontFamily: theme.fontFamily,
           fontSize: getFontSize(theme, size),
           color: disabled ? colorScheme.textColorDisabled : colorScheme.textColorPrimary,
         ),
+        child: widget.label!,
       ));
     }
     if (prefixIconList.isNotEmpty) {
       prefixIcon = Padding(
-        padding: const EdgeInsets.only(left: 8, right: 2),
+        padding: widget.prefixPadding ?? const EdgeInsets.only(left: 8, right: 2),
         child: TSpace(
           breakLine: true,
           spacing: 2,
@@ -454,10 +495,11 @@ class _TInputState extends TFormItemValidateState<TInput> {
 
     suffixIconList.add(widget.suffixIcon);
     suffixIconList.add(widget.suffix);
+    suffixIconList.removeWhere((element) => element == null);
 
     if (suffixIconList.isNotEmpty) {
       suffixIcon = Padding(
-        padding: const EdgeInsets.only(right: 8.0),
+        padding: widget.suffixPadding ?? const EdgeInsets.only(right: 8.0),
         child: TSpace(
           breakLine: true,
           spacing: 2,
@@ -479,12 +521,16 @@ class _TInputState extends TFormItemValidateState<TInput> {
         widget.onMouseleave?.call(event);
       },
       child: TInputBox(
+        obscuringCharacter: widget.obscuringCharacter,
         enabled: !disabled,
-        controller: effectiveController,
+        controller: effectiveFocusNode.hasFocus || widget.format == null ? effectiveController : _formatController,
         autofocus: widget.autofocus,
         readOnly: widget.readonly,
         focusNode: effectiveFocusNode,
         cursorWidth: 1,
+        inputFormatters: widget.inputFormatters,
+        keyboardType: widget.keyboardType,
+        restorationId: widget.restorationId,
         style: TextStyle(
           fontFamily: theme.fontFamily,
           fontSize: fontSize,
@@ -512,6 +558,7 @@ class _TInputState extends TFormItemValidateState<TInput> {
           fontFamily: theme.fontFamily,
           fontSize: fontSize,
           color: disabled ? colorScheme.textColorDisabled : colorScheme.textColorPlaceholder,
+          overflow: TextOverflow.ellipsis,
         )),
         padding: MaterialStatePropertyAll(EdgeInsets.symmetric(
           vertical: size.sizeOf(small: _kInputHeightS, medium: _kInputHeightDefault, large: _kInputHeightL),
@@ -519,13 +566,13 @@ class _TInputState extends TFormItemValidateState<TInput> {
         )),
         tips: MaterialStateProperty.resolveWith((states) {
           if (widget.tips == null) return null;
-          return Text(
-            widget.tips!,
+          return DefaultTextStyle(
             style: TextStyle(
               fontFamily: theme.fontFamily,
               fontSize: theme.fontData.fontSizeS,
               color: tipsColor,
             ),
+            child: widget.tips!,
           );
         }),
         prefix: MaterialStateProperty.resolveWith((states) {
