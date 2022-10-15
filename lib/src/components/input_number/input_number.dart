@@ -407,27 +407,30 @@ class _TInputNumberState<T> extends TFormItemValidateState<TInputNumber<T>> {
     );
   }
 
-  MaterialStateWidget _buildRightIcon(TColorScheme colorScheme, TComponentSize size, TThemeData theme, IconData icon) {
-    return MaterialStateWidget.resolveWith((states) {
-      Color color = colorScheme.textColorSecondary;
-      if (states.contains(MaterialState.hovered) || states.contains(MaterialState.focused)) {
-        color = colorScheme.textColorPrimary;
-      }
-      if (states.contains(MaterialState.disabled)) {
-        color = colorScheme.textColorDisabled;
-      }
-      return Center(
-        child: Icon(
-          icon,
-          size: size.sizeOf(
-            small: theme.fontData.fontSize,
-            medium: theme.fontData.fontSizeBase,
-            large: theme.fontData.fontSizeL,
+  Widget _buildRightIcon(TColorScheme colorScheme, TComponentSize size, TThemeData theme, IconData icon) {
+    return Builder(
+      builder: (context) {
+        var states = TMaterialStateScope.of(context)!;
+        Color color = colorScheme.textColorSecondary;
+        if (states.contains(MaterialState.hovered) || states.contains(MaterialState.focused)) {
+          color = colorScheme.textColorPrimary;
+        }
+        if (states.contains(MaterialState.disabled)) {
+          color = colorScheme.textColorDisabled;
+        }
+        return Center(
+          child: Icon(
+            icon,
+            size: size.sizeOf(
+              small: theme.fontData.fontSize,
+              medium: theme.fontData.fontSizeBase,
+              large: theme.fontData.fontSizeL,
+            ),
+            color: color,
           ),
-          color: color,
-        ),
-      );
-    });
+        );
+      }
+    );
   }
 
   /// 处理递增事件

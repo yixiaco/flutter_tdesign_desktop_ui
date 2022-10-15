@@ -89,7 +89,7 @@ class TBreadcrumb extends StatelessWidget {
     TThemeData theme, {
     VoidCallback? followLink,
   }) {
-    Widget child = TMaterialStateBuilder(
+    Widget child = TMaterialStateButton(
       disabled: option.disabled,
       selected: index == options.length - 1,
       onTap: () {

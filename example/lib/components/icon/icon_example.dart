@@ -29,7 +29,7 @@ class TIconExample extends StatelessWidget {
           crossAxisCount: 6,
         ),
         itemBuilder: (context, index) {
-          return TMaterialStateBuilder(
+          return TMaterialStateButton(
             builder: (context, states) {
               var entry = TIcons.allIcons.entries.elementAt(index);
               var icon = entry.value;
@@ -41,7 +41,7 @@ class TIconExample extends StatelessWidget {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        TMaterialStateBuilder(
+                        TMaterialStateButton(
                           onTap: () {
                             Clipboard.setData(ClipboardData(text: entry.key));
                           },
@@ -54,7 +54,7 @@ class TIconExample extends StatelessWidget {
                           },
                         ),
                         const TDivider(layout: Axis.vertical, margin: EdgeInsets.symmetric(horizontal: 8)),
-                        TMaterialStateBuilder(
+                        TMaterialStateButton(
                           onTap: () {
                             Clipboard.setData(ClipboardData(text: 'Icon(TIcons.${entry.key})'));
                           },

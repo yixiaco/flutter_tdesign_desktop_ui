@@ -191,7 +191,7 @@ class _TButton extends StatelessWidget {
                 decoration: shape != null ? ShapeDecoration(shape: shape) : null,
                 duration: const Duration(milliseconds: 200),
                 alignment: buttonStyle.alignment,
-                child: MaterialStateProperty.resolveAs(child, states),
+                child: child,
               ),
             ),
           );
@@ -719,6 +719,7 @@ class TButton extends StatelessWidget {
       iconWidget = Icon(icon, size: btnIconSize);
     }
     result.add(iconWidget);
+    result.add(child);
 
     return _TButton(
       disabled: disabled,
@@ -738,13 +739,11 @@ class TButton extends StatelessWidget {
       side: side,
       radius: radius,
       softWrap: softWrap,
-      child: MaterialStateWidget.resolveWith((states) {
-        return TSpace(
-          spacing: TVar.spacer,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [...result, MaterialStateProperty.resolveAs(child, states)],
-        );
-      }),
+      child: TSpace(
+        spacing: TVar.spacer,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: result,
+      ),
     );
   }
 

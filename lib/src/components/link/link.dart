@@ -133,7 +133,7 @@ class TLink extends StatelessWidget {
       return BorderSide.none;
     });
 
-    return TMaterialStateBuilder(
+    return TMaterialStateButton(
       disabled: disabled,
       onTap: onClick,
       builder: (context, states) {

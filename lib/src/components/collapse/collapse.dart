@@ -268,7 +268,7 @@ class _TCollapsePanelState<T> extends State<_TCollapsePanel<T>> {
     );
     Widget child;
     if (widget.expandOnRowClick) {
-      child = TMaterialStateBuilder(
+      child = TMaterialStateButton(
         disabled: widget.disabled,
         onTap: () => widget.onChange?.call(!widget.expand),
         builder: (context, states) {
@@ -301,7 +301,7 @@ class _TCollapsePanelState<T> extends State<_TCollapsePanel<T>> {
         child: chevronIcon,
       );
     }
-    Widget icon = TMaterialStateBuilder(
+    Widget icon = TMaterialStateButton(
       disabled: widget.disabled,
       onTap: () => widget.onChange?.call(!widget.expand),
       builder: (context, states) {

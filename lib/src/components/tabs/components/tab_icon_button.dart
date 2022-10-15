@@ -70,7 +70,7 @@ class _TabIconButton extends StatelessWidget {
     border = iconButtonStyle?.border ?? border;
     var width = iconButtonStyle?.width ?? _kIconWidth;
     var height = iconButtonStyle?.height ?? size.sizeOf(small: 48, medium: 48, large: 64);
-    return TMaterialStateBuilder(
+    return TMaterialStateButton(
       onTap: onTap,
       builder: (BuildContext context, Set<MaterialState> states) {
         return Container(

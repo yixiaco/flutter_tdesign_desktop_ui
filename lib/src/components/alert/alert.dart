@@ -115,7 +115,7 @@ class _TAlertState extends State<TAlert> {
     if (widget.operation != null) {
       operation = Padding(
         padding: EdgeInsets.symmetric(horizontal: TVar.spacer),
-        child: TMaterialStateBuilder(
+        child: TMaterialStateButton(
           builder: (context, states) {
             return DefaultTextStyle.merge(
               style: TextStyle(
@@ -173,7 +173,7 @@ class _TAlertState extends State<TAlert> {
                   padding: const EdgeInsets.only(top: 12),
                   child: DefaultTextStyle.merge(
                     style: TextStyle(color: colorScheme.brandColor),
-                    child: TMaterialStateBuilder(
+                    child: TMaterialStateButton(
                       onTap: () {
                         setState(() {
                           isExpand = !isExpand;

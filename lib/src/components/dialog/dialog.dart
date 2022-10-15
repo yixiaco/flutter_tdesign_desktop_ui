@@ -714,7 +714,7 @@ class _TRawDialogState extends State<TRawDialog> {
           onPressed: widget.onConfirm,
           child: Text(widget.confirmText ?? GlobalTDesignLocalizations.of(context).dialogConfirm),
         );
-    Widget closeIcon = TMaterialStateBuilder(
+    Widget closeIcon = TMaterialStateButton(
       onTap: widget.onCloseBtnClick,
       builder: (context, states) {
         return DefaultTextStyle(

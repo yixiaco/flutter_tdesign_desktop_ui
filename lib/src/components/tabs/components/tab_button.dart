@@ -362,7 +362,7 @@ class _TabButtonState<T> extends State<_TabButton<T>> with TickerProviderStateMi
   Padding _buildCloseIcon(MaterialStateProperty<Color?> effectiveIconColor, IconThemeData iconThemeData) {
     return Padding(
       padding: const EdgeInsets.only(left: 8),
-      child: TMaterialStateBuilder(
+      child: TMaterialStateButton(
         selected: widget.checked,
         disabled: widget.disabled,
         onTap: () => widget.onRemove?.call(widget.value, widget.index),
