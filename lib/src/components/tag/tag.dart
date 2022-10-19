@@ -214,8 +214,8 @@ class _TTagState extends State<TTag> {
 
     Widget child = widget.child;
     if (widget.maxWidth != null) {
-      child = LimitedBox(
-        maxWidth: widget.maxWidth!,
+      child = ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: widget.maxWidth!),
         child: child,
       );
     }
@@ -265,7 +265,10 @@ class _TTagState extends State<TTag> {
             fontSize: theme.fontSize,
             overflow: TextOverflow.ellipsis,
           ),
-          child: Center(child: child),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [child],
+          ),
         ),
       ),
     );

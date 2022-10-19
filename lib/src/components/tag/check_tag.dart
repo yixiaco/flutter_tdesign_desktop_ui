@@ -58,12 +58,7 @@ class _TCheckTagState extends State<TCheckTag> with TickerProviderStateMixin, TT
     var size = widget.size ?? theme.size;
 
     // 鼠标
-    final effectiveMouseCursor = MaterialStateProperty.resolveWith<MouseCursor>((states) {
-      if (states.contains(MaterialState.disabled)) {
-        return SystemMouseCursors.noDrop;
-      }
-      return SystemMouseCursors.click;
-    });
+    const effectiveMouseCursor = TMaterialStateMouseCursor.clickable;
 
     // 文本颜色
     var textColor = MaterialStateProperty.resolveWith((states) {

@@ -106,12 +106,7 @@ class _TRadioState<T> extends TFormItemValidateState<TRadio<T>> with TickerProvi
     var colorScheme = theme.colorScheme;
 
     // 鼠标
-    final effectiveMouseCursor = MaterialStateProperty.resolveWith<MouseCursor>((states) {
-      if (states.contains(MaterialState.disabled)) {
-        return SystemMouseCursors.noDrop;
-      }
-      return SystemMouseCursors.click;
-    });
+    const effectiveMouseCursor = TMaterialStateMouseCursor.clickable;
 
     // 选中颜色
     var checkColor = MaterialStateProperty.resolveWith((states) {

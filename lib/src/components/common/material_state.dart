@@ -2,6 +2,7 @@ import 'package:dartx/dartx.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
+import 'package:flutter/services.dart';
 
 /// 一个通用的按钮状态构建器
 class TMaterialStateButton extends StatefulWidget {
@@ -126,12 +127,7 @@ class _TMaterialStateButtonState extends State<TMaterialStateButton> with Materi
 
   @override
   Widget build(BuildContext context) {
-    var effectiveCursor = MaterialStateProperty.resolveWith((states) {
-      if (states.contains(MaterialState.disabled)) {
-        return SystemMouseCursors.noDrop;
-      }
-      return SystemMouseCursors.click;
-    });
+    var effectiveCursor = TMaterialStateMouseCursor.clickable;
 
     return FocusableActionDetector(
       mouseCursor: widget.cursor?.resolve(materialStates) ?? effectiveCursor.resolve(materialStates),
@@ -249,4 +245,65 @@ class TMaterialStateScope extends InheritedWidget {
     final TMaterialStateScope? scope = context.dependOnInheritedWidgetOfExactType<TMaterialStateScope>();
     return scope?._states;
   }
+}
+
+abstract class TMaterialStateMouseCursor extends MouseCursor implements MaterialStateProperty<MouseCursor> {
+  const TMaterialStateMouseCursor();
+  @override
+  MouseCursor resolve(Set<MaterialState> states);
+
+  @protected
+  @override
+  MouseCursorSession createSession(int device) {
+    return resolve(<MaterialState>{}).createSession(device);
+  }
+
+  /// A mouse cursor for clickable material widgets, which resolves differently
+  /// when the widget is disabled.
+  ///
+  /// By default this cursor resolves to [SystemMouseCursors.click]. If the widget is
+  /// disabled, the cursor resolves to [SystemMouseCursors.noDrop].
+  ///
+  /// This cursor is the default for many Material widgets.
+  static const TMaterialStateMouseCursor clickable = _EnabledAndDisabledMouseCursor(
+    enabledCursor: SystemMouseCursors.click,
+    disabledCursor: SystemMouseCursors.noDrop,
+    name: 'clickable',
+  );
+
+  /// A mouse cursor for material widgets related to text, which resolves differently
+  /// when the widget is disabled.
+  ///
+  /// By default this cursor resolves to [SystemMouseCursors.text]. If the widget is
+  /// disabled, the cursor resolves to [SystemMouseCursors.noDrop].
+  ///
+  /// This cursor is the default for many Material widgets.
+  static const TMaterialStateMouseCursor textable = _EnabledAndDisabledMouseCursor(
+    enabledCursor: SystemMouseCursors.text,
+    disabledCursor: SystemMouseCursors.noDrop,
+    name: 'textable',
+  );
+}
+
+class _EnabledAndDisabledMouseCursor extends TMaterialStateMouseCursor {
+  const _EnabledAndDisabledMouseCursor({
+    required this.enabledCursor,
+    required this.disabledCursor,
+    required this.name,
+  });
+
+  final MouseCursor enabledCursor;
+  final MouseCursor disabledCursor;
+  final String name;
+
+  @override
+  MouseCursor resolve(Set<MaterialState> states) {
+    if (states.contains(MaterialState.disabled)) {
+      return disabledCursor;
+    }
+    return enabledCursor;
+  }
+
+  @override
+  String get debugDescription => 'MaterialStateMouseCursor($name)';
 }

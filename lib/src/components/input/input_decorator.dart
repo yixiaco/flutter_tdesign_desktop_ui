@@ -243,7 +243,7 @@ class TRenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
 
   static BoxParentData _boxParentData(RenderBox box) => box.parentData! as BoxParentData;
 
-  EdgeInsets get contentPadding => padding as EdgeInsets;
+  EdgeInsets get contentPadding => padding as EdgeInsets? ?? EdgeInsets.zero;
 
   @override
   double computeMinIntrinsicWidth(double height) {
