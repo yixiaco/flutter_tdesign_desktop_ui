@@ -360,20 +360,23 @@ class _TInputBoxState extends State<TInputBox> {
         style: widget.placeholderStyle?.resolve(context.states) ?? widget.style,
       );
     }
-    return TDecorator(
-      input: context.child!,
-      textAlign: widget.textAlign,
-      forceLine: widget.forceLine,
-      direction: textDirection,
-      textBaseline: TextBaseline.alphabetic,
-      tips: widget.tips?.resolve(context.states),
-      prefix: widget.prefix?.resolve(context.states),
-      suffix: widget.suffix?.resolve(context.states),
-      padding: widget.padding?.resolve(context.states),
-      placeholder: placeholder,
-      container: Container(
-        decoration: widget.border?.resolve(context.states),
-        // duration: const Duration(milliseconds: 100),
+    return Container(
+      decoration: widget.border?.resolve(context.states),
+      child: TDecorator(
+        input: context.child!,
+        textAlign: widget.textAlign,
+        autoWidth: !widget.forceLine,
+        breakLine: false,
+        direction: textDirection,
+        textBaseline: TextBaseline.alphabetic,
+        // prefix: widget.prefix?.resolve(context.states),
+        suffix: widget.suffix?.resolve(context.states),
+        padding: widget.padding?.resolve(context.states),
+        placeholder: placeholder,
+        // container: Container(
+        //   decoration: widget.border?.resolve(context.states),
+        //   // duration: const Duration(milliseconds: 100),
+        // ),
       ),
     );
   }

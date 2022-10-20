@@ -190,19 +190,15 @@ class _TTagInputState extends TFormItemValidateState<TTagInput> {
               child: Wrap(
                 children: [
                   const Text('prefix'),
-                  ConstrainedBox(
-                    constraints: BoxConstraints(minWidth: 155),
-                    child: TInputBox(
-                      style: TextStyle(color: Colors.black),
-                      cursorColor: Colors.black,
-                      selectionColor: Colors.blue,
-                    ),
+                  TInput(
+                    inputConstraints: BoxConstraints(minWidth: 155),
+                    breakLine: true,
+                    autoWidth: true,
+                    suffix: Text('suffix'),
                   ),
                 ],
               ),
             ),
-            Text('suffix'),
-            Text('suffix'),
           ],
         ),
       ),

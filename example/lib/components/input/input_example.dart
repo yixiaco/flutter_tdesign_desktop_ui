@@ -10,6 +10,7 @@ class TInputExample extends StatelessWidget {
   Widget build(BuildContext context) {
     return const TSpace(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       direction: Axis.vertical,
       children: [
         TInput(
@@ -68,6 +69,8 @@ class TInputExample extends StatelessWidget {
           showClearIconOnEmpty: true,
           clearable: true,
           prefixLabels: [
+            TTag(closable: true, child: Text('12345')),
+            TTag(closable: true, child: Text('12345')),
             TTag(closable: true, child: Text('123456')),
             TTag(closable: true, child: Text('123456')),
             TTag(closable: true, child: Text('123456')),
@@ -78,11 +81,9 @@ class TInputExample extends StatelessWidget {
             TTag(closable: true, child: Text('123456')),
             TTag(closable: true, child: Text('123456')),
             TTag(closable: true, child: Text('123456')),
-            TTag(closable: true, child: Text('123456')),
-            TTag(closable: true, child: Text('123456')),
-            TTag(closable: true, child: Text('123456')),
-            TTag(closable: true, child: Text('123456')),
-            TTag(closable: true, child: Text('123456')),
+            TTag(closable: true, child: Text('12345')),
+            TTag(closable: true, child: Text('12345')),
+            TTag(closable: true, child: Text('12345')),
           ],
           suffix: Text('元'),
           prefixIcon: Icon(TIcons.time),
