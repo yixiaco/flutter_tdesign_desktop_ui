@@ -362,7 +362,7 @@ class _TInputBoxState extends State<TInputBox> {
     }
     return Container(
       decoration: widget.border?.resolve(context.states),
-      child: TDecorator(
+      child: TInputDecorator(
         input: context.child!,
         textAlign: widget.textAlign,
         autoWidth: !widget.forceLine,

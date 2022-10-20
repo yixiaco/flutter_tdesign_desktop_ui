@@ -11,16 +11,15 @@ enum TDecorationSlot {
   placeholder;
 }
 
-class TDecoratorParentData extends ContainerBoxParentData<RenderBox> {
+class _TDecoratorParentData extends ContainerBoxParentData<RenderBox> {
   TDecorationSlot? slot;
 
   @override
   String toString() => '${super.toString()}; slot=$slot';
 }
 
-class TDecoratorData extends ParentDataWidget<TDecoratorParentData> {
-  const TDecoratorData({
-    super.key,
+class _TDecoratorData extends ParentDataWidget<_TDecoratorParentData> {
+  const _TDecoratorData({
     required this.slot,
     required super.child,
   });
@@ -29,8 +28,8 @@ class TDecoratorData extends ParentDataWidget<TDecoratorParentData> {
 
   @override
   void applyParentData(RenderObject renderObject) {
-    assert(renderObject.parentData is TDecoratorParentData);
-    final TDecoratorParentData parentData = renderObject.parentData! as TDecoratorParentData;
+    assert(renderObject.parentData is _TDecoratorParentData);
+    final _TDecoratorParentData parentData = renderObject.parentData! as _TDecoratorParentData;
     bool needsLayout = false;
     if (parentData.slot != slot) {
       parentData.slot = slot;
@@ -45,7 +44,7 @@ class TDecoratorData extends ParentDataWidget<TDecoratorParentData> {
   }
 
   @override
-  Type get debugTypicalAncestorWidgetClass => TDecorator;
+  Type get debugTypicalAncestorWidgetClass => TInputDecorator;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -54,13 +53,9 @@ class TDecoratorData extends ParentDataWidget<TDecoratorParentData> {
   }
 }
 
-const String _kInputName = 'input';
-const String _kSuffixName = 'suffix';
-const String _kPlaceholderName = 'placeholder';
-const String _kPrefixStartName = 'prefix';
-
-class TDecorator extends MultiChildRenderObjectWidget {
-  TDecorator({
+/// 输入框装饰器
+class TInputDecorator extends MultiChildRenderObjectWidget {
+  TInputDecorator({
     super.key,
     this.prefix,
     this.suffix,
@@ -73,12 +68,12 @@ class TDecorator extends MultiChildRenderObjectWidget {
     required this.autoWidth,
     required this.breakLine,
   }) : super(children: [
-          TDecoratorData(slot: TDecorationSlot.input, child: input),
-          if (placeholder != null) TDecoratorData(slot: TDecorationSlot.placeholder, child: placeholder),
-          if (suffix != null) TDecoratorData(slot: TDecorationSlot.suffix, child: suffix),
+          _TDecoratorData(slot: TDecorationSlot.input, child: input),
+          if (placeholder != null) _TDecoratorData(slot: TDecorationSlot.placeholder, child: placeholder),
+          if (suffix != null) _TDecoratorData(slot: TDecorationSlot.suffix, child: suffix),
           if (prefix != null && prefix.isNotEmpty)
             ...List.generate(
-                prefix.length, (index) => TDecoratorData(slot: TDecorationSlot.prefix, child: prefix[index])),
+                prefix.length, (index) => _TDecoratorData(slot: TDecorationSlot.prefix, child: prefix[index])),
         ]);
 
   /// 前缀
@@ -112,34 +107,9 @@ class TDecorator extends MultiChildRenderObjectWidget {
   /// 是否换行
   final bool breakLine;
 
-  // @override
-  // Iterable<String> get slots => {
-  //       _kSuffixName,
-  //       _kInputName,
-  //       _kPlaceholderName,
-  //       if (prefix != null) ...List.generate(prefix!.length, (index) => '$_kPrefixStartName$index')
-  //     };
-  //
-  // @override
-  // Widget? childForSlot(String slot) {
-  //   switch (slot) {
-  //     case _kInputName:
-  //       return input;
-  //     case _kSuffixName:
-  //       return suffix;
-  //     case _kPlaceholderName:
-  //       return placeholder;
-  //   }
-  //   if (slot.startsWith(_kPrefixStartName)) {
-  //     var index = int.parse(RegExp('$_kPrefixStartName(\\d+)').firstMatch(slot)!.group(1)!);
-  //     return prefix![index];
-  //   }
-  //   return null;
-  // }
-
   @override
-  TRenderDecoration createRenderObject(BuildContext context) {
-    return TRenderDecoration(
+  RenderTDecoration createRenderObject(BuildContext context) {
+    return RenderTDecoration(
       prefixLength: prefix?.length ?? 0,
       textAlign: textAlign,
       textBaseline: textBaseline,
@@ -151,7 +121,7 @@ class TDecorator extends MultiChildRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(BuildContext context, TRenderDecoration renderObject) {
+  void updateRenderObject(BuildContext context, RenderTDecoration renderObject) {
     renderObject
       ..prefixLength = prefix?.length ?? 0
       ..direction = direction
@@ -163,11 +133,12 @@ class TDecorator extends MultiChildRenderObjectWidget {
   }
 }
 
-class TRenderDecoration extends RenderBox with ContainerRenderObjectMixin<RenderBox, TDecoratorParentData>,
-    RenderBoxContainerDefaultsMixin<RenderBox, TDecoratorParentData>,
-    DebugOverflowIndicatorMixin {
-
-  TRenderDecoration({
+class RenderTDecoration extends RenderBox
+    with
+        ContainerRenderObjectMixin<RenderBox, _TDecoratorParentData>,
+        RenderBoxContainerDefaultsMixin<RenderBox, _TDecoratorParentData>,
+        DebugOverflowIndicatorMixin {
+  RenderTDecoration({
     EdgeInsetsGeometry? padding,
     required int prefixLength,
     required TextAlign textAlign,
@@ -186,8 +157,8 @@ class TRenderDecoration extends RenderBox with ContainerRenderObjectMixin<Render
   RenderBox? _findRenderBox(TDecorationSlot slot) {
     RenderBox? child = firstChild;
     while (child != null) {
-      var parentData = child.parentData as TDecoratorParentData;
-      if(parentData.slot == slot) {
+      var parentData = child.parentData as _TDecoratorParentData;
+      if (parentData.slot == slot) {
         return child;
       }
       child = parentData.nextSibling;
@@ -203,8 +174,8 @@ class TRenderDecoration extends RenderBox with ContainerRenderObjectMixin<Render
     List<RenderBox> boxes = [];
     RenderBox? child = firstChild;
     while (child != null) {
-      var parentData = child.parentData as TDecoratorParentData;
-      if(parentData.slot == TDecorationSlot.prefix) {
+      var parentData = child.parentData as _TDecoratorParentData;
+      if (parentData.slot == TDecorationSlot.prefix) {
         boxes.add(child);
       }
       child = parentData.nextSibling;
@@ -213,17 +184,6 @@ class TRenderDecoration extends RenderBox with ContainerRenderObjectMixin<Render
   }
 
   RenderBox? get suffix => _findRenderBox(TDecorationSlot.suffix);
-
-  // The returned list is ordered for hit testing.
-  // @override
-  // Iterable<RenderBox> get children {
-  //   return <RenderBox>[
-  //     if (input != null) input!,
-  //     ...prefixes,
-  //     if (suffix != null) suffix!,
-  //     if (placeholder != null) placeholder!,
-  //   ];
-  // }
 
   /// prefix数量
   int get prefixLength => _prefixLength;
@@ -312,8 +272,8 @@ class TRenderDecoration extends RenderBox with ContainerRenderObjectMixin<Render
 
   @override
   void setupParentData(RenderBox child) {
-    if(child.parentData is! TDecoratorParentData) {
-      child.parentData = TDecoratorParentData();
+    if (child.parentData is! _TDecoratorParentData) {
+      child.parentData = _TDecoratorParentData();
     }
   }
 
@@ -414,36 +374,35 @@ class TRenderDecoration extends RenderBox with ContainerRenderObjectMixin<Render
   @override
   double computeMinIntrinsicHeight(double width) {
     width = math.max(width - contentPadding.horizontal, 0.0);
-    double prefixHeight = 0; //_minHeight(prefix, width);
-    double prefixWidth = 0; //_minWidth(prefix, prefixHeight);
+    double prefixHeight = 0;
+    double prefixWidth = 0;
     final double suffixHeight = _minHeight(suffix, width);
     final double suffixWidth = _minWidth(suffix, suffixHeight);
     if (breakLine) {
       double cpw = 0;
-      double? cph;
       double availableWidth = width - suffixWidth;
-      for (var prefix in prefixes) {
+      List<double> levelHeight = [0];
+      var level = 0;
+      for (int i = 0; i < prefixes.length; i++) {
+        var prefix = prefixes[i];
         var ph = _minHeight(prefix, availableWidth);
         var pw = _minWidth(prefix, ph);
-        cph ??= ph;
-        if (cpw + pw > availableWidth) {
-          prefixHeight += cph + ph;
-          prefixWidth = math.max(prefixWidth, cpw);
+        if (i > 0 && cpw + pw > availableWidth) {
+          cpw = pw;
+          level++;
+          levelHeight.add(ph);
           cpw = pw;
         } else {
           cpw += pw;
-          prefixWidth = math.max(prefixWidth, cpw);
+          levelHeight[level] = math.max(ph, levelHeight[level]);
         }
       }
-      double inputHeight;
-      if (availableWidth - cpw - contentPadding.horizontal < 0) {
-        inputHeight = _lineHeight(availableWidth, <RenderBox?>[input, placeholder]);
-      } else {
-        inputHeight = _lineHeight(availableWidth - cpw - contentPadding.horizontal, <RenderBox?>[input, placeholder]);
-      }
+      prefixHeight = levelHeight.reduce((value, element) => value + element);
+      double inputHeight =
+          _lineHeight(availableWidth - cpw - contentPadding.horizontal, <RenderBox?>[input, placeholder]);
 
-      final double contentHeight = contentPadding.top + inputHeight + contentPadding.bottom;
-      final double containerHeight = <double>[contentHeight].reduce(math.max);
+      final double contentHeight = contentPadding.vertical + inputHeight;
+      final double containerHeight = <double>[contentHeight, prefixHeight, suffixHeight].reduce(math.max);
       const double minContainerHeight = 20;
       return math.max(containerHeight, minContainerHeight);
     } else {
@@ -489,13 +448,7 @@ class TRenderDecoration extends RenderBox with ContainerRenderObjectMixin<Render
       return 0.0;
     }
     box.layout(constraints, parentUsesSize: true);
-    // Since internally, all layout is performed against the alphabetic baseline,
-    // (eg, ascents/descents are all relative to alphabetic, even if the font is
-    // an ideographic or hanging font), we should always obtain the reference
-    // baseline from the alphabetic baseline. The ideographic baseline is for
-    // use post-layout and is derived from the alphabetic baseline combined with
-    // the font metrics.
-    final double baseline = box.getDistanceToBaseline(TextBaseline.alphabetic)!;
+    final double baseline = box.getDistanceToBaseline(textBaseline)!;
 
     assert(() {
       if (baseline >= 0) {
@@ -526,159 +479,32 @@ class TRenderDecoration extends RenderBox with ContainerRenderObjectMixin<Render
         'TInputBox that contains it.',
       );
     }
+    var input = this.input;
+    var placeholder = this.placeholder;
+    var suffix = this.suffix;
+    var prefixes = this.prefixes;
 
     final Map<RenderBox?, double> boxToBaseline = <RenderBox?, double>{};
-    final BoxConstraints boxConstraints = constraints.loosen();
+    var result = _decoratorLayout(boxToBaseline);
+    double inputWidth = result.inputWidth;
+    bool isMaxWidth = result.isMaxWidth;
+    double maxHeight = result.maxHeight;
+    double maxWidth = result.maxWidth;
+    int level = result.level;
+    List<double> levelHeight = result.levelHeight;
+    var availableWidth = result.availableWidth;
 
-    for (var prefix in prefixes) {
-      boxToBaseline[prefix] = _layoutLineBox(prefix, boxConstraints);
-    }
-    boxToBaseline[suffix] = _layoutLineBox(suffix, boxConstraints);
-    var suffixWidth = _boxSize(suffix).width;
-    var availableWidth = constraints.maxWidth - suffixWidth;
+    // final double inputInternalBaseline = math.max(
+    //   boxToBaseline[input]!,
+    //   boxToBaseline[placeholder]!,
+    // );
 
-    double inputWidth = 0;
-    double otherWidth = 0;
-    bool isMaxWidth = false;
-    double maxHeight = 0;
-    double maxWidth = 0;
-    double cpw = 0;
-    var level = 0;
-    List<double> levelHeight = [0];
-    // 计算input高度
-    void computedInputLayout() {
-      if (autoWidth) {
-        // 自动宽度
-        var minInputWidth = math.max(0.0, constraints.minWidth - otherWidth);
-        var maxInputWidth = math.max(0.0, constraints.maxWidth - otherWidth);
-        // 换行并且自动宽度
-        boxToBaseline[placeholder] = _layoutLineBox(
-          placeholder,
-          boxConstraints.copyWith(
-            minWidth: 0,
-            maxWidth: maxInputWidth,
-            minHeight: math.max(0.0, constraints.minHeight),
-          ),
-        );
-        boxToBaseline[input] = _layoutLineBox(
-          input,
-          boxConstraints.copyWith(
-            minWidth: math.max(_boxSize(placeholder).width, minInputWidth),
-            maxWidth: maxInputWidth,
-            minHeight: math.max(0.0, constraints.minHeight),
-          ),
-        );
-        inputWidth = _boxSize(input).width;
-      } else {
-        isMaxWidth = true;
-        // 全宽
-        inputWidth = math.max(
-          0.0,
-          constraints.maxWidth - (contentPadding.horizontal + otherWidth),
-        );
-        boxToBaseline[placeholder] = _layoutLineBox(
-          placeholder,
-          boxConstraints.copyWith(
-            minWidth: 0,
-            maxWidth: inputWidth,
-          ),
-        );
-        boxToBaseline[input] = _layoutLineBox(
-          input,
-          boxConstraints.copyWith(
-            minWidth: inputWidth,
-            maxWidth: inputWidth,
-          ),
-        );
-      }
-    }
-
-    // 计算prefix高度、宽度
+    double cpw0 = 0;
+    double offsetTop = 0;
+    double currentRowHeight = 0;
     if (breakLine) {
-      for (int i = 0; i < prefixes.length; i++) {
-        var pw = _boxSize(prefixes[i]).width;
-        var ph = _boxSize(prefixes[i]).height;
-        if (i > 0 && pw + cpw > availableWidth) {
-          // 换行
-          level++;
-          isMaxWidth = true;
-          levelHeight.add(ph);
-          maxWidth = math.max(maxWidth, pw);
-          cpw = pw;
-        } else {
-          levelHeight[level] = math.max(ph, levelHeight[level]);
-          // 未换行
-          cpw += pw;
-          maxWidth = math.max(maxWidth, cpw);
-        }
-      }
-      otherWidth = contentPadding.horizontal + cpw + suffixWidth;
-      if (otherWidth > availableWidth) {
-        // 换行
-        otherWidth = contentPadding.horizontal + suffixWidth;
-        computedInputLayout();
-        cpw = inputWidth;
-        maxWidth = math.max(cpw, maxWidth);
-      } else {
-        computedInputLayout();
-        cpw += inputWidth;
-        maxWidth = math.max(cpw, maxWidth);
-      }
-      maxWidth += suffixWidth;
-
-      // The field can be occupied by a hint or by the input itself
-      final double placeholderHeight = placeholder == null ? 0 : placeholder!.size.height;
-      final double inputDirectHeight = input == null ? 0 : input!.size.height;
-      final double inputHeight = math.max(placeholderHeight, inputDirectHeight);
-
-      levelHeight[level] = math.max(contentPadding.vertical + inputHeight, levelHeight[level]);
-      // 将多行prefix高度累加
-      maxHeight = levelHeight.reduce((value, element) => value + element);
-
-      // Calculate the height of the input text container.
-      final double suffixHeight = suffix == null ? 0 : suffix!.size.height;
-      final double contentHeight = math.max(maxHeight, suffixHeight);
-
-      final double maxContainerHeight = boxConstraints.maxHeight;
-      maxHeight = math.min(contentHeight, maxContainerHeight);
-    } else {
-      for (var prefix in prefixes) {
-        var pw = _boxSize(prefix).width;
-        var ph = _boxSize(prefix).height;
-        maxHeight = math.max(ph, maxHeight);
-        maxWidth += pw;
-      }
-      maxWidth += suffixWidth;
-      otherWidth = contentPadding.horizontal + maxWidth;
-      computedInputLayout();
-      // The field can be occupied by a hint or by the input itself
-      final double placeholderHeight = placeholder == null ? 0 : placeholder!.size.height;
-      final double inputDirectHeight = input == null ? 0 : input!.size.height;
-      final double inputHeight = math.max(placeholderHeight, inputDirectHeight);
-      maxWidth += inputWidth;
-
-      levelHeight[level] = math.max(contentPadding.vertical + inputHeight, levelHeight[level]);
-      // 将多行prefix高度累加
-      maxHeight = levelHeight.reduce((value, element) => value + element);
-
-      // Calculate the height of the input text container.
-      final double suffixHeight = suffix == null ? 0 : suffix!.size.height;
-      final double contentHeight = math.max(maxHeight, suffixHeight);
-
-      final double maxContainerHeight = boxConstraints.maxHeight;
-      maxHeight = math.min(contentHeight, maxContainerHeight);
-    }
-
-    final double inputInternalBaseline = math.max(
-      boxToBaseline[input]!,
-      boxToBaseline[placeholder]!,
-    );
-
-    if (breakLine) {
-      double cpw0 = 0;
       int level = 0;
       double offsetLeft;
-      double offsetTop = 0;
       for (int i = 0; i < prefixes.length; i++) {
         var prefix = prefixes[i];
         var width = prefix.size.width;
@@ -697,74 +523,257 @@ class TRenderDecoration extends RenderBox with ContainerRenderObjectMixin<Render
         } else {
           offsetTop = levelHeight.sublist(0, level).reduce((value, element) => value + element);
         }
-        _boxParentData(prefix).offset = Offset(offsetLeft, offsetTop);
+        currentRowHeight = levelHeight[level];
+        _boxParentData(prefix).offset = Offset(offsetLeft, offsetTop + (currentRowHeight - prefix.size.height) / 2 + contentPadding.top);
       }
       if (input != null) {
-        _boxParentData(input!).offset =
-            Offset(cpw0, offsetTop + contentPadding.top + inputInternalBaseline - boxToBaseline[input]!);
+        if (cpw0 + inputWidth + contentPadding.horizontal > availableWidth) {
+          level++;
+          cpw0 = 0;
+          offsetTop = levelHeight.sublist(0, level).reduce((value, element) => value + element);
+        }
+        currentRowHeight = levelHeight[level];
+        if(maxHeight < constraints.minHeight) {
+          currentRowHeight = constraints.minHeight;
+        }
+        _boxParentData(input).offset = Offset(cpw0 + contentPadding.left,
+            offsetTop + (currentRowHeight - (contentPadding.top + input.size.height)) / 2);
+      }
+    } else {
+      currentRowHeight = levelHeight[level];
+      for (int i = 0; i < prefixes.length; i++) {
+        var prefix = prefixes[i];
+        _boxParentData(prefix).offset = Offset(cpw0, (currentRowHeight - prefix.size.height) / 2);
+        cpw0 += prefix.size.width;
+      }
+      if(maxHeight < constraints.minHeight) {
+        currentRowHeight = constraints.minHeight;
+      }
+      if (input != null) {
+        _boxParentData(input).offset =
+            Offset(cpw0 + contentPadding.left, (currentRowHeight - input.size.height) / 2 + contentPadding.top);
       }
     }
-
-    /// 旧代码
-    //
-    //
-    //
-    //
-    // double width = contentPadding.horizontal;
-    // double height = containerHeight;
-    // double leftOffset = (prefix?.size.width ?? 0) + contentPadding.left;
-    // if (prefix != null) {
-    //   width += _boxSize(prefix).width;
-    //   _boxParentData(prefix!).offset = Offset(0, (containerHeight - _boxSize(prefix).height) / 2);
-    // }
-    // if (input != null) {
-    //   width += _boxSize(input).width;
-    //   _boxParentData(input!).offset =
-    //       Offset(leftOffset, contentPadding.top + inputInternalBaseline - boxToBaseline[input]!);
-    // }
-    // if (placeholder != null) {
-    //   double offsetLeft;
-    //   switch (textAlign) {
-    //     left:
-    //     case TextAlign.left:
-    //       offsetLeft = leftOffset;
-    //       break;
-    //     right:
-    //     case TextAlign.right:
-    //       offsetLeft = leftOffset + inputWidth - _boxSize(placeholder).width;
-    //       break;
-    //     case TextAlign.center:
-    //       offsetLeft = leftOffset + (inputWidth - _boxSize(placeholder).width) / 2;
-    //       break;
-    //     case TextAlign.justify:
-    //       offsetLeft = leftOffset;
-    //       break;
-    //     case TextAlign.start:
-    //       switch (direction) {
-    //         case TextDirection.rtl:
-    //           continue right;
-    //         case TextDirection.ltr:
-    //           continue left;
-    //       }
-    //     case TextAlign.end:
-    //       switch (direction) {
-    //         case TextDirection.rtl:
-    //           continue left;
-    //         case TextDirection.ltr:
-    //           continue right;
-    //       }
-    //   }
-    //   _boxParentData(placeholder!).offset =
-    //       Offset(offsetLeft, contentPadding.top + inputInternalBaseline - boxToBaseline[placeholder]!);
-    // }
-    // leftOffset += (input?.size.width ?? 0) + contentPadding.right;
+    if (placeholder != null) {
+      double offsetLeft;
+      switch (textAlign) {
+        left:
+        case TextAlign.left:
+          offsetLeft = cpw0;
+          break;
+        right:
+        case TextAlign.right:
+          offsetLeft = cpw0 + inputWidth - _boxSize(placeholder).width;
+          break;
+        case TextAlign.center:
+          offsetLeft = cpw0 + (inputWidth - _boxSize(placeholder).width) / 2;
+          break;
+        case TextAlign.justify:
+          offsetLeft = cpw0;
+          break;
+        case TextAlign.start:
+          switch (direction) {
+            case TextDirection.rtl:
+              continue right;
+            case TextDirection.ltr:
+              continue left;
+          }
+        case TextAlign.end:
+          switch (direction) {
+            case TextDirection.rtl:
+              continue left;
+            case TextDirection.ltr:
+              continue right;
+          }
+      }
+      _boxParentData(placeholder).offset = Offset(offsetLeft + contentPadding.left,
+          offsetTop + (currentRowHeight - placeholder.size.height) / 2 + contentPadding.top);
+    }
+    if (isMaxWidth) {
+      maxWidth = constraints.maxWidth;
+    }
     if (suffix != null) {
-      _boxParentData(suffix!).offset = Offset(
+      _boxParentData(suffix).offset = Offset(
         maxWidth - _boxSize(suffix).width,
-        (maxHeight - _boxSize(suffix).height) / 2,
+        (constraints.constrainHeight(maxHeight) - _boxSize(suffix).height) / 2,
       );
     }
     size = Size(maxWidth, constraints.constrainHeight(maxHeight));
+  }
+
+  /// 计算布局宽高
+  _TDecoratorLayoutResult _decoratorLayout(Map<RenderBox?, double> boxToBaseline) {
+    var input = this.input;
+    var placeholder = this.placeholder;
+    var suffix = this.suffix;
+    var prefixes = this.prefixes;
+
+    final BoxConstraints boxConstraints = constraints.loosen();
+
+    boxToBaseline[suffix] = _layoutLineBox(suffix, boxConstraints);
+    var suffixWidth = _boxSize(suffix).width;
+    var availableWidth = constraints.maxWidth - suffixWidth;
+
+    double inputWidth = 0;
+    double otherWidth = 0;
+    bool isMaxWidth = false;
+    double maxHeight = 0;
+    double maxWidth = 0;
+    double cpw = 0;
+    var level = 0;
+    List<double> levelHeight = [0];
+    // 计算input高度
+    void computedInputLayout({double? min, double? max}) {
+      if (autoWidth) {
+        // 自动宽度
+        var minInputWidth = math.max(0.0, min ?? constraints.minWidth - otherWidth);
+        var maxInputWidth = math.max(0.0, max ?? availableWidth - contentPadding.horizontal);
+        // 换行并且自动宽度
+        boxToBaseline[placeholder] = _layoutLineBox(
+          placeholder,
+          boxConstraints.copyWith(
+            minWidth: 0,
+            maxWidth: maxInputWidth,
+          ),
+        );
+        boxToBaseline[input] = _layoutLineBox(
+          input,
+          boxConstraints.copyWith(
+            minWidth: math.max(_boxSize(placeholder).width, minInputWidth),
+            maxWidth: maxInputWidth,
+          ),
+        );
+        inputWidth = _boxSize(input).width;
+      } else {
+        isMaxWidth = true;
+        // 全宽
+        inputWidth = math.max(
+          0.0,
+          max ?? constraints.maxWidth - otherWidth,
+        );
+        boxToBaseline[placeholder] = _layoutLineBox(
+          placeholder,
+          boxConstraints.copyWith(
+            minWidth: 0,
+            maxWidth: inputWidth,
+          ),
+        );
+        boxToBaseline[input] = _layoutLineBox(
+          input,
+          boxConstraints.copyWith(
+            minWidth: 0,
+            maxWidth: inputWidth,
+          ),
+        );
+      }
+    }
+
+    // 计算prefix高度、宽度
+    if (breakLine) {
+      for (var prefix in prefixes) {
+        boxToBaseline[prefix] = _layoutLineBox(prefix, boxConstraints);
+      }
+      for (int i = 0; i < prefixes.length; i++) {
+        var pw = _boxSize(prefixes[i]).width;
+        var ph = _boxSize(prefixes[i]).height;
+        if (i > 0 && pw + cpw > availableWidth) {
+          // 换行
+          level++;
+          isMaxWidth = true;
+          levelHeight.add(ph);
+          maxWidth = math.max(maxWidth, pw);
+          cpw = pw;
+        } else {
+          levelHeight[level] = math.max(ph, levelHeight[level]);
+          // 未换行
+          cpw += pw;
+          maxWidth = math.max(maxWidth, cpw);
+        }
+      }
+      otherWidth = contentPadding.horizontal + cpw + suffixWidth;
+      if (contentPadding.horizontal + cpw > availableWidth) {
+        // 换行
+        otherWidth = contentPadding.horizontal + suffixWidth;
+        computedInputLayout();
+      } else {
+        computedInputLayout();
+      }
+      if (contentPadding.horizontal + cpw + inputWidth > availableWidth) {
+        // 换行
+        cpw = inputWidth + contentPadding.horizontal;
+        maxWidth = math.max(cpw, maxWidth);
+
+        // The field can be occupied by a hint or by the input itself
+        final double placeholderHeight = placeholder == null ? 0 : placeholder.size.height;
+        final double inputDirectHeight = input == null ? 0 : input.size.height;
+        final double inputHeight = math.max(placeholderHeight, inputDirectHeight);
+
+        level++;
+
+        levelHeight.add(contentPadding.vertical + inputHeight);
+      } else {
+        cpw += inputWidth + contentPadding.horizontal;
+        maxWidth = math.max(cpw, maxWidth);
+
+        // 该字段可以由提示或输入本身占用
+        final double placeholderHeight = placeholder == null ? 0 : placeholder.size.height;
+        final double inputDirectHeight = input == null ? 0 : input.size.height;
+        // 计算输入文本容器的高度。
+        final double inputHeight = math.max(placeholderHeight, inputDirectHeight);
+
+        levelHeight[level] = math.max(contentPadding.vertical + inputHeight, levelHeight[level]);
+      }
+      maxWidth += suffixWidth;
+
+      // 将多行prefix高度累加
+      maxHeight = levelHeight.reduce((value, element) => value + element);
+
+      final double suffixHeight = suffix == null ? 0 : suffix.size.height;
+      final double contentHeight = math.max(maxHeight, suffixHeight);
+
+      final double maxContainerHeight = boxConstraints.maxHeight;
+      maxHeight = math.min(contentHeight, maxContainerHeight);
+    } else {
+      for (var prefix in prefixes) {
+        boxToBaseline[prefix] = _layoutLineBox(
+          prefix,
+          boxConstraints.copyWith(maxWidth: math.max(0, availableWidth - maxWidth - contentPadding.horizontal - 40)),
+        );
+        var pw = _boxSize(prefix).width;
+        var ph = _boxSize(prefix).height;
+        maxHeight = math.max(ph, maxHeight);
+        maxWidth += pw;
+        levelHeight[level] = math.max(levelHeight[level], ph);
+      }
+      maxWidth += suffixWidth;
+      otherWidth = contentPadding.horizontal + maxWidth;
+      computedInputLayout(max: constraints.maxWidth - otherWidth);
+      // 该字段可以由提示或输入本身占用
+      final double placeholderHeight = placeholder == null ? 0 : placeholder.size.height;
+      final double inputDirectHeight = input == null ? 0 : input.size.height;
+      // 计算输入文本容器的高度。
+      final double inputHeight = math.max(placeholderHeight, inputDirectHeight);
+      maxWidth += inputWidth + contentPadding.horizontal;
+
+      levelHeight[level] = math.max(contentPadding.vertical + inputHeight, levelHeight[level]);
+      // 将多行prefix高度累加
+      maxHeight = levelHeight.reduce((value, element) => value + element);
+
+      final double suffixHeight = suffix == null ? 0 : suffix.size.height;
+      final double contentHeight = math.max(maxHeight, suffixHeight);
+
+      final double maxContainerHeight = boxConstraints.maxHeight;
+      maxHeight = math.min(contentHeight, maxContainerHeight);
+    }
+    return _TDecoratorLayoutResult(
+      isMaxWidth: isMaxWidth,
+      inputWidth: inputWidth,
+      levelHeight: levelHeight,
+      maxWidth: maxWidth,
+      maxHeight: maxHeight,
+      availableWidth: availableWidth,
+      level: level,
+    );
   }
 
   @override
@@ -790,4 +799,24 @@ class TRenderDecoration extends RenderBox with ContainerRenderObjectMixin<Render
   bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
     return defaultHitTestChildren(result, position: position);
   }
+}
+
+class _TDecoratorLayoutResult {
+  final bool isMaxWidth;
+  final double inputWidth;
+  final List<double> levelHeight;
+  final double maxWidth;
+  final double maxHeight;
+  final int level;
+  final double availableWidth;
+
+  const _TDecoratorLayoutResult({
+    required this.isMaxWidth,
+    required this.inputWidth,
+    required this.levelHeight,
+    required this.maxWidth,
+    required this.maxHeight,
+    required this.level,
+    required this.availableWidth,
+  });
 }

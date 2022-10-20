@@ -268,7 +268,7 @@ class _TInputNumberState<T> extends TFormItemValidateState<TInputNumber<T>> {
             TButton(
               disabled: _disabled || (_max != null && _current >= _max!),
               style: buttonStyle,
-              radius: BorderRadius.zero,
+              radius: const BorderRadius.only(topRight: Radius.circular(2)),
               softWrap: true,
               onPressed: _handleAdd,
               child: _buildRightIcon(colorScheme, size, theme, TIcons.chevronUp),
@@ -277,7 +277,7 @@ class _TInputNumberState<T> extends TFormItemValidateState<TInputNumber<T>> {
             TButton(
               disabled: _disabled || (_min != null && _current <= _min!),
               style: buttonStyle,
-              radius: BorderRadius.zero,
+              radius: const BorderRadius.only(bottomRight: Radius.circular(2)),
               softWrap: true,
               onPressed: _handleRemove,
               child: _buildRightIcon(colorScheme, size, theme, TIcons.chevronDown),
@@ -337,7 +337,7 @@ class _TInputNumberState<T> extends TFormItemValidateState<TInputNumber<T>> {
         autoWidth: widget.autoWidth,
         tips: widget.inputTips,
         scrollController: widget.scrollController,
-        suffixPadding: widget.theme == TInputNumberTheme.column ? const EdgeInsets.only(right: 1) : null,
+        suffixPadding: widget.theme == TInputNumberTheme.column ? const EdgeInsets.only(right: 0) : null,
       ),
     );
 

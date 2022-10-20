@@ -583,14 +583,10 @@ class _TInputState extends TFormItemValidateState<TInput> {
               }
 
               if (prefixList.isNotEmpty) {
-                prefixIcon = Padding(
-                  padding: widget.prefixPadding ?? EdgeInsets.only(left: TVar.spacer, right: 2),
-                  child: TSpace(
-                    breakLine: true,
-                    spacing: 2,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: prefixList,
-                  ),
+                prefixIcon = TSpace(
+                  spacing: 2,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: prefixList,
                 );
               }
               return _buildRowDecoration(border, decorationContext, prefixIcon, decorationContext.states, colorScheme,
@@ -649,8 +645,9 @@ class _TInputState extends TFormItemValidateState<TInput> {
     var textDirection = Directionality.of(context);
 
     return Container(
+      constraints: BoxConstraints(minHeight: _inputHeight(size)),
       decoration: border.resolve(decorationContext.states),
-      child: TDecorator(
+      child: TInputDecorator(
         breakLine: true,
         autoWidth: widget.autoWidth,
         direction: textDirection,
@@ -659,42 +656,9 @@ class _TInputState extends TFormItemValidateState<TInput> {
         suffix: suffixIcon,
         padding: EdgeInsets.symmetric(horizontal: TVar.spacer),
         placeholder: placeholder,
-        input: ConstrainedBox(
-          constraints: BoxConstraints(minWidth: _inputHeight(size)),
-          child: decorationContext.child!,
-        ),
+        input: decorationContext.child!,
         prefix: prefixList,
       ),
-      // child: Row(
-      //   mainAxisSize: MainAxisSize.min,
-      //   children: [
-      //     Flexible(
-      //       child: Padding(
-      //         padding: EdgeInsets.only(left: TVar.spacerS),
-      //         child: Wrap(
-      //           spacing: 2,
-      //           crossAxisAlignment: WrapCrossAlignment.center,
-      //           children: [
-      //             if (prefixList.isNotEmpty) ...prefixList,
-      //             Padding(
-      //               padding: EdgeInsets.symmetric(
-      //                 horizontal: TVar.spacer,
-      //               ),
-      //               child: Stack(children: [
-      //                 Container(
-      //                   constraints: widget.inputConstraints,
-      //                   child: decorationContext.child!,
-      //                 ),
-      //                 if (placeholder != null) placeholder,
-      //               ]),
-      //             ),
-      //           ],
-      //         ),
-      //       ),
-      //     ),
-      //     if (suffixIcon != null) suffixIcon
-      //   ],
-      // ),
     );
   }
 
@@ -707,27 +671,23 @@ class _TInputState extends TFormItemValidateState<TInput> {
       TComponentSize size,
       Widget? placeholder,
       Widget? suffixIcon) {
+    var textDirection = Directionality.of(context);
     return Container(
       height: _inputHeight(size),
       decoration: border.resolve(decorationContext.states),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (prefixIcon != null) prefixIcon,
-          Flexible(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: TVar.spacer),
-              child: Stack(children: [
-                Container(
-                  constraints: widget.inputConstraints,
-                  child: decorationContext.child!,
-                ),
-                if (placeholder != null) placeholder,
-              ]),
-            ),
-          ),
-          if (suffixIcon != null) suffixIcon
-        ],
+      child: TInputDecorator(
+        breakLine: false,
+        autoWidth: widget.autoWidth,
+        direction: textDirection,
+        textAlign: widget.align,
+        textBaseline: TextBaseline.alphabetic,
+        suffix: suffixIcon,
+        padding: EdgeInsets.symmetric(horizontal: TVar.spacer),
+        placeholder: placeholder,
+        input: decorationContext.child!,
+        prefix: prefixIcon != null
+            ? [TSingleChildScrollView(scrollDirection: Axis.horizontal, showScroll: false, child: prefixIcon)]
+            : [],
       ),
     );
   }
