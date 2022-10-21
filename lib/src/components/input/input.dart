@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
@@ -42,6 +43,8 @@ class TInput extends TFormItemValidate {
     this.onEnter,
     this.onFocus,
     this.onKeyDown,
+    this.onKeyPress,
+    this.onKeyUp,
     this.align = TextAlign.left,
     this.onMouseenter,
     this.onMouseleave,
@@ -55,6 +58,7 @@ class TInput extends TFormItemValidate {
     this.format,
     this.inputConstraints,
     this.breakLine = false,
+    this.padding,
   }) : super(key: key, name: name, focusNode: focusNode);
 
   /// 控制正在编辑的文本。
@@ -137,6 +141,12 @@ class TInput extends TFormItemValidate {
   /// 键盘按下时触发
   final TInputKeyEvent? onKeyDown;
 
+  /// 按下字符键时触发（keydown -> keypress -> keyup）
+  final TInputKeyEvent? onKeyPress;
+
+  /// 释放键盘时触发
+  final TInputKeyEvent? onKeyUp;
+
   /// 文本对齐方式
   final TextAlign align;
 
@@ -175,6 +185,9 @@ class TInput extends TFormItemValidate {
 
   /// 可换行，前缀会、输入框在[Wrap]包装下换行，后缀单独居中显示
   final bool breakLine;
+
+  /// 边框内边距
+  final EdgeInsetsGeometry? padding;
 
   @override
   TFormItemValidateState createState() => _TInputState();
@@ -297,6 +310,8 @@ class _TInputState extends TFormItemValidateState<TInput> {
   TextEditingController get effectiveController =>
       widget.controller ?? (_controller ??= TextEditingController(text: widget.defaultValue));
 
+  late ScrollController _prefixScrollController;
+
   /// 是否拥有焦点
   bool _isFocused = false;
 
@@ -306,7 +321,7 @@ class _TInputState extends TFormItemValidateState<TInput> {
   /// 是否临时查看密码
   bool look = false;
 
-  late ValueNotifier<bool> showClearIcon;
+  late ValueNotifier<bool> _showClearIcon;
 
   /// 缓存旧字符串
   String? _text;
@@ -317,24 +332,34 @@ class _TInputState extends TFormItemValidateState<TInput> {
   @override
   void initState() {
     _text = effectiveController.text;
-    showClearIcon = ValueNotifier(false);
+    _showClearIcon = ValueNotifier(false);
     effectiveFocusNode.onKeyEvent = _onKeyEvent;
     effectiveFocusNode.addListener(_focusChange);
     effectiveController.addListener(_textChange);
     _formatController =
         TextEditingController(text: widget.format?.call(effectiveController.text) ?? effectiveController.text);
+    _prefixScrollController = ScrollController();
     super.initState();
   }
 
   KeyEventResult _onKeyEvent(FocusNode node, KeyEvent event) {
-    widget.onKeyDown?.call(effectiveController.text, event);
+    if (event is KeyDownEvent) {
+      widget.onKeyDown?.call(effectiveController.text, event);
+      if (event.logicalKey.keyId >= 97 && event.logicalKey.keyId <= 122) {
+        widget.onKeyPress?.call(effectiveController.text, event);
+      }
+    }
+    if (event is KeyUpEvent) {
+      widget.onKeyUp?.call(effectiveController.text, event);
+    }
     return KeyEventResult.ignored;
   }
 
   @override
   void dispose() {
     _text = null;
-    showClearIcon.dispose();
+    _prefixScrollController.dispose();
+    _showClearIcon.dispose();
     effectiveFocusNode.onKeyEvent = null;
     effectiveFocusNode.removeListener(_focusChange);
     effectiveController.removeListener(_textChange);
@@ -354,6 +379,41 @@ class _TInputState extends TFormItemValidateState<TInput> {
     } else {
       widget.onBlur?.call(effectiveController.text);
     }
+    _handleScroll();
+  }
+
+  /// 处理鼠标进入、离开事件
+  void _handleHovered(bool hovered) {
+    if (_isHover != hovered) {
+      setState(() {
+        _isHover = hovered;
+      });
+      _showClearIcon.value = hovered && (widget.showClearIconOnEmpty || effectiveController.text.isNotEmpty);
+    }
+    _handleScroll();
+  }
+
+  /// 处理前缀滚动
+  _handleScroll() {
+    SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+      if (mounted) {
+        if (_prefixScrollController.hasClients) {
+          if (_isHover || _isFocused) {
+            _prefixScrollController.animateTo(
+              _prefixScrollController.position.maxScrollExtent,
+              duration: TVar.animDurationBase,
+              curve: Curves.easeInOut,
+            );
+          } else {
+            _prefixScrollController.animateTo(
+              0,
+              duration: TVar.animDurationBase,
+              curve: Curves.easeInOut,
+            );
+          }
+        }
+      }
+    });
   }
 
   /// 文本发生变化时触发
@@ -362,13 +422,14 @@ class _TInputState extends TFormItemValidateState<TInput> {
       _text = effectiveController.text;
       _formatController.text = widget.format?.call(effectiveController.text) ?? effectiveController.text;
       if (!widget.showClearIconOnEmpty && effectiveController.text.isEmpty) {
-        showClearIcon.value = false;
+        _showClearIcon.value = false;
       } else if (_isHover) {
-        showClearIcon.value = true;
+        _showClearIcon.value = true;
       }
       formItemState?.validate(trigger: TFormRuleTrigger.change);
       widget.onChange?.call(effectiveController.text);
     }
+    _handleScroll();
   }
 
   @override
@@ -536,9 +597,10 @@ class _TInputState extends TFormItemValidateState<TInput> {
           },
           child: TInputBase(
             decorationBuilder: (decorationContext) {
-              Widget? placeholder;
-              if (decorationContext.controller.text.isEmpty) {
-                placeholder = Text(
+              /// 使用Visibility避免重建导致滚动条重置
+              Widget placeholder = Visibility(
+                visible: decorationContext.controller.text.isEmpty,
+                child: Text(
                   widget.placeholder ?? GlobalTDesignLocalizations.of(context).inputPlaceholder,
                   style: TextStyle(
                     fontFamily: theme.fontFamily,
@@ -546,8 +608,8 @@ class _TInputState extends TFormItemValidateState<TInput> {
                     color: disabled ? colorScheme.textColorDisabled : colorScheme.textColorPlaceholder,
                     overflow: TextOverflow.ellipsis,
                   ),
-                );
-              }
+                ),
+              );
               List<Widget> prefixList = List.generate(prefixIconList.length, (index) {
                 var padding = (widget.prefixPadding ?? EdgeInsets.only(left: TVar.spacer, right: 2)) as EdgeInsets;
                 var isFirst = index == 0;
@@ -647,6 +709,7 @@ class _TInputState extends TFormItemValidateState<TInput> {
     return Container(
       constraints: BoxConstraints(minHeight: _inputHeight(size)),
       decoration: border.resolve(decorationContext.states),
+      padding: widget.padding,
       child: TInputDecorator(
         breakLine: true,
         autoWidth: widget.autoWidth,
@@ -665,15 +728,30 @@ class _TInputState extends TFormItemValidateState<TInput> {
   Widget _buildRowDecoration(
       MaterialStateProperty<BoxDecoration> border,
       TextDecorationContext decorationContext,
-      Widget? prefixIcon,
+      Widget? prefix,
       Set<MaterialState> states,
       TColorScheme colorScheme,
       TComponentSize size,
       Widget? placeholder,
       Widget? suffixIcon) {
+    List<Widget>? prefixes;
+    if (prefix != null) {
+      prefixes = [
+        TSingleChildScrollView(
+          controller: _prefixScrollController,
+          scrollDirection: Axis.horizontal,
+          showScroll: false,
+          child: Container(
+            padding: widget.prefixPadding,
+            child: prefix,
+          ),
+        )
+      ];
+    }
     var textDirection = Directionality.of(context);
     return Container(
       height: _inputHeight(size),
+      padding: widget.padding,
       decoration: border.resolve(decorationContext.states),
       child: TInputDecorator(
         breakLine: false,
@@ -685,9 +763,7 @@ class _TInputState extends TFormItemValidateState<TInput> {
         padding: EdgeInsets.symmetric(horizontal: TVar.spacer),
         placeholder: placeholder,
         input: decorationContext.child!,
-        prefix: prefixIcon != null
-            ? [TSingleChildScrollView(scrollDirection: Axis.horizontal, showScroll: false, child: prefixIcon)]
-            : [],
+        prefix: prefixes,
       ),
     );
   }
@@ -700,33 +776,13 @@ class _TInputState extends TFormItemValidateState<TInput> {
 
   /// 构建清空按钮
   Widget _buildClearIcon(TColorScheme colorScheme) {
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      child: GestureDetector(
-        onTap: () {
-          effectiveController.clear();
-          widget.onClear?.call();
-        },
-        child: ValueListenableBuilder<bool>(
-          valueListenable: showClearIcon,
-          builder: (context, value, child) {
-            return Visibility(
-              visible: value,
-              child: Icon(TIcons.closeCircleFilled, color: colorScheme.textColorPlaceholder),
-            );
-          },
-        ),
-      ),
+    return TClearIcon(
+      onClick: () {
+        effectiveController.clear();
+        widget.onClear?.call();
+      },
+      show: _showClearIcon,
     );
-  }
-
-  void _handleHovered(bool hovered) {
-    if (_isHover != hovered) {
-      setState(() {
-        _isHover = hovered;
-      });
-      showClearIcon.value = hovered && (widget.showClearIconOnEmpty || effectiveController.text.isNotEmpty);
-    }
   }
 
   @override
@@ -745,5 +801,41 @@ class _TInputState extends TFormItemValidateState<TInput> {
         effectiveController.text = widget.defaultValue ?? '';
         break;
     }
+  }
+}
+
+/// 关闭按钮
+class TClearIcon extends StatelessWidget {
+  const TClearIcon({
+    Key? key,
+    this.onClick,
+    required this.show,
+  }) : super(key: key);
+
+  /// 点击事件
+  final VoidCallback? onClick;
+
+  /// 显示状态
+  final ValueNotifier<bool> show;
+
+  @override
+  Widget build(BuildContext context) {
+    var theme = TTheme.of(context);
+    var colorScheme = theme.colorScheme;
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: onClick,
+        child: ValueListenableBuilder<bool>(
+          valueListenable: show,
+          builder: (context, value, child) {
+            return Visibility(
+              visible: value,
+              child: Icon(TIcons.closeCircleFilled, color: colorScheme.textColorPlaceholder),
+            );
+          },
+        ),
+      ),
+    );
   }
 }

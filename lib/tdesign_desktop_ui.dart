@@ -82,11 +82,6 @@ export 'src/components/form/form.dart';
 export 'src/components/form/form_item.dart';
 export 'src/components/form/type.dart';
 export 'src/components/form/form_rule.dart';
-/// 单选框
-export 'src/components/radio/radio.dart';
-export 'src/components/radio/radio_group.dart';
-/// 开关
-export 'src/components/switch/switch.dart';
 /// 输入框
 export 'src/components/input/input.dart';
 export 'src/components/input/custom_outline_input_border.dart';
@@ -100,6 +95,14 @@ export 'src/components/input_adornment/input_adornment.dart';
 /// 数字输入框
 export 'src/components/input_number/input_number.dart';
 export 'src/components/input_number/type.dart';
+/// 单选框
+export 'src/components/radio/radio.dart';
+export 'src/components/radio/radio_group.dart';
+/// 开关
+export 'src/components/switch/switch.dart';
+/// 标签输入框
+export 'src/components/tag_input/tag_input.dart';
+export 'src/components/tag_input/type.dart';
 /// 折叠面板
 export 'src/components/collapse/collapse.dart';
 export 'src/components/collapse/type.dart';

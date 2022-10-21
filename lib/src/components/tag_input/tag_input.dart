@@ -1,6 +1,7 @@
+import 'package:dartx/dartx.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:tdesign_desktop_ui/src/components/tag_input/type.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 typedef TTagInputCollapsedItemsCallback = Widget Function(List<String> collapsedTags, int count);
@@ -15,11 +16,12 @@ class TTagInput extends TFormItemValidate {
     this.collapsedItems,
     this.disabled = false,
     this.dragSort = false,
+    this.excessTagsDisplayType = TTagExcessTagsDisplayType.breakLine,
     this.textController,
     this.defaultInputValue,
     this.label,
     this.max,
-    this.minCollapsedNum,
+    this.minCollapsedNum = 0,
     this.placeholder,
     this.readonly = false,
     this.size,
@@ -28,7 +30,7 @@ class TTagInput extends TFormItemValidate {
     this.suffixIcon,
     this.tag,
     this.tips,
-    this.value,
+    this.controller,
     this.defaultValue,
     this.valueDisplay,
     this.onBlur,
@@ -41,6 +43,9 @@ class TTagInput extends TFormItemValidate {
     this.onMouseenter,
     this.onMouseleave,
     this.onRemove,
+    this.tagTheme = TTagTheme.defaultTheme,
+    this.tagVariant = TTagVariant.dark,
+    this.textAlign = TextAlign.left,
     FocusNode? focusNode,
     String? name,
   }) : super(key: key, name: name, focusNode: focusNode);
@@ -60,6 +65,9 @@ class TTagInput extends TFormItemValidate {
   /// 拖拽调整标签顺序
   final bool dragSort;
 
+  /// 标签超出时的呈现方式，有两种：横向滚动显示 和 换行显示
+  final TTagExcessTagsDisplayType excessTagsDisplayType;
+
   /// 输入框的值
   final TextEditingController? textController;
 
@@ -73,7 +81,7 @@ class TTagInput extends TFormItemValidate {
   final int? max;
 
   /// 最小折叠数量，用于标签数量过多的情况下折叠选中项，超出该数值的选中项折叠。值为 0 则表示不折叠
-  final int? minCollapsedNum;
+  final int minCollapsedNum;
 
   /// 占位符
   final String? placeholder;
@@ -100,16 +108,16 @@ class TTagInput extends TFormItemValidate {
   final Widget? tips;
 
   /// 值
-  final List<String>? value;
+  final TTagInputController? controller;
 
   /// 默认值
   final List<String>? defaultValue;
 
   /// 自定义值呈现的全部内容，参数为所有标签的值。
-  final Widget Function(List<String> value, void Function(int index, String? item) onClose)? valueDisplay;
+  final List<Widget> Function(List<String> value, void Function(int index, String item) onClose)? valueDisplay;
 
   /// 失去焦点时触发
-  final void Function(List<String> value)? onBlur;
+  final void Function(List<String> value, String inputValue)? onBlur;
 
   /// 值变化时触发，参数 `context.trigger` 表示数据变化的触发来源；`context.index` 指当前变化项的下标；`context.item` 指当前变化项；
   final void Function(List<String> value, TagInputChangeContext context)? onChange;
@@ -124,99 +132,241 @@ class TTagInput extends TFormItemValidate {
   final void Function(List<String> value)? onEnter;
 
   /// 聚焦时触发
-  final void Function(List<String> value)? onFocus;
+  final void Function(List<String> value, String inputValue)? onFocus;
 
   /// 输入框值发生变化时触发，`context.trigger` 表示触发输入框值变化的来源：文本输入触发、清除按钮触发、回车键触发等
   final void Function(String value, InputValueChangeContext context)? onInputChange;
 
   /// 进入输入框时触发
-  final VoidCallback? onMouseenter;
+  final PointerEnterEventListener? onMouseenter;
 
   /// 离开输入框时触发
-  final VoidCallback? onMouseleave;
+  final PointerExitEventListener? onMouseleave;
 
   /// 移除单个标签时触发
   final void Function(TagInputRemoveContext context)? onRemove;
+
+  /// 标签主题
+  final TTagTheme tagTheme;
+
+  /// 标签风格变体
+  final TTagVariant tagVariant;
+
+  /// 文本对齐方式
+  final TextAlign textAlign;
 
   @override
   TFormItemValidateState<TTagInput> createState() => _TTagInputState();
 }
 
 class _TTagInputState extends TFormItemValidateState<TTagInput> {
+  TTagInputController? _controller;
+
+  TTagInputController get effectiveController =>
+      widget.controller ?? (_controller ??= TTagInputController(value: widget.defaultValue));
+
+  TextEditingController? _textController;
+
+  TextEditingController get effectiveTextController =>
+      widget.textController ?? (_textController ??= TextEditingController(text: widget.defaultInputValue));
+
   FocusNode? _focusNode;
 
   FocusNode get effectiveFocusNode => widget.focusNode ?? (_focusNode ??= FocusNode());
 
-  TextEditingController? _controller;
-
-  late TextEditingController _formatController;
-
-  /// 有效文本控制器
-  TextEditingController get effectiveController =>
-      widget.textController ?? (_controller ??= TextEditingController(text: widget.defaultInputValue));
-
-  /// 是否拥有焦点
-  bool isFocused = false;
-
-  /// 是否悬停
-  bool isHover = false;
+  late ValueNotifier<bool> showClearIcon;
 
   /// 组件禁用状态
   bool get disabled => formDisabled || widget.disabled;
 
+  bool _isHovered = false;
+
   @override
   void initState() {
     super.initState();
+    showClearIcon = ValueNotifier(false);
   }
 
   @override
   void dispose() {
+    showClearIcon.dispose();
+    _controller?.dispose();
+    _textController?.dispose();
+    _focusNode?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    var theme = TTheme.of(context);
-    var colorScheme = theme.colorScheme;
-
-    return Container(
-      decoration: BoxDecoration(border: Border.all()),
-      child: ConstrainedBox(
-        constraints: BoxConstraints(minWidth: 0),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Flexible(
-              child: Wrap(
-                children: [
-                  const Text('prefix'),
-                  TInput(
-                    inputConstraints: BoxConstraints(minWidth: 155),
-                    breakLine: true,
-                    autoWidth: true,
-                    suffix: Text('suffix'),
-                  ),
-                ],
+    return AnimatedBuilder(
+      animation: effectiveController,
+      builder: (BuildContext context, Widget? child) {
+        return TInput(
+          padding: EdgeInsets.only(left: TVar.spacerS),
+          align: widget.textAlign,
+          disabled: disabled,
+          readonly: widget.readonly,
+          controller: effectiveTextController,
+          focusNode: effectiveFocusNode,
+          autoWidth: widget.autoWidth,
+          breakLine: widget.excessTagsDisplayType == TTagExcessTagsDisplayType.breakLine,
+          suffixIcon: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TClearIcon(
+                onClick: _handleClear,
+                show: showClearIcon,
               ),
-            ),
-          ],
-        ),
-      ),
+              if (widget.suffixIcon != null) widget.suffixIcon!,
+            ],
+          ),
+          label: widget.label,
+          size: widget.size,
+          status: widget.status,
+          suffix: widget.suffix,
+          tips: widget.tips,
+          prefixLabels: _buildTags(),
+          onMouseenter: (event) {
+            _isHovered = true;
+            _handleChange();
+            widget.onMouseenter?.call(event);
+          },
+          onMouseleave: (event) {
+            _isHovered = false;
+            _handleChange();
+            widget.onMouseleave?.call(event);
+          },
+          placeholder: widget.placeholder,
+          onEnter: _handleEnter,
+          onKeyDown: _handleBackspace,
+          onFocus: (text) => widget.onFocus?.call(effectiveController.value, text),
+          onBlur: (text) => widget.onBlur?.call(effectiveController.value, text),
+          onClear: _handleClear,
+          onChange: (text) {
+            _handleChange();
+            widget.onInputChange?.call(effectiveTextController.text, InputValueChangeContext.input);
+          },
+        );
+      },
     );
   }
 
+  /// 处理退格键
+  void _handleBackspace(String text, KeyEvent event) {
+    if (event.physicalKey == PhysicalKeyboardKey.backspace && text.isEmpty) {
+      var lastIndex = effectiveController.value.lastIndex;
+      widget.onRemove?.call(TagInputRemoveContext(
+        value: effectiveController.value,
+        index: lastIndex,
+        item: effectiveController.value[lastIndex],
+        trigger: TagInputRemoveTrigger.backspace,
+      ));
+      effectiveController.removeLast();
+    }
+  }
+
+  /// 处理回车键
+  void _handleEnter(String text) {
+    if (text.isNotEmpty) {
+      effectiveTextController.clear();
+      effectiveFocusNode.requestFocus();
+      if (widget.max == null || effectiveController.value.length < widget.max!) {
+        effectiveController.add(text);
+      }
+      _handleChange();
+      widget.onInputChange?.call(text, InputValueChangeContext.enter);
+    }
+    widget.onEnter?.call(effectiveController.value);
+  }
+
+  /// 构建标签
+  List<Widget> _buildTags() {
+    List<Widget> defaultValueDisplay(List<String> value, void Function(int index, String item) onClose) {
+      int length = value.length;
+      if (widget.minCollapsedNum > 0 && value.length > widget.minCollapsedNum) {
+        length = widget.minCollapsedNum;
+      }
+      return [
+        ...List.generate(length, (index) {
+          return Padding(
+            padding: EdgeInsets.only(right: TVar.spacerS),
+            child: TTag(
+              closable: !disabled,
+              theme: widget.tagTheme,
+              variant: widget.tagVariant,
+              child: Text(widget.tag?.call(value[index]) ?? value[index]),
+              onClose: () {
+                onClose(index, value[index]);
+              },
+            ),
+          );
+        }),
+        if (value.length > length)
+          Padding(
+            padding: EdgeInsets.only(right: TVar.spacerS),
+            child: widget.collapsedItems?.call(value.sublist(length), value.length - length) ??
+                TTag(
+                  theme: widget.tagTheme,
+                  variant: widget.tagVariant,
+                  child: Text('+${value.length - length}'),
+                ),
+          ),
+      ];
+    }
+
+    return (widget.valueDisplay ?? defaultValueDisplay).call(effectiveController.value, _tagRemove);
+  }
+
+  /// 标签删除事件
+  void _tagRemove(int index, String item) {
+    widget.onRemove?.call(TagInputRemoveContext(
+      value: effectiveController.value,
+      index: index,
+      item: item,
+      trigger: TagInputRemoveTrigger.tagRemove,
+    ));
+    effectiveController.removeAt(index);
+  }
+
+  /// 处理变更
+  void _handleChange() {
+    if ((effectiveController.value.isNotEmpty || effectiveTextController.text.isNotEmpty) &&
+        widget.clearable &&
+        !disabled &&
+        !widget.readonly &&
+        _isHovered) {
+      showClearIcon.value = true;
+    } else {
+      showClearIcon.value = false;
+    }
+  }
+
+  /// 处理清空事件
+  void _handleClear() {
+    showClearIcon.value = false;
+    effectiveController.clear();
+    effectiveTextController.clear();
+    widget.onClear?.call();
+    widget.onInputChange?.call(effectiveTextController.text, InputValueChangeContext.clear);
+  }
+
   @override
-  get formItemValue => widget.value;
+  FocusNode? get focusNode => effectiveFocusNode;
+
+  @override
+  get formItemValue => effectiveController.value;
 
   @override
   void reset(TFormResetType type) {
     switch (type) {
       case TFormResetType.empty:
-        widget.onChange?.call([], const TagInputChangeContext(trigger: TagInputTriggerSource.clear, item: null));
+        effectiveController.clear();
         break;
       case TFormResetType.initial:
-        widget.onChange?.call(widget.defaultValue ?? [], const TagInputChangeContext(trigger: TagInputTriggerSource.clear, item: null));
+        effectiveController.value = widget.defaultValue ?? [];
         break;
     }
+    widget.onChange?.call(
+        effectiveController.value, const TagInputChangeContext(trigger: TagInputTriggerSource.clear, item: null));
   }
 }

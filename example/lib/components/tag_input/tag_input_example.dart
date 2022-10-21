@@ -9,39 +9,38 @@ class TTagInputExample extends StatefulWidget {
 }
 
 class _TTagInputExampleState extends State<TTagInputExample> {
+  late TTagInputController controller;
+
+  @override
+  void initState() {
+    controller = TTagInputController(value: ['hello', 'world','hello', 'world','hello', 'world','hello', 'world','hello', 'world','hello', 'world']);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          decoration: BoxDecoration(border: Border.all()),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(minWidth: 0),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Flexible(
-                  child: Wrap(
-                    children: [
-                      const Text('prefix'),
-                      ConstrainedBox(
-                        constraints: BoxConstraints(minWidth: 155),
-                        child: TInputBox(
-                          forceLine: false,
-                          style: TextStyle(color: Colors.black),
-                          cursorColor: Colors.black,
-                          selectionColor: Colors.blue,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Text('suffix'),
-                Text('suffix'),
-              ],
-            ),
-          ),
+        TTagInput(
+          // disabled: true,
+          // autoWidth: true,
+          // excessTagsDisplayType: TTagExcessTagsDisplayType.scroll,
+          controller: controller,
+          clearable: true,
+          // max: 5,
+          // minCollapsedNum: 2,
+          collapsedItems: (collapsedTags, count) {
+            return TTag(child: Text('更多($count)'));
+          },
+          tagTheme: TTagTheme.primary,
+          tagVariant: TTagVariant.light,
         ),
       ],
     );
