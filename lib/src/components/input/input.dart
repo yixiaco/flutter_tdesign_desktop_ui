@@ -196,6 +196,7 @@ class TInput extends TFormItemValidate {
   static MaterialStateProperty<BoxDecoration> defaultInputBorder({
     required BuildContext context,
     required bool disabled,
+    required bool readonly,
     TInputStatus status = TInputStatus.defaultStatus,
     TFormItemState? formItemState,
   }) {
@@ -289,7 +290,7 @@ class TInput extends TFormItemValidate {
         backgroundBlendMode: BlendMode.src,
         border: Border.all(width: onePx, color: formItemState?.borderColor ?? inputTheme.borderColor ?? color),
         borderRadius: inputTheme.borderRadius ?? BorderRadius.circular(TVar.borderRadiusDefault),
-        boxShadow: shadows,
+        boxShadow: readonly ? null : shadows,
         color: inputTheme.backgroundColor ??
             (disabled ? colorScheme.bgColorComponentDisabled : colorScheme.bgColorSpecialComponent),
       );
@@ -463,12 +464,13 @@ class _TInputState extends TFormItemValidateState<TInput> {
     var size = widget.size ?? inputTheme.size ?? theme.size;
 
     var fontSize = getFontSize(theme, size);
-    var cursor = TMaterialStateMouseCursor.textable;
+    var cursor = widget.readonly ? SystemMouseCursors.click : TMaterialStateMouseCursor.textable;
 
     // 边框样式
     var border = TInput.defaultInputBorder(
       context: context,
       disabled: disabled,
+      readonly: widget.readonly,
       formItemState: formItemState,
       status: widget.status,
     );

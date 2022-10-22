@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+/// input滚动时的最小宽度
+const double _kInputScrollMinWidth = 40;
 enum TDecorationSlot {
   prefix,
   suffix,
@@ -737,7 +739,7 @@ class RenderTDecoration extends RenderBox
       for (var prefix in prefixes) {
         boxToBaseline[prefix] = _layoutLineBox(
           prefix,
-          boxConstraints.copyWith(maxWidth: math.max(0, availableWidth - maxWidth - contentPadding.horizontal - 40)),
+          boxConstraints.copyWith(maxWidth: math.max(0, availableWidth - maxWidth - contentPadding.horizontal - _kInputScrollMinWidth)),
         );
         var pw = _boxSize(prefix).width;
         var ph = _boxSize(prefix).height;

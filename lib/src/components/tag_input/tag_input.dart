@@ -228,22 +228,21 @@ class _TTagInputState extends TFormItemValidateState<TTagInput> {
           prefixLabels: _buildTags(),
           onMouseenter: (event) {
             _isHovered = true;
-            _handleChange();
+            _handleClearChange();
             widget.onMouseenter?.call(event);
           },
           onMouseleave: (event) {
             _isHovered = false;
-            _handleChange();
+            _handleClearChange();
             widget.onMouseleave?.call(event);
           },
-          placeholder: widget.placeholder,
+          placeholder: effectiveController.value.isNotEmpty ? '' : widget.placeholder,
           onEnter: _handleEnter,
           onKeyDown: _handleBackspace,
           onFocus: (text) => widget.onFocus?.call(effectiveController.value, text),
           onBlur: (text) => widget.onBlur?.call(effectiveController.value, text),
-          onClear: _handleClear,
           onChange: (text) {
-            _handleChange();
+            _handleClearChange();
             widget.onInputChange?.call(effectiveTextController.text, InputValueChangeContext.input);
           },
         );
@@ -255,13 +254,15 @@ class _TTagInputState extends TFormItemValidateState<TTagInput> {
   void _handleBackspace(String text, KeyEvent event) {
     if (event.physicalKey == PhysicalKeyboardKey.backspace && text.isEmpty) {
       var lastIndex = effectiveController.value.lastIndex;
+      var item = effectiveController.value[lastIndex];
       widget.onRemove?.call(TagInputRemoveContext(
         value: effectiveController.value,
         index: lastIndex,
-        item: effectiveController.value[lastIndex],
+        item: item,
         trigger: TagInputRemoveTrigger.backspace,
       ));
       effectiveController.removeLast();
+      _handleValueChange(TagInputTriggerSource.backspace, item);
     }
   }
 
@@ -273,8 +274,9 @@ class _TTagInputState extends TFormItemValidateState<TTagInput> {
       if (widget.max == null || effectiveController.value.length < widget.max!) {
         effectiveController.add(text);
       }
-      _handleChange();
+      _handleClearChange();
       widget.onInputChange?.call(text, InputValueChangeContext.enter);
+      _handleValueChange(TagInputTriggerSource.enter, text);
     }
     widget.onEnter?.call(effectiveController.value);
   }
@@ -291,7 +293,7 @@ class _TTagInputState extends TFormItemValidateState<TTagInput> {
           return Padding(
             padding: EdgeInsets.only(right: TVar.spacerS),
             child: TTag(
-              closable: !disabled,
+              closable: !disabled && !widget.readonly,
               theme: widget.tagTheme,
               variant: widget.tagVariant,
               child: Text(widget.tag?.call(value[index]) ?? value[index]),
@@ -326,10 +328,11 @@ class _TTagInputState extends TFormItemValidateState<TTagInput> {
       trigger: TagInputRemoveTrigger.tagRemove,
     ));
     effectiveController.removeAt(index);
+    _handleValueChange(TagInputTriggerSource.tagRemove, item);
   }
 
-  /// 处理变更
-  void _handleChange() {
+  /// 处理清理icon状态变更
+  void _handleClearChange() {
     if ((effectiveController.value.isNotEmpty || effectiveTextController.text.isNotEmpty) &&
         widget.clearable &&
         !disabled &&
@@ -341,6 +344,12 @@ class _TTagInputState extends TFormItemValidateState<TTagInput> {
     }
   }
 
+  /// 处理值变更
+  void _handleValueChange(TagInputTriggerSource triggerSource, [String? item]) {
+    formChange();
+    widget.onChange?.call(effectiveController.value, TagInputChangeContext(trigger: triggerSource, item: item));
+  }
+
   /// 处理清空事件
   void _handleClear() {
     showClearIcon.value = false;
@@ -348,6 +357,7 @@ class _TTagInputState extends TFormItemValidateState<TTagInput> {
     effectiveTextController.clear();
     widget.onClear?.call();
     widget.onInputChange?.call(effectiveTextController.text, InputValueChangeContext.clear);
+    _handleValueChange(TagInputTriggerSource.clear);
   }
 
   @override
@@ -367,6 +377,8 @@ class _TTagInputState extends TFormItemValidateState<TTagInput> {
         break;
     }
     widget.onChange?.call(
-        effectiveController.value, const TagInputChangeContext(trigger: TagInputTriggerSource.clear, item: null));
+      effectiveController.value,
+      const TagInputChangeContext(trigger: TagInputTriggerSource.reset, item: null),
+    );
   }
 }
