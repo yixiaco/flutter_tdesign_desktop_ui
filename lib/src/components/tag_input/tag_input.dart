@@ -288,19 +288,58 @@ class _TTagInputState extends TFormItemValidateState<TTagInput> {
       if (widget.minCollapsedNum > 0 && value.length > widget.minCollapsedNum) {
         length = widget.minCollapsedNum;
       }
+      Widget buildTag(int index) {
+        var item = value[index];
+        return TTag(
+          closable: !disabled && !widget.readonly,
+          theme: widget.tagTheme,
+          variant: widget.tagVariant,
+          child: Text(widget.tag?.call(item) ?? item),
+          onClose: () {
+            onClose(index, item);
+          },
+        );
+      }
+
       return [
         ...List.generate(length, (index) {
+          Widget tag = buildTag(index);
+          // 拖拽
+          if (widget.dragSort) {
+            var item = value[index];
+            tag = MouseRegion(
+              cursor: SystemMouseCursors.basic,
+              child: Draggable<_TagInputDraggableData>(
+                data: _TagInputDraggableData(
+                  current: item,
+                  currentIndex: index,
+                ),
+                feedback: Opacity(opacity: 0.6, child: tag),
+                child: DragTarget<_TagInputDraggableData>(
+                  builder: (context, candidateData, rejectedData) {
+                    print('candidateData:$candidateData,rejectedData:$rejectedData');
+                    return buildTag(index);
+                  },
+                  onWillAccept: (data) {
+                    return data != null;
+                  },
+                  onAccept: (data) {
+                    var tagInputDragSortContext = TagInputDragSortContext(
+                      newTags: [],
+                      currentIndex: data.currentIndex,
+                      current: data.current,
+                      targetIndex: index,
+                      target: item,
+                    );
+                    widget.onDragSort?.call(tagInputDragSortContext);
+                  },
+                ),
+              ),
+            );
+          }
           return Padding(
             padding: EdgeInsets.only(right: TVar.spacerS),
-            child: TTag(
-              closable: !disabled && !widget.readonly,
-              theme: widget.tagTheme,
-              variant: widget.tagVariant,
-              child: Text(widget.tag?.call(value[index]) ?? value[index]),
-              onClose: () {
-                onClose(index, value[index]);
-              },
-            ),
+            child: tag,
           );
         }),
         if (value.length > length)
@@ -381,4 +420,15 @@ class _TTagInputState extends TFormItemValidateState<TTagInput> {
       const TagInputChangeContext(trigger: TagInputTriggerSource.reset, item: null),
     );
   }
+}
+
+/// 拖拽数据
+class _TagInputDraggableData<T> {
+  const _TagInputDraggableData({
+    required this.currentIndex,
+    required this.current,
+  });
+
+  final int currentIndex;
+  final T current;
 }

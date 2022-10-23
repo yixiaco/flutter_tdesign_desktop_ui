@@ -29,6 +29,7 @@ class _TTagInputExampleState extends State<TTagInputExample> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         TTagInput(
+          dragSort: true,
           // readonly: true,
           // disabled: true,
           // autoWidth: true,
