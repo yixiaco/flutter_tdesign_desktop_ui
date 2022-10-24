@@ -317,7 +317,21 @@ class _TTagInputState extends TFormItemValidateState<TTagInput> {
                 feedback: Opacity(opacity: 0.6, child: tag),
                 child: DragTarget<_TagInputDraggableData>(
                   builder: (context, candidateData, rejectedData) {
-                    print('candidateData:$candidateData,rejectedData:$rejectedData');
+                    if (candidateData.isNotEmpty) {
+                      var divider = TDivider(
+                        layout: Axis.vertical,
+                        color: TTheme.of(context).colorScheme.brandColor,
+                        margin: const EdgeInsets.symmetric(horizontal: 2),
+                      );
+                      return Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (candidateData[0]!.currentIndex >= index) divider,
+                          buildTag(index),
+                          if (candidateData[0]!.currentIndex < index) divider,
+                        ],
+                      );
+                    }
                     return buildTag(index);
                   },
                   onWillAccept: (data) {
@@ -331,6 +345,7 @@ class _TTagInputState extends TFormItemValidateState<TTagInput> {
                       targetIndex: index,
                       target: item,
                     );
+                    effectiveController.moveIndex(data.currentIndex, index);
                     widget.onDragSort?.call(tagInputDragSortContext);
                   },
                 ),

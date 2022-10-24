@@ -19,6 +19,11 @@ class TagInputChangeContext {
     this.index,
     this.item,
   });
+
+  @override
+  String toString() {
+    return 'TagInputChangeContext{trigger: $trigger, index: $index, item: $item}';
+  }
 }
 
 enum TagInputTriggerSource {
@@ -49,6 +54,11 @@ class TagInputDragSortContext {
     required this.targetIndex,
     required this.target,
   });
+
+  @override
+  String toString() {
+    return 'TagInputDragSortContext{newTags: $newTags, currentIndex: $currentIndex, current: $current, targetIndex: $targetIndex, target: $target}';
+  }
 }
 
 class TagInputRemoveContext {
@@ -63,6 +73,11 @@ class TagInputRemoveContext {
     required this.item,
     required this.trigger,
   });
+
+  @override
+  String toString() {
+    return 'TagInputRemoveContext{value: $value, index: $index, item: $item, trigger: $trigger}';
+  }
 }
 
 enum TagInputRemoveTrigger {
@@ -94,7 +109,7 @@ class TTagInputController extends ChangeNotifier {
 
   /// 删除指定下标
   void removeAt(int index) {
-    if(index > 0 && index < _value.length) {
+    if(index >= 0 && index < _value.length) {
       _value.removeAt(index);
       notifyListeners();
     }
@@ -114,12 +129,11 @@ class TTagInputController extends ChangeNotifier {
     }
   }
 
-  /// 位置互换
-  void exchange(int olIndex, int newIndex) {
-    if(olIndex > 0 && olIndex < _value.length && newIndex > 0 && newIndex < _value.length) {
-      var value = _value[olIndex];
-      _value[olIndex] = _value[newIndex];
-      _value[newIndex] = value;
+  /// 将旧下标中的数据移动到新下标中
+  void moveIndex(int olIndex, int newIndex) {
+    if(olIndex >= 0 && olIndex < _value.length && newIndex >= 0 && newIndex < _value.length) {
+      var value = _value.removeAt(olIndex);
+      _value.insert(newIndex, value);
       notifyListeners();
     }
   }

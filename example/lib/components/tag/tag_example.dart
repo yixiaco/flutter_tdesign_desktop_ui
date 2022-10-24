@@ -25,15 +25,34 @@ class _TTagExampleState extends State<TTagExample> {
             ),
             TTag(
               closable: true,
+              variant: TTagVariant.light,
+              child: Text('标签'),
+            ),
+            TTag(
+              closable: true,
+              variant: TTagVariant.outline,
+              child: Text('标签'),
+            ),
+            TTag(
+              closable: true,
+              variant: TTagVariant.lightOutline,
+              child: Text('标签'),
+            ),
+            TTag(
+              disabled: true,
+              child: Text('标签'),
+            ),
+            TTag(
+              disabled: true,
+              variant: TTagVariant.light,
+              child: Text('标签'),
+            ),
+            TTag(
+              closable: true,
               theme: TTagTheme.link,
               icon: Icon(TIcons.logoWecom),
               child: Text('标签'),
             ),
-            TTag(
-              closable: true,
-              disabled: true,
-              child: Text('标签'),
-            ),
           ],
         ),
         const TSpace(
@@ -57,6 +76,12 @@ class _TTagExampleState extends State<TTagExample> {
             ),
             TTag(
               closable: true,
+              theme: TTagTheme.primary,
+              variant: TTagVariant.lightOutline,
+              child: Text('标签'),
+            ),
+            TTag(
+              closable: true,
               disabled: true,
               theme: TTagTheme.primary,
               variant: TTagVariant.outline,
@@ -81,6 +106,12 @@ class _TTagExampleState extends State<TTagExample> {
               closable: true,
               theme: TTagTheme.success,
               variant: TTagVariant.outline,
+              child: Text('标签'),
+            ),
+            TTag(
+              closable: true,
+              theme: TTagTheme.success,
+              variant: TTagVariant.lightOutline,
               child: Text('标签'),
             ),
             TTag(
@@ -109,6 +140,12 @@ class _TTagExampleState extends State<TTagExample> {
               closable: true,
               theme: TTagTheme.warning,
               variant: TTagVariant.outline,
+              child: Text('标签'),
+            ),
+            TTag(
+              closable: true,
+              theme: TTagTheme.warning,
+              variant: TTagVariant.lightOutline,
               child: Text('标签'),
             ),
             TTag(
@@ -137,6 +174,12 @@ class _TTagExampleState extends State<TTagExample> {
               closable: true,
               theme: TTagTheme.danger,
               variant: TTagVariant.outline,
+              child: Text('标签'),
+            ),
+            TTag(
+              closable: true,
+              theme: TTagTheme.danger,
+              variant: TTagVariant.lightOutline,
               child: Text('标签'),
             ),
             TTag(

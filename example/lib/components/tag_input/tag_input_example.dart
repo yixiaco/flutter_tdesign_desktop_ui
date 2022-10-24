@@ -13,7 +13,7 @@ class _TTagInputExampleState extends State<TTagInputExample> {
 
   @override
   void initState() {
-    controller = TTagInputController(value: ['hello', 'world','hello', 'world','hello', 'world','hello', 'world','hello', 'world','hello', 'world']);
+    controller = TTagInputController(value: ['1', '2','3', '4','5', '6','7', '8','9', '10','11', '12']);
     super.initState();
   }
 
@@ -29,19 +29,12 @@ class _TTagInputExampleState extends State<TTagInputExample> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         TTagInput(
-          dragSort: true,
-          // readonly: true,
-          // disabled: true,
-          // autoWidth: true,
-          // excessTagsDisplayType: TTagExcessTagsDisplayType.scroll,
+          // dragSort: true,
           controller: controller,
           clearable: true,
-          // max: 5,
-          // minCollapsedNum: 2,
           collapsedItems: (collapsedTags, count) {
             return TTag(child: Text('更多($count)'));
           },
-          tagTheme: TTagTheme.primary,
           tagVariant: TTagVariant.light,
         ),
       ],
