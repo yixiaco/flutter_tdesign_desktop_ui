@@ -37,6 +37,13 @@ class _TTagInputExampleState extends State<TTagInputExample> {
           },
           tagVariant: TTagVariant.light,
         ),
+        TTagInput(
+          // dragSort: true,
+          controller: controller,
+          clearable: true,
+          excessTagsDisplayType: TTagExcessTagsDisplayType.scroll,
+          tagVariant: TTagVariant.light,
+        ),
       ],
     );
   }

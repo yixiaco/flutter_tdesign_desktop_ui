@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 
 /// input滚动时的最小宽度
 const double _kInputScrollMinWidth = 40;
+
 enum TDecorationSlot {
   prefix,
   suffix,
@@ -492,7 +493,7 @@ class RenderTDecoration extends RenderBox
     bool isMaxWidth = result.isMaxWidth;
     double maxHeight = result.maxHeight;
     double maxWidth = result.maxWidth;
-    int level = result.level;
+    int level = result.levelHeight.length - 1;
     List<double> levelHeight = result.levelHeight;
     var availableWidth = result.availableWidth;
 
@@ -526,7 +527,7 @@ class RenderTDecoration extends RenderBox
           offsetTop = levelHeight.sublist(0, level).reduce((value, element) => value + element);
         }
         currentRowHeight = levelHeight[level];
-        _boxParentData(prefix).offset = Offset(offsetLeft, offsetTop + (currentRowHeight - prefix.size.height) / 2 + contentPadding.top);
+        _boxParentData(prefix).offset = Offset(offsetLeft, offsetTop + (currentRowHeight - prefix.size.height) / 2);
       }
       if (input != null) {
         if (cpw0 + inputWidth + contentPadding.horizontal > availableWidth) {
@@ -535,11 +536,6 @@ class RenderTDecoration extends RenderBox
           offsetTop = levelHeight.sublist(0, level).reduce((value, element) => value + element);
         }
         currentRowHeight = levelHeight[level];
-        if(maxHeight < constraints.minHeight) {
-          currentRowHeight = constraints.minHeight;
-        }
-        _boxParentData(input).offset = Offset(cpw0 + contentPadding.left,
-            offsetTop + (currentRowHeight - (contentPadding.top + input.size.height)) / 2);
       }
     } else {
       currentRowHeight = levelHeight[level];
@@ -548,13 +544,18 @@ class RenderTDecoration extends RenderBox
         _boxParentData(prefix).offset = Offset(cpw0, (currentRowHeight - prefix.size.height) / 2);
         cpw0 += prefix.size.width;
       }
-      if(maxHeight < constraints.minHeight) {
+    }
+    if (level == 0) {
+      if (maxHeight < constraints.minHeight) {
         currentRowHeight = constraints.minHeight;
       }
-      if (input != null) {
-        _boxParentData(input).offset =
-            Offset(cpw0 + contentPadding.left, (currentRowHeight - input.size.height) / 2 + contentPadding.top);
+      if (currentRowHeight < _boxSize(suffix).height) {
+        currentRowHeight = _boxSize(suffix).height;
       }
+    }
+    if (input != null) {
+      _boxParentData(input).offset = Offset(
+          cpw0 + contentPadding.left, offsetTop + (currentRowHeight - input.size.height) / 2 + contentPadding.top);
     }
     if (placeholder != null) {
       double offsetLeft;
@@ -739,7 +740,8 @@ class RenderTDecoration extends RenderBox
       for (var prefix in prefixes) {
         boxToBaseline[prefix] = _layoutLineBox(
           prefix,
-          boxConstraints.copyWith(maxWidth: math.max(0, availableWidth - maxWidth - contentPadding.horizontal - _kInputScrollMinWidth)),
+          boxConstraints.copyWith(
+              maxWidth: math.max(0, availableWidth - maxWidth - contentPadding.horizontal - _kInputScrollMinWidth)),
         );
         var pw = _boxSize(prefix).width;
         var ph = _boxSize(prefix).height;
@@ -774,7 +776,6 @@ class RenderTDecoration extends RenderBox
       maxWidth: maxWidth,
       maxHeight: maxHeight,
       availableWidth: availableWidth,
-      level: level,
     );
   }
 
@@ -809,7 +810,6 @@ class _TDecoratorLayoutResult {
   final List<double> levelHeight;
   final double maxWidth;
   final double maxHeight;
-  final int level;
   final double availableWidth;
 
   const _TDecoratorLayoutResult({
@@ -818,7 +818,6 @@ class _TDecoratorLayoutResult {
     required this.levelHeight,
     required this.maxWidth,
     required this.maxHeight,
-    required this.level,
     required this.availableWidth,
   });
 }
