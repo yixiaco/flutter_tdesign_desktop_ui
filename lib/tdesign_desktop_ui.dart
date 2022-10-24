@@ -87,7 +87,6 @@ export 'src/components/input/input.dart';
 export 'src/components/input/custom_outline_input_border.dart';
 export 'src/components/input/input_theme.dart';
 export 'src/components/input/input_base.dart';
-export 'src/components/input/input_box.dart';
 export 'src/components/input/input_decorator.dart';
 export 'src/components/input/type.dart';
 /// 输入框装饰器

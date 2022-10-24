@@ -18,6 +18,7 @@ import 'package:example/components/menu/menu_example.dart';
 import 'package:example/components/popup/popup_example.dart';
 import 'package:example/components/progress/progress_example.dart';
 import 'package:example/components/radio/radio_example.dart';
+import 'package:example/components/select_input/select_input_example.dart';
 import 'package:example/components/space/space_example.dart';
 import 'package:example/components/switch/switch_example.dart';
 import 'package:example/components/tabs/tabs_example.dart';
@@ -241,6 +242,15 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
           onClick: () {
             setState(() {
               content = const TRadioExample();
+            });
+          },
+        ),
+        TMenuItemProps(
+          value: 'select_input',
+          content: const Text('SelectInput 筛选器输入框'),
+          onClick: () {
+            setState(() {
+              content = const TSelectInputExample();
             });
           },
         ),

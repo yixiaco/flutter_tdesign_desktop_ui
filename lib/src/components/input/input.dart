@@ -59,6 +59,7 @@ class TInput extends TFormItemValidate {
     this.inputConstraints,
     this.breakLine = false,
     this.padding,
+    this.borderless = false,
   }) : super(key: key, name: name, focusNode: focusNode);
 
   /// 控制正在编辑的文本。
@@ -189,6 +190,9 @@ class TInput extends TFormItemValidate {
   /// 边框内边距
   final EdgeInsetsGeometry? padding;
 
+  /// 无边框模式
+  final bool borderless;
+
   @override
   TFormItemValidateState createState() => _TInputState();
 
@@ -197,6 +201,7 @@ class TInput extends TFormItemValidate {
     required BuildContext context,
     required bool disabled,
     required bool readonly,
+    required bool borderless,
     TInputStatus status = TInputStatus.defaultStatus,
     TFormItemState? formItemState,
   }) {
@@ -288,9 +293,9 @@ class TInput extends TFormItemValidate {
       }
       return BoxDecoration(
         backgroundBlendMode: BlendMode.src,
-        border: Border.all(width: onePx, color: formItemState?.borderColor ?? inputTheme.borderColor ?? color),
+        border: borderless ? null : Border.all(width: onePx, color: formItemState?.borderColor ?? inputTheme.borderColor ?? color),
         borderRadius: inputTheme.borderRadius ?? BorderRadius.circular(TVar.borderRadiusDefault),
-        boxShadow: readonly ? null : shadows,
+        boxShadow: readonly || borderless ? null : shadows,
         color: inputTheme.backgroundColor ??
             (disabled ? colorScheme.bgColorComponentDisabled : colorScheme.bgColorSpecialComponent),
       );
@@ -471,6 +476,7 @@ class _TInputState extends TFormItemValidateState<TInput> {
       context: context,
       disabled: disabled,
       readonly: widget.readonly,
+      borderless: widget.borderless,
       formItemState: formItemState,
       status: widget.status,
     );

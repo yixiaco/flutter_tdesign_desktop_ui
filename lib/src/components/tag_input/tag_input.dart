@@ -46,6 +46,7 @@ class TTagInput extends TFormItemValidate {
     this.tagTheme = TTagTheme.defaultTheme,
     this.tagVariant = TTagVariant.dark,
     this.textAlign = TextAlign.left,
+    this.borderless = false,
     FocusNode? focusNode,
     String? name,
   }) : super(key: key, name: name, focusNode: focusNode);
@@ -155,6 +156,9 @@ class TTagInput extends TFormItemValidate {
   /// 文本对齐方式
   final TextAlign textAlign;
 
+  /// 无边框模式
+  final bool borderless;
+
   @override
   TFormItemValidateState<TTagInput> createState() => _TTagInputState();
 }
@@ -203,6 +207,7 @@ class _TTagInputState extends TFormItemValidateState<TTagInput> {
       builder: (BuildContext context, Widget? child) {
         return TInput(
           padding: EdgeInsets.only(left: TVar.spacerS),
+          borderless: widget.borderless,
           align: widget.textAlign,
           disabled: disabled,
           readonly: widget.readonly,
