@@ -7,11 +7,13 @@ class _PopupOverlay extends StatefulWidget {
     required this.animation,
     this.onEnter,
     required this.popupState,
+    required this.onRemove,
   }) : super(key: key);
 
   final Animation<double> animation;
   final PointerEnterEventListener? onEnter;
   final TPopupState popupState;
+  final VoidCallback onRemove;
 
   @override
   State<_PopupOverlay> createState() => _PopupOverlayState();
@@ -31,12 +33,12 @@ class _PopupOverlayState extends State<_PopupOverlay> {
 
   @override
   void initState() {
+    super.initState();
     levelNotifier = _PopupLevelNotifier({});
     _visible = ValueNotifier(false);
     _isReverse = ValueNotifier(false);
     _updateIgnore();
     widget.animation.addListener(_updateIgnore);
-    super.initState();
   }
 
   @override
@@ -54,6 +56,7 @@ class _PopupOverlayState extends State<_PopupOverlay> {
     widget.animation.removeListener(_updateIgnore);
     _visible.dispose();
     _isReverse.dispose();
+    widget.onRemove();
     super.dispose();
   }
 

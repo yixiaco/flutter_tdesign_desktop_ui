@@ -233,6 +233,12 @@ class _TRippleState extends State<TRipple> with TickerProviderStateMixin {
     final Map<Type, Action<Intent>> actionMap = <Type, Action<Intent>>{
       ActivateIntent: CallbackAction<ActivateIntent>(
         onInvoke: (intent) {
+          if (widget.disabled) {
+            return;
+          }
+          if (widget.selected && !widget.selectedClick) {
+            return;
+          }
           _doSplash();
           _handleTap();
           context.findRenderObject()!.sendSemanticsEvent(const TapSemanticEvent());

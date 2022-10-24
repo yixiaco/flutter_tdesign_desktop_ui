@@ -176,6 +176,9 @@ class _TMaterialStateButtonState extends State<TMaterialStateButton> with Materi
     final Map<Type, Action<Intent>> actionMap = <Type, Action<Intent>>{
       ActivateIntent: CallbackAction<ActivateIntent>(
         onInvoke: (intent) {
+          if (!_isClick) {
+            return;
+          }
           _handleTap();
           context.findRenderObject()!.sendSemanticsEvent(const TapSemanticEvent());
           return null;

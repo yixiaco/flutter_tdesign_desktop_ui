@@ -338,14 +338,16 @@ class _TTagInputState extends TFormItemValidateState<TTagInput> {
                     return data != null;
                   },
                   onAccept: (data) {
+                    var currentIndex = data.currentIndex;
+                    var current = data.current;
+                    effectiveController.moveIndex(currentIndex, index);
                     var tagInputDragSortContext = TagInputDragSortContext(
-                      newTags: [],
-                      currentIndex: data.currentIndex,
-                      current: data.current,
+                      newTags: effectiveController.value,
+                      currentIndex: currentIndex,
+                      current: current,
                       targetIndex: index,
                       target: item,
                     );
-                    effectiveController.moveIndex(data.currentIndex, index);
                     widget.onDragSort?.call(tagInputDragSortContext);
                   },
                 ),
