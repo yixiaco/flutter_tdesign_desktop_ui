@@ -8,12 +8,14 @@ class _PopupOverlay extends StatefulWidget {
     this.onEnter,
     required this.popupState,
     required this.onRemove,
+    required this.focusScopeNode,
   }) : super(key: key);
 
   final Animation<double> animation;
   final PointerEnterEventListener? onEnter;
   final TPopupState popupState;
   final VoidCallback onRemove;
+  final FocusScopeNode focusScopeNode;
 
   @override
   State<_PopupOverlay> createState() => _PopupOverlayState();
@@ -62,6 +64,9 @@ class _PopupOverlayState extends State<_PopupOverlay> {
 
   void _updateIgnore() {
     if (widget.animation.value > 0) {
+      if(widget.popupState.widget.trigger != TPopupTrigger.focus) {
+        widget.focusScopeNode.requestFocus();
+      }
       _visible.value = true;
     } else {
       _visible.value = false;
@@ -89,6 +94,13 @@ class _PopupOverlayState extends State<_PopupOverlay> {
     // 浮层内边距
     var padding = style?.padding ?? EdgeInsets.symmetric(vertical: 4, horizontal: TVar.spacer);
 
+    // 获取定位
+    var box = widget.popupState.context.findRenderObject() as RenderBox;
+    var target = box.localToGlobal(
+      box.size.topLeft(Offset.zero),
+      ancestor: Overlay.of(widget.popupState.context)?.context.findRenderObject(),
+    );
+
     // 当小部件完全不显示时，忽略所有事件
     Widget result = ValueListenableBuilder<bool>(
       builder: (BuildContext context, value, Widget? child) {
@@ -103,7 +115,14 @@ class _PopupOverlayState extends State<_PopupOverlay> {
             maintainState: true,
             maintainAnimation: true,
             // maintainSize : true,
-            child: child!,
+            child: FocusScope(
+              node: widget.focusScopeNode,
+              skipTraversal: true,
+              child: FocusTrap(
+                focusScopeNode: widget.focusScopeNode,
+                child: RepaintBoundary(child: child!),
+              ),
+            ),
           ),
         );
       },
@@ -113,18 +132,28 @@ class _PopupOverlayState extends State<_PopupOverlay> {
         child: ValueListenableBuilder(
           valueListenable: _isReverse,
           builder: (BuildContext context, bool value, Widget? child) {
+            var boxConstraints = style?.constraints;
+            if(boxConstraints == null && style?.followBoxWidth == true) {
+              boxConstraints = BoxConstraints(minWidth: box.size.width);
+            }
             return Container(
               key: _containerKey,
               margin: style?.margin,
               clipBehavior: Clip.antiAlias,
               width: style?.width,
               height: style?.height,
-              constraints: style?.constraints,
+              constraints: boxConstraints,
               transform: style?.transform,
               transformAlignment: style?.transformAlignment,
               decoration: ShapeDecoration(
                 color: bgColorContainer,
-                shadows: [...popupShadow, ...popupTopArrowShadow, ...popupRightArrowShadow, ...popupBottomArrowShadow, ...popupLeftArrowShadow],
+                shadows: [
+                  ...popupShadow,
+                  ...popupTopArrowShadow,
+                  ...popupRightArrowShadow,
+                  ...popupBottomArrowShadow,
+                  ...popupLeftArrowShadow
+                ],
                 shape: BubbleShapeBorder(
                   smooth: 0,
                   arrowQuadraticBezierLength: 0,
@@ -171,13 +200,6 @@ class _PopupOverlayState extends State<_PopupOverlay> {
       );
     }
 
-    // 获取定位
-    var box = widget.popupState.context.findRenderObject() as RenderBox;
-    var target = box.localToGlobal(
-      box.size.topLeft(Offset.zero),
-      ancestor: Overlay.of(widget.popupState.context)?.context.findRenderObject(),
-    );
-
     return Positioned.fill(
       child: CustomSingleChildLayout(
         delegate: _PopupPositionDelegate(
@@ -187,7 +209,9 @@ class _PopupOverlayState extends State<_PopupOverlay> {
           target: _PopupOffset.of(box.size, target),
           callback: (isReverse) {
             SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
-              _isReverse.value = isReverse;
+              if(mounted) {
+                _isReverse.value = isReverse;
+              }
             });
           },
         ),

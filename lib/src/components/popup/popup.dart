@@ -96,8 +96,9 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
   /// 有效显隐值
   ValueNotifier<bool> get effectiveVisible => widget.visible ?? (_visible ??= ValueNotifier(false));
 
-  /// 区域焦点节点
-  final FocusScopeNode _node = FocusScopeNode();
+  /// 焦点节点
+  final FocusNode _node = FocusNode();
+  final FocusScopeNode _popupScopeNode = FocusScopeNode();
 
   /// 动画控制器
   late AnimationController _controller;
@@ -125,6 +126,14 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
 
   _PopupLevel? _popupLevel;
 
+  late Map<Type, Action<Intent>> actions = <Type, Action<Intent>>{
+    DismissIntent: _DismissModalAction(() {
+      _node.unfocus();
+      _popupScopeNode.unfocus();
+      _updateVisible(false);
+    }),
+  };
+
   @override
   void initState() {
     _controller = AnimationController(
@@ -137,6 +146,7 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
     // 初始化显隐
     _showHidePopup();
     _node.addListener(_focusVisible);
+    _popupScopeNode.addListener(_focusVisible);
     super.initState();
   }
 
@@ -156,6 +166,8 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
         }
       }
       // 检查当前浮层的事件
+      _handlePointerBounds(event);
+    } else if (event is PointerUpEvent && widget.trigger.isTrue(focus: true)) {
       _handlePointerBounds(event);
     }
   }
@@ -192,6 +204,10 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
     effectiveVisible.removeListener(_showHidePopup);
     _visible?.dispose();
     _controller.dispose();
+    _node.dispose();
+    _popupScopeNode.dispose();
+    _showTimer?.cancel();
+    _hideTimer?.cancel();
     super.dispose();
   }
 
@@ -263,6 +279,7 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
     _entry = OverlayEntry(builder: (BuildContext context) {
       Widget child = _PopupOverlay(
         key: _overlayKey,
+        focusScopeNode: _popupScopeNode,
         onEnter: (_) {
           if (widget.trigger.isTrue(hover: true)) {
             if (!_controller.isDismissed) _updateVisible(true);
@@ -275,13 +292,18 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
         popupState: this,
         onRemove: () => _removeEntry(force: true),
       );
-      return child;
+      return Actions(
+        actions: actions,
+        child: child,
+      );
     });
     overlayState.insert(_entry!);
   }
 
   /// 销毁浮层对象.不应该直接使用这个方法，而是使用[_hidePopup]
   void _removeEntry({bool force = false}) {
+    _node.unfocus();
+    _popupScopeNode.unfocus();
     if (_existGlobalPointerRoute) {
       // 移除监听全局指针事件
       GestureBinding.instance.pointerRouter.removeGlobalRoute(_globalPointerRoute);
@@ -317,8 +339,8 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
   }
 
   void _focusVisible() {
-    if(widget.trigger == TPopupTrigger.focus){
-      if (_node.hasFocus) {
+    if (widget.trigger == TPopupTrigger.focus) {
+      if (_node.hasFocus || _popupScopeNode.hasFocus) {
         effectiveVisible.value = true;
       } else {
         effectiveVisible.value = false;
@@ -360,11 +382,26 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
         child: widget.child,
       );
     } else if (widget.trigger == TPopupTrigger.focus) {
-      child = FocusScope(
-        node: _node,
+      child = Focus(
+        focusNode: _node,
         child: widget.child,
       );
     }
-    return child;
+    return Actions(
+      actions: actions,
+      child: child,
+    );
+  }
+}
+
+class _DismissModalAction extends DismissAction {
+  _DismissModalAction(this.callback);
+
+  final VoidCallback callback;
+
+  @override
+  Object? invoke(DismissIntent intent) {
+    callback();
+    return null;
   }
 }

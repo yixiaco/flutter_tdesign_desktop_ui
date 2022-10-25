@@ -69,7 +69,7 @@ class _TPopupExampleState extends State<TPopupExample> {
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: const [
-          TButton(themeStyle: TButtonThemeStyle.primary, child: Text('获取焦点时触发')),
+          TInput(autoWidth: true),
           TButton(themeStyle: TButtonThemeStyle.primary, child: Text('获取焦点时触发')),
         ],
       ),
@@ -91,7 +91,7 @@ class _TPopupExampleState extends State<TPopupExample> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: const [
-            SizedBox(width: 100, child: TInput()),
+            TInput(autoWidth: true),
             TButton(themeStyle: TButtonThemeStyle.primary, child: Text('右击时触发')),
             TButton(themeStyle: TButtonThemeStyle.primary, child: Text('右击时触发')),
           ],

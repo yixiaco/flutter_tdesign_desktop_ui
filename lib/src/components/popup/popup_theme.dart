@@ -72,6 +72,7 @@ class TPopupStyle {
     this.constraints,
     this.transform,
     this.transformAlignment,
+    this.followBoxWidth,
   });
 
   /// 浮层背景色
@@ -106,6 +107,9 @@ class TPopupStyle {
   /// 参见:[Transform.alignment]，它由此属性设置。
   final AlignmentGeometry? transformAlignment;
 
+  /// 最小宽度跟随组件大小
+  final bool? followBoxWidth;
+
   TPopupStyle copyWith({
     Color? backgroundColor,
     EdgeInsetsGeometry? padding,
@@ -117,6 +121,7 @@ class TPopupStyle {
     BoxConstraints? constraints,
     Matrix4? transform,
     AlignmentGeometry? transformAlignment,
+    bool? followBoxWidth,
   }) {
     return TPopupStyle(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -129,6 +134,25 @@ class TPopupStyle {
       constraints: constraints ?? this.constraints,
       transform: transform ?? this.transform,
       transformAlignment: transformAlignment ?? this.transformAlignment,
+      followBoxWidth: followBoxWidth ?? this.followBoxWidth,
+    );
+  }
+
+  TPopupStyle merge({
+    TPopupStyle? style,
+  }) {
+    return TPopupStyle(
+      backgroundColor: backgroundColor ?? style?.backgroundColor,
+      padding: padding ?? style?.padding,
+      margin: margin ?? style?.margin,
+      radius: radius ?? style?.radius,
+      border: border ?? style?.border,
+      width: width ?? style?.width,
+      height: height ?? style?.height,
+      constraints: constraints ?? style?.constraints,
+      transform: transform ?? style?.transform,
+      transformAlignment: transformAlignment ?? style?.transformAlignment,
+      followBoxWidth: followBoxWidth ?? style?.followBoxWidth,
     );
   }
 
@@ -146,7 +170,8 @@ class TPopupStyle {
           height == other.height &&
           constraints == other.constraints &&
           transform == other.transform &&
-          transformAlignment == other.transformAlignment;
+          transformAlignment == other.transformAlignment &&
+          followBoxWidth == other.followBoxWidth;
 
   @override
   int get hashCode =>
@@ -159,7 +184,8 @@ class TPopupStyle {
       height.hashCode ^
       constraints.hashCode ^
       transform.hashCode ^
-      transformAlignment.hashCode;
+      transformAlignment.hashCode ^
+      followBoxWidth.hashCode;
 }
 
 /// 浮层出现位置

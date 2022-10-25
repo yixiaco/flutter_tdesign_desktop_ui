@@ -1,20 +1,15 @@
 import 'package:flutter/foundation.dart';
 
-class SelectInputKeys {
+class SelectInputValue {
   final String label;
-  final String id;
-  final String children;
+  final dynamic value;
+  final List<SelectInputValue>? children;
 
-  const SelectInputKeys({
+  const SelectInputValue({
     required this.label,
-    required this.id,
-    required this.children,
+    this.value,
+    this.children,
   });
-
-  @override
-  String toString() {
-    return 'SelectInputKeys{label: $label, id: $id, children: $children}';
-  }
 }
 
 class TSelectInputFocusContext {
@@ -30,16 +25,18 @@ class TSelectInputFocusContext {
   });
 }
 
-class TSelectController<T> extends ChangeNotifier {
-  T _value;
+class TSelectInputController extends ChangeNotifier {}
 
-  TSelectController({
-    required T value,
+class TSelectInputSingleController<T extends SelectInputValue> extends TSelectInputController {
+  T? _value;
+
+  TSelectInputSingleController({
+    T? value,
   }) : _value = value;
 
-  T get value => _value;
+  T? get value => _value;
 
-  set value(T value) {
+  set value(T? value) {
     if (_value != value) {
       _value = value;
       notifyListeners();
@@ -47,6 +44,19 @@ class TSelectController<T> extends ChangeNotifier {
   }
 }
 
-class TSelectMultipleController<T> extends TSelectController<List<T>> {
-  TSelectMultipleController({required super.value});
+class TSelectInputMultipleController<T extends SelectInputValue> extends TSelectInputController {
+  List<T> _value;
+
+  TSelectInputMultipleController({
+    List<T> value = const [],
+  }) : _value = value;
+
+  List<T> get value => _value;
+
+  set value(List<T> value) {
+    if (_value != value) {
+      _value = value;
+      notifyListeners();
+    }
+  }
 }

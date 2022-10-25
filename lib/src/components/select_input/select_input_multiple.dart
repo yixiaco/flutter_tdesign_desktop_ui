@@ -2,10 +2,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
-/// 筛选器输入框
-/// 定义：筛选器通用输入框
-class TSelectInput<T extends SelectInputValue> extends StatefulWidget {
-  const TSelectInput({
+/// 筛选器输入框多选
+class TSelectInputMultiple<T extends SelectInputValue> extends StatefulWidget {
+  const TSelectInputMultiple({
     Key? key,
     this.allowInput = false,
     this.autoWidth = false,
@@ -48,10 +47,7 @@ class TSelectInput<T extends SelectInputValue> extends StatefulWidget {
     this.onMouseleave,
     this.onPopupVisibleChange,
     this.onTagChange,
-  })  : assert(controller == null ||
-            multiple && controller is TSelectInputMultipleController ||
-            !multiple && controller is TSelectInputSingleController),
-        super(key: key);
+  }) : super(key: key);
 
   /// 是否允许输入
   final bool allowInput;
@@ -150,10 +146,11 @@ class TSelectInput<T extends SelectInputValue> extends StatefulWidget {
   final TextAlign textAlign;
 
   /// 全部标签值。值为数组表示多个标签，值为非数组表示单个数值。
-  final TSelectInputController? controller;
+  final TSelectInputMultipleController<T>? controller;
 
   /// 自定义值呈现的全部内容，参数为所有标签的值。
-  final Widget Function(TSelectInputController value, void Function(int index, T item) onClose)? valueDisplay;
+  final Widget Function(TSelectInputMultipleController<T> value, void Function(int index, T item) onClose)?
+      valueDisplay;
 
   /// 失去焦点时触发
   final void Function(TSelectInputFocusContext context)? onBlur;
@@ -162,10 +159,10 @@ class TSelectInput<T extends SelectInputValue> extends StatefulWidget {
   final VoidCallback? onClear;
 
   /// 按键按下 Enter 时触发
-  final void Function(TSelectInputController value, String inputValue)? onEnter;
+  final void Function(TSelectInputMultipleController<T> value, String inputValue)? onEnter;
 
   /// 聚焦时触发
-  final void Function(TSelectInputController value, String inputValue, String tagInputValue)? onFocus;
+  final void Function(TSelectInputMultipleController<T> value, String inputValue, String tagInputValue)? onFocus;
 
   /// 输入框值发生变化时触发，context.trigger 表示触发输入框值变化的来源：文本输入触发、清除按钮触发等
   final void Function(String value, InputValueChangeContext trigger)? onInputChange;
@@ -183,102 +180,58 @@ class TSelectInput<T extends SelectInputValue> extends StatefulWidget {
   final void Function(TagInputChangeContext context)? onTagChange;
 
   @override
-  State<TSelectInput<T>> createState() => _TSelectInputState<T>();
+  State<TSelectInputMultiple<T>> createState() => _TSelectInputMultipleState<T>();
 }
 
-class _TSelectInputState<T extends SelectInputValue> extends State<TSelectInput<T>> {
+class _TSelectInputMultipleState<T extends SelectInputValue> extends State<TSelectInputMultiple<T>> {
+  late TTagInputController _tagInputController;
+
+  TextEditingController? _textController;
+
+  TextEditingController get effectiveTextEditingController =>
+      widget.inputController ?? (_textController ??= TextEditingController(text: widget.defaultInputValue));
+
+  TSelectInputMultipleController<T>? _multipleController;
+
+  TSelectInputMultipleController<T> get effectiveMultipleController =>
+      widget.controller ?? (_multipleController ??= TSelectInputMultipleController<T>());
+
+  @override
+  void initState() {
+    var value = effectiveMultipleController.value;
+    _tagInputController = TTagInputController(value: value.map((e) => e.label).toList());
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _textController?.dispose();
+    _multipleController?.dispose();
+    _tagInputController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (widget.multiple) {
-      return _buildMultiple();
-    } else {
-      return _buildSingle();
-    }
-  }
-
-  /// 构建单选组件
-  Widget _buildSingle() {
-    return TSelectInputSingle<T>(
-      allowInput: !widget.allowInput,
+    return TPopup(
       disabled: widget.disabled,
-      controller: widget.controller as TSelectInputSingleController<T>,
-      readonly: widget.readonly,
-      borderless: widget.borderless,
-      autoWidth: widget.autoWidth,
-      tips: widget.tips,
-      suffix: widget.suffix,
-      label: widget.label,
-      onBlur: widget.onBlur,
-      onFocus: widget.onFocus,
-      placeholder: widget.placeholder,
-      onMouseleave: widget.onMouseleave,
-      onMouseenter: widget.onMouseenter,
-      suffixIcon: widget.suffixIcon,
-      onClear: widget.onClear,
-      clearable: widget.clearable,
-      onEnter: widget.onEnter,
-      status: widget.status,
-      popupStyle: widget.popupStyle,
-      textAlign: widget.textAlign,
-      defaultInputValue: widget.defaultInputValue,
-      destroyOnClose: widget.destroyOnClose,
-      hideDuration: widget.hideDuration,
-      inputController: widget.inputController,
-      loading: widget.loading,
-      onClose: widget.onClose,
-      onInputChange: widget.onInputChange,
-      onOpen: widget.onOpen,
-      onPopupVisibleChange: widget.onPopupVisibleChange,
-      panel: widget.panel,
-      popupVisible: widget.popupVisible,
       showDuration: widget.showDuration,
-      valueDisplay: widget.valueDisplay,
-    );
-  }
-
-  /// 构建多选组件
-  Widget _buildMultiple() {
-    return TSelectInputMultiple<T>(
-      allowInput: !widget.allowInput,
-      disabled: widget.disabled,
-      controller: widget.controller as TSelectInputMultipleController<T>,
-      readonly: widget.readonly,
-      borderless: widget.borderless,
-      tagTheme: widget.tagTheme,
-      tagVariant: widget.tagVariant,
-      autoWidth: widget.autoWidth,
-      collapsedItems: widget.collapsedItems,
-      minCollapsedNum: widget.minCollapsedNum,
-      tips: widget.tips,
-      tag: widget.tag,
-      suffix: widget.suffix,
-      label: widget.label,
-      onBlur: widget.onBlur,
-      onFocus: widget.onFocus,
-      placeholder: widget.placeholder,
-      onMouseleave: widget.onMouseleave,
-      onMouseenter: widget.onMouseenter,
-      suffixIcon: widget.suffixIcon,
-      onClear: widget.onClear,
-      clearable: widget.clearable,
-      onEnter: widget.onEnter,
-      status: widget.status,
-      popupStyle: widget.popupStyle,
-      textAlign: widget.textAlign,
-      defaultInputValue: widget.defaultInputValue,
-      destroyOnClose: widget.destroyOnClose,
       hideDuration: widget.hideDuration,
-      inputController: widget.inputController,
-      loading: widget.loading,
-      onClose: widget.onClose,
-      onInputChange: widget.onInputChange,
       onOpen: widget.onOpen,
-      onPopupVisibleChange: widget.onPopupVisibleChange,
-      onTagChange: widget.onTagChange,
-      panel: widget.panel,
-      popupVisible: widget.popupVisible,
-      showDuration: widget.showDuration,
-      valueDisplay: widget.valueDisplay,
+      onClose: widget.onClose,
+      destroyOnClose: widget.destroyOnClose,
+      visible: widget.popupVisible,
+      style: const TPopupStyle(followBoxWidth: true).merge(style: widget.popupStyle),
+      content: widget.panel,
+      trigger: TPopupTrigger.focus,
+      placement: TPopupPlacement.bottomLeft,
+      child: TTagInput(
+        controller: _tagInputController,
+        readonly: !widget.allowInput || widget.readonly,
+        disabled: widget.disabled,
+        textController: effectiveTextEditingController,
+        autoWidth: widget.autoWidth,
+      ),
     );
   }
 }

@@ -94,6 +94,11 @@ export 'src/components/input_adornment/input_adornment.dart';
 /// 数字输入框
 export 'src/components/input_number/input_number.dart';
 export 'src/components/input_number/type.dart';
+/// 筛选器输入框
+export 'src/components/select_input/select_input.dart';
+export 'src/components/select_input/select_input_multiple.dart';
+export 'src/components/select_input/select_input_single.dart';
+export 'src/components/select_input/type.dart';
 /// 单选框
 export 'src/components/radio/radio.dart';
 export 'src/components/radio/radio_group.dart';

@@ -10,7 +10,7 @@ class TInputNumberExample extends StatefulWidget {
 }
 
 class _TInputNumberExampleState extends State<TInputNumberExample> {
-  String? value0 = '10';
+  int? value0;
   String? value1 = '10';
   String? value2 = '10';
   String? value3 = '10';
@@ -32,14 +32,13 @@ class _TInputNumberExampleState extends State<TInputNumberExample> {
             authWidth = value!;
           }),
         ),
-        TInputNumber<String>(
+        TInputNumber<int>(
           value: value0,
           max: 5,
           min: -5,
           autoWidth: authWidth,
           autocorrect: false,
           // readonly: true,
-          status: TInputStatus.warning,
           onChange: (value) {
             print(value);
             setState(() {
