@@ -12,121 +12,112 @@ class TPopupExample extends StatefulWidget {
 }
 
 class _TPopupExampleState extends State<TPopupExample> {
-  ValueNotifier<int> i = ValueNotifier(0);
-  ValueNotifier<Color> backgroundColor = ValueNotifier(Colors.blue);
-  late var children2 = [
-    TPopup(
-      trigger: TPopupTrigger.hover,
-      placement: TPopupPlacement.leftBottom,
-      showArrow: true,
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: const [
-          TButton(themeStyle: TButtonThemeStyle.primary, child: Text('悬浮式触发')),
-          TButton(themeStyle: TButtonThemeStyle.primary, child: Text('悬浮式触发')),
-        ],
-      ),
-      child: const TButton(
-        themeStyle: TButtonThemeStyle.primary,
-        child: Text('悬浮式触发'),
-      ),
-    ),
-    ValueListenableBuilder(
-      valueListenable: backgroundColor,
-      builder: (BuildContext context, Color value, Widget? child) {
-        return TPopup(
-          placement: TPopupPlacement.topLeft,
-          trigger: TPopupTrigger.click,
-          showArrow: true,
-          onOpen: () {
-            backgroundColor.value = Colors.primaries[Random().nextInt(Colors.primaries.length)];
-          },
-          style: TPopupStyle(
-            backgroundColor: backgroundColor.value,
-          ),
-          builderContent: (context) {
-            return ValueListenableBuilder(
-              valueListenable: i,
-              builder: (BuildContext context, int value, Widget? child) {
-                return Text('这是一个弹出框$value');
-              },
-            );
-          },
-          child: TButton(
-            themeStyle: TButtonThemeStyle.primary,
-            onPressed: () {
-              i.value++;
-            },
-            child: const Text('点击时触发'),
-          ),
-        );
-      },
-    ),
-    TPopup(
-      trigger: TPopupTrigger.focus,
-      placement: TPopupPlacement.right,
-      showArrow: true,
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: const [
-          TInput(autoWidth: true),
-          TButton(themeStyle: TButtonThemeStyle.primary, child: Text('获取焦点时触发')),
-        ],
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: const [
-          SizedBox(width: 150, child: TInput(placeholder: '获取焦点时触发1')),
-          SizedBox(width: 150, child: TInput(placeholder: '获取焦点时触发2')),
-        ],
-      ),
-    ),
-    TPopup(
-      trigger: TPopupTrigger.contextMenu,
-      placement: TPopupPlacement.bottom,
-      destroyOnClose: false,
-      showArrow: true,
-      content: Material(
-        color: Colors.transparent,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: const [
-            TInput(autoWidth: true),
-            TButton(themeStyle: TButtonThemeStyle.primary, child: Text('右击时触发')),
-            TButton(themeStyle: TButtonThemeStyle.primary, child: Text('右击时触发')),
-          ],
-        ),
-      ),
-      child: const TButton(
-        themeStyle: TButtonThemeStyle.primary,
-        child: Text('右击时触发'),
-      ),
-    ),
-  ];
+  late ValueNotifier<int> i;
+  late ValueNotifier<Color> backgroundColor;
 
-  void random() {
-    setState(() {
-      var random = Random();
-      for (int i = 0; i < children2.length; i++) {
-        var child = children2[i];
-        var nextInt = random.nextInt(children2.length);
-        children2[i] = children2[nextInt];
-        children2[nextInt] = child;
-      }
-    });
+  @override
+  void initState() {
+    i = ValueNotifier(0);
+    backgroundColor = ValueNotifier(Colors.blue);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    i.dispose();
+    backgroundColor.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        TButton(
-          onPressed: () {
-            random();
-          },
-          child: const Text('触发随机'),
+        TPopup(
+          trigger: TPopupTrigger.hover,
+          placement: TPopupPlacement.leftBottom,
+          showArrow: true,
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: const [
+              TButton(themeStyle: TButtonThemeStyle.primary, child: Text('悬浮式触发')),
+              TButton(themeStyle: TButtonThemeStyle.primary, child: Text('悬浮式触发')),
+            ],
+          ),
+          child: const TButton(
+            themeStyle: TButtonThemeStyle.primary,
+            child: Text('悬浮式触发'),
+          ),
         ),
-        ...children2,
+        ValueListenableBuilder(
+          valueListenable: backgroundColor,
+          builder: (BuildContext context, Color value, Widget? child) {
+            return TPopup(
+              placement: TPopupPlacement.topLeft,
+              trigger: TPopupTrigger.click,
+              showArrow: true,
+              onOpen: () {
+                backgroundColor.value = Colors.primaries[Random().nextInt(Colors.primaries.length)];
+              },
+              style: TPopupStyle(
+                backgroundColor: backgroundColor.value,
+              ),
+              content: ValueListenableBuilder(
+                valueListenable: i,
+                builder: (BuildContext context, int value, Widget? child) {
+                  return Text('这是一个弹出框$value');
+                },
+              ),
+              child: TButton(
+                themeStyle: TButtonThemeStyle.primary,
+                onPressed: () {
+                  i.value++;
+                },
+                child: const Text('点击时触发'),
+              ),
+            );
+          },
+        ),
+        TPopup(
+          trigger: TPopupTrigger.focus,
+          placement: TPopupPlacement.right,
+          showArrow: true,
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: const [
+              TInput(autoWidth: true),
+              TButton(themeStyle: TButtonThemeStyle.primary, child: Text('获取焦点时触发')),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: const [
+              SizedBox(width: 150, child: TInput(placeholder: '获取焦点时触发1')),
+              SizedBox(width: 150, child: TInput(placeholder: '获取焦点时触发2')),
+            ],
+          ),
+        ),
+        TPopup(
+          trigger: TPopupTrigger.contextMenu,
+          placement: TPopupPlacement.bottom,
+          destroyOnClose: false,
+          showArrow: true,
+          content: Material(
+            color: Colors.transparent,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: const [
+                TInput(autoWidth: true),
+                TButton(themeStyle: TButtonThemeStyle.primary, child: Text('右击时触发')),
+                TButton(themeStyle: TButtonThemeStyle.primary, child: Text('右击时触发')),
+              ],
+            ),
+          ),
+          child: const TButton(
+            themeStyle: TButtonThemeStyle.primary,
+            child: Text('右击时触发'),
+          ),
+        ),
       ],
     );
   }

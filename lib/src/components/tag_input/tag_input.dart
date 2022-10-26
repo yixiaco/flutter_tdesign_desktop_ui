@@ -24,6 +24,7 @@ class TTagInput extends TFormItemValidate {
     this.minCollapsedNum = 0,
     this.placeholder,
     this.readonly = false,
+    this.allowInput = true,
     this.size,
     this.status = TInputStatus.defaultStatus,
     this.suffix,
@@ -47,6 +48,7 @@ class TTagInput extends TFormItemValidate {
     this.tagVariant = TTagVariant.dark,
     this.textAlign = TextAlign.left,
     this.borderless = false,
+    this.enterClearInput = true,
     FocusNode? focusNode,
     String? name,
   }) : super(key: key, name: name, focusNode: focusNode);
@@ -90,6 +92,9 @@ class TTagInput extends TFormItemValidate {
   /// 只读状态，值为真会隐藏标签移除按钮和输入框
   final bool readonly;
 
+  /// 是否允许输入
+  final bool allowInput;
+
   /// 尺寸
   final TComponentSize? size;
 
@@ -103,7 +108,7 @@ class TTagInput extends TFormItemValidate {
   final Widget? suffixIcon;
 
   /// 自定义标签的内部内容，每一个标签的当前值。注意和 valueDisplay 区分，valueDisplay 是用来定义全部标签内容，而非某一个标签
-  final String Function(String value)? tag;
+  final String Function(int index, String value)? tag;
 
   /// 输入框下方提示文本，会根据不同的 status 呈现不同的样式
   final Widget? tips;
@@ -159,6 +164,9 @@ class TTagInput extends TFormItemValidate {
   /// 无边框模式
   final bool borderless;
 
+  /// 按下enter事件清除input文本
+  final bool enterClearInput;
+
   @override
   TFormItemValidateState<TTagInput> createState() => _TTagInputState();
 }
@@ -210,7 +218,7 @@ class _TTagInputState extends TFormItemValidateState<TTagInput> {
           borderless: widget.borderless,
           align: widget.textAlign,
           disabled: disabled,
-          readonly: widget.readonly,
+          readonly: !widget.allowInput || widget.readonly,
           controller: effectiveTextController,
           focusNode: effectiveFocusNode,
           autoWidth: widget.autoWidth,
@@ -250,37 +258,6 @@ class _TTagInputState extends TFormItemValidateState<TTagInput> {
     );
   }
 
-  /// 处理退格键
-  void _handleBackspace(String text, KeyEvent event) {
-    if (event.physicalKey == PhysicalKeyboardKey.backspace && text.isEmpty) {
-      var lastIndex = effectiveController.value.lastIndex;
-      var item = effectiveController.value[lastIndex];
-      widget.onRemove?.call(TagInputRemoveContext(
-        value: effectiveController.value,
-        index: lastIndex,
-        item: item,
-        trigger: TagInputRemoveTrigger.backspace,
-      ));
-      effectiveController.removeLast();
-      _handleValueChange(TagInputTriggerSource.backspace, index: lastIndex, item: item);
-    }
-  }
-
-  /// 处理回车键
-  void _handleEnter(String text) {
-    if (text.isNotEmpty) {
-      effectiveTextController.clear();
-      effectiveFocusNode.requestFocus();
-      if (widget.max == null || effectiveController.value.length < widget.max!) {
-        effectiveController.add(text);
-      }
-      _handleClearChange();
-      widget.onInputChange?.call(text, InputValueChangeContext.enter);
-      _handleValueChange(TagInputTriggerSource.enter, index: effectiveController.value.lastIndex, item: text);
-    }
-    widget.onEnter?.call(effectiveController.value);
-  }
-
   /// 构建标签
   List<Widget> _buildTags() {
     List<Widget> defaultValueDisplay(List<String> value, void Function(int index, String item) onClose) {
@@ -294,7 +271,7 @@ class _TTagInputState extends TFormItemValidateState<TTagInput> {
           closable: !disabled && !widget.readonly,
           theme: widget.tagTheme,
           variant: widget.tagVariant,
-          child: Text(widget.tag?.call(item) ?? item),
+          child: Text(widget.tag?.call(index, item) ?? item),
           onClose: () {
             onClose(index, item);
           },
@@ -373,6 +350,39 @@ class _TTagInputState extends TFormItemValidateState<TTagInput> {
     }
 
     return (widget.valueDisplay ?? defaultValueDisplay).call(effectiveController.value, _tagRemove);
+  }
+
+  /// 处理退格键
+  void _handleBackspace(String text, KeyEvent event) {
+    if (event.physicalKey == PhysicalKeyboardKey.backspace && text.isEmpty) {
+      var lastIndex = effectiveController.value.lastIndex;
+      var item = effectiveController.value[lastIndex];
+      effectiveController.removeLast();
+      widget.onRemove?.call(TagInputRemoveContext(
+        value: effectiveController.value,
+        index: lastIndex,
+        item: item,
+        trigger: TagInputRemoveTrigger.backspace,
+      ));
+      _handleValueChange(TagInputTriggerSource.backspace, index: lastIndex, item: item);
+    }
+  }
+
+  /// 处理回车键
+  void _handleEnter(String text) {
+    if (text.isNotEmpty) {
+      if(widget.enterClearInput) {
+        effectiveTextController.clear();
+      }
+      effectiveFocusNode.requestFocus();
+      if (widget.max == null || effectiveController.value.length < widget.max!) {
+        effectiveController.add(text);
+      }
+      _handleClearChange();
+      widget.onInputChange?.call(text, InputValueChangeContext.enter);
+      _handleValueChange(TagInputTriggerSource.enter, index: effectiveController.value.lastIndex, item: text);
+    }
+    widget.onEnter?.call(effectiveController.value);
   }
 
   /// 标签删除事件

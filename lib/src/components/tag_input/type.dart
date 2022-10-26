@@ -1,4 +1,3 @@
-import 'package:dartx/dartx.dart';
 import 'package:flutter/foundation.dart';
 
 enum TTagExcessTagsDisplayType {
@@ -88,28 +87,40 @@ enum TagInputRemoveTrigger {
 class TTagInputController extends ChangeNotifier {
   List<String> _value;
 
+  /// 是否允许值变更
+  bool update;
+
   TTagInputController({
     List<String>? value,
+    this.update = true,
   }) : _value = value ?? [];
 
   List<String> get value => _value;
 
   set value(List<String> value) {
-    if (!_value.contentEquals(value)) {
+    if (update) {
       _value = value;
       notifyListeners();
     }
   }
 
+  /// 强制更新
+  void forceUpdate(List<String> value) {
+    _value = value;
+    notifyListeners();
+  }
+
   /// 添加
   void add(String value) {
-    _value.add(value);
-    notifyListeners();
+    if (update) {
+      _value.add(value);
+      notifyListeners();
+    }
   }
 
   /// 删除指定下标
   void removeAt(int index) {
-    if(index >= 0 && index < _value.length) {
+    if (update && index >= 0 && index < _value.length) {
       _value.removeAt(index);
       notifyListeners();
     }
@@ -117,13 +128,15 @@ class TTagInputController extends ChangeNotifier {
 
   /// 添加全部
   void addAll(List<String> value) {
-    _value.addAll(value);
-    notifyListeners();
+    if (update) {
+      _value.addAll(value);
+      notifyListeners();
+    }
   }
 
   /// 删除最后一项
   void removeLast() {
-    if (_value.isNotEmpty) {
+    if (update && _value.isNotEmpty) {
       _value.removeLast();
       notifyListeners();
     }
@@ -131,7 +144,7 @@ class TTagInputController extends ChangeNotifier {
 
   /// 将旧下标中的数据移动到新下标中
   void moveIndex(int olIndex, int newIndex) {
-    if(olIndex >= 0 && olIndex < _value.length && newIndex >= 0 && newIndex < _value.length) {
+    if (update) {
       var value = _value.removeAt(olIndex);
       _value.insert(newIndex, value);
       notifyListeners();
@@ -140,7 +153,7 @@ class TTagInputController extends ChangeNotifier {
 
   /// 清除全部
   void clear() {
-    if (_value.isNotEmpty) {
+    if (update && _value.isNotEmpty) {
       _value = [];
       notifyListeners();
     }

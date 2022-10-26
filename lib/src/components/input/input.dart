@@ -184,7 +184,8 @@ class TInput extends TFormItemValidate {
   /// 输入框约束（不包含前缀、后缀）
   final BoxConstraints? inputConstraints;
 
-  /// 可换行，前缀会、输入框在[Wrap]包装下换行，后缀单独居中显示
+  /// 前缀可换行，输入框会在[Wrap]包装下换行，后缀单独居中显示
+  /// 换行前缀应该在[prefixLabels]中，以便进行布局计算
   final bool breakLine;
 
   /// 边框内边距

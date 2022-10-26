@@ -4,7 +4,7 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// 筛选器输入框
 /// 定义：筛选器通用输入框
-class TSelectInput<T extends SelectInputValue> extends StatefulWidget {
+class TSelectInput<T extends SelectInputValue> extends StatelessWidget {
   const TSelectInput({
     Key? key,
     this.size,
@@ -22,6 +22,9 @@ class TSelectInput<T extends SelectInputValue> extends StatefulWidget {
     this.multiple = false,
     this.panel,
     this.placeholder,
+    this.placement,
+    this.trigger,
+    this.showArrow,
     this.onOpen,
     this.onClose,
     this.showDuration = const Duration(milliseconds: 250),
@@ -43,7 +46,8 @@ class TSelectInput<T extends SelectInputValue> extends StatefulWidget {
     this.onDragSort,
     this.max,
     this.controller,
-    this.valueDisplay,
+    this.singleValueDisplay,
+    this.multipleValueDisplay,
     this.onBlur,
     this.onClear,
     this.onEnter,
@@ -53,6 +57,8 @@ class TSelectInput<T extends SelectInputValue> extends StatefulWidget {
     this.onMouseleave,
     this.onPopupVisibleChange,
     this.onTagChange,
+    this.focusNode,
+    this.autofocus = false,
   })  : assert(controller == null ||
             multiple && controller is TSelectInputMultipleController ||
             !multiple && controller is TSelectInputSingleController),
@@ -106,6 +112,15 @@ class TSelectInput<T extends SelectInputValue> extends StatefulWidget {
   final String? placeholder;
 
   /// Popup 浮层组件属性
+  /// 浮层出现位置
+  final TPopupPlacement? placement;
+
+  /// 触发浮层出现的方式
+  final TPopupTrigger? trigger;
+
+  /// 是否显示浮层箭头
+  final bool? showArrow;
+
   /// 打开事件
   final TCallback? onOpen;
 
@@ -141,7 +156,7 @@ class TSelectInput<T extends SelectInputValue> extends StatefulWidget {
   final Widget? suffixIcon;
 
   /// 自定义标签的内部内容，每一个标签的当前值。注意和 valueDisplay 区分，valueDisplay 是用来定义全部标签内容，而非某一个标签
-  final String Function(String value)? tag;
+  final String Function(int index, T value)? tag;
 
   /// 输入框下方提示文本，会根据不同的 status 呈现不同的样式
   final Widget? tips;
@@ -173,10 +188,13 @@ class TSelectInput<T extends SelectInputValue> extends StatefulWidget {
   final TSelectInputController? controller;
 
   /// 自定义值呈现的全部内容，参数为所有标签的值。
-  final Widget Function(dynamic value, void Function(int index, T item) onClose)? valueDisplay;
+  final Widget Function(T value, void Function(int index, T item) onClose)? singleValueDisplay;
+
+  /// 自定义值呈现的全部内容，参数为所有标签的值。
+  final List<Widget> Function(List<T> value, void Function(int index, T item) onClose)? multipleValueDisplay;
 
   /// 失去焦点时触发
-  final void Function(TSelectInputFocusContext context)? onBlur;
+  final void Function(dynamic value, TSelectInputFocusContext context)? onBlur;
 
   /// 清空按钮点击时触发
   final VoidCallback? onClear;
@@ -202,14 +220,15 @@ class TSelectInput<T extends SelectInputValue> extends StatefulWidget {
   /// 值变化时触发，参数 context.trigger 表示数据变化的触发来源；context.index 指当前变化项的下标；context.item 指当前变化项
   final void Function(dynamic value, TagInputChangeContext context)? onTagChange;
 
-  @override
-  State<TSelectInput<T>> createState() => _TSelectInputState<T>();
-}
+  /// 焦点
+  final FocusNode? focusNode;
 
-class _TSelectInputState<T extends SelectInputValue> extends State<TSelectInput<T>> {
+  /// 自动聚焦
+  final bool autofocus;
+
   @override
   Widget build(BuildContext context) {
-    if (widget.multiple) {
+    if (multiple) {
       return _buildMultiple();
     } else {
       return _buildSingle();
@@ -219,90 +238,93 @@ class _TSelectInputState<T extends SelectInputValue> extends State<TSelectInput<
   /// 构建单选组件
   Widget _buildSingle() {
     return TSingleSelectInput<T>(
-      size: widget.size,
-      allowInput: !widget.allowInput,
-      disabled: widget.disabled,
-      controller: widget.controller as TSelectInputSingleController<T>,
-      readonly: widget.readonly,
-      borderless: widget.borderless,
-      autoWidth: widget.autoWidth,
-      tips: widget.tips,
-      suffix: widget.suffix,
-      label: widget.label,
-      onBlur: widget.onBlur,
+      size: size,
+      allowInput: allowInput,
+      disabled: disabled,
+      controller: controller as TSelectInputSingleController<T>,
+      readonly: readonly,
+      borderless: borderless,
+      autoWidth: autoWidth,
+      tips: tips,
+      suffix: suffix,
+      label: label,
+      onBlur: onBlur,
       onFocus: (value, inputValue) {
-        widget.onFocus?.call(value, inputValue, null);
+        onFocus?.call(value, inputValue, null);
       },
-      placeholder: widget.placeholder,
-      onMouseleave: widget.onMouseleave,
-      onMouseenter: widget.onMouseenter,
-      suffixIcon: widget.suffixIcon,
-      onClear: widget.onClear,
-      clearable: widget.clearable,
-      onEnter: widget.onEnter,
-      status: widget.status,
-      popupStyle: widget.popupStyle,
-      textAlign: widget.textAlign,
-      defaultInputValue: widget.defaultInputValue,
-      destroyOnClose: widget.destroyOnClose,
-      hideDuration: widget.hideDuration,
-      inputController: widget.inputController,
-      loading: widget.loading,
-      onClose: widget.onClose,
-      onInputChange: widget.onInputChange,
-      onOpen: widget.onOpen,
-      onPopupVisibleChange: widget.onPopupVisibleChange,
-      panel: widget.panel,
-      popupVisible: widget.popupVisible,
-      showDuration: widget.showDuration,
-      valueDisplay: widget.valueDisplay,
+      placeholder: placeholder,
+      onMouseleave: onMouseleave,
+      onMouseenter: onMouseenter,
+      suffixIcon: suffixIcon,
+      onClear: onClear,
+      clearable: clearable,
+      onEnter: onEnter,
+      status: status,
+      popupStyle: popupStyle,
+      textAlign: textAlign,
+      defaultInputValue: defaultInputValue,
+      destroyOnClose: destroyOnClose,
+      hideDuration: hideDuration,
+      inputController: inputController,
+      loading: loading,
+      onClose: onClose,
+      onInputChange: onInputChange,
+      onOpen: onOpen,
+      onPopupVisibleChange: onPopupVisibleChange,
+      panel: panel,
+      popupVisible: popupVisible,
+      showDuration: showDuration,
+      focusNode: focusNode,
+      autofocus: autofocus,
     );
   }
 
   /// 构建多选组件
   Widget _buildMultiple() {
     return TMultipleSelectInput<T>(
-      size: widget.size,
-      allowInput: widget.allowInput,
-      disabled: widget.disabled,
-      controller: widget.controller as TSelectInputMultipleController<T>,
-      readonly: widget.readonly,
-      borderless: widget.borderless,
-      tagTheme: widget.tagTheme,
-      tagVariant: widget.tagVariant,
-      autoWidth: widget.autoWidth,
-      collapsedItems: widget.collapsedItems,
-      minCollapsedNum: widget.minCollapsedNum,
-      tips: widget.tips,
-      tag: widget.tag,
-      suffix: widget.suffix,
-      label: widget.label,
-      onBlur: widget.onBlur,
-      onFocus: widget.onFocus,
-      placeholder: widget.placeholder,
-      onMouseleave: widget.onMouseleave,
-      onMouseenter: widget.onMouseenter,
-      suffixIcon: widget.suffixIcon,
-      onClear: widget.onClear,
-      clearable: widget.clearable,
-      onEnter: widget.onEnter,
-      status: widget.status,
-      popupStyle: widget.popupStyle,
-      textAlign: widget.textAlign,
-      defaultInputValue: widget.defaultInputValue,
-      destroyOnClose: widget.destroyOnClose,
-      hideDuration: widget.hideDuration,
-      inputController: widget.inputController,
-      loading: widget.loading,
-      onClose: widget.onClose,
-      onInputChange: widget.onInputChange,
-      onOpen: widget.onOpen,
-      onPopupVisibleChange: widget.onPopupVisibleChange,
-      onTagChange: widget.onTagChange,
-      panel: widget.panel,
-      popupVisible: widget.popupVisible,
-      showDuration: widget.showDuration,
-      valueDisplay: widget.valueDisplay,
+      size: size,
+      allowInput: allowInput,
+      disabled: disabled,
+      controller: controller as TSelectInputMultipleController<T>,
+      readonly: readonly,
+      borderless: borderless,
+      tagTheme: tagTheme,
+      tagVariant: tagVariant,
+      autoWidth: autoWidth,
+      collapsedItems: collapsedItems,
+      minCollapsedNum: minCollapsedNum,
+      tips: tips,
+      tag: tag,
+      suffix: suffix,
+      label: label,
+      onBlur: onBlur,
+      onFocus: onFocus,
+      placeholder: placeholder,
+      onMouseleave: onMouseleave,
+      onMouseenter: onMouseenter,
+      suffixIcon: suffixIcon,
+      onClear: onClear,
+      clearable: clearable,
+      onEnter: onEnter,
+      status: status,
+      popupStyle: popupStyle,
+      textAlign: textAlign,
+      defaultInputValue: defaultInputValue,
+      destroyOnClose: destroyOnClose,
+      hideDuration: hideDuration,
+      inputController: inputController,
+      loading: loading,
+      onClose: onClose,
+      onInputChange: onInputChange,
+      onOpen: onOpen,
+      onPopupVisibleChange: onPopupVisibleChange,
+      onTagChange: onTagChange,
+      panel: panel,
+      popupVisible: popupVisible,
+      showDuration: showDuration,
+      valueDisplay: multipleValueDisplay,
+      focusNode: focusNode,
+      autofocus: autofocus,
     );
   }
 }

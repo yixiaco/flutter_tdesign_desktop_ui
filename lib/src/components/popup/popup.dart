@@ -34,11 +34,9 @@ class TPopup extends StatefulWidget {
     this.showDuration = const Duration(milliseconds: 250),
     this.hideDuration = const Duration(milliseconds: 150),
     this.destroyOnClose = true,
-    this.builderContent,
+    this.hideEmptyPopup = false,
     this.style,
-  })  : assert(!(content != null && builderContent != null), 'content和builderContent只能给定一个'),
-        assert(!(content == null && builderContent == null), 'content或builderContent不能为空'),
-        super(key: key);
+  }) : super(key: key);
 
   /// 浮层出现位置
   final TPopupPlacement placement;
@@ -79,8 +77,8 @@ class TPopup extends StatefulWidget {
   /// 因为一般不需要维护浮层内容的状态，这可以显著提升运行速度
   final bool destroyOnClose;
 
-  /// 使用build创建浮层
-  final WidgetBuilder? builderContent;
+  /// 浮层是否隐藏空内容，默认不隐藏
+  final bool hideEmptyPopup;
 
   /// 浮层样式
   final TPopupStyle? style;
@@ -252,6 +250,10 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
     }
     _showTimer?.cancel();
     _showTimer = null;
+    assert(widget.content != null || widget.hideEmptyPopup);
+    if (widget.content == null && widget.hideEmptyPopup) {
+      return;
+    }
     if (_entry == null) {
       _createEntry();
     }
@@ -354,16 +356,7 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
     if (widget.disabled) {
       return child;
     }
-    // 窗口变更时，通知到组件
-    MediaQuery.of(context);
-    // 在下一帧时，更新浮层
-    if (_overlayKey.currentState != null) {
-      SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
-        if (mounted && (_overlayKey.currentState?.mounted ?? false)) {
-          _overlayKey.currentState?.setState(() {});
-        }
-      });
-    }
+    _notifyPopupUpdate();
     if (widget.trigger == TPopupTrigger.hover) {
       child = MouseRegion(
         hitTestBehavior: HitTestBehavior.translucent,
@@ -387,10 +380,30 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
         child: widget.child,
       );
     }
-    return Actions(
-      actions: actions,
-      child: child,
+    return NotificationListener<SizeChangedLayoutNotification>(
+      onNotification: (notification) {
+        _notifyPopupUpdate();
+        return false;
+      },
+      child: SizeChangedLayoutNotifier(
+        child: Actions(
+          actions: actions,
+          child: child,
+        ),
+      ),
     );
+  }
+
+  /// 当布局变更时，通知到浮层
+  void _notifyPopupUpdate() {
+    // 在下一帧时，更新浮层
+    if (_overlayKey.currentState != null) {
+      SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+        if (mounted && (_overlayKey.currentState?.mounted ?? false)) {
+          _overlayKey.currentState?.setState(() {});
+        }
+      });
+    }
   }
 }
 

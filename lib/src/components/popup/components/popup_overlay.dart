@@ -193,7 +193,7 @@ class _PopupOverlayState extends State<_PopupOverlay> {
               child: child,
             );
           },
-          child: currentPopupWidget.content ?? currentPopupWidget.builderContent?.call(context),
+          child: currentPopupWidget.content,
         ),
       ),
     );

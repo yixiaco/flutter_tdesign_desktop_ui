@@ -17,11 +17,11 @@ class TSelectInputFocusContext {
   String inputValue;
 
   /// 表示标签输入框的值
-  List<String> tagInputValue;
+  List<String>? tagInputValue;
 
   TSelectInputFocusContext({
     required this.inputValue,
-    required this.tagInputValue,
+    this.tagInputValue,
   });
 }
 
@@ -66,4 +66,14 @@ class TSelectInputMultipleController<T extends SelectInputValue> extends TSelect
     notifyListeners();
   }
 
+  /// 删除下标项
+  void removeAt(int index) {
+    _value.removeAt(index);
+    notifyListeners();
+  }
+
+  void clear() {
+    _value.clear();
+    notifyListeners();
+  }
 }

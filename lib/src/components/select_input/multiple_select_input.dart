@@ -18,9 +18,11 @@ class TMultipleSelectInput<T extends SelectInputValue> extends StatefulWidget {
     this.label,
     this.loading = false,
     this.minCollapsedNum = 0,
-    this.multiple = false,
     this.panel,
     this.placeholder,
+    this.placement,
+    this.trigger,
+    this.showArrow,
     this.onOpen,
     this.onClose,
     this.showDuration = const Duration(milliseconds: 250),
@@ -52,6 +54,8 @@ class TMultipleSelectInput<T extends SelectInputValue> extends StatefulWidget {
     this.onMouseleave,
     this.onPopupVisibleChange,
     this.onTagChange,
+    this.focusNode,
+    this.autofocus = false,
   }) : super(key: key);
 
   /// 尺寸
@@ -92,9 +96,6 @@ class TMultipleSelectInput<T extends SelectInputValue> extends StatefulWidget {
   /// 最小折叠数量，用于标签数量过多的情况下折叠选中项，超出该数值的选中项折叠。值为 0 则表示不折叠
   final int minCollapsedNum;
 
-  /// 是否为多选模式，默认为单选
-  final bool multiple;
-
   /// 下拉框内容，可完全自定义
   final Widget? panel;
 
@@ -102,6 +103,15 @@ class TMultipleSelectInput<T extends SelectInputValue> extends StatefulWidget {
   final String? placeholder;
 
   /// Popup 浮层组件属性
+  /// 浮层出现位置
+  final TPopupPlacement? placement;
+
+  /// 触发浮层出现的方式
+  final TPopupTrigger? trigger;
+
+  /// 是否显示浮层箭头
+  final bool? showArrow;
+
   /// 打开事件
   final TCallback? onOpen;
 
@@ -137,7 +147,7 @@ class TMultipleSelectInput<T extends SelectInputValue> extends StatefulWidget {
   final Widget? suffixIcon;
 
   /// 自定义标签的内部内容，每一个标签的当前值。注意和 valueDisplay 区分，valueDisplay 是用来定义全部标签内容，而非某一个标签
-  final String Function(String value)? tag;
+  final String Function(int index, T value)? tag;
 
   /// 输入框下方提示文本，会根据不同的 status 呈现不同的样式
   final Widget? tips;
@@ -169,11 +179,10 @@ class TMultipleSelectInput<T extends SelectInputValue> extends StatefulWidget {
   final TSelectInputMultipleController<T>? controller;
 
   /// 自定义值呈现的全部内容，参数为所有标签的值。
-  final Widget Function(List<T> value, void Function(int index, T item) onClose)?
-      valueDisplay;
+  final List<Widget> Function(List<T> value, void Function(int index, T item) onClose)? valueDisplay;
 
   /// 失去焦点时触发
-  final void Function(TSelectInputFocusContext context)? onBlur;
+  final void Function(List<T> value, TSelectInputFocusContext context)? onBlur;
 
   /// 清空按钮点击时触发
   final VoidCallback? onClear;
@@ -199,6 +208,12 @@ class TMultipleSelectInput<T extends SelectInputValue> extends StatefulWidget {
   /// 值变化时触发，参数 context.trigger 表示数据变化的触发来源；context.index 指当前变化项的下标；context.item 指当前变化项
   final void Function(List<T> value, TagInputChangeContext context)? onTagChange;
 
+  /// 焦点
+  final FocusNode? focusNode;
+
+  /// 自动聚焦
+  final bool autofocus;
+
   @override
   State<TMultipleSelectInput<T>> createState() => _TMultipleSelectInputState<T>();
 }
@@ -219,40 +234,66 @@ class _TMultipleSelectInputState<T extends SelectInputValue> extends State<TMult
   @override
   void initState() {
     var value = effectiveMultipleController.value;
-    _tagInputController = TTagInputController(value: value.map((e) => e.label).toList());
+    _tagInputController = TTagInputController(value: value.map((e) => e.label).toList(), update: false);
+    effectiveMultipleController.addListener(_handleChange);
     super.initState();
   }
 
   @override
+  void didUpdateWidget(covariant TMultipleSelectInput<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.controller != oldWidget.controller) {
+      (oldWidget.controller ?? _multipleController)?.removeListener(_handleChange);
+      (widget.controller ?? _multipleController)?.addListener(_handleChange);
+    }
+  }
+
+  @override
   void dispose() {
+    effectiveMultipleController.removeListener(_handleChange);
     _textController?.dispose();
     _multipleController?.dispose();
     _tagInputController.dispose();
     super.dispose();
   }
 
+  void _handleChange() {
+    _tagInputController.forceUpdate(effectiveMultipleController.value.map((e) => e.label).toList());
+  }
+
   @override
   Widget build(BuildContext context) {
     return TPopup(
-      disabled: widget.disabled,
+      disabled: widget.disabled || widget.readonly,
       showDuration: widget.showDuration,
       hideDuration: widget.hideDuration,
-      onOpen: widget.onOpen,
-      onClose: widget.onClose,
+      onOpen: () {
+        widget.onOpen?.call();
+        widget.onPopupVisibleChange?.call(true);
+      },
+      onClose: () {
+        widget.onClose?.call();
+        widget.onPopupVisibleChange?.call(false);
+      },
       destroyOnClose: widget.destroyOnClose,
       visible: widget.popupVisible,
       style: const TPopupStyle(followBoxWidth: true).merge(style: widget.popupStyle),
       content: widget.panel,
-      trigger: TPopupTrigger.focus,
-      placement: TPopupPlacement.bottomLeft,
+      trigger: widget.trigger ?? TPopupTrigger.focus,
+      placement: widget.placement ?? TPopupPlacement.bottomLeft,
+      showArrow: widget.showArrow ?? false,
+      hideEmptyPopup: true,
       child: TTagInput(
         controller: _tagInputController,
-        readonly: !widget.allowInput || widget.readonly,
+        readonly: widget.readonly,
+        allowInput: widget.allowInput,
         disabled: widget.disabled,
         textController: effectiveTextEditingController,
         autoWidth: widget.autoWidth,
         tips: widget.tips,
         onInputChange: widget.onInputChange,
+        // 筛选器统一特性：筛选器按下回车时不清空输入框
+        enterClearInput: false,
         textAlign: widget.textAlign,
         status: widget.status,
         onEnter: (value) {
@@ -267,12 +308,15 @@ class _TMultipleSelectInputState<T extends SelectInputValue> extends State<TMult
         clearable: widget.clearable,
         onClear: widget.onClear,
         onBlur: (value, inputValue) {
-          widget.onBlur?.call(TSelectInputFocusContext(inputValue: inputValue, tagInputValue: value));
+          widget.onBlur?.call(effectiveMultipleController.value,
+              TSelectInputFocusContext(inputValue: inputValue, tagInputValue: value));
         },
         label: widget.label,
         suffix: widget.suffix,
         suffixIcon: !widget.disabled && widget.loading ? const TLoading(size: TComponentSize.small) : widget.suffixIcon,
-        tag: widget.tag,
+        tag: widget.tag != null
+            ? (index, value) => widget.tag!.call(index, effectiveMultipleController.value[index])
+            : null,
         minCollapsedNum: widget.minCollapsedNum,
         collapsedItems: widget.collapsedItems,
         tagVariant: widget.tagVariant,
@@ -286,7 +330,15 @@ class _TMultipleSelectInputState<T extends SelectInputValue> extends State<TMult
           widget.onTagChange?.call(effectiveMultipleController.value, context);
         },
         dragSort: widget.dragSort,
+        valueDisplay: widget.valueDisplay != null ? _handleValueDisplay : null,
       ),
+    );
+  }
+
+  List<Widget> _handleValueDisplay(value, onClose) {
+    return widget.valueDisplay!.call(
+      effectiveMultipleController.value,
+      (index, item) => onClose(index, item.label),
     );
   }
 }

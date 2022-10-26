@@ -1,4 +1,3 @@
-import 'package:dartx/dartx.dart';
 import 'package:flutter/widgets.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
@@ -11,10 +10,11 @@ class TSelectInputExample extends StatefulWidget {
 }
 
 class _TSelectInputExampleState extends State<TSelectInputExample> {
-  late TSelectInputController _controller;
-  late TSelectInputMultipleController<SelectInputValue> _multipleController;
+  late TSelectInputSingleController _controller;
+  late TSelectInputMultipleController _multipleController;
   late ValueNotifier<bool> _popupVisible;
   late List<SelectInputValue> options;
+  FocusNode singleFocusNode = FocusNode();
 
   @override
   void initState() {
@@ -33,28 +33,65 @@ class _TSelectInputExampleState extends State<TSelectInputExample> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+    _controller.dispose();
+    _multipleController.dispose();
+    _popupVisible.dispose();
+    singleFocusNode.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return TSpace(
       direction: Axis.vertical,
       children: [
         TSelectInput(
+          autoWidth: true,
           controller: _controller,
+          focusNode: singleFocusNode,
+          allowInput: true,
+          clearable: true,
+          suffixIcon: const Icon(TIcons.chevronDown),
+          popupStyle: const TPopupStyle(constraints: BoxConstraints(maxHeight: 280)),
+          panel: TSingleChildScrollView(
+            scrollDirection: Axis.vertical,
+            child: TSpace(
+              spacing: 2,
+              direction: Axis.vertical,
+              mainAxisSize: MainAxisSize.min,
+              children: List.generate(options.length, (index) {
+                return TButton(
+                  variant: TButtonVariant.text,
+                  child: Text(options[index].label),
+                  onPressed: () {
+                    _controller.value = options[index];
+                    singleFocusNode.unfocus();
+                  },
+                );
+              }),
+            ),
+          ),
         ),
         SizedBox(
-          width: 300,
+          width: 350,
           child: TSelectInput(
             controller: _multipleController,
             // autoWidth: true,
             multiple: true,
             allowInput: true,
+            // readonly: true,
             clearable: true,
             popupVisible: _popupVisible,
             suffixIcon: const Icon(TIcons.chevronDown),
             onTagChange: (value, context) {
+              if (context.trigger == TagInputTriggerSource.clear || context.trigger == TagInputTriggerSource.reset) {
+                _multipleController.clear();
+              }
               if (TagInputTriggerSource.tagRemove == context.trigger ||
                   TagInputTriggerSource.backspace == context.trigger) {
                 setState(() {
-                  options.removeLast();
+                  _multipleController.removeAt(context.index!);
                 });
               }
               if (TagInputTriggerSource.enter == context.trigger) {
@@ -77,7 +114,7 @@ class _TSelectInputExampleState extends State<TSelectInputExample> {
                     variant: TButtonVariant.text,
                     child: Text(options[index].label),
                     onPressed: () {
-                      _popupVisible.value = false;
+                      _multipleController.add(options[index]);
                     },
                   );
                 }),
