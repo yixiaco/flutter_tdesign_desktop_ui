@@ -133,8 +133,12 @@ class _PopupOverlayState extends State<_PopupOverlay> {
           valueListenable: _isReverse,
           builder: (BuildContext context, bool value, Widget? child) {
             var boxConstraints = style?.constraints;
-            if(boxConstraints == null && style?.followBoxWidth == true) {
-              boxConstraints = BoxConstraints(minWidth: box.size.width);
+            if(style?.followBoxWidth == true) {
+              if(boxConstraints == null) {
+                boxConstraints = BoxConstraints(minWidth: box.size.width);
+              } else {
+                boxConstraints = boxConstraints.enforce(BoxConstraints(minWidth: box.size.width));
+              }
             }
             return Container(
               key: _containerKey,

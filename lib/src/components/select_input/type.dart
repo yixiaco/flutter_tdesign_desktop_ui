@@ -17,7 +17,7 @@ class TSelectInputFocusContext {
   String inputValue;
 
   /// 表示标签输入框的值
-  dynamic tagInputValue;
+  List<String> tagInputValue;
 
   TSelectInputFocusContext({
     required this.inputValue,
@@ -59,4 +59,11 @@ class TSelectInputMultipleController<T extends SelectInputValue> extends TSelect
       notifyListeners();
     }
   }
+
+  /// 新增一项
+  void add(T value) {
+    _value.add(value);
+    notifyListeners();
+  }
+
 }

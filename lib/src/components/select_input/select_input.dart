@@ -7,6 +7,7 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 class TSelectInput<T extends SelectInputValue> extends StatefulWidget {
   const TSelectInput({
     Key? key,
+    this.size,
     this.allowInput = false,
     this.autoWidth = false,
     this.borderless = false,
@@ -37,6 +38,10 @@ class TSelectInput<T extends SelectInputValue> extends StatefulWidget {
     this.tagTheme = TTagTheme.defaultTheme,
     this.tagVariant = TTagVariant.dark,
     this.textAlign = TextAlign.left,
+    this.excessTagsDisplayType = TTagExcessTagsDisplayType.breakLine,
+    this.dragSort = false,
+    this.onDragSort,
+    this.max,
     this.controller,
     this.valueDisplay,
     this.onBlur,
@@ -52,6 +57,9 @@ class TSelectInput<T extends SelectInputValue> extends StatefulWidget {
             multiple && controller is TSelectInputMultipleController ||
             !multiple && controller is TSelectInputSingleController),
         super(key: key);
+
+  /// 尺寸
+  final TComponentSize? size;
 
   /// 是否允许输入
   final bool allowInput;
@@ -149,11 +157,23 @@ class TSelectInput<T extends SelectInputValue> extends StatefulWidget {
   /// 文本对齐方式
   final TextAlign textAlign;
 
+  /// 标签超出时的呈现方式，有两种：横向滚动显示 和 换行显示
+  final TTagExcessTagsDisplayType excessTagsDisplayType;
+
+  /// 拖拽调整标签顺序
+  final bool dragSort;
+
+  /// 最大允许输入的标签数量
+  final int? max;
+
+  /// 拖拽排序时触发
+  final void Function(TagInputDragSortContext context)? onDragSort;
+
   /// 全部标签值。值为数组表示多个标签，值为非数组表示单个数值。
   final TSelectInputController? controller;
 
   /// 自定义值呈现的全部内容，参数为所有标签的值。
-  final Widget Function(TSelectInputController value, void Function(int index, T item) onClose)? valueDisplay;
+  final Widget Function(dynamic value, void Function(int index, T item) onClose)? valueDisplay;
 
   /// 失去焦点时触发
   final void Function(TSelectInputFocusContext context)? onBlur;
@@ -162,10 +182,10 @@ class TSelectInput<T extends SelectInputValue> extends StatefulWidget {
   final VoidCallback? onClear;
 
   /// 按键按下 Enter 时触发
-  final void Function(TSelectInputController value, String inputValue)? onEnter;
+  final void Function(dynamic value, String inputValue)? onEnter;
 
   /// 聚焦时触发
-  final void Function(TSelectInputController value, String inputValue, String tagInputValue)? onFocus;
+  final void Function(dynamic value, String inputValue, List<String>? tagInputValue)? onFocus;
 
   /// 输入框值发生变化时触发，context.trigger 表示触发输入框值变化的来源：文本输入触发、清除按钮触发等
   final void Function(String value, InputValueChangeContext trigger)? onInputChange;
@@ -180,7 +200,7 @@ class TSelectInput<T extends SelectInputValue> extends StatefulWidget {
   final void Function(bool visible)? onPopupVisibleChange;
 
   /// 值变化时触发，参数 context.trigger 表示数据变化的触发来源；context.index 指当前变化项的下标；context.item 指当前变化项
-  final void Function(TagInputChangeContext context)? onTagChange;
+  final void Function(dynamic value, TagInputChangeContext context)? onTagChange;
 
   @override
   State<TSelectInput<T>> createState() => _TSelectInputState<T>();
@@ -198,7 +218,8 @@ class _TSelectInputState<T extends SelectInputValue> extends State<TSelectInput<
 
   /// 构建单选组件
   Widget _buildSingle() {
-    return TSelectInputSingle<T>(
+    return TSingleSelectInput<T>(
+      size: widget.size,
       allowInput: !widget.allowInput,
       disabled: widget.disabled,
       controller: widget.controller as TSelectInputSingleController<T>,
@@ -209,7 +230,9 @@ class _TSelectInputState<T extends SelectInputValue> extends State<TSelectInput<
       suffix: widget.suffix,
       label: widget.label,
       onBlur: widget.onBlur,
-      onFocus: widget.onFocus,
+      onFocus: (value, inputValue) {
+        widget.onFocus?.call(value, inputValue, null);
+      },
       placeholder: widget.placeholder,
       onMouseleave: widget.onMouseleave,
       onMouseenter: widget.onMouseenter,
@@ -238,8 +261,9 @@ class _TSelectInputState<T extends SelectInputValue> extends State<TSelectInput<
 
   /// 构建多选组件
   Widget _buildMultiple() {
-    return TSelectInputMultiple<T>(
-      allowInput: !widget.allowInput,
+    return TMultipleSelectInput<T>(
+      size: widget.size,
+      allowInput: widget.allowInput,
       disabled: widget.disabled,
       controller: widget.controller as TSelectInputMultipleController<T>,
       readonly: widget.readonly,

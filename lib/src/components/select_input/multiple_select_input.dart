@@ -3,9 +3,10 @@ import 'package:flutter/widgets.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// 筛选器输入框多选
-class TSelectInputMultiple<T extends SelectInputValue> extends StatefulWidget {
-  const TSelectInputMultiple({
+class TMultipleSelectInput<T extends SelectInputValue> extends StatefulWidget {
+  const TMultipleSelectInput({
     Key? key,
+    this.size,
     this.allowInput = false,
     this.autoWidth = false,
     this.borderless = false,
@@ -36,6 +37,10 @@ class TSelectInputMultiple<T extends SelectInputValue> extends StatefulWidget {
     this.tagTheme = TTagTheme.defaultTheme,
     this.tagVariant = TTagVariant.dark,
     this.textAlign = TextAlign.left,
+    this.excessTagsDisplayType = TTagExcessTagsDisplayType.breakLine,
+    this.dragSort = false,
+    this.onDragSort,
+    this.max,
     this.controller,
     this.valueDisplay,
     this.onBlur,
@@ -48,6 +53,9 @@ class TSelectInputMultiple<T extends SelectInputValue> extends StatefulWidget {
     this.onPopupVisibleChange,
     this.onTagChange,
   }) : super(key: key);
+
+  /// 尺寸
+  final TComponentSize? size;
 
   /// 是否允许输入
   final bool allowInput;
@@ -145,11 +153,23 @@ class TSelectInputMultiple<T extends SelectInputValue> extends StatefulWidget {
   /// 文本对齐方式
   final TextAlign textAlign;
 
+  /// 标签超出时的呈现方式，有两种：横向滚动显示 和 换行显示
+  final TTagExcessTagsDisplayType excessTagsDisplayType;
+
+  /// 拖拽调整标签顺序
+  final bool dragSort;
+
+  /// 最大允许输入的标签数量
+  final int? max;
+
+  /// 拖拽排序时触发
+  final void Function(TagInputDragSortContext context)? onDragSort;
+
   /// 全部标签值。值为数组表示多个标签，值为非数组表示单个数值。
   final TSelectInputMultipleController<T>? controller;
 
   /// 自定义值呈现的全部内容，参数为所有标签的值。
-  final Widget Function(TSelectInputMultipleController<T> value, void Function(int index, T item) onClose)?
+  final Widget Function(List<T> value, void Function(int index, T item) onClose)?
       valueDisplay;
 
   /// 失去焦点时触发
@@ -159,10 +179,10 @@ class TSelectInputMultiple<T extends SelectInputValue> extends StatefulWidget {
   final VoidCallback? onClear;
 
   /// 按键按下 Enter 时触发
-  final void Function(TSelectInputMultipleController<T> value, String inputValue)? onEnter;
+  final void Function(List<T> value, String inputValue)? onEnter;
 
   /// 聚焦时触发
-  final void Function(TSelectInputMultipleController<T> value, String inputValue, String tagInputValue)? onFocus;
+  final void Function(List<T> value, String inputValue, List<String> tagInputValue)? onFocus;
 
   /// 输入框值发生变化时触发，context.trigger 表示触发输入框值变化的来源：文本输入触发、清除按钮触发等
   final void Function(String value, InputValueChangeContext trigger)? onInputChange;
@@ -177,13 +197,13 @@ class TSelectInputMultiple<T extends SelectInputValue> extends StatefulWidget {
   final void Function(bool visible)? onPopupVisibleChange;
 
   /// 值变化时触发，参数 context.trigger 表示数据变化的触发来源；context.index 指当前变化项的下标；context.item 指当前变化项
-  final void Function(TagInputChangeContext context)? onTagChange;
+  final void Function(List<T> value, TagInputChangeContext context)? onTagChange;
 
   @override
-  State<TSelectInputMultiple<T>> createState() => _TSelectInputMultipleState<T>();
+  State<TMultipleSelectInput<T>> createState() => _TMultipleSelectInputState<T>();
 }
 
-class _TSelectInputMultipleState<T extends SelectInputValue> extends State<TSelectInputMultiple<T>> {
+class _TMultipleSelectInputState<T extends SelectInputValue> extends State<TMultipleSelectInput<T>> {
   late TTagInputController _tagInputController;
 
   TextEditingController? _textController;
@@ -231,6 +251,41 @@ class _TSelectInputMultipleState<T extends SelectInputValue> extends State<TSele
         disabled: widget.disabled,
         textController: effectiveTextEditingController,
         autoWidth: widget.autoWidth,
+        tips: widget.tips,
+        onInputChange: widget.onInputChange,
+        textAlign: widget.textAlign,
+        status: widget.status,
+        onEnter: (value) {
+          widget.onEnter?.call(effectiveMultipleController.value, effectiveTextEditingController.text);
+        },
+        placeholder: widget.placeholder,
+        onMouseenter: widget.onMouseenter,
+        onMouseleave: widget.onMouseleave,
+        onFocus: (value, inputValue) {
+          widget.onFocus?.call(effectiveMultipleController.value, inputValue, value);
+        },
+        clearable: widget.clearable,
+        onClear: widget.onClear,
+        onBlur: (value, inputValue) {
+          widget.onBlur?.call(TSelectInputFocusContext(inputValue: inputValue, tagInputValue: value));
+        },
+        label: widget.label,
+        suffix: widget.suffix,
+        suffixIcon: !widget.disabled && widget.loading ? const TLoading(size: TComponentSize.small) : widget.suffixIcon,
+        tag: widget.tag,
+        minCollapsedNum: widget.minCollapsedNum,
+        collapsedItems: widget.collapsedItems,
+        tagVariant: widget.tagVariant,
+        tagTheme: widget.tagTheme,
+        borderless: widget.borderless,
+        excessTagsDisplayType: widget.excessTagsDisplayType,
+        onDragSort: widget.onDragSort,
+        size: widget.size,
+        max: widget.max,
+        onChange: (value, context) {
+          widget.onTagChange?.call(effectiveMultipleController.value, context);
+        },
+        dragSort: widget.dragSort,
       ),
     );
   }

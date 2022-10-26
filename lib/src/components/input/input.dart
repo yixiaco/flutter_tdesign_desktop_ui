@@ -818,6 +818,7 @@ class TClearIcon extends StatelessWidget {
     Key? key,
     this.onClick,
     required this.show,
+    this.icon,
   }) : super(key: key);
 
   /// 点击事件
@@ -825,6 +826,9 @@ class TClearIcon extends StatelessWidget {
 
   /// 显示状态
   final ValueNotifier<bool> show;
+
+  /// 当显示状态为false时，显示替换的icon
+  final Widget? icon;
 
   @override
   Widget build(BuildContext context) {
@@ -834,14 +838,22 @@ class TClearIcon extends StatelessWidget {
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
         onTap: onClick,
-        child: ValueListenableBuilder<bool>(
-          valueListenable: show,
-          builder: (context, value, child) {
-            return Visibility(
-              visible: value,
-              child: Icon(TIcons.closeCircleFilled, color: colorScheme.textColorPlaceholder),
-            );
-          },
+        child: IconTheme.merge(
+          data: IconThemeData(
+            color: colorScheme.textColorPlaceholder,
+          ),
+          child: ValueListenableBuilder<bool>(
+            valueListenable: show,
+            builder: (context, value, child) {
+              if(icon != null && !value) {
+                return icon!;
+              }
+              return Visibility(
+                visible: value,
+                child: const Icon(TIcons.closeCircleFilled),
+              );
+            },
+          ),
         ),
       ),
     );

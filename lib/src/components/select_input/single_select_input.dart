@@ -3,9 +3,10 @@ import 'package:flutter/widgets.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// 筛选器输入框单选
-class TSelectInputSingle<T extends SelectInputValue> extends StatefulWidget {
-  const TSelectInputSingle({
+class TSingleSelectInput<T extends SelectInputValue> extends StatefulWidget {
+  const TSingleSelectInput({
     Key? key,
+    this.size,
     this.allowInput = false,
     this.autoWidth = false,
     this.borderless = false,
@@ -41,6 +42,9 @@ class TSelectInputSingle<T extends SelectInputValue> extends StatefulWidget {
     this.onMouseleave,
     this.onPopupVisibleChange,
   }) : super(key: key);
+
+  /// 尺寸
+  final TComponentSize? size;
 
   /// 是否允许输入
   final bool allowInput;
@@ -132,7 +136,7 @@ class TSelectInputSingle<T extends SelectInputValue> extends StatefulWidget {
   final void Function(TSelectInputSingleController<T> value, String inputValue)? onEnter;
 
   /// 聚焦时触发
-  final void Function(TSelectInputSingleController<T> value, String inputValue, String tagInputValue)? onFocus;
+  final void Function(TSelectInputSingleController<T> value, String inputValue)? onFocus;
 
   /// 输入框值发生变化时触发，context.trigger 表示触发输入框值变化的来源：文本输入触发、清除按钮触发等
   final void Function(String value, InputValueChangeContext trigger)? onInputChange;
@@ -147,10 +151,10 @@ class TSelectInputSingle<T extends SelectInputValue> extends StatefulWidget {
   final void Function(bool visible)? onPopupVisibleChange;
 
   @override
-  State<TSelectInputSingle<T>> createState() => _TSelectInputSingleState<T>();
+  State<TSingleSelectInput<T>> createState() => _TSingleSelectInputState<T>();
 }
 
-class _TSelectInputSingleState<T extends SelectInputValue> extends State<TSelectInputSingle<T>> {
+class _TSingleSelectInputState<T extends SelectInputValue> extends State<TSingleSelectInput<T>> {
   TextEditingController? _textController;
 
   TextEditingController get effectiveTextEditingController =>
@@ -170,6 +174,7 @@ class _TSelectInputSingleState<T extends SelectInputValue> extends State<TSelect
   @override
   Widget build(BuildContext context) {
     return TInput(
+      size: widget.size,
       readonly: !widget.allowInput || widget.readonly,
       disabled: widget.disabled,
       controller: effectiveTextEditingController,

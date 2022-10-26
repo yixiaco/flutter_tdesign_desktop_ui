@@ -215,15 +215,10 @@ class _TTagInputState extends TFormItemValidateState<TTagInput> {
           focusNode: effectiveFocusNode,
           autoWidth: widget.autoWidth,
           breakLine: widget.excessTagsDisplayType == TTagExcessTagsDisplayType.breakLine,
-          suffixIcon: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TClearIcon(
-                onClick: _handleClear,
-                show: showClearIcon,
-              ),
-              if (widget.suffixIcon != null) widget.suffixIcon!,
-            ],
+          suffixIcon: TClearIcon(
+            onClick: _handleClear,
+            show: showClearIcon,
+            icon: widget.suffixIcon,
           ),
           label: widget.label,
           size: widget.size,
@@ -267,7 +262,7 @@ class _TTagInputState extends TFormItemValidateState<TTagInput> {
         trigger: TagInputRemoveTrigger.backspace,
       ));
       effectiveController.removeLast();
-      _handleValueChange(TagInputTriggerSource.backspace, item);
+      _handleValueChange(TagInputTriggerSource.backspace, index: lastIndex, item: item);
     }
   }
 
@@ -281,7 +276,7 @@ class _TTagInputState extends TFormItemValidateState<TTagInput> {
       }
       _handleClearChange();
       widget.onInputChange?.call(text, InputValueChangeContext.enter);
-      _handleValueChange(TagInputTriggerSource.enter, text);
+      _handleValueChange(TagInputTriggerSource.enter, index: effectiveController.value.lastIndex, item: text);
     }
     widget.onEnter?.call(effectiveController.value);
   }
@@ -389,7 +384,7 @@ class _TTagInputState extends TFormItemValidateState<TTagInput> {
       trigger: TagInputRemoveTrigger.tagRemove,
     ));
     effectiveController.removeAt(index);
-    _handleValueChange(TagInputTriggerSource.tagRemove, item);
+    _handleValueChange(TagInputTriggerSource.tagRemove, index: index, item: item);
   }
 
   /// 处理清理icon状态变更
@@ -406,9 +401,10 @@ class _TTagInputState extends TFormItemValidateState<TTagInput> {
   }
 
   /// 处理值变更
-  void _handleValueChange(TagInputTriggerSource triggerSource, [String? item]) {
+  void _handleValueChange(TagInputTriggerSource triggerSource, {int? index, String? item}) {
     formChange();
-    widget.onChange?.call(effectiveController.value, TagInputChangeContext(trigger: triggerSource, item: item));
+    widget.onChange
+        ?.call(effectiveController.value, TagInputChangeContext(trigger: triggerSource, index: index, item: item));
   }
 
   /// 处理清空事件
