@@ -34,11 +34,9 @@ class TPopup extends StatefulWidget {
     this.showDuration = const Duration(milliseconds: 250),
     this.hideDuration = const Duration(milliseconds: 150),
     this.destroyOnClose = true,
-    this.builderContent,
+    this.hideEmptyPopup = false,
     this.style,
-  })  : assert(!(content != null && builderContent != null), 'content和builderContent只能给定一个'),
-        assert(!(content == null && builderContent == null), 'content或builderContent不能为空'),
-        super(key: key);
+  }) : super(key: key);
 
   /// 浮层出现位置
   final TPopupPlacement placement;
@@ -79,8 +77,8 @@ class TPopup extends StatefulWidget {
   /// 因为一般不需要维护浮层内容的状态，这可以显著提升运行速度
   final bool destroyOnClose;
 
-  /// 使用build创建浮层
-  final WidgetBuilder? builderContent;
+  /// 浮层是否隐藏空内容，默认不隐藏
+  final bool hideEmptyPopup;
 
   /// 浮层样式
   final TPopupStyle? style;
@@ -96,8 +94,9 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
   /// 有效显隐值
   ValueNotifier<bool> get effectiveVisible => widget.visible ?? (_visible ??= ValueNotifier(false));
 
-  /// 区域焦点节点
-  FocusScopeNode? _node;
+  /// 焦点节点
+  final FocusNode _node = FocusNode();
+  final FocusScopeNode _popupScopeNode = FocusScopeNode();
 
   /// 动画控制器
   late AnimationController _controller;
@@ -123,6 +122,16 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
   /// 弹出层key
   final GlobalKey<_PopupOverlayState> _overlayKey = GlobalKey();
 
+  _PopupLevel? _popupLevel;
+
+  late Map<Type, Action<Intent>> actions = <Type, Action<Intent>>{
+    DismissIntent: _DismissModalAction(() {
+      _node.unfocus();
+      _popupScopeNode.unfocus();
+      _updateVisible(false);
+    }),
+  };
+
   @override
   void initState() {
     _controller = AnimationController(
@@ -134,10 +143,8 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
     effectiveVisible.addListener(_showHidePopup);
     // 初始化显隐
     _showHidePopup();
-    if (widget.trigger == TPopupTrigger.focus) {
-      _node = FocusScopeNode();
-      _node!.addListener(_focusVisible);
-    }
+    _node.addListener(_focusVisible);
+    _popupScopeNode.addListener(_focusVisible);
     super.initState();
   }
 
@@ -150,13 +157,15 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
     else if (event is PointerUpEvent && widget.trigger.isTrue(click: true, contextMenu: true)) {
       // 先检查子浮层的事件
       var popupOverlayState = _overlayKey.currentState;
-      if(popupOverlayState != null) {
+      if (popupOverlayState != null) {
         var set = popupOverlayState.levelNotifier.children.toSet();
         for (var child in set) {
           child.currentState?.widget.popupState._globalPointerRoute(event);
         }
       }
       // 检查当前浮层的事件
+      _handlePointerBounds(event);
+    } else if (event is PointerUpEvent && widget.trigger.isTrue(focus: true)) {
       _handlePointerBounds(event);
     }
   }
@@ -188,11 +197,15 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
 
   @override
   void dispose() {
-    effectiveVisible.removeListener(_showHidePopup);
-    _visible?.dispose();
     // 销毁浮层
     _removeEntry(force: true);
+    effectiveVisible.removeListener(_showHidePopup);
+    _visible?.dispose();
     _controller.dispose();
+    _node.dispose();
+    _popupScopeNode.dispose();
+    _showTimer?.cancel();
+    _hideTimer?.cancel();
     super.dispose();
   }
 
@@ -208,15 +221,9 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
 
   /// 显示浮层
   void _showPopup({bool immediately = false}) {
-    // focus类型不需要监听指针事件
-    if (!_existGlobalPointerRoute && !widget.trigger.isTrue(focus: true)) {
-      // 监听全局指针事件，这样我们可以在单击其他控件时立即隐藏浮层。
-      GestureBinding.instance.pointerRouter.addGlobalRoute(_globalPointerRoute);
-      _existGlobalPointerRoute = true;
-    }
     _hideTimer?.cancel();
     _hideTimer = null;
-    if (immediately || _controller.isAnimating) {
+    if (immediately) {
       _ensureVisible();
       return;
     }
@@ -232,21 +239,25 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
       return;
     }
     _hideTimer ??= Timer(widget.hideDuration, _reverseVisible);
-    if (_existGlobalPointerRoute) {
-      // 移除监听全局指针事件
-      GestureBinding.instance.pointerRouter.removeGlobalRoute(_globalPointerRoute);
-      _existGlobalPointerRoute = false;
-    }
   }
 
   /// 立即显示浮层，不应该直接使用这个方法，而是使用[_showPopup]
   void _ensureVisible() {
+    if (!_existGlobalPointerRoute) {
+      // 监听全局指针事件，这样我们可以在单击其他控件时立即隐藏浮层。
+      GestureBinding.instance.pointerRouter.addGlobalRoute(_globalPointerRoute);
+      _existGlobalPointerRoute = true;
+    }
     _showTimer?.cancel();
     _showTimer = null;
+    assert(widget.content != null || widget.hideEmptyPopup);
+    if (widget.content == null && widget.hideEmptyPopup) {
+      return;
+    }
     if (_entry == null) {
       _createEntry();
     }
-    _PopupLevel.of(context)?.popupLevel.addOverlay(_overlayKey);
+    _popupLevel?.popupLevel.addOverlay(_overlayKey);
     widget.onOpen?.call();
     _controller.forward();
   }
@@ -254,7 +265,7 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
   /// 浮层不可见.不应该直接使用这个方法，而是使用[_hidePopup]
   void _reverseVisible() {
     if (_entry != null) {
-      _PopupLevel.of(context)?.popupLevel.removeOverlay(_overlayKey);
+      _popupLevel?.popupLevel.removeOverlay(_overlayKey);
       widget.onClose?.call();
     }
     _controller.reverse();
@@ -270,6 +281,7 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
     _entry = OverlayEntry(builder: (BuildContext context) {
       Widget child = _PopupOverlay(
         key: _overlayKey,
+        focusScopeNode: _popupScopeNode,
         onEnter: (_) {
           if (widget.trigger.isTrue(hover: true)) {
             if (!_controller.isDismissed) _updateVisible(true);
@@ -280,14 +292,26 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
           curve: Curves.fastOutSlowIn,
         ),
         popupState: this,
+        onRemove: () => _removeEntry(force: true),
       );
-      return child;
+      return Actions(
+        actions: actions,
+        child: child,
+      );
     });
     overlayState.insert(_entry!);
   }
 
   /// 销毁浮层对象.不应该直接使用这个方法，而是使用[_hidePopup]
   void _removeEntry({bool force = false}) {
+    _node.unfocus();
+    _popupScopeNode.unfocus();
+    if (_existGlobalPointerRoute) {
+      // 移除监听全局指针事件
+      GestureBinding.instance.pointerRouter.removeGlobalRoute(_globalPointerRoute);
+      _existGlobalPointerRoute = false;
+    }
+    _popupLevel?.popupLevel.removeOverlay(_overlayKey);
     // 是否销毁
     if (widget.destroyOnClose || force) {
       _entry?.remove();
@@ -302,50 +326,37 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
 
   @override
   void didUpdateWidget(TPopup oldWidget) {
-    // 替换了widget后，焦点可能丢失
-    if (widget.trigger == TPopupTrigger.focus) {
-      if (_node == null) {
-        _node = FocusScopeNode();
-        _node!.addListener(_focusVisible);
-      }
-    } else {
-      _node?.dispose();
-      _node = null;
-    }
     if (widget.visible != oldWidget.visible) {
       (oldWidget.visible ?? _visible)?.removeListener(_showHidePopup);
       (widget.visible ?? _visible)?.addListener(_showHidePopup);
     }
-    // 暂时先销毁浮层
-    // _removeEntry(force: true);
 
     super.didUpdateWidget(oldWidget);
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _popupLevel = _PopupLevel.of(context);
+  }
+
   void _focusVisible() {
-    if (_node!.hasFocus) {
-      effectiveVisible.value = true;
-    } else {
-      effectiveVisible.value = false;
+    if (widget.trigger == TPopupTrigger.focus) {
+      if (_node.hasFocus || _popupScopeNode.hasFocus) {
+        effectiveVisible.value = true;
+      } else {
+        effectiveVisible.value = false;
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     Widget child = widget.child;
-    if(widget.disabled) {
+    if (widget.disabled) {
       return child;
     }
-    // 窗口变更时，通知到组件
-    MediaQuery.of(context);
-    // 在下一帧时，更新浮层
-    if (_overlayKey.currentState != null) {
-      SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
-        if (mounted) {
-          _overlayKey.currentState?.setState(() {});
-        }
-      });
-    }
+    _notifyPopupUpdate();
     if (widget.trigger == TPopupTrigger.hover) {
       child = MouseRegion(
         hitTestBehavior: HitTestBehavior.translucent,
@@ -364,11 +375,46 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
         child: widget.child,
       );
     } else if (widget.trigger == TPopupTrigger.focus) {
-      child = FocusScope(
-        node: _node,
+      child = Focus(
+        focusNode: _node,
         child: widget.child,
       );
     }
-    return child;
+    return NotificationListener<SizeChangedLayoutNotification>(
+      onNotification: (notification) {
+        _notifyPopupUpdate();
+        return false;
+      },
+      child: SizeChangedLayoutNotifier(
+        child: Actions(
+          actions: actions,
+          child: child,
+        ),
+      ),
+    );
+  }
+
+  /// 当布局变更时，通知到浮层
+  void _notifyPopupUpdate() {
+    // 在下一帧时，更新浮层
+    if (_overlayKey.currentState != null) {
+      SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+        if (mounted && (_overlayKey.currentState?.mounted ?? false)) {
+          _overlayKey.currentState?.setState(() {});
+        }
+      });
+    }
+  }
+}
+
+class _DismissModalAction extends DismissAction {
+  _DismissModalAction(this.callback);
+
+  final VoidCallback callback;
+
+  @override
+  Object? invoke(DismissIntent intent) {
+    callback();
+    return null;
   }
 }

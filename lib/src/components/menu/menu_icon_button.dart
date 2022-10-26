@@ -61,7 +61,7 @@ class TMenuIconButton extends StatelessWidget {
       child: Semantics(
         container: true,
         button: true,
-        child: TMaterialStateBuilder(
+        child: TMaterialStateButton(
           onTap: onClick,
           builder: (context, states) {
             return Container(

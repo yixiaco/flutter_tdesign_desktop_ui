@@ -132,13 +132,7 @@ class _TCheckboxState<T> extends TFormItemValidateState<TCheckbox<T>>
     Map<Type, Action<Intent>> actionMap = activeMap(context);
 
     // 鼠标
-    final MaterialStateProperty<MouseCursor> effectiveMouseCursor =
-        MaterialStateProperty.resolveWith<MouseCursor>((states) {
-      if (states.contains(MaterialState.disabled)) {
-        return SystemMouseCursors.noDrop;
-      }
-      return SystemMouseCursors.click;
-    });
+    const MaterialStateProperty<MouseCursor> effectiveMouseCursor = TMaterialStateMouseCursor.clickable;
 
     // 边框
     final MaterialStateProperty<TBorderSide> effectiveBorderSide = MaterialStateProperty.resolveWith((states) {

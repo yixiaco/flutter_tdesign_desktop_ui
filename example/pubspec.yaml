@@ -34,6 +34,7 @@ dependencies:
   hooks_riverpod: ^1.0.4 #状态共享
   tdesign_desktop_ui:
     path: ../
+  dartx: ^1.1.0 # String、List、int、Map...的扩展方法
 
 
   # The following adds the Cupertino Icons font to your application.

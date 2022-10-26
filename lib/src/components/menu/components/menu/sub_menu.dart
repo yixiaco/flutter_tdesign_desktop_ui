@@ -175,7 +175,7 @@ class _TSubMenu<T> extends StatelessWidget {
         ),
         child: Padding(
           padding: EdgeInsets.only(top: isFirst ? 0 : 4, bottom: isLast ? 0 : 4),
-          child: TMaterialStateBuilder(
+          child: TMaterialStateButton(
             disabled: disabled,
             selected: isActive,
             onTap: isPopup ? null : () => _handleClick(isExpanded, controller, value),

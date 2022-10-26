@@ -81,7 +81,8 @@ class _TabButtonState<T> extends State<_TabButton<T>> with TickerProviderStateMi
     if (widget.dragSort) {
       child = Draggable<_TabButtonDraggableData<T>>(
         data: _TabButtonDraggableData<T>(currentIndex: widget.index, current: widget.value),
-        feedback: _buildButton(context, {...states, MaterialState.hovered, MaterialState.dragged}, showRemoveIcon: false),
+        feedback:
+            _buildButton(context, {...states, MaterialState.hovered, MaterialState.dragged}, showRemoveIcon: false),
         childWhenDragging: _buildButton(context, {...states, MaterialState.dragged, MaterialState.disabled}),
         child: DragTarget<_TabButtonDraggableData<T>>(
           builder: (context, candidateData, rejectedData) {
@@ -122,13 +123,7 @@ class _TabButtonState<T> extends State<_TabButton<T>> with TickerProviderStateMi
     var isCard = widget.theme == TTabsTheme.card;
 
     // 鼠标
-    final effectiveMouseCursor = buttonStyle?.cursor ??
-        MaterialStateProperty.resolveWith<MouseCursor>((states) {
-          if (states.contains(MaterialState.disabled)) {
-            return SystemMouseCursors.noDrop;
-          }
-          return SystemMouseCursors.click;
-        });
+    final effectiveMouseCursor = buttonStyle?.cursor ?? TMaterialStateMouseCursor.clickable;
 
     // 字体颜色
     MaterialStateProperty<Color> textColor = MaterialStateProperty.resolveWith((states) {
@@ -216,17 +211,17 @@ class _TabButtonState<T> extends State<_TabButton<T>> with TickerProviderStateMi
         break;
     }
 
-    if(buttonStyle?.backgroundColor != null) {
+    if (buttonStyle?.backgroundColor != null) {
       effectiveBgColor = MaterialStateProperty.resolveWith((states) {
         return MaterialStateProperty.resolveAs(buttonStyle!.backgroundColor!, states);
       });
     }
-    if(buttonStyle?.textColor != null) {
+    if (buttonStyle?.textColor != null) {
       textColor = MaterialStateProperty.resolveWith((states) {
         return MaterialStateProperty.resolveAs(buttonStyle!.textColor!, states);
       });
     }
-    if(buttonStyle?.closeIconColor != null) {
+    if (buttonStyle?.closeIconColor != null) {
       effectiveIconColor = MaterialStateProperty.resolveWith((states) {
         return MaterialStateProperty.resolveAs(buttonStyle!.closeIconColor!, states);
       });
@@ -362,7 +357,7 @@ class _TabButtonState<T> extends State<_TabButton<T>> with TickerProviderStateMi
   Padding _buildCloseIcon(MaterialStateProperty<Color?> effectiveIconColor, IconThemeData iconThemeData) {
     return Padding(
       padding: const EdgeInsets.only(left: 8),
-      child: TMaterialStateBuilder(
+      child: TMaterialStateButton(
         selected: widget.checked,
         disabled: widget.disabled,
         onTap: () => widget.onRemove?.call(widget.value, widget.index),

@@ -32,7 +32,7 @@ class TextDecorationContext {
   });
 }
 
-typedef TextDecorationBuilder = Widget Function(TextDecorationContext context);
+typedef TextDecorationBuilder = Widget Function(TextDecorationContext decorationContext);
 
 class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDetectorBuilder {
   _TextFieldSelectionGestureDetectorBuilder({

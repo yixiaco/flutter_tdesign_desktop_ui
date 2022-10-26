@@ -39,6 +39,9 @@ enum TTagVariant {
   /// [TTagTheme]非默认时，半透明主色背景，主色前景
   light,
 
-  /// [TTagTheme]非默认时，暗底色背景，主色前景
-  outline;
+  /// [TTagTheme]非默认时，透明背景，主色前景,主色边框
+  outline,
+
+  /// [TTagTheme]非默认时，半透明背景，主色前景,主色边框
+  lightOutline;
 }

@@ -582,12 +582,7 @@ class _TRadioButtonState<T> extends State<_TRadioButton<T>> with TickerProviderS
     );
 
     // 鼠标
-    final effectiveMouseCursor = MaterialStateProperty.resolveWith<MouseCursor>((states) {
-      if (states.contains(MaterialState.disabled)) {
-        return SystemMouseCursors.noDrop;
-      }
-      return SystemMouseCursors.click;
-    });
+    const effectiveMouseCursor = TMaterialStateMouseCursor.clickable;
 
     // 颜色
     var color = MaterialStateProperty.resolveAs(widget.textColor, states);

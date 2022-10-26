@@ -1,33 +1,15 @@
+import 'package:dartx/dartx.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
+import 'package:flutter/services.dart';
 
-abstract class MaterialStateWidget extends Widget implements MaterialStateProperty<Widget> {
-  const MaterialStateWidget({super.key});
-
-  static MaterialStateWidget resolveWith(MaterialPropertyResolver<Widget> callback) => _MaterialStateWidget(callback);
-
-  @override
-  Widget resolve(Set<MaterialState> states);
-}
-
-class _MaterialStateWidget extends MaterialStateWidget {
-  const _MaterialStateWidget(this._resolve) : super();
-  final MaterialPropertyResolver<Widget> _resolve;
-
-  @override
-  Widget resolve(Set<MaterialState> states) => _resolve(states);
-
-  @override
-  Element createElement() {
-    throw UnimplementedError();
-  }
-}
-
-/// 一个通用的状态构建器
-class TMaterialStateBuilder extends StatefulWidget {
-  const TMaterialStateBuilder({
+/// 一个通用的按钮状态构建器
+class TMaterialStateButton extends StatefulWidget {
+  const TMaterialStateButton({
     Key? key,
-    required this.builder,
+    this.builder,
+    this.child,
     this.disabled = false,
     this.selected = false,
     this.selectedClick = true,
@@ -47,7 +29,8 @@ class TMaterialStateBuilder extends StatefulWidget {
     this.actions,
     this.shortcuts,
     this.enableFeedback = true,
-  }) : super(key: key);
+  })  : assert(child != null || builder != null),
+        super(key: key);
 
   /// 是否禁用
   final bool disabled;
@@ -62,7 +45,9 @@ class TMaterialStateBuilder extends StatefulWidget {
   final MaterialStateProperty<MouseCursor?>? cursor;
 
   /// 子组件构建器
-  final Widget Function(BuildContext context, Set<MaterialState> states) builder;
+  final Widget Function(BuildContext context, Set<MaterialState> states)? builder;
+
+  final Widget? child;
 
   /// 焦点
   final FocusNode? focusNode;
@@ -112,10 +97,10 @@ class TMaterialStateBuilder extends StatefulWidget {
   final bool enableFeedback;
 
   @override
-  State<TMaterialStateBuilder> createState() => _TMaterialStateBuilderState();
+  State<TMaterialStateButton> createState() => _TMaterialStateButtonState();
 }
 
-class _TMaterialStateBuilderState extends State<TMaterialStateBuilder> with MaterialStateMixin {
+class _TMaterialStateButtonState extends State<TMaterialStateButton> with MaterialStateMixin {
   @override
   void initState() {
     super.initState();
@@ -124,7 +109,7 @@ class _TMaterialStateBuilderState extends State<TMaterialStateBuilder> with Mate
   }
 
   @override
-  void didUpdateWidget(covariant TMaterialStateBuilder oldWidget) {
+  void didUpdateWidget(covariant TMaterialStateButton oldWidget) {
     super.didUpdateWidget(oldWidget);
     setMaterialState(MaterialState.disabled, widget.disabled);
     setMaterialState(MaterialState.selected, widget.selected);
@@ -142,12 +127,7 @@ class _TMaterialStateBuilderState extends State<TMaterialStateBuilder> with Mate
 
   @override
   Widget build(BuildContext context) {
-    var effectiveCursor = MaterialStateProperty.resolveWith((states) {
-      if (states.contains(MaterialState.disabled)) {
-        return SystemMouseCursors.noDrop;
-      }
-      return SystemMouseCursors.click;
-    });
+    var effectiveCursor = TMaterialStateMouseCursor.clickable;
 
     return FocusableActionDetector(
       mouseCursor: widget.cursor?.resolve(materialStates) ?? effectiveCursor.resolve(materialStates),
@@ -157,7 +137,7 @@ class _TMaterialStateBuilderState extends State<TMaterialStateBuilder> with Mate
       enabled: !widget.disabled,
       autofocus: widget.autofocus,
       focusNode: widget.focusNode,
-      actions: widget.actions,
+      actions: widget.actions ?? activeMap(context),
       shortcuts: widget.shortcuts,
       child: GestureDetector(
         behavior: widget.behavior,
@@ -177,9 +157,35 @@ class _TMaterialStateBuilderState extends State<TMaterialStateBuilder> with Mate
         onLongPress: widget.onLongPress != null ? _handleLongPress : null,
         onLongPressUp: widget.onLongPressUp,
         onLongPressCancel: widget.onLongPressCancel,
-        child: widget.builder(context, materialStates),
+        child: TMaterialStateScope(
+          states: Set.unmodifiable(materialStates),
+          child: Builder(
+            builder: (context) {
+              if(widget.child != null) {
+                return widget.child!;
+              }
+              return widget.builder!(context, materialStates);
+            },
+          ),
+        ),
       ),
     );
+  }
+
+  Map<Type, Action<Intent>> activeMap(BuildContext context) {
+    final Map<Type, Action<Intent>> actionMap = <Type, Action<Intent>>{
+      ActivateIntent: CallbackAction<ActivateIntent>(
+        onInvoke: (intent) {
+          if (!_isClick) {
+            return;
+          }
+          _handleTap();
+          context.findRenderObject()!.sendSemanticsEvent(const TapSemanticEvent());
+          return null;
+        },
+      ),
+    };
+    return actionMap;
   }
 
   void _handleLongPress() {
@@ -220,4 +226,87 @@ class _TMaterialStateBuilderState extends State<TMaterialStateBuilder> with Mate
     }
     setMaterialState(MaterialState.pressed, tap);
   }
+}
+
+/// 对于包装在[TMaterialStateButton]下的组件可以使用[TMaterialStateScope.of]的方式获取状态值
+class TMaterialStateScope extends InheritedWidget {
+  const TMaterialStateScope({
+    super.key,
+    required super.child,
+    required Set<MaterialState> states,
+  }) : _states = states;
+
+  final Set<MaterialState> _states;
+
+  @override
+  bool updateShouldNotify(TMaterialStateScope oldWidget) {
+    return !_states.contentEquals(oldWidget._states);
+  }
+
+  /// 查询最近的MaterialState状态
+  static Set<MaterialState>? of(BuildContext context) {
+    final TMaterialStateScope? scope = context.dependOnInheritedWidgetOfExactType<TMaterialStateScope>();
+    return scope?._states;
+  }
+}
+
+abstract class TMaterialStateMouseCursor extends MouseCursor implements MaterialStateProperty<MouseCursor> {
+  const TMaterialStateMouseCursor();
+  @override
+  MouseCursor resolve(Set<MaterialState> states);
+
+  @protected
+  @override
+  MouseCursorSession createSession(int device) {
+    return resolve(<MaterialState>{}).createSession(device);
+  }
+
+  /// A mouse cursor for clickable material widgets, which resolves differently
+  /// when the widget is disabled.
+  ///
+  /// By default this cursor resolves to [SystemMouseCursors.click]. If the widget is
+  /// disabled, the cursor resolves to [SystemMouseCursors.noDrop].
+  ///
+  /// This cursor is the default for many Material widgets.
+  static const TMaterialStateMouseCursor clickable = _EnabledAndDisabledMouseCursor(
+    enabledCursor: SystemMouseCursors.click,
+    disabledCursor: SystemMouseCursors.noDrop,
+    name: 'clickable',
+  );
+
+  /// A mouse cursor for material widgets related to text, which resolves differently
+  /// when the widget is disabled.
+  ///
+  /// By default this cursor resolves to [SystemMouseCursors.text]. If the widget is
+  /// disabled, the cursor resolves to [SystemMouseCursors.noDrop].
+  ///
+  /// This cursor is the default for many Material widgets.
+  static const TMaterialStateMouseCursor textable = _EnabledAndDisabledMouseCursor(
+    enabledCursor: SystemMouseCursors.text,
+    disabledCursor: SystemMouseCursors.noDrop,
+    name: 'textable',
+  );
+}
+
+class _EnabledAndDisabledMouseCursor extends TMaterialStateMouseCursor {
+  const _EnabledAndDisabledMouseCursor({
+    required this.enabledCursor,
+    required this.disabledCursor,
+    required this.name,
+  });
+
+  final MouseCursor enabledCursor;
+  final MouseCursor disabledCursor;
+  final String name;
+
+  @override
+  MouseCursor resolve(Set<MaterialState> states) {
+    if (states.contains(MaterialState.disabled)) {
+      return disabledCursor;
+    }
+    return enabledCursor;
+  }
+
+  @override
+  String get debugDescription => 'MaterialStateMouseCursor($name)';
 }

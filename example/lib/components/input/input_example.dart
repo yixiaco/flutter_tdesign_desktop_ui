@@ -9,7 +9,9 @@ class TInputExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const TSpace(
-      breakLine: true,
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      direction: Axis.vertical,
       children: [
         TInput(
           status: TInputStatus.success,
@@ -62,6 +64,34 @@ class TInputExample extends StatelessWidget {
           obscuringCharacter: '*',
           showLimitNumber: true,
           prefixIcon: Icon(TIcons.time),
+        ),
+        TInput(
+          showClearIconOnEmpty: true,
+          clearable: true,
+          prefixLabels: [
+            TTag(closable: true, child: Text('12345')),
+            TTag(closable: true, child: Text('12345')),
+            TTag(closable: true, child: Text('123456')),
+            TTag(closable: true, child: Text('123456')),
+            TTag(closable: true, child: Text('123456')),
+            TTag(closable: true, child: Text('123456')),
+            TTag(closable: true, child: Text('123456')),
+            TTag(closable: true, child: Text('123456')),
+            TTag(closable: true, child: Text('123456')),
+            TTag(closable: true, child: Text('123456')),
+            TTag(closable: true, child: Text('123456')),
+            TTag(closable: true, child: Text('123456')),
+            TTag(closable: true, child: Text('12345')),
+            TTag(closable: true, child: Text('12345')),
+            // TTag(closable: true, child: Text('12345')),
+          ],
+          suffix: Text('元'),
+          prefixIcon: Icon(TIcons.time),
+          autoWidth: true,
+          tips: Text('自适应宽度的输入框'),
+          inputConstraints: BoxConstraints(minWidth: 100),
+          // align: TextAlign.right,
+          breakLine: true,
         ),
       ],
     );

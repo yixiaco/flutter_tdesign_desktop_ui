@@ -11,16 +11,6 @@ class TInputAdornmentExample extends StatefulWidget {
 
 class _TInputAdornmentExampleState extends State<TInputAdornmentExample> {
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 500),

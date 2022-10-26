@@ -7,11 +7,15 @@ class _PopupOverlay extends StatefulWidget {
     required this.animation,
     this.onEnter,
     required this.popupState,
+    required this.onRemove,
+    required this.focusScopeNode,
   }) : super(key: key);
 
   final Animation<double> animation;
   final PointerEnterEventListener? onEnter;
   final TPopupState popupState;
+  final VoidCallback onRemove;
+  final FocusScopeNode focusScopeNode;
 
   @override
   State<_PopupOverlay> createState() => _PopupOverlayState();
@@ -31,12 +35,12 @@ class _PopupOverlayState extends State<_PopupOverlay> {
 
   @override
   void initState() {
+    super.initState();
     levelNotifier = _PopupLevelNotifier({});
     _visible = ValueNotifier(false);
     _isReverse = ValueNotifier(false);
     _updateIgnore();
     widget.animation.addListener(_updateIgnore);
-    super.initState();
   }
 
   @override
@@ -54,11 +58,15 @@ class _PopupOverlayState extends State<_PopupOverlay> {
     widget.animation.removeListener(_updateIgnore);
     _visible.dispose();
     _isReverse.dispose();
+    widget.onRemove();
     super.dispose();
   }
 
   void _updateIgnore() {
     if (widget.animation.value > 0) {
+      if(widget.popupState.widget.trigger != TPopupTrigger.focus) {
+        widget.focusScopeNode.requestFocus();
+      }
       _visible.value = true;
     } else {
       _visible.value = false;
@@ -86,6 +94,13 @@ class _PopupOverlayState extends State<_PopupOverlay> {
     // 浮层内边距
     var padding = style?.padding ?? EdgeInsets.symmetric(vertical: 4, horizontal: TVar.spacer);
 
+    // 获取定位
+    var box = widget.popupState.context.findRenderObject() as RenderBox;
+    var target = box.localToGlobal(
+      box.size.topLeft(Offset.zero),
+      ancestor: Overlay.of(widget.popupState.context)?.context.findRenderObject(),
+    );
+
     // 当小部件完全不显示时，忽略所有事件
     Widget result = ValueListenableBuilder<bool>(
       builder: (BuildContext context, value, Widget? child) {
@@ -100,7 +115,14 @@ class _PopupOverlayState extends State<_PopupOverlay> {
             maintainState: true,
             maintainAnimation: true,
             // maintainSize : true,
-            child: child!,
+            child: FocusScope(
+              node: widget.focusScopeNode,
+              skipTraversal: true,
+              child: FocusTrap(
+                focusScopeNode: widget.focusScopeNode,
+                child: RepaintBoundary(child: child!),
+              ),
+            ),
           ),
         );
       },
@@ -110,18 +132,32 @@ class _PopupOverlayState extends State<_PopupOverlay> {
         child: ValueListenableBuilder(
           valueListenable: _isReverse,
           builder: (BuildContext context, bool value, Widget? child) {
+            var boxConstraints = style?.constraints;
+            if(style?.followBoxWidth == true) {
+              if(boxConstraints == null) {
+                boxConstraints = BoxConstraints(minWidth: box.size.width);
+              } else {
+                boxConstraints = boxConstraints.enforce(BoxConstraints(minWidth: box.size.width));
+              }
+            }
             return Container(
               key: _containerKey,
               margin: style?.margin,
               clipBehavior: Clip.antiAlias,
               width: style?.width,
               height: style?.height,
-              constraints: style?.constraints,
+              constraints: boxConstraints,
               transform: style?.transform,
               transformAlignment: style?.transformAlignment,
               decoration: ShapeDecoration(
                 color: bgColorContainer,
-                shadows: [...popupShadow, ...popupTopArrowShadow, ...popupRightArrowShadow, ...popupBottomArrowShadow, ...popupLeftArrowShadow],
+                shadows: [
+                  ...popupShadow,
+                  ...popupTopArrowShadow,
+                  ...popupRightArrowShadow,
+                  ...popupBottomArrowShadow,
+                  ...popupLeftArrowShadow
+                ],
                 shape: BubbleShapeBorder(
                   smooth: 0,
                   arrowQuadraticBezierLength: 0,
@@ -157,7 +193,7 @@ class _PopupOverlayState extends State<_PopupOverlay> {
               child: child,
             );
           },
-          child: currentPopupWidget.content ?? currentPopupWidget.builderContent?.call(context),
+          child: currentPopupWidget.content,
         ),
       ),
     );
@@ -168,13 +204,6 @@ class _PopupOverlayState extends State<_PopupOverlay> {
       );
     }
 
-    // 获取定位
-    var box = widget.popupState.context.findRenderObject() as RenderBox;
-    var target = box.localToGlobal(
-      box.size.topLeft(Offset.zero),
-      ancestor: Overlay.of(widget.popupState.context)?.context.findRenderObject(),
-    );
-
     return Positioned.fill(
       child: CustomSingleChildLayout(
         delegate: _PopupPositionDelegate(
@@ -184,7 +213,9 @@ class _PopupOverlayState extends State<_PopupOverlay> {
           target: _PopupOffset.of(box.size, target),
           callback: (isReverse) {
             SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
-              _isReverse.value = isReverse;
+              if(mounted) {
+                _isReverse.value = isReverse;
+              }
             });
           },
         ),

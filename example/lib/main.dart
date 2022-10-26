@@ -18,10 +18,12 @@ import 'package:example/components/menu/menu_example.dart';
 import 'package:example/components/popup/popup_example.dart';
 import 'package:example/components/progress/progress_example.dart';
 import 'package:example/components/radio/radio_example.dart';
+import 'package:example/components/select_input/select_input_example.dart';
 import 'package:example/components/space/space_example.dart';
 import 'package:example/components/switch/switch_example.dart';
 import 'package:example/components/tabs/tabs_example.dart';
 import 'package:example/components/tag/tag_example.dart';
+import 'package:example/components/tag_input/tag_input_example.dart';
 import 'package:example/state/locale_state.dart';
 import 'package:example/state/semantics_state.dart';
 import 'package:example/state/size_state.dart';
@@ -244,11 +246,29 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
           },
         ),
         TMenuItemProps(
+          value: 'select_input',
+          content: const Text('SelectInput 筛选器输入框'),
+          onClick: () {
+            setState(() {
+              content = const TSelectInputExample();
+            });
+          },
+        ),
+        TMenuItemProps(
           value: 'switch',
           content: const Text('Switch 开关'),
           onClick: () {
             setState(() {
               content = const TSwitchExample();
+            });
+          },
+        ),
+        TMenuItemProps(
+          value: 'tag_input',
+          content: const Text('TagInput 标签输入框'),
+          onClick: () {
+            setState(() {
+              content = const TTagInputExample();
             });
           },
         ),

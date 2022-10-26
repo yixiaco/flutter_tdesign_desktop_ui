@@ -31,6 +31,7 @@ class TSpaceExample extends StatelessWidget {
           ],
         ),
         TSpace(
+          breakLine: true,
           separator: TDivider(
             dashed: true,
             layout: Axis.vertical,

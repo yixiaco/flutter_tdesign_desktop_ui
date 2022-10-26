@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// 标签
@@ -93,12 +92,28 @@ class _TTagState extends State<TTag> {
 
     var size = widget.size ?? theme.size;
 
-    Color backgroundColor = colorScheme.bgColorComponent;
+    Color? backgroundColor;
+    Color borderColor = Colors.transparent;
     Color textColor = colorScheme.textColorPrimary;
 
     // 样式
     switch (widget.theme) {
       case TTagTheme.defaultTheme:
+        switch (widget.variant) {
+          case TTagVariant.dark:
+            backgroundColor = colorScheme.bgColorComponent;
+            break;
+            light:
+          case TTagVariant.light:
+              backgroundColor = colorScheme.bgColorContainerHover;
+            break;
+          case TTagVariant.outline:
+            borderColor = colorScheme.borderLevel2Color;
+            break;
+          case TTagVariant.lightOutline:
+            borderColor = colorScheme.borderLevel2Color;
+            continue light;
+        }
         // 默认
         if (widget.disabled) {
           backgroundColor = colorScheme.bgColorComponentDisabled;
@@ -112,13 +127,18 @@ class _TTagState extends State<TTag> {
             textColor = colorScheme.textColorAnti;
             backgroundColor = colorScheme.brandColor;
             break;
+          light:
           case TTagVariant.light:
             textColor = colorScheme.brandColor;
             backgroundColor = colorScheme.brandColorLight;
             break;
           case TTagVariant.outline:
             textColor = colorScheme.brandColor;
+            borderColor = colorScheme.brandColor;
             break;
+          case TTagVariant.lightOutline:
+            borderColor = colorScheme.brandColor;
+            continue light;
         }
         break;
       case TTagTheme.warning:
@@ -128,13 +148,18 @@ class _TTagState extends State<TTag> {
             textColor = colorScheme.textColorAnti;
             backgroundColor = colorScheme.warningColor;
             break;
+          light:
           case TTagVariant.light:
             textColor = colorScheme.warningColor;
             backgroundColor = colorScheme.warningColor1;
             break;
           case TTagVariant.outline:
             textColor = colorScheme.warningColor;
+            borderColor = colorScheme.warningColor;
             break;
+          case TTagVariant.lightOutline:
+            borderColor = colorScheme.warningColor;
+            continue light;
         }
         break;
       case TTagTheme.danger:
@@ -144,13 +169,18 @@ class _TTagState extends State<TTag> {
             textColor = colorScheme.textColorAnti;
             backgroundColor = colorScheme.errorColor;
             break;
+          light:
           case TTagVariant.light:
             textColor = colorScheme.errorColor;
             backgroundColor = colorScheme.errorColor1;
             break;
           case TTagVariant.outline:
             textColor = colorScheme.errorColor;
+            borderColor = colorScheme.errorColor;
             break;
+          case TTagVariant.lightOutline:
+            borderColor = colorScheme.errorColor;
+            continue light;
         }
         break;
       case TTagTheme.success:
@@ -160,16 +190,22 @@ class _TTagState extends State<TTag> {
             textColor = colorScheme.textColorAnti;
             backgroundColor = colorScheme.successColor;
             break;
+          light:
           case TTagVariant.light:
             textColor = colorScheme.successColor;
             backgroundColor = colorScheme.successColor1;
             break;
           case TTagVariant.outline:
             textColor = colorScheme.successColor;
+            borderColor = colorScheme.successColor;
             break;
+          case TTagVariant.lightOutline:
+            borderColor = colorScheme.successColor;
+            continue light;
         }
         break;
       case TTagTheme.link:
+        backgroundColor = colorScheme.bgColorComponent;
         if (widget.disabled) {
           backgroundColor = colorScheme.bgColorComponentDisabled;
           textColor = colorScheme.textColorDisabled;
@@ -187,7 +223,26 @@ class _TTagState extends State<TTag> {
     textColor = widget.textColor ?? textColor;
 
     // 高度
-    double height = size.lazySizeOf(small: () => 22, medium: () => 24, large: () => 32);
+    double height;
+    EdgeInsetsGeometry padding;
+    TextStyle style;
+    switch(size) {
+      case TComponentSize.small:
+        height = 22;
+        padding = EdgeInsets.symmetric(horizontal: TVar.spacerS);
+        style = theme.fontData.fontBodySmall;
+        break;
+      case TComponentSize.medium:
+        height = 24;
+        padding = EdgeInsets.symmetric(horizontal: TVar.spacer);
+        style = theme.fontData.fontBodySmall;
+        break;
+      case TComponentSize.large:
+        height = 32;
+        padding = const EdgeInsets.symmetric(horizontal: 12);
+        style = theme.fontData.fontBodyMedium;
+        break;
+    }
 
     // 形状
     BoxDecoration decoration;
@@ -196,26 +251,29 @@ class _TTagState extends State<TTag> {
         decoration = BoxDecoration(
           color: backgroundColor,
           borderRadius: BorderRadius.circular(TVar.borderRadiusDefault),
+          border: Border.all(color: borderColor),
         );
         break;
       case TTagShape.round:
         decoration = BoxDecoration(
           color: backgroundColor,
           borderRadius: BorderRadius.circular(height / 2),
+          border: Border.all(color: borderColor),
         );
         break;
       case TTagShape.mark:
         decoration = BoxDecoration(
           color: backgroundColor,
           borderRadius: BorderRadius.horizontal(right: Radius.circular(height / 2)),
+          border: Border.all(color: borderColor),
         );
         break;
     }
 
     Widget child = widget.child;
     if (widget.maxWidth != null) {
-      child = LimitedBox(
-        maxWidth: widget.maxWidth!,
+      child = ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: widget.maxWidth!),
         child: child,
       );
     }
@@ -251,26 +309,28 @@ class _TTagState extends State<TTag> {
       onTap: widget.disabled ? null : widget.onClick,
       onTapDown: (details) => _handleFocused(true),
       onTapUp: (details) => _handleFocused(false),
+      onTapCancel: () => _handleFocused(false),
       child: AnimatedContainer(
-        padding: EdgeInsets.symmetric(horizontal: TVar.spacer),
+        padding: padding,
         height: height,
         duration: TVar.animDurationBase,
         decoration: decoration,
-        child: DefaultTextStyle(
-          style: TextStyle(
+        child: AnimatedDefaultTextStyle(
+          duration: TVar.animDurationBase,
+          style: style.merge(TextStyle(
             fontFamily: theme.fontFamily,
             color: textColor,
-            textBaseline: TextBaseline.alphabetic,
-            height: 1.15,
-            fontSize: theme.fontSize,
             overflow: TextOverflow.ellipsis,
+          )),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [child],
           ),
-          child: Center(child: child),
         ),
       ),
     );
 
-    if (widget.theme == TTagTheme.link) {
+    if (widget.theme == TTagTheme.link || widget.theme == TTagTheme.defaultTheme) {
       SystemMouseCursor cursor;
       if (widget.disabled) {
         cursor = SystemMouseCursors.noDrop;
@@ -301,7 +361,7 @@ class _TTagState extends State<TTag> {
       if (widget.variant == TTagVariant.dark) {
         closeColor = colorScheme.fontWhite1;
         closeHoverColor = colorScheme.fontWhite2;
-      } else if (widget.variant == TTagVariant.light || widget.variant == TTagVariant.outline) {
+      } else if (widget.variant == TTagVariant.light || widget.variant == TTagVariant.outline || widget.variant == TTagVariant.lightOutline) {
         switch (widget.theme) {
           case TTagTheme.defaultTheme:
             break;

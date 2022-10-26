@@ -2,6 +2,7 @@ import 'dart:collection';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 const _kPeriod = Duration(milliseconds: 200);
@@ -104,8 +105,8 @@ class TRipple extends StatefulWidget {
   /// 通常组件的默认值是true
   final bool? enableFeedback;
 
-  /// 波纹
-  final RippleFactory splashFactory;
+  /// 波纹，默认是一个斜8°工厂[InkBevelAngleRipple],赋值为null时，不会创建波纹
+  final RippleFactory? splashFactory;
 
   /// 圆角
   final BorderRadius? radius;
@@ -164,9 +165,9 @@ class _TRippleState extends State<TRipple> with TickerProviderStateMixin {
     return AllowTapListener(
       onTapUp: _handleCancel,
       onTapCancel: _handleCancel,
-      child: TMaterialStateBuilder(
+      child: TMaterialStateButton(
         shortcuts: widget.shortcuts,
-        actions: widget.actions,
+        actions: widget.actions ?? activeMap(context),
         focusNode: widget.focusNode,
         autofocus: widget.autofocus,
         disabled: widget.disabled,
@@ -182,67 +183,96 @@ class _TRippleState extends State<TRipple> with TickerProviderStateMixin {
         onFocusChange: widget.onFocusChange,
         onHover: widget.onHover,
         enableFeedback: widget.enableFeedback ?? true,
-        builder: (context, states) {
-          Widget child = CustomPaint(
-            painter: painter..splashes = _splashes,
-            child: widget.builder(context, states),
-          );
-          if (widget.backgroundColor != null) {
-            if (widget.animatedDuration != null) {
-              child = AnimatedContainer(
-                color: widget.backgroundColor?.resolve(states),
-                duration: widget.animatedDuration!,
-                curve: widget.curve,
-                child: child,
-              );
-            } else {
-              child = Container(
-                color: widget.backgroundColor?.resolve(states),
+        child: Builder(
+          builder: (context) {
+            var states = TMaterialStateScope.of(context)!;
+            Widget child = CustomPaint(
+              painter: painter..splashes = _splashes,
+              child: widget.builder(context, states),
+            );
+            if (widget.backgroundColor != null) {
+              if (widget.animatedDuration != null) {
+                child = AnimatedContainer(
+                  color: widget.backgroundColor?.resolve(states),
+                  duration: widget.animatedDuration!,
+                  curve: widget.curve,
+                  child: child,
+                );
+              } else {
+                child = Container(
+                  color: widget.backgroundColor?.resolve(states),
+                  child: child,
+                );
+              }
+            }
+            if (widget.radius != null) {
+              child = ClipRRect(
+                borderRadius: widget.radius,
                 child: child,
               );
             }
-          }
-          if (widget.radius != null) {
-            child = ClipRRect(
-              borderRadius: widget.radius,
-              child: child,
-            );
-          }
-          if (widget.shape != null) {
-            child = ClipPath(
-              clipper: ShapeBorderClipper(shape: widget.shape!),
-              child: child,
-            );
-          }
-          if (widget.radius == null && widget.shape == null) {
-            child = ClipRect(
-              child: child,
-            );
-          }
-          return widget.afterBuilder?.call(context, states, child) ?? child;
-        },
+            if (widget.shape != null) {
+              child = ClipPath(
+                clipper: ShapeBorderClipper(shape: widget.shape!),
+                child: child,
+              );
+            }
+            if (widget.radius == null && widget.shape == null) {
+              child = ClipRect(
+                child: child,
+              );
+            }
+            return widget.afterBuilder?.call(context, states, child) ?? child;
+          },
+        ),
       ),
     );
   }
 
+  Map<Type, Action<Intent>> activeMap(BuildContext context) {
+    final Map<Type, Action<Intent>> actionMap = <Type, Action<Intent>>{
+      ActivateIntent: CallbackAction<ActivateIntent>(
+        onInvoke: (intent) {
+          if (widget.disabled) {
+            return;
+          }
+          if (widget.selected && !widget.selectedClick) {
+            return;
+          }
+          _doSplash();
+          _handleTap();
+          context.findRenderObject()!.sendSemanticsEvent(const TapSemanticEvent());
+          return null;
+        },
+      ),
+    };
+    return actionMap;
+  }
+
   /// 处理点击事件
   void _handleOnTapDown(TapDownDetails details) {
+    _doSplash();
+    widget.onTapDown?.call(details);
+  }
+
+  void _doSplash() {
     var rippleController = RippleController(
       vsync: this,
       color: widget.fixedRippleColor ?? _kDefaultRippleColor,
       notifyListeners: painter.markNeedsPaint,
     );
 
-    RippleSplash splash = createSplash(rippleController);
-    _splashes ??= HashSet<RippleSplash>();
-    _splashes!.add(splash);
-    _currentSplash?.cancel();
-    _currentSplash = splash;
-    splash.start();
-    widget.onTapDown?.call(details);
+    RippleSplash? splash = createSplash(rippleController);
+    if (splash != null) {
+      _splashes ??= HashSet<RippleSplash>();
+      _splashes!.add(splash);
+      _currentSplash?.cancel();
+      _currentSplash = splash;
+      splash.start();
+    }
   }
 
-  RippleSplash createSplash(RippleController rippleController) {
+  RippleSplash? createSplash(RippleController rippleController) {
     RippleSplash? splash;
     void onRemoved() {
       if (_splashes != null) {
@@ -254,7 +284,7 @@ class _TRippleState extends State<TRipple> with TickerProviderStateMixin {
       }
     }
 
-    splash = widget.splashFactory.create(
+    splash = widget.splashFactory?.create(
       controller: rippleController,
       referenceBox: context.findRenderObject() as RenderBox,
       onRemoved: onRemoved,
@@ -263,20 +293,20 @@ class _TRippleState extends State<TRipple> with TickerProviderStateMixin {
   }
 
   void _handleTap() {
-    confirm();
+    _confirm();
     widget.onTap?.call();
   }
 
   void _handleCancel([TapUpDetails? details]) {
-    cancel();
+    _cancel();
   }
 
   ///当鼠标左键放开时
-  void confirm() {
+  void _confirm() {
     _currentSplash?.confirm();
   }
 
-  void cancel() {
+  void _cancel() {
     _currentSplash?.cancel();
   }
 }
@@ -444,6 +474,12 @@ class InkBevelAngleRipple extends RippleSplash {
   late Animation<int> _fadeOut;
 
   @override
+  void start() {
+    _angleController.forward(from: 0);
+    _fadeOutController.value = 0;
+  }
+
+  @override
   void cancel() {
     _angleController.forward();
     _fadeOutController.animateTo(1.0);
@@ -474,11 +510,5 @@ class InkBevelAngleRipple extends RippleSplash {
       path.addRect(Rect.fromLTWH(0, 0, width, size.height));
       canvas.drawPath(path.transform(Matrix4.skewX(-pi / 22).storage), paint);
     }
-  }
-
-  @override
-  void start() {
-    _angleController.forward(from: 0);
-    _fadeOutController.value = 0;
   }
 }

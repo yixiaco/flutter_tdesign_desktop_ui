@@ -190,8 +190,12 @@ class _TButton extends StatelessWidget {
                 padding: padding,
                 decoration: shape != null ? ShapeDecoration(shape: shape) : null,
                 duration: const Duration(milliseconds: 200),
-                alignment: buttonStyle.alignment,
-                child: MaterialStateProperty.resolveAs(child, states),
+                child: Stack(
+                  alignment: buttonStyle.alignment ?? Alignment.center,
+                  children: [
+                    if (child != null) child!,
+                  ],
+                ),
               ),
             ),
           );
@@ -278,7 +282,8 @@ class _TButton extends StatelessWidget {
 
     // 动态前景色
     MaterialStateProperty<Color?> foregroundColorResolve(String theme, {bool ghost = false, String? defaultColor}) {
-      return MaterialStateProperty.resolveWith((states) => resolve(theme, states, ghost: ghost, defaultColor: defaultColor));
+      return MaterialStateProperty.resolveWith(
+          (states) => resolve(theme, states, ghost: ghost, defaultColor: defaultColor));
     }
 
     // 固定前景色
@@ -547,7 +552,8 @@ class _TButton extends StatelessWidget {
         round: Size.fromHeight(btnHeight),
         circle: Size.square(btnHeight),
       )),
-      side: MaterialStateProperty.resolveWith((states) => MaterialStateProperty.resolveAs(side, states) ?? borderSide.resolve(states)),
+      side: MaterialStateProperty.resolveWith(
+          (states) => MaterialStateProperty.resolveAs(side, states) ?? borderSide.resolve(states)),
       shape: ButtonStyleButton.allOrNull<TRoundedRectangleBorder>(TRoundedRectangleBorder(
         borderRadius: radius ??
             BorderRadius.circular(shape.valueOf(
@@ -719,6 +725,7 @@ class TButton extends StatelessWidget {
       iconWidget = Icon(icon, size: btnIconSize);
     }
     result.add(iconWidget);
+    result.add(child);
 
     return _TButton(
       disabled: disabled,
@@ -738,13 +745,11 @@ class TButton extends StatelessWidget {
       side: side,
       radius: radius,
       softWrap: softWrap,
-      child: MaterialStateWidget.resolveWith((states) {
-        return TSpace(
-          spacing: TVar.spacer,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [...result, MaterialStateProperty.resolveAs(child, states)],
-        );
-      }),
+      child: TSpace(
+        spacing: TVar.spacer,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: result,
+      ),
     );
   }
 
