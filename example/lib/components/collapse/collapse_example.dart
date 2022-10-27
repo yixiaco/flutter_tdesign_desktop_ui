@@ -47,7 +47,7 @@ class _TCollapseExampleState extends State<TCollapseExample> {
                 size: TComponentSize.small,
                 child: Text('操作'),
               ),
-              expandIcon: Icon(TIcons.arrowDown),
+              expandIcon: Icon(TIcons.discountFilled),
             ),
             TCollapsePanel(
               header: Text('销毁面板'),

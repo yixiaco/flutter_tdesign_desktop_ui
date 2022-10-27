@@ -149,14 +149,19 @@ class _TabLabelTrackPainter extends CustomPainter {
     required this.tabKeys,
     required this.painterKey,
   });
+
   /// 轨道颜色
   final Color trackColor;
+
   /// 轨道宽度
   final double strokeWidth;
+
   /// 方向
   final TTabsPlacement placement;
+
   /// 标签key
   final List<GlobalKey> tabKeys;
+
   /// 画布key
   final GlobalKey painterKey;
 
@@ -196,5 +201,4 @@ class _TabLabelTrackPainter extends CustomPainter {
   bool shouldRepaint(covariant _TabLabelTrackPainter oldDelegate) {
     return true;
   }
-
 }

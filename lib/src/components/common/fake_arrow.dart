@@ -1,18 +1,7 @@
-import 'dart:math';
+import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
-
-const _kFakeArrowSvg = '''<svg
-            width="16"
-            height="16"
-            viewBox="0 0 16 16"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            >
-            <path d="M3.75 5.7998L7.99274 10.0425L12.2361 5.79921" stroke="black" stroke-opacity="0.9" stroke-width="1.3" />
-            </svg>''';
 
 /// 箭头方向
 enum TFakeArrowPlacement {
@@ -34,16 +23,12 @@ class TFakeArrow extends StatefulWidget {
   const TFakeArrow({
     super.key,
     this.placement = TFakeArrowPlacement.right,
-    this.child,
     this.color,
     this.dimension,
   });
 
   /// 方向
   final TFakeArrowPlacement placement;
-
-  /// 替换icon图标
-  final Widget? child;
 
   /// 颜色
   final Color? color;
@@ -93,47 +78,18 @@ class _TFakeArrowState extends State<TFakeArrow> with SingleTickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
+    var iconTheme = IconTheme.of(context);
     var theme = TTheme.of(context);
     var colorScheme = theme.colorScheme;
-    return CustomPaint(
-      size: Size.square(widget.dimension ?? 16),
-      painter: _painter
-      ..t = _animated
-      ..placement = widget.placement
-      ..color = widget.color ?? colorScheme.textColorPrimary,
+    return RepaintBoundary(
+      child: CustomPaint(
+        size: Size.square(widget.dimension ?? iconTheme.size ?? 16),
+        painter: _painter
+          ..t = _animated
+          ..placement = widget.placement
+          ..color = widget.color ?? iconTheme.color ?? colorScheme.textColorPrimary,
+      ),
     );
-    // return AnimatedBuilder(
-    //   builder: (BuildContext context, Widget? child) {
-    //     Matrix4 matrix4;
-    //     switch (widget.placement) {
-    //       case TFakeArrowPlacement.left:
-    //         matrix4 = Matrix4.rotationY(pi * _animated.value)..rotateZ(-pi / 2);
-    //         break;
-    //       case TFakeArrowPlacement.right:
-    //         matrix4 = Matrix4.rotationY(pi * _animated.value)..rotateZ(pi / 2);
-    //         break;
-    //       case TFakeArrowPlacement.top:
-    //         matrix4 = Matrix4.rotationX(pi * _animated.value)..rotateZ(pi);
-    //         break;
-    //       case TFakeArrowPlacement.bottom:
-    //         matrix4 = Matrix4.rotationX(pi * _animated.value);
-    //         break;
-    //     }
-    //     return Transform(
-    //       transform: matrix4,
-    //       alignment: Alignment.center,
-    //       filterQuality: FilterQuality.medium,
-    //       child: widget.child ??
-    //           SvgPicture.string(
-    //             _kFakeArrowSvg,
-    //             color: widget.color ?? colorScheme.textColorPrimary,
-    //             width: widget.dimension,
-    //             height: widget.dimension,
-    //           ),
-    //     );
-    //   },
-    //   animation: _animated,
-    // );
   }
 }
 
@@ -161,5 +117,54 @@ class _TFakeArrowPainter extends AnimationChangeNotifierPainter {
   }
 
   @override
-  void paint(Canvas canvas, Size size) {}
+  void paint(Canvas canvas, Size size) {
+    var width = math.max(size.width - 8, 0);
+
+    var h = width / 2;
+    var dw = width / 2;
+    var dh = h / 2;
+    var center = size.center(Offset.zero);
+    Paint paint = Paint()
+      ..strokeCap = StrokeCap.square
+      ..strokeJoin = StrokeJoin.round
+      ..color = color
+      ..strokeWidth = 1.2
+      ..style = PaintingStyle.stroke;
+    Path path = Path();
+    switch (placement) {
+      case TFakeArrowPlacement.left:
+        path.addPolygon([
+          center + Offset(_lerp(-dh, dh), -dw),
+          center + Offset(_lerp(dh, -dh), 0),
+          center + Offset(_lerp(-dh, dh), dw),
+        ], false);
+        break;
+      case TFakeArrowPlacement.right:
+        path.addPolygon([
+          center + Offset(_lerp(dh, -dh), -dw),
+          center + Offset(_lerp(-dh, dh), 0),
+          center + Offset(_lerp(dh, -dh), dw),
+        ], false);
+        break;
+      case TFakeArrowPlacement.top:
+        path.addPolygon([
+          center + Offset(-dw, _lerp(-dh, dh)),
+          center + Offset(0, _lerp(dh, -dh)),
+          center + Offset(dw, _lerp(-dh, dh)),
+        ], false);
+        break;
+      case TFakeArrowPlacement.bottom:
+        path.addPolygon([
+          center + Offset(-dw, _lerp(dh, -dh)),
+          center + Offset(0, _lerp(-dh, dh)),
+          center + Offset(dw, _lerp(dh, -dh)),
+        ], false);
+        break;
+    }
+    canvas.drawPath(path, paint);
+  }
+
+  double _lerp(double begin, double end) {
+    return begin + (end - begin) * t.value;
+  }
 }

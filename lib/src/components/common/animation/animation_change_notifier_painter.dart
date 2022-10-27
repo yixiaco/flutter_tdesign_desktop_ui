@@ -17,7 +17,7 @@ abstract class AnimationChangeNotifierPainter extends ChangeNotifier implements 
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 
   @override
   bool? hitTest(Offset position) => null;

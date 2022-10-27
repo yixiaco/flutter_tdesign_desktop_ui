@@ -29,7 +29,7 @@ class TMenuIconButton extends StatelessWidget {
   final Color? backgroundColor;
 
   /// icon
-  final Icon child;
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {

@@ -190,7 +190,8 @@ class _TCollapsePanelState<T> extends State<_TCollapsePanel<T>> {
 
     Widget child = _buildHeader(theme, icon);
 
-    var borderSide = widget.last || widget.borderless ? BorderSide.none : BorderSide(color: colorScheme.componentBorder);
+    var borderSide =
+        widget.last || widget.borderless ? BorderSide.none : BorderSide(color: colorScheme.componentBorder);
     var disabledColor = widget.disabled ? colorScheme.bgColorComponentDisabled : null;
     var bgColor = widget.borderless ? null : disabledColor ?? colorScheme.bgColorSecondaryContainer;
 
@@ -236,7 +237,9 @@ class _TCollapsePanelState<T> extends State<_TCollapsePanel<T>> {
   /// 头部
   Widget _buildHeader(TThemeData theme, Widget? icon) {
     var colorScheme = theme.colorScheme;
-    var borderSide = widget.last && !widget.expand || widget.borderless ? BorderSide.none : BorderSide(color: colorScheme.componentBorder);
+    var borderSide = widget.last && !widget.expand || widget.borderless
+        ? BorderSide.none
+        : BorderSide(color: colorScheme.componentBorder);
     Widget header = DefaultTextStyle.merge(
       style: TextStyle(fontSize: theme.fontData.fontSizeTitleSmall),
       child: Container(
@@ -286,10 +289,11 @@ class _TCollapsePanelState<T> extends State<_TCollapsePanel<T>> {
     if (!widget.showExpandIcon) {
       return null;
     }
-    Widget chevronIcon = TFakeArrow(
-      placement: widget.expand ? TFakeArrowPlacement.bottom : TFakeArrowPlacement.right,
-      child: widget.panel.expandIcon ?? widget.expandIcon,
-    );
+    Widget chevronIcon = widget.panel.expandIcon ??
+        widget.expandIcon ??
+        TFakeArrow(
+          placement: widget.expand ? TFakeArrowPlacement.bottom : TFakeArrowPlacement.right,
+        );
     if (widget.expandIconPlacement == TCollapseExpandIconPlacement.left) {
       chevronIcon = Padding(
         padding: EdgeInsets.only(right: TVar.spacer1),

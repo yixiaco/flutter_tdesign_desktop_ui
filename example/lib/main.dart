@@ -519,7 +519,8 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
               collapsed = !collapsed;
             });
           },
-          child: Icon(collapsed ? TIcons.chevronRight : TIcons.chevronLeft),
+          child: TFakeArrow(placement: collapsed ? TFakeArrowPlacement.right : TFakeArrowPlacement.left),
+          // child: Icon(collapsed ? TIcons.chevronRight : TIcons.chevronLeft),
         ),
       ),
     );

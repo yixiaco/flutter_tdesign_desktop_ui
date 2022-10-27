@@ -246,17 +246,19 @@ class _TRadioGroupState<T> extends TFormItemValidateState<TRadioGroup<T>> with S
         color: colorScheme.bgColorComponent,
         borderRadius: BorderRadius.circular(TVar.borderRadiusDefault),
       ),
-      child: CustomPaint(
-        painter: _indicatorPainter
-          ..t = _position
-          ..optionKeys = _optionKeys
-          ..color = blockColor
-          ..index = widget._index,
-        child: TSpace(
-          breakLine: false,
-          spacing: 0,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: box,
+      child: RepaintBoundary(
+        child: CustomPaint(
+          painter: _indicatorPainter
+            ..t = _position
+            ..optionKeys = _optionKeys
+            ..color = blockColor
+            ..index = widget._index,
+          child: TSpace(
+            breakLine: false,
+            spacing: 0,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: box,
+          ),
         ),
       ),
     );
@@ -364,13 +366,13 @@ class _TRadioGroupState<T> extends TFormItemValidateState<TRadioGroup<T>> with S
   void reset(TFormResetType type) {
     switch (type) {
       case TFormResetType.empty:
-        if(widget.allowUncheck) {
+        if (widget.allowUncheck) {
           _value = null;
           _valueChange(true, null);
         }
         break;
       case TFormResetType.initial:
-        if(widget.allowUncheck || widget.defaultValue != null) {
+        if (widget.allowUncheck || widget.defaultValue != null) {
           _value = widget.defaultValue;
           _valueChange(true, widget.defaultValue);
         }
