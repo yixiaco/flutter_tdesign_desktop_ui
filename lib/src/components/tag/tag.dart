@@ -289,7 +289,7 @@ class _TTagState extends State<TTag> {
     if (widget.icon != null) {
       icon = Padding(
         padding: const EdgeInsets.only(right: 4),
-        child: TAnimatedIcon(
+        child: TAnimatedIconTheme(
           duration: TVar.animDurationBase,
           curve: TVar.animTimeFnEasing,
           size: theme.fontData.fontSizeBodyLarge,
@@ -440,7 +440,7 @@ class _TagCloseIconState extends State<_TagCloseIcon> {
       cursor: widget.disabled ? SystemMouseCursors.noDrop : SystemMouseCursors.click,
       child: GestureDetector(
         onTap: widget.disabled ? null : widget.click,
-        child: TAnimatedIcon(
+        child: TAnimatedIconTheme(
           duration: TVar.animDurationBase,
           curve: TVar.animTimeFnEasing,
           size: widget.size,

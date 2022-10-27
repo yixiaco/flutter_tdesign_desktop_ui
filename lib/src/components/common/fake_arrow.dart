@@ -36,8 +36,7 @@ class TFakeArrow extends StatefulWidget {
     this.placement = TFakeArrowPlacement.right,
     this.child,
     this.color,
-    this.width,
-    this.height,
+    this.dimension,
   });
 
   /// 方向
@@ -49,11 +48,8 @@ class TFakeArrow extends StatefulWidget {
   /// 颜色
   final Color? color;
 
-  /// 宽度
-  final double? width;
-
-  /// 高度
-  final double? height;
+  /// 宽高
+  final double? dimension;
 
   @override
   State<TFakeArrow> createState() => _TFakeArrowState();
@@ -62,10 +58,12 @@ class TFakeArrow extends StatefulWidget {
 class _TFakeArrowState extends State<TFakeArrow> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late CurvedAnimation _animated;
+  late _TFakeArrowPainter _painter;
 
   @override
   void initState() {
     super.initState();
+    _painter = _TFakeArrowPainter();
     _controller = AnimationController(
       vsync: this,
       duration: TVar.animDurationSlow,
@@ -87,6 +85,7 @@ class _TFakeArrowState extends State<TFakeArrow> with SingleTickerProviderStateM
 
   @override
   void dispose() {
+    _painter.dispose();
     _controller.dispose();
     _animated.dispose();
     super.dispose();
@@ -96,37 +95,71 @@ class _TFakeArrowState extends State<TFakeArrow> with SingleTickerProviderStateM
   Widget build(BuildContext context) {
     var theme = TTheme.of(context);
     var colorScheme = theme.colorScheme;
-    return AnimatedBuilder(
-      builder: (BuildContext context, Widget? child) {
-        Matrix4 matrix4;
-        switch (widget.placement) {
-          case TFakeArrowPlacement.left:
-            matrix4 = Matrix4.rotationY(pi * _animated.value)..rotateZ(-pi / 2);
-            break;
-          case TFakeArrowPlacement.right:
-            matrix4 = Matrix4.rotationY(pi * _animated.value)..rotateZ(pi / 2);
-            break;
-          case TFakeArrowPlacement.top:
-            matrix4 = Matrix4.rotationX(pi * _animated.value)..rotateZ(pi);
-            break;
-          case TFakeArrowPlacement.bottom:
-            matrix4 = Matrix4.rotationX(pi * _animated.value);
-            break;
-        }
-        return Transform(
-          transform: matrix4,
-          alignment: Alignment.center,
-          filterQuality: FilterQuality.medium,
-          child: widget.child ??
-              SvgPicture.string(
-                _kFakeArrowSvg,
-                color: widget.color ?? colorScheme.textColorPrimary,
-                width: widget.width,
-                height: widget.height,
-              ),
-        );
-      },
-      animation: _animated,
+    return CustomPaint(
+      size: Size.square(widget.dimension ?? 16),
+      painter: _painter
+      ..t = _animated
+      ..placement = widget.placement
+      ..color = widget.color ?? colorScheme.textColorPrimary,
     );
+    // return AnimatedBuilder(
+    //   builder: (BuildContext context, Widget? child) {
+    //     Matrix4 matrix4;
+    //     switch (widget.placement) {
+    //       case TFakeArrowPlacement.left:
+    //         matrix4 = Matrix4.rotationY(pi * _animated.value)..rotateZ(-pi / 2);
+    //         break;
+    //       case TFakeArrowPlacement.right:
+    //         matrix4 = Matrix4.rotationY(pi * _animated.value)..rotateZ(pi / 2);
+    //         break;
+    //       case TFakeArrowPlacement.top:
+    //         matrix4 = Matrix4.rotationX(pi * _animated.value)..rotateZ(pi);
+    //         break;
+    //       case TFakeArrowPlacement.bottom:
+    //         matrix4 = Matrix4.rotationX(pi * _animated.value);
+    //         break;
+    //     }
+    //     return Transform(
+    //       transform: matrix4,
+    //       alignment: Alignment.center,
+    //       filterQuality: FilterQuality.medium,
+    //       child: widget.child ??
+    //           SvgPicture.string(
+    //             _kFakeArrowSvg,
+    //             color: widget.color ?? colorScheme.textColorPrimary,
+    //             width: widget.dimension,
+    //             height: widget.dimension,
+    //           ),
+    //     );
+    //   },
+    //   animation: _animated,
+    // );
   }
+}
+
+class _TFakeArrowPainter extends AnimationChangeNotifierPainter {
+  TFakeArrowPlacement get placement => _placement!;
+  TFakeArrowPlacement? _placement;
+
+  set placement(TFakeArrowPlacement value) {
+    if (value == _placement) {
+      return;
+    }
+    _placement = value;
+    notifyListeners();
+  }
+
+  Color get color => _color!;
+  Color? _color;
+
+  set color(Color value) {
+    if (value == _color) {
+      return;
+    }
+    _color = value;
+    notifyListeners();
+  }
+
+  @override
+  void paint(Canvas canvas, Size size) {}
 }

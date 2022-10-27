@@ -28,7 +28,6 @@ class _TCollapseExampleState extends State<TCollapseExample> {
         TCollapse<int>(
           disabled: disabled,
           defaultExpandAll: true,
-          expandIconPlacement: TCollapseExpandIconPlacement.right,
           panels: const [
             TCollapsePanel(
               header: Text('这是一个折叠面板'),

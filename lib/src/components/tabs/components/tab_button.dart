@@ -362,7 +362,7 @@ class _TabButtonState<T> extends State<_TabButton<T>> with TickerProviderStateMi
         disabled: widget.disabled,
         onTap: () => widget.onRemove?.call(widget.value, widget.index),
         builder: (BuildContext context, Set<MaterialState> states) {
-          return TAnimatedIcon(
+          return TAnimatedIconTheme(
             duration: TVar.animDurationBase,
             curve: TVar.animTimeFnEasing,
             color: effectiveIconColor.resolve(states),

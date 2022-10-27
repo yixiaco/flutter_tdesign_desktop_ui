@@ -29,7 +29,7 @@ export 'src/components/common/toggleable.dart';
 export 'src/components/common/animation/animation_change_notifier_painter.dart';
 export 'src/components/common/hollow.dart';
 export 'src/components/common/scroll/scrollbar.dart';
-export 'src/components/common/animation/animated_icon.dart';
+export 'src/components/common/animation/animated_icon_theme.dart';
 export 'src/components/common/fixed_flex.dart';
 export 'src/components/common/scroll/scroll_view.dart';
 export 'src/components/common/fake_arrow.dart';
