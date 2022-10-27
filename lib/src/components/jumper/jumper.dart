@@ -40,7 +40,7 @@ enum TJumperTrigger {
 /// 用于上下翻页，适用于监控视图实例切换等
 class TJumper extends StatelessWidget {
   const TJumper({
-    Key? key,
+    super.key,
     this.disabled = false,
     this.layout = Axis.horizontal,
     this.showCurrent = true,
@@ -48,7 +48,7 @@ class TJumper extends StatelessWidget {
     this.tips,
     this.variant = TJumperVariant.text,
     this.onChange,
-  }) : super(key: key);
+  });
 
   /// 按钮禁用配置
   final bool disabled;

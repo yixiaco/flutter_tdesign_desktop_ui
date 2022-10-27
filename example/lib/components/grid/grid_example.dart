@@ -3,7 +3,7 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// 栅格示例
 class GridExample extends StatelessWidget {
-  const GridExample({Key? key}) : super(key: key);
+  const GridExample({super.key});
 
   @override
   Widget build(BuildContext context) {

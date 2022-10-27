@@ -3,9 +3,9 @@ part of '../../head_menu.dart';
 /// 处理顶部导航button分配
 class _THeadMenuLayout<T> extends StatelessWidget {
   const _THeadMenuLayout({
-    Key? key,
+    super.key,
     required this.props,
-  }) : super(key: key);
+  });
 
   /// 布局属性
   final _THeadMenuItemLayoutProps<T> props;

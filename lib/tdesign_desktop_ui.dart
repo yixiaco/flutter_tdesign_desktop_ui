@@ -31,7 +31,6 @@ export 'src/components/common/hollow.dart';
 export 'src/components/common/scroll/scrollbar.dart';
 export 'src/components/common/animation/animated_icon.dart';
 export 'src/components/common/fixed_flex.dart';
-export 'src/components/common/decoration_box.dart';
 export 'src/components/common/scroll/scroll_view.dart';
 export 'src/components/common/fake_arrow.dart';
 export 'src/components/common/expandable_text.dart';
@@ -94,6 +93,10 @@ export 'src/components/input_adornment/input_adornment.dart';
 /// 数字输入框
 export 'src/components/input_number/input_number.dart';
 export 'src/components/input_number/type.dart';
+/// Select 选择器
+export 'src/components/select/select.dart';
+export 'src/components/select/option.dart';
+export 'src/components/select/type.dart';
 /// 筛选器输入框
 export 'src/components/select_input/select_input.dart';
 export 'src/components/select_input/multiple_select_input.dart';
@@ -130,3 +133,4 @@ export 'src/components/dialog/type.dart';
 /// 弹出层
 export 'src/components/popup/popup.dart';
 export 'src/components/popup/popup_theme.dart';
+export 'src/components/popup/type.dart';

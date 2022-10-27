@@ -17,9 +17,9 @@ double? _paddingLeft<T>(_TMenuItemLayoutProps<T> props) {
 /// 次级菜单
 class _TSubMenu<T> extends StatelessWidget {
   const _TSubMenu({
-    Key? key,
+    super.key,
     required this.props,
-  }) : super(key: key);
+  });
 
   /// 布局属性
   final _TMenuItemLayoutProps<T> props;

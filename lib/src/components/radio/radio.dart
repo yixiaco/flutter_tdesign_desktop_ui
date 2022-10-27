@@ -5,9 +5,9 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 /// 单选框代表从一组互斥的选项中仅选择一个选项。
 class TRadio<T> extends TFormItemValidate {
   const TRadio({
-    Key? key,
-    String? name,
-    FocusNode? focusNode,
+    super.key,
+    super.name,
+    super.focusNode,
     this.allowUncheck = false,
     this.checked,
     this.defaultChecked,
@@ -17,7 +17,7 @@ class TRadio<T> extends TFormItemValidate {
     this.onChange,
     this.onClick,
     this.autofocus = false,
-  }) : super(key: key, name: name, focusNode: focusNode);
+  });
 
   /// 是否允许取消选中
   final bool allowUncheck;

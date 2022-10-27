@@ -3,11 +3,11 @@ part of '../tabs.dart';
 /// 选项卡面板
 class _TabPanel<T> extends StatefulWidget {
   const _TabPanel({
-    Key? key,
+    super.key,
     required this.index,
     this.value,
     required this.list,
-  }) : super(key: key);
+  });
 
   final int index;
 

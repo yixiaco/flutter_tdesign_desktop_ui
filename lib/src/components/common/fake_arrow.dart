@@ -32,13 +32,13 @@ enum TFakeArrowPlacement {
 /// 统一使用的翻转箭头组件
 class TFakeArrow extends StatefulWidget {
   const TFakeArrow({
-    Key? key,
+    super.key,
     this.placement = TFakeArrowPlacement.right,
     this.child,
     this.color,
     this.width,
     this.height,
-  }) : super(key: key);
+  });
 
   /// 方向
   final TFakeArrowPlacement placement;

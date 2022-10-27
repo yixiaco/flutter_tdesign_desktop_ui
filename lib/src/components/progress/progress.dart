@@ -8,7 +8,7 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 /// 展示操作的当前进度
 class TProgress extends ImplicitlyAnimatedWidget {
   const TProgress({
-    Key? key,
+    super.key,
     this.color,
     this.showLabel = true,
     this.label,
@@ -19,10 +19,10 @@ class TProgress extends ImplicitlyAnimatedWidget {
     this.strokeWidth,
     this.theme = TProgressTheme.line,
     this.trackColor,
-    Curve curve = Curves.linear,
-    Duration duration = const Duration(milliseconds: 200),
-    VoidCallback? onEnd,
-  }) : super(key: key, curve: curve, duration: duration, onEnd: onEnd);
+    super.curve = Curves.linear,
+    super.duration = const Duration(milliseconds: 200),
+    super.onEnd,
+  });
 
   /// 进度条颜色,多个颜色会形成渐变色
   final List<Color>? color;
@@ -364,14 +364,14 @@ typedef AnimationPainter = CustomPainter Function(Animation<double> animation);
 
 class _TProgressActionPaint extends StatefulWidget {
   const _TProgressActionPaint({
-    Key? key,
+    super.key,
     this.painter,
     this.size = Size.zero,
     this.isComplex = false,
     this.willChange = false,
     this.child,
     required this.action,
-  }) : super(key: key);
+  });
 
   /// 子组件
   final Widget? child;

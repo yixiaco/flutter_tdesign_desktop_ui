@@ -88,10 +88,10 @@ class TInputTheme extends InheritedTheme {
   final TInputThemeData data;
 
   const TInputTheme({
-    Key? key,
+    super.key,
     required this.data,
-    required Widget child,
-  }) : super(key: key, child: child);
+    required super.child,
+  });
 
   /// 来自封闭给定上下文的最近主题实例的数据
   static TInputThemeData of(BuildContext context) {

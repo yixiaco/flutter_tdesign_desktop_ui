@@ -2,11 +2,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
+typedef TSelectInputCollapsedItemsCallback<T> = Widget Function(List<T> value, List<T> collapsedTags, int count);
+
 /// 筛选器输入框
 /// 定义：筛选器通用输入框
 class TSelectInput<T extends SelectInputValue> extends StatelessWidget {
   const TSelectInput({
-    Key? key,
+    super.key,
     this.size,
     this.allowInput = false,
     this.autoWidth = false,
@@ -45,7 +47,7 @@ class TSelectInput<T extends SelectInputValue> extends StatelessWidget {
     this.dragSort = false,
     this.onDragSort,
     this.max,
-    this.controller,
+    this.value,
     this.singleValueDisplay,
     this.multipleValueDisplay,
     this.onBlur,
@@ -59,10 +61,7 @@ class TSelectInput<T extends SelectInputValue> extends StatelessWidget {
     this.onTagChange,
     this.focusNode,
     this.autofocus = false,
-  })  : assert(controller == null ||
-            multiple && controller is TSelectInputMultipleController ||
-            !multiple && controller is TSelectInputSingleController),
-        super(key: key);
+  })  : assert(value == null || multiple && value is List<T> || !multiple && value is T);
 
   /// 尺寸
   final TComponentSize? size;
@@ -82,7 +81,7 @@ class TSelectInput<T extends SelectInputValue> extends StatelessWidget {
   /// 标签过多的情况下，折叠项内容，默认为 `+N`。
   /// 如果需要悬浮就显示其他内容，可以使用 `collapsedItems` 自定义。
   /// `value` 表示所有标签值，`collapsedTags` 表示折叠标签值，`count` 表示总标签数量
-  final TTagInputCollapsedItemsCallback? collapsedItems;
+  final TSelectInputCollapsedItemsCallback<T>? collapsedItems;
 
   /// 是否禁用
   final bool disabled;
@@ -141,7 +140,7 @@ class TSelectInput<T extends SelectInputValue> extends StatelessWidget {
   final TPopupStyle? popupStyle;
 
   /// 是否显示下拉框
-  final ValueNotifier<bool>? popupVisible;
+  final TPopupVisible? popupVisible;
 
   /// 只读状态，值为真会隐藏输入框，且无法打开下拉框
   final bool readonly;
@@ -185,10 +184,10 @@ class TSelectInput<T extends SelectInputValue> extends StatelessWidget {
   final void Function(TagInputDragSortContext context)? onDragSort;
 
   /// 全部标签值。值为数组表示多个标签，值为非数组表示单个数值。
-  final TSelectInputController? controller;
+  final dynamic value;
 
-  /// 自定义值呈现的全部内容，参数为所有标签的值。
-  final Widget Function(T value, void Function(int index, T item) onClose)? singleValueDisplay;
+  /// 自定义值呈现的全部内容
+  final String Function(T? value)? singleValueDisplay;
 
   /// 自定义值呈现的全部内容，参数为所有标签的值。
   final List<Widget> Function(List<T> value, void Function(int index, T item) onClose)? multipleValueDisplay;
@@ -241,7 +240,7 @@ class TSelectInput<T extends SelectInputValue> extends StatelessWidget {
       size: size,
       allowInput: allowInput,
       disabled: disabled,
-      controller: controller as TSelectInputSingleController<T>,
+      value: value,
       readonly: readonly,
       borderless: borderless,
       autoWidth: autoWidth,
@@ -274,6 +273,7 @@ class TSelectInput<T extends SelectInputValue> extends StatelessWidget {
       panel: panel,
       popupVisible: popupVisible,
       showDuration: showDuration,
+      valueDisplay: singleValueDisplay,
       focusNode: focusNode,
       autofocus: autofocus,
     );
@@ -285,7 +285,7 @@ class TSelectInput<T extends SelectInputValue> extends StatelessWidget {
       size: size,
       allowInput: allowInput,
       disabled: disabled,
-      controller: controller as TSelectInputMultipleController<T>,
+      value: value,
       readonly: readonly,
       borderless: borderless,
       tagTheme: tagTheme,

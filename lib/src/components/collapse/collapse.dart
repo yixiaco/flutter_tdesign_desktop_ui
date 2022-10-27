@@ -6,7 +6,7 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 /// 可以将较多或较复杂的内容进行分组，分组内容区可以折叠展开或隐藏。
 class TCollapse<T> extends StatefulWidget {
   const TCollapse({
-    Key? key,
+    super.key,
     this.borderless = false,
     this.defaultExpandAll = false,
     this.disabled = false,
@@ -18,7 +18,7 @@ class TCollapse<T> extends StatefulWidget {
     this.value,
     this.onChange,
     required this.panels,
-  }) : super(key: key);
+  });
 
   /// 是否为无边框模式
   final bool borderless;
@@ -132,7 +132,7 @@ class _TCollapseState<T> extends State<TCollapse<T>> {
 /// 折叠单面板
 class _TCollapsePanel<T> extends StatefulWidget {
   const _TCollapsePanel({
-    Key? key,
+    super.key,
     required this.expand,
     required this.disabled,
     required this.showExpandIcon,
@@ -143,7 +143,7 @@ class _TCollapsePanel<T> extends StatefulWidget {
     required this.panel,
     required this.last,
     required this.borderless,
-  }) : super(key: key);
+  });
 
   /// 是否展开
   final bool expand;

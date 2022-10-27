@@ -10,9 +10,9 @@ void _itemHandleClick<T>(_TMenuItemLayoutProps<T> props, TMenuController<T> cont
 /// 子菜单
 class _TMenuItem<T> extends StatelessWidget {
   const _TMenuItem({
-    Key? key,
+    super.key,
     required this.props,
-  }) : super(key: key);
+  });
 
   /// 布局属性
   final _TMenuItemLayoutProps<T> props;

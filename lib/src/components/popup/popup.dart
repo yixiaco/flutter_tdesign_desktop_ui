@@ -21,7 +21,7 @@ typedef PopupPositionCallback = void Function(bool isReverse);
 /// 弹出层组件是其他弹窗类组件如气泡确认框实现的基础，当这些组件提供的能力不能满足定制需求时，可以在弹出层组件基础上封装
 class TPopup extends StatefulWidget {
   const TPopup({
-    Key? key,
+    super.key,
     this.placement = TPopupPlacement.top,
     this.trigger = TPopupTrigger.hover,
     this.showArrow = false,
@@ -36,7 +36,7 @@ class TPopup extends StatefulWidget {
     this.destroyOnClose = true,
     this.hideEmptyPopup = false,
     this.style,
-  }) : super(key: key);
+  });
 
   /// 浮层出现位置
   final TPopupPlacement placement;
@@ -50,8 +50,8 @@ class TPopup extends StatefulWidget {
   /// 是否禁用组件
   final bool disabled;
 
-  /// 是否显示浮层,默认为false,当你需要手动控制它时，你应该传输一个ValueNotifier
-  final ValueNotifier<bool>? visible;
+  /// 是否显示浮层,默认为false,当你需要手动控制它时，你应该传输一个[TPopupVisible]
+  final TPopupVisible? visible;
 
   /// The widget below this widget in the tree.
   ///

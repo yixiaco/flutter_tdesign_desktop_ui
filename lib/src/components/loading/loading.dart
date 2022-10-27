@@ -8,7 +8,7 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 /// 在网络较慢或数据较多时，表示数据正在加载的状态。
 class TLoading extends StatefulWidget {
   const TLoading({
-    Key? key,
+    super.key,
     this.loading = true,
     this.size,
     this.boxSize,
@@ -18,7 +18,7 @@ class TLoading extends StatefulWidget {
     this.child,
     this.text,
     this.delay,
-  }) : super(key: key);
+  });
 
   /// 是否处于加载状态
   final bool loading;

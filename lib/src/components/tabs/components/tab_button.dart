@@ -3,7 +3,7 @@ part of '../tabs.dart';
 /// 标签按钮
 class _TabButton<T> extends StatefulWidget {
   const _TabButton({
-    Key? key,
+    super.key,
     this.disabled = false,
     required this.dragSort,
     required this.checked,
@@ -17,7 +17,7 @@ class _TabButton<T> extends StatefulWidget {
     this.onDragSort,
     required this.value,
     required this.index,
-  }) : super(key: key);
+  });
 
   /// 是否禁用组件
   final bool disabled;

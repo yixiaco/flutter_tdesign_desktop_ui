@@ -7,7 +7,7 @@ import 'package:flutter/services.dart';
 /// 一个通用的按钮状态构建器
 class TMaterialStateButton extends StatefulWidget {
   const TMaterialStateButton({
-    Key? key,
+    super.key,
     this.builder,
     this.child,
     this.disabled = false,
@@ -29,8 +29,7 @@ class TMaterialStateButton extends StatefulWidget {
     this.actions,
     this.shortcuts,
     this.enableFeedback = true,
-  })  : assert(child != null || builder != null),
-        super(key: key);
+  })  : assert(child != null || builder != null);
 
   /// 是否禁用
   final bool disabled;
@@ -141,7 +140,7 @@ class _TMaterialStateButtonState extends State<TMaterialStateButton> with Materi
       shortcuts: widget.shortcuts,
       child: GestureDetector(
         behavior: widget.behavior,
-        onTap: _handleTap,
+        onTap: widget.onTap != null ? _handleTap : null,
         onTapDown: (details) {
           _onTap(true);
           if (_isClick) widget.onTapDown?.call(details);

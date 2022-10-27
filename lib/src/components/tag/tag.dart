@@ -6,7 +6,7 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 /// 标签常用于标记、分类和选择
 class TTag extends StatefulWidget {
   const TTag({
-    Key? key,
+    super.key,
     this.closable = false,
     required this.child,
     this.disabled = false,
@@ -20,7 +20,7 @@ class TTag extends StatefulWidget {
     this.onClose,
     this.backgroundColor,
     this.textColor,
-  }) : super(key: key);
+  });
 
   /// 标签是否可关闭
   final bool closable;
@@ -402,13 +402,13 @@ class _TTagState extends State<TTag> {
 /// 标签close icon
 class _TagCloseIcon extends StatefulWidget {
   const _TagCloseIcon({
-    Key? key,
+    super.key,
     required this.size,
     required this.color,
     required this.hoverColor,
     this.disabled = false,
     this.click,
-  }) : super(key: key);
+  });
 
   /// icon大小
   final double size;

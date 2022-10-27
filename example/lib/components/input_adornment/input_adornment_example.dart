@@ -3,7 +3,7 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// 输入装饰器示例代码
 class TInputAdornmentExample extends StatefulWidget {
-  const TInputAdornmentExample({Key? key}) : super(key: key);
+  const TInputAdornmentExample({super.key});
 
   @override
   State<TInputAdornmentExample> createState() => _TInputAdornmentExampleState();

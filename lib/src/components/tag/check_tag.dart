@@ -5,7 +5,7 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 /// 标签有已选和未选两种状态，可以通过点击标签来切换。类似多选框的效果。
 class TCheckTag extends StatefulWidget {
   const TCheckTag({
-    Key? key,
+    super.key,
     this.checked = false,
     required this.child,
     this.disabled = false,
@@ -14,7 +14,7 @@ class TCheckTag extends StatefulWidget {
     this.onClick,
     this.focusNode,
     this.autofocus = false,
-  }) : super(key: key);
+  });
 
   /// 标签选中的状态
   final bool checked;

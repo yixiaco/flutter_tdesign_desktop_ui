@@ -3,7 +3,7 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// 跳转链接示例
 class TLinkExample extends StatelessWidget {
-  const TLinkExample({Key? key}) : super(key: key);
+  const TLinkExample({super.key});
 
   @override
   Widget build(BuildContext context) {

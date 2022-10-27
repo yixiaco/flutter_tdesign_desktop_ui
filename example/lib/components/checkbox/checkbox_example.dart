@@ -3,7 +3,7 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// 复选框示例
 class TCheckboxExample extends StatefulWidget {
-  const TCheckboxExample({Key? key}) : super(key: key);
+  const TCheckboxExample({super.key});
 
   @override
   State<TCheckboxExample> createState() => _TCheckboxExampleState();

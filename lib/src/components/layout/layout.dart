@@ -5,12 +5,12 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 /// 用于组织框架结构
 class TLayout extends StatelessWidget {
   const TLayout({
-    Key? key,
+    super.key,
     this.aside,
     this.header,
     this.content,
     this.footer,
-  }) : super(key: key);
+  });
 
   /// 侧边栏，一般是一个[TAside]
   final Widget? aside;
@@ -72,11 +72,11 @@ class TLayout extends StatelessWidget {
 /// layout布局侧边栏
 class TAside extends StatelessWidget {
   const TAside({
-    Key? key,
+    super.key,
     this.child,
     this.width = 232,
     this.color,
-  }) : super(key: key);
+  });
 
   final Widget? child;
 
@@ -108,10 +108,10 @@ class TAside extends StatelessWidget {
 /// layout布局顶栏
 class THeader extends StatelessWidget {
   const THeader({
-    Key? key,
+    super.key,
     this.child,
     this.height = 64,
-  }) : super(key: key);
+  });
 
   final Widget? child;
 
@@ -140,10 +140,10 @@ class THeader extends StatelessWidget {
 /// layout布局底栏
 class TFooter extends StatelessWidget {
   const TFooter({
-    Key? key,
+    super.key,
     this.child,
     this.height = 24,
-  }) : super(key: key);
+  });
 
   final Widget? child;
 
@@ -172,10 +172,10 @@ class TFooter extends StatelessWidget {
 /// layout布局内容区域
 class TContent extends StatelessWidget {
   const TContent({
-    Key? key,
+    super.key,
     this.alignment = Alignment.topLeft,
     this.child,
-  }) : super(key: key);
+  });
 
   final Alignment alignment;
 

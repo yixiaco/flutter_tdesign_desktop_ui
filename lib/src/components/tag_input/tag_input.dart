@@ -4,13 +4,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
-typedef TTagInputCollapsedItemsCallback = Widget Function(List<String> collapsedTags, int count);
+typedef TTagInputCollapsedItemsCallback = Widget Function(List<String> value, List<String> collapsedTags, int count);
 
 /// 标签输入框
 /// 用于输入文本标签
 class TTagInput extends TFormItemValidate {
   const TTagInput({
-    Key? key,
+    super.key,
     this.autoWidth = false,
     this.clearable = false,
     this.collapsedItems,
@@ -49,9 +49,9 @@ class TTagInput extends TFormItemValidate {
     this.textAlign = TextAlign.left,
     this.borderless = false,
     this.enterClearInput = true,
-    FocusNode? focusNode,
-    String? name,
-  }) : super(key: key, name: name, focusNode: focusNode);
+    super.focusNode,
+    super.name,
+  });
 
   /// 宽度随内容自适应
   final bool autoWidth;
@@ -59,7 +59,8 @@ class TTagInput extends TFormItemValidate {
   /// 是否可清空
   final bool clearable;
 
-  /// 标签过多的情况下，折叠项内容，默认为 +N。如果需要悬浮就显示其他内容，可以使用 collapsedItems 自定义。value 表示标签值，collapsedTags 表示折叠标签值，count 表示总标签数量
+  /// 标签过多的情况下，折叠项内容，默认为 +N。如果需要悬浮就显示其他内容，可以使用 collapsedItems 自定义。
+  /// value 表示标签值，collapsedTags 表示折叠标签值，count 表示总标签数量
   final TTagInputCollapsedItemsCallback? collapsedItems;
 
   /// 是否禁用标签输入框
@@ -339,7 +340,7 @@ class _TTagInputState extends TFormItemValidateState<TTagInput> {
         if (value.length > length)
           Padding(
             padding: EdgeInsets.only(right: TVar.spacerS),
-            child: widget.collapsedItems?.call(value.sublist(length), value.length - length) ??
+            child: widget.collapsedItems?.call(value, value.sublist(length), value.length - length) ??
                 TTag(
                   theme: widget.tagTheme,
                   variant: widget.tagVariant,
@@ -371,7 +372,7 @@ class _TTagInputState extends TFormItemValidateState<TTagInput> {
   /// 处理回车键
   void _handleEnter(String text) {
     if (text.isNotEmpty) {
-      if(widget.enterClearInput) {
+      if (widget.enterClearInput) {
         effectiveTextController.clear();
       }
       effectiveFocusNode.requestFocus();

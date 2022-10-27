@@ -3,7 +3,7 @@ part of '../tabs.dart';
 /// 标签
 class _TabsLabel<T> extends StatefulWidget {
   const _TabsLabel({
-    Key? key,
+    super.key,
     this.addable = false,
     this.disabled = false,
     this.dragSort = false,
@@ -16,7 +16,7 @@ class _TabsLabel<T> extends StatefulWidget {
     this.onChange,
     this.onDragSort,
     this.onRemove,
-  }) : super(key: key);
+  });
 
   /// 选项卡是否可增加
   final bool addable;

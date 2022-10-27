@@ -14,7 +14,7 @@ enum TDividerAlign {
 
 class TDivider extends StatelessWidget {
   const TDivider({
-    Key? key,
+    super.key,
     this.child,
     this.align = TDividerAlign.center,
     this.dashed = false,
@@ -23,7 +23,7 @@ class TDivider extends StatelessWidget {
     this.thickness,
     this.margin,
     this.color,
-  }) : super(key: key);
+  });
 
   /// 文本位置（仅在水平分割线有效）
   final TDividerAlign align;

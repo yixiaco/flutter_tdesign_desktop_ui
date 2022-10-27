@@ -3,7 +3,7 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// 按钮示例
 class TButtonExample extends StatelessWidget {
-  const TButtonExample({Key? key}) : super(key: key);
+  const TButtonExample({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -1,3 +1,4 @@
+import 'package:dartx/dartx.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
@@ -5,7 +6,7 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 /// 筛选器输入框多选
 class TMultipleSelectInput<T extends SelectInputValue> extends StatefulWidget {
   const TMultipleSelectInput({
-    Key? key,
+    super.key,
     this.size,
     this.allowInput = false,
     this.autoWidth = false,
@@ -43,7 +44,7 @@ class TMultipleSelectInput<T extends SelectInputValue> extends StatefulWidget {
     this.dragSort = false,
     this.onDragSort,
     this.max,
-    this.controller,
+    this.value = const [],
     this.valueDisplay,
     this.onBlur,
     this.onClear,
@@ -56,7 +57,7 @@ class TMultipleSelectInput<T extends SelectInputValue> extends StatefulWidget {
     this.onTagChange,
     this.focusNode,
     this.autofocus = false,
-  }) : super(key: key);
+  });
 
   /// 尺寸
   final TComponentSize? size;
@@ -76,7 +77,7 @@ class TMultipleSelectInput<T extends SelectInputValue> extends StatefulWidget {
   /// 标签过多的情况下，折叠项内容，默认为 `+N`。
   /// 如果需要悬浮就显示其他内容，可以使用 `collapsedItems` 自定义。
   /// `value` 表示所有标签值，`collapsedTags` 表示折叠标签值，`count` 表示总标签数量
-  final TTagInputCollapsedItemsCallback? collapsedItems;
+  final TSelectInputCollapsedItemsCallback<T>? collapsedItems;
 
   /// 是否禁用
   final bool disabled;
@@ -132,7 +133,7 @@ class TMultipleSelectInput<T extends SelectInputValue> extends StatefulWidget {
   final TPopupStyle? popupStyle;
 
   /// 是否显示下拉框
-  final ValueNotifier<bool>? popupVisible;
+  final TPopupVisible? popupVisible;
 
   /// 只读状态，值为真会隐藏输入框，且无法打开下拉框
   final bool readonly;
@@ -176,7 +177,7 @@ class TMultipleSelectInput<T extends SelectInputValue> extends StatefulWidget {
   final void Function(TagInputDragSortContext context)? onDragSort;
 
   /// 全部标签值。值为数组表示多个标签，值为非数组表示单个数值。
-  final TSelectInputMultipleController<T>? controller;
+  final List<T> value;
 
   /// 自定义值呈现的全部内容，参数为所有标签的值。
   final List<Widget> Function(List<T> value, void Function(int index, T item) onClose)? valueDisplay;
@@ -226,39 +227,33 @@ class _TMultipleSelectInputState<T extends SelectInputValue> extends State<TMult
   TextEditingController get effectiveTextEditingController =>
       widget.inputController ?? (_textController ??= TextEditingController(text: widget.defaultInputValue));
 
-  TSelectInputMultipleController<T>? _multipleController;
-
-  TSelectInputMultipleController<T> get effectiveMultipleController =>
-      widget.controller ?? (_multipleController ??= TSelectInputMultipleController<T>());
+  late List<T> _value;
 
   @override
   void initState() {
-    var value = effectiveMultipleController.value;
-    _tagInputController = TTagInputController(value: value.map((e) => e.label).toList(), update: false);
-    effectiveMultipleController.addListener(_handleChange);
+    _value = [];
+    _tagInputController = TTagInputController(value: widget.value.map((e) => e.label).toList(), update: false);
     super.initState();
   }
 
   @override
   void didUpdateWidget(covariant TMultipleSelectInput<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.controller != oldWidget.controller) {
-      (oldWidget.controller ?? _multipleController)?.removeListener(_handleChange);
-      (widget.controller ?? _multipleController)?.addListener(_handleChange);
+    if (!widget.value.contentEquals(_value)) {
+      _value = List.from(widget.value);
+      _handleChange();
     }
   }
 
   @override
   void dispose() {
-    effectiveMultipleController.removeListener(_handleChange);
     _textController?.dispose();
-    _multipleController?.dispose();
     _tagInputController.dispose();
     super.dispose();
   }
 
   void _handleChange() {
-    _tagInputController.forceUpdate(effectiveMultipleController.value.map((e) => e.label).toList());
+    _tagInputController.forceUpdate(widget.value.map((e) => e.label).toList());
   }
 
   @override
@@ -279,7 +274,7 @@ class _TMultipleSelectInputState<T extends SelectInputValue> extends State<TMult
       visible: widget.popupVisible,
       style: const TPopupStyle(followBoxWidth: true).merge(style: widget.popupStyle),
       content: widget.panel,
-      trigger: widget.trigger ?? TPopupTrigger.focus,
+      trigger: widget.trigger ?? (widget.allowInput ? TPopupTrigger.focus : TPopupTrigger.click),
       placement: widget.placement ?? TPopupPlacement.bottomLeft,
       showArrow: widget.showArrow ?? false,
       hideEmptyPopup: true,
@@ -297,28 +292,28 @@ class _TMultipleSelectInputState<T extends SelectInputValue> extends State<TMult
         textAlign: widget.textAlign,
         status: widget.status,
         onEnter: (value) {
-          widget.onEnter?.call(effectiveMultipleController.value, effectiveTextEditingController.text);
+          widget.onEnter?.call(widget.value, effectiveTextEditingController.text);
         },
         placeholder: widget.placeholder,
         onMouseenter: widget.onMouseenter,
         onMouseleave: widget.onMouseleave,
         onFocus: (value, inputValue) {
-          widget.onFocus?.call(effectiveMultipleController.value, inputValue, value);
+          widget.onFocus?.call(widget.value, inputValue, value);
         },
         clearable: widget.clearable,
         onClear: widget.onClear,
         onBlur: (value, inputValue) {
-          widget.onBlur?.call(effectiveMultipleController.value,
+          widget.onBlur?.call(widget.value,
               TSelectInputFocusContext(inputValue: inputValue, tagInputValue: value));
         },
         label: widget.label,
         suffix: widget.suffix,
         suffixIcon: !widget.disabled && widget.loading ? const TLoading(size: TComponentSize.small) : widget.suffixIcon,
         tag: widget.tag != null
-            ? (index, value) => widget.tag!.call(index, effectiveMultipleController.value[index])
+            ? (index, value) => widget.tag!.call(index, widget.value[index])
             : null,
         minCollapsedNum: widget.minCollapsedNum,
-        collapsedItems: widget.collapsedItems,
+        collapsedItems: widget.collapsedItems != null ? _handleCollapsedTags : null,
         tagVariant: widget.tagVariant,
         tagTheme: widget.tagTheme,
         borderless: widget.borderless,
@@ -327,7 +322,7 @@ class _TMultipleSelectInputState<T extends SelectInputValue> extends State<TMult
         size: widget.size,
         max: widget.max,
         onChange: (value, context) {
-          widget.onTagChange?.call(effectiveMultipleController.value, context);
+          widget.onTagChange?.call(widget.value, context);
         },
         dragSort: widget.dragSort,
         valueDisplay: widget.valueDisplay != null ? _handleValueDisplay : null,
@@ -335,9 +330,14 @@ class _TMultipleSelectInputState<T extends SelectInputValue> extends State<TMult
     );
   }
 
-  List<Widget> _handleValueDisplay(value, onClose) {
+  Widget _handleCollapsedTags(List<String> value, List<String> collapsedTags, int count) {
+    var value = widget.value;
+    return widget.collapsedItems!(value, value.sublist(value.length - count), count);
+  }
+
+  List<Widget> _handleValueDisplay(List<String> value, void Function(int index, String item) onClose) {
     return widget.valueDisplay!.call(
-      effectiveMultipleController.value,
+      widget.value,
       (index, item) => onClose(index, item.label),
     );
   }

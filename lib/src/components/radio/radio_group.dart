@@ -66,8 +66,8 @@ enum TRadioVariant {
 /// 单选框组
 class TRadioGroup<T> extends TFormItemValidate {
   const TRadioGroup({
-    Key? key,
-    String? name,
+    super.key,
+    super.name,
     this.disabled = false,
     required this.options,
     required this.value,
@@ -76,7 +76,7 @@ class TRadioGroup<T> extends TFormItemValidate {
     this.size,
     this.variant = TRadioVariant.radio,
     this.allowUncheck = false,
-  }) : super(key: key, name: name);
+  });
 
   /// 是否禁用组件
   final bool disabled;
@@ -459,7 +459,7 @@ class _IndicatorBlockPainter extends AnimationChangeNotifierPainter {
 /// 单选按钮
 class _TRadioButton<T> extends StatefulWidget {
   const _TRadioButton({
-    Key? key,
+    super.key,
     this.allowUncheck = false,
     this.checked,
     this.disabled = false,
@@ -474,7 +474,7 @@ class _TRadioButton<T> extends StatefulWidget {
     this.size,
     this.border,
     this.radius,
-  }) : super(key: key);
+  });
 
   /// 是否允许取消选中
   final bool allowUncheck;

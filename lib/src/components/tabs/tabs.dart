@@ -23,7 +23,7 @@ part 'components/tab_panel.dart';
 /// 用于承载同一层级下不同页面或类别的组件，方便用户在同一个页面框架下进行快速切换。
 class TTabs<T> extends StatefulWidget {
   const TTabs({
-    Key? key,
+    super.key,
     this.addable = false,
     this.disabled = false,
     this.dragSort = false,
@@ -40,7 +40,7 @@ class TTabs<T> extends StatefulWidget {
     this.mainAxisSize,
     this.softWrap = true,
     this.mainAxisAlignment,
-  }) : super(key: key);
+  });
 
   /// 选项卡是否可增加
   final bool addable;

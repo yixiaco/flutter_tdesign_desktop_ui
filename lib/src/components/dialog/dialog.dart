@@ -25,7 +25,7 @@ class TDialogController extends ChangeNotifier {
 /// 对话框
 class TDialog extends StatefulWidget {
   const TDialog({
-    Key? key,
+    super.key,
     required this.controller,
     required this.body,
     this.cancelBtn,
@@ -60,7 +60,7 @@ class TDialog extends StatefulWidget {
     this.onOpened,
     this.onOverlayClick,
     this.destroyOnClose = false,
-  }) : super(key: key);
+  });
 
   /// 控制对话框是否显示
   final TDialogController controller;
@@ -565,7 +565,7 @@ class _ActivateIntent extends Action<ActivateIntent> {
 /// 对话框
 class TRawDialog extends StatefulWidget {
   const TRawDialog({
-    Key? key,
+    super.key,
     required this.body,
     this.cancelBtn,
     this.cancelText,
@@ -588,7 +588,7 @@ class TRawDialog extends StatefulWidget {
     this.onCancel,
     this.onCloseBtnClick,
     this.onConfirm,
-  }) : super(key: key);
+  });
 
   /// 对话框内容
   final Widget body;

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 class TLoadingExample extends StatefulWidget {
-  const TLoadingExample({Key? key}) : super(key: key);
+  const TLoadingExample({super.key});
 
   @override
   State<TLoadingExample> createState() => _TLoadingExampleState();

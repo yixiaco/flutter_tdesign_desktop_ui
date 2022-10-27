@@ -2,7 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 class TSwitchExample extends StatefulWidget {
-  const TSwitchExample({Key? key}) : super(key: key);
+  const TSwitchExample({super.key});
 
   @override
   State<TSwitchExample> createState() => _TSwitchExampleState();

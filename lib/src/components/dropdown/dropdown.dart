@@ -5,7 +5,7 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 /// 用于承载过多的操作集合，通过下拉拓展的形式，收纳更多的操作。
 class TDropdown<T> extends StatefulWidget {
   const TDropdown({
-    Key? key,
+    super.key,
     this.direction = TDropdownDirection.right,
     this.disabled = false,
     this.hideAfterItemClick = true,
@@ -17,7 +17,7 @@ class TDropdown<T> extends StatefulWidget {
     this.trigger = TPopupTrigger.hover,
     this.onClick,
     required this.child,
-  }) : super(key: key);
+  });
 
   /// 多层级操作时，子层级展开方向
   final TDropdownDirection direction;
@@ -57,12 +57,12 @@ class TDropdown<T> extends StatefulWidget {
 }
 
 class _TDropdownState<T> extends State<TDropdown<T>> {
-  late ValueNotifier<bool> visible;
+  late TPopupVisible visible;
 
   @override
   void initState() {
     super.initState();
-    visible = ValueNotifier(false);
+    visible = TPopupVisible();
   }
 
   @override
@@ -110,14 +110,14 @@ class _TDropdownState<T> extends State<TDropdown<T>> {
 /// 下拉菜单面板
 class _TDropdownMenu<T> extends StatefulWidget {
   const _TDropdownMenu({
-    Key? key,
+    super.key,
     required this.direction,
     required this.maxColumnWidth,
     required this.minColumnWidth,
     required this.maxHeight,
     required this.options,
     this.onClick,
-  }) : super(key: key);
+  });
 
   /// 多层级操作时，子层级展开方向
   final TDropdownDirection direction;
@@ -269,7 +269,7 @@ class _TDropdownMenuState<T> extends State<_TDropdownMenu<T>> {
 /// 下拉菜单面板子项
 class _TDropdownItem<T> extends StatelessWidget {
   const _TDropdownItem({
-    Key? key,
+    super.key,
     required this.option,
     this.onPressed,
     this.onHover,
@@ -277,7 +277,7 @@ class _TDropdownItem<T> extends StatelessWidget {
     required this.minColumnWidth,
     this.parent,
     this.highlight = false,
-  }) : super(key: key);
+  });
 
   /// 父选项数据
   final TDropdownOption<T>? parent;

@@ -3,13 +3,13 @@ part of '../popup.dart';
 /// 浮层内容对象
 class _PopupOverlay extends StatefulWidget {
   const _PopupOverlay({
-    Key? key,
+    super.key,
     required this.animation,
     this.onEnter,
     required this.popupState,
     required this.onRemove,
     required this.focusScopeNode,
-  }) : super(key: key);
+  });
 
   final Animation<double> animation;
   final PointerEnterEventListener? onEnter;

@@ -8,13 +8,13 @@ const _kIconButtonPadding = EdgeInsets.all(8);
 /// 导航菜单操作区按钮，通常用于[TMenu]、[THeadMenu]组件中
 class TMenuIconButton extends StatelessWidget {
   const TMenuIconButton({
-    Key? key,
+    super.key,
     this.onClick,
     this.theme,
     this.size,
     this.backgroundColor,
     required this.child,
-  }) : super(key: key);
+  });
 
   /// 点击事件
   final GestureTapCallback? onClick;

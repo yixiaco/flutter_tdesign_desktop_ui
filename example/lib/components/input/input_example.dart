@@ -4,7 +4,7 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// 输入框示例
 class TInputExample extends StatelessWidget {
-  const TInputExample({Key? key}) : super(key: key);
+  const TInputExample({super.key});
 
   @override
   Widget build(BuildContext context) {

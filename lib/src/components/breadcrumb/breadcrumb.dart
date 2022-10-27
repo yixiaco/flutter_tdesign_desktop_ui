@@ -7,12 +7,12 @@ import 'package:url_launcher/link.dart';
 /// 显示当前页面在系统层级结构的位置，并能返回之前任意层级的页面。
 class TBreadcrumb extends StatelessWidget {
   const TBreadcrumb({
-    Key? key,
+    super.key,
     this.maxItemWidth,
     required this.options,
     this.separator,
     this.theme = TBreadcrumbTheme.light,
-  }) : super(key: key);
+  });
 
   /// 单项最大宽度，超出后会以省略号形式呈现
   final double? maxItemWidth;

@@ -6,9 +6,9 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 /// 多选框是一个选择控件，允许用户通过单击在选中和未选中之间切换
 class TCheckbox<T> extends TFormItemValidate {
   const TCheckbox({
-    Key? key,
-    String? name,
-    FocusNode? focusNode,
+    super.key,
+    super.name,
+    super.focusNode,
     this.checked,
     this.defaultChecked = false,
     this.disabled = false,
@@ -18,7 +18,7 @@ class TCheckbox<T> extends TFormItemValidate {
     this.value,
     this.onChange,
     this.autofocus = false,
-  }) : super(key: key, name: name, focusNode: focusNode);
+  });
 
   /// 是否选中
   final bool? checked;

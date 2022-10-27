@@ -8,11 +8,11 @@ import 'package:tdesign_desktop_ui/src/theme/theme_data.dart';
 /// 用于装饰输入类组件的装饰器
 class TInputAdornment extends StatelessWidget {
   const TInputAdornment({
-    Key? key,
+    super.key,
     this.prepend,
     this.append,
     required this.child,
-  }) : super(key: key);
+  });
 
   /// 前缀装饰
   final Widget? prepend;

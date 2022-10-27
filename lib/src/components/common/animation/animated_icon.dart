@@ -3,17 +3,17 @@ import 'package:flutter/widgets.dart';
 /// 自定义动画icon
 class TAnimatedIcon extends ImplicitlyAnimatedWidget {
   const TAnimatedIcon({
-    Key? key,
+    super.key,
     this.color,
     this.opacity,
     this.size,
     this.shadows,
     required this.child,
-    Curve curve = Curves.linear,
+    super.curve = Curves.linear,
     this.data,
-    required Duration duration,
-    VoidCallback? onEnd,
-  }) : super(key: key, curve: curve, duration: duration, onEnd: onEnd);
+    required super.duration,
+    super.onEnd,
+  });
 
   /// icon颜色
   final Color? color;

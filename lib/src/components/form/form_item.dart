@@ -6,7 +6,7 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 /// 注意：子组件不能指定多个name组件注册到该子项中。
 class TFormItem extends StatefulWidget {
   const TFormItem({
-    Key? key,
+    super.key,
     this.help,
     this.label,
     this.labelText,
@@ -20,7 +20,7 @@ class TFormItem extends StatefulWidget {
     this.showStatusIcon,
     this.successBorder = false,
     required this.child,
-  }) : super(key: key);
+  });
 
   /// 表单项说明内容
   final Widget? help;
@@ -499,10 +499,10 @@ class _TFormItemScope extends InheritedWidget {
 
 abstract class TFormItemValidate extends StatefulWidget {
   const TFormItemValidate({
-    Key? key,
+    super.key,
     this.name,
     this.focusNode,
-  }) : super(key: key);
+  });
 
   /// 表单字段名称
   final String? name;

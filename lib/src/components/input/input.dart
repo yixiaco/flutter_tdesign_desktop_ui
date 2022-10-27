@@ -14,13 +14,13 @@ const double _kInputHeightL = 40;
 /// 用于承载用户信息录入的文本框，常用于表单、对话框等场景，对不同内容的信息录入，可拓展形成多种信息录入形式
 class TInput extends TFormItemValidate {
   const TInput({
-    Key? key,
-    String? name,
+    super.key,
+    super.name,
     this.defaultValue,
     this.controller,
     this.autofocus = false,
     this.readonly = false,
-    FocusNode? focusNode,
+    super.focusNode,
     this.clearable = false,
     this.disabled = false,
     this.label,
@@ -60,7 +60,7 @@ class TInput extends TFormItemValidate {
     this.breakLine = false,
     this.padding,
     this.borderless = false,
-  }) : super(key: key, name: name, focusNode: focusNode);
+  });
 
   /// 控制正在编辑的文本。
   /// 如果为null，此小部件将创建自己的[TextEditingController]并用[defaultValue]初始化其[TextEditingController.text]。
@@ -816,11 +816,11 @@ class _TInputState extends TFormItemValidateState<TInput> {
 /// 关闭按钮
 class TClearIcon extends StatelessWidget {
   const TClearIcon({
-    Key? key,
+    super.key,
     this.onClick,
     required this.show,
     this.icon,
-  }) : super(key: key);
+  });
 
   /// 点击事件
   final VoidCallback? onClick;
@@ -839,21 +839,23 @@ class TClearIcon extends StatelessWidget {
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
         onTap: onClick,
-        child: IconTheme.merge(
-          data: IconThemeData(
-            color: colorScheme.textColorPlaceholder,
-          ),
-          child: ValueListenableBuilder<bool>(
-            valueListenable: show,
-            builder: (context, value, child) {
-              if(icon != null && !value) {
-                return icon!;
-              }
-              return Visibility(
-                visible: value,
-                child: const Icon(TIcons.closeCircleFilled),
-              );
-            },
+        child: AbsorbPointer(
+          child: IconTheme.merge(
+            data: IconThemeData(
+              color: colorScheme.textColorPlaceholder,
+            ),
+            child: ValueListenableBuilder<bool>(
+              valueListenable: show,
+              builder: (context, value, child) {
+                if(icon != null && !value) {
+                  return icon!;
+                }
+                return Visibility(
+                  visible: value,
+                  child: const Icon(TIcons.closeCircleFilled),
+                );
+              },
+            ),
           ),
         ),
       ),

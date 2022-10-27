@@ -3,7 +3,7 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// 对话框示例
 class TDialogExample extends StatefulWidget {
-  const TDialogExample({Key? key}) : super(key: key);
+  const TDialogExample({super.key});
 
   @override
   State<TDialogExample> createState() => _TDialogExampleState();

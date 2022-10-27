@@ -3,9 +3,9 @@ part of '../../menu.dart';
 /// 处理button分配
 class _TMenuLayout<T> extends StatelessWidget {
   const _TMenuLayout({
-    Key? key,
+    super.key,
     required this.props,
-  }) : super(key: key);
+  });
 
   /// 布局属性
   final _TMenuItemLayoutProps<T> props;

@@ -6,7 +6,7 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 /// 滚动条组件
 class TSingleChildScrollView extends StatefulWidget {
   const TSingleChildScrollView({
-    Key? key,
+    super.key,
     this.scrollDirection = Axis.vertical,
     this.reverse = false,
     this.padding,
@@ -25,7 +25,7 @@ class TSingleChildScrollView extends StatefulWidget {
     this.thumbVisibility = true,
     this.onShowScroll,
     this.alwaysShowPadding = false,
-  }) : super(key: key);
+  });
 
   /// The axis along which the scroll view scrolls.
   ///

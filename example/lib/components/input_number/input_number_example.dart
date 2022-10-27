@@ -3,7 +3,7 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// 数字输入框示例代码
 class TInputNumberExample extends StatefulWidget {
-  const TInputNumberExample({Key? key}) : super(key: key);
+  const TInputNumberExample({super.key});
 
   @override
   State<TInputNumberExample> createState() => _TInputNumberExampleState();

@@ -3,7 +3,7 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// 表单示例
 class TFormExample extends StatefulWidget {
-  const TFormExample({Key? key}) : super(key: key);
+  const TFormExample({super.key});
 
   @override
   State<TFormExample> createState() => _TFormExampleState();

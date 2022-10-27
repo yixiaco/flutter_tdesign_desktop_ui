@@ -3,7 +3,7 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// 告警示例
 class TAlertExample extends StatelessWidget {
-  const TAlertExample({Key? key}) : super(key: key);
+  const TAlertExample({super.key});
 
   @override
   Widget build(BuildContext context) {

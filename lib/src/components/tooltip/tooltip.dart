@@ -26,7 +26,7 @@ enum TTooltipTheme {
 /// 用于文字提示的气泡框
 class TTooltip extends StatelessWidget {
   const TTooltip({
-    Key? key,
+    super.key,
     this.disabled = false,
     this.destroyOnClose = true,
     this.duration,
@@ -38,7 +38,7 @@ class TTooltip extends StatelessWidget {
     this.trigger = TPopupTrigger.hover,
     this.padding,
     required this.child,
-  }) : super(key: key);
+  });
 
   /// 是否禁用组件
   final bool disabled;

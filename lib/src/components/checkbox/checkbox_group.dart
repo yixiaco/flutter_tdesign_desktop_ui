@@ -44,15 +44,15 @@ class TCheckboxOption<T> {
 /// 多选框组
 class TCheckboxGroup<T> extends TFormItemValidate {
   const TCheckboxGroup({
-    Key? key,
+    super.key,
     this.disabled = false,
     this.max,
     required this.options,
     this.value,
     this.defaultValue = const [],
-    String? name,
+    super.name,
     this.onChange,
-  }) : super(key: key, name: name);
+  });
 
   /// 是否禁用组件
   final bool disabled;

@@ -34,9 +34,9 @@ typedef TInputNumberFormatCallback = String Function(String value, String? fixed
 /// 数字输入框由增加、减少按钮、数值输入组成。每次点击增加按钮（或减少按钮），数字增长（或减少）的量是恒定的。
 class TInputNumber<T> extends TFormItemValidate {
   const TInputNumber({
-    Key? key,
-    String? name,
-    FocusNode? focusNode,
+    super.key,
+    super.name,
+    super.focusNode,
     this.align,
     this.autoWidth = false,
     this.decimalPlaces,
@@ -69,8 +69,7 @@ class TInputNumber<T> extends TFormItemValidate {
     this.restorationId,
     this.autofocus = false,
     this.autocorrect = true,
-  })  : assert(T == num || T == String || T == int || T == double),
-        super(key: key, name: name, focusNode: focusNode);
+  })  : assert(T == num || T == String || T == int || T == double);
 
   /// 文本内容位置，居左/居中/居右
   final TextAlign? align;

@@ -2,7 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 class TCollapseExample extends StatefulWidget {
-  const TCollapseExample({Key? key}) : super(key: key);
+  const TCollapseExample({super.key});
 
   @override
   State<TCollapseExample> createState() => _TCollapseExampleState();

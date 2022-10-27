@@ -74,7 +74,7 @@ Map<String, Color> _variables(TColorScheme scheme) {
 /// 实现了填充按钮、描边按钮、虚框按钮、文字按钮
 class _TButton extends StatelessWidget {
   const _TButton({
-    Key? key,
+    super.key,
     this.size,
     required this.variant,
     required this.themeStyle,
@@ -93,7 +93,7 @@ class _TButton extends StatelessWidget {
     this.focusNode,
     required this.autofocus,
     required this.clipBehavior,
-  }) : super(key: key);
+  });
 
   ///按钮内容
   final Widget? child;
@@ -587,7 +587,7 @@ class _TButton extends StatelessWidget {
 /// 按钮
 class TButton extends StatelessWidget {
   const TButton({
-    Key? key,
+    super.key,
     this.onPressed,
     this.variant,
     this.disabled = false,
@@ -609,7 +609,7 @@ class TButton extends StatelessWidget {
     this.radius,
     this.softWrap = false,
     this.type = TButtonType.button,
-  }) : super(key: key);
+  });
 
   ///按钮内容
   final Widget? child;
