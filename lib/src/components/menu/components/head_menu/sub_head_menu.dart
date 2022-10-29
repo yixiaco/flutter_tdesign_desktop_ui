@@ -181,6 +181,7 @@ class _TSubHeadMenu<T> extends StatelessWidget {
                           padding: const EdgeInsets.only(left: 8.0),
                           child: TFakeArrow(
                             placement: placement,
+                            dimension: 16,
                             color: textColor.resolve(states),
                           ),
                         )

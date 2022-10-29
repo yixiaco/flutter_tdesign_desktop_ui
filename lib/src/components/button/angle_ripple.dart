@@ -133,11 +133,6 @@ class _TRippleState extends State<TRipple> with TickerProviderStateMixin {
   _TAngleRipplePainter painter = _TAngleRipplePainter();
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   void dispose() {
     super.dispose();
     painter.dispose();
@@ -158,6 +153,16 @@ class _TRippleState extends State<TRipple> with TickerProviderStateMixin {
       }
       _currentSplash = null;
     }
+  }
+
+  bool get _isClick {
+    if (widget.disabled) {
+      return false;
+    }
+    if (widget.selected && !widget.selectedClick) {
+      return false;
+    }
+    return true;
   }
 
   @override
@@ -242,6 +247,7 @@ class _TRippleState extends State<TRipple> with TickerProviderStateMixin {
           }
           _doSplash();
           _confirm();
+          widget.onTap?.call();
           context.findRenderObject()!.sendSemanticsEvent(const TapSemanticEvent());
           return null;
         },
@@ -252,6 +258,9 @@ class _TRippleState extends State<TRipple> with TickerProviderStateMixin {
 
   /// 处理点击事件
   void _handleOnTapDown(TapDownDetails details) {
+    if(!_isClick) {
+      return;
+    }
     _doSplash();
   }
 

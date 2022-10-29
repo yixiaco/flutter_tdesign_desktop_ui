@@ -64,7 +64,7 @@ class _PopupOverlayState extends State<_PopupOverlay> {
 
   void _updateIgnore() {
     if (widget.animation.value > 0) {
-      if(widget.popupState.widget.trigger != TPopupTrigger.focus) {
+      if (widget.popupState.widget.trigger != TPopupTrigger.focus && !widget.popupState._node.hasFocus) {
         widget.focusScopeNode.requestFocus();
       }
       _visible.value = true;
@@ -133,13 +133,21 @@ class _PopupOverlayState extends State<_PopupOverlay> {
           valueListenable: _isReverse,
           builder: (BuildContext context, bool value, Widget? child) {
             var boxConstraints = style?.constraints;
-            if(style?.followBoxWidth == true) {
-              if(boxConstraints == null) {
+            if (style?.followBoxWidth == true) {
+              if (boxConstraints == null) {
                 boxConstraints = BoxConstraints(minWidth: box.size.width);
               } else {
                 boxConstraints = boxConstraints.enforce(BoxConstraints(minWidth: box.size.width));
               }
             }
+            var placement = currentPopupWidget.showArrow
+                ? currentPopupWidget.placement.sides(
+                    top: value ? BubbleDirection.top : BubbleDirection.bottom,
+                    left: value ? BubbleDirection.left : BubbleDirection.right,
+                    right: value ? BubbleDirection.right : BubbleDirection.left,
+                    bottom: value ? BubbleDirection.bottom : BubbleDirection.top,
+                  )
+                : BubbleDirection.none;
             return Container(
               key: _containerKey,
               margin: style?.margin,
@@ -151,26 +159,19 @@ class _PopupOverlayState extends State<_PopupOverlay> {
               transformAlignment: style?.transformAlignment,
               decoration: ShapeDecoration(
                 color: bgColorContainer,
-                shadows: [
+                shadows: style?.shadows ?? [
                   ...popupShadow,
-                  ...popupTopArrowShadow,
-                  ...popupRightArrowShadow,
-                  ...popupBottomArrowShadow,
-                  ...popupLeftArrowShadow
+                  if (placement == BubbleDirection.top) ...popupTopArrowShadow,
+                  if (placement == BubbleDirection.right) ...popupRightArrowShadow,
+                  if (placement == BubbleDirection.bottom) ...popupBottomArrowShadow,
+                  if (placement == BubbleDirection.left) ...popupLeftArrowShadow
                 ],
                 shape: BubbleShapeBorder(
                   smooth: 0,
                   arrowQuadraticBezierLength: 0,
                   arrowAngle: 6,
                   arrowHeight: 6,
-                  direction: currentPopupWidget.showArrow
-                      ? currentPopupWidget.placement.sides(
-                          top: value ? BubbleDirection.top : BubbleDirection.bottom,
-                          left: value ? BubbleDirection.left : BubbleDirection.right,
-                          right: value ? BubbleDirection.right : BubbleDirection.left,
-                          bottom: value ? BubbleDirection.bottom : BubbleDirection.top,
-                        )
-                      : BubbleDirection.none,
+                  direction: placement,
                   radius: style?.radius ?? BorderRadius.circular(TVar.borderRadiusDefault),
                   border: style?.border,
                   position: currentPopupWidget.placement.valueOf(
@@ -213,7 +214,7 @@ class _PopupOverlayState extends State<_PopupOverlay> {
           target: _PopupOffset.of(box.size, target),
           callback: (isReverse) {
             SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
-              if(mounted) {
+              if (mounted) {
                 _isReverse.value = isReverse;
               }
             });

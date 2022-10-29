@@ -48,7 +48,7 @@ class TInputNumber<T> extends TFormItemValidate {
     this.placeholder,
     this.readonly = false,
     this.size,
-    this.status = TInputStatus.defaultStatus,
+    this.status,
     this.step = 1,
     this.suffix,
     this.theme = TInputNumberTheme.row,
@@ -105,7 +105,7 @@ class TInputNumber<T> extends TFormItemValidate {
   final TComponentSize? size;
 
   /// 文本框状态。
-  final TInputStatus status;
+  final TInputStatus? status;
 
   /// 数值改变步数，可以是小数。如果是大数，请保证数据类型为字符串。
   final dynamic step;
@@ -221,13 +221,15 @@ class _TInputNumberState<T> extends TFormItemValidateState<TInputNumber<T>> {
     }
   }
 
+  TInputStatus get status => formItemState?.inputStatus ?? widget.status ?? TInputStatus.defaultStatus;
+
   @override
   Widget build(BuildContext context) {
     var theme = TTheme.of(context);
     var colorScheme = theme.colorScheme;
     var size = widget.size ?? theme.size;
     // tips颜色
-    var tipsColor = widget.status.lazyValueOf(
+    var tipsColor = status.lazyValueOf(
       defaultStatus: () => colorScheme.textColorPlaceholder,
       success: () => colorScheme.successColor,
       warning: () => colorScheme.warningColor,
@@ -305,6 +307,7 @@ class _TInputNumberState<T> extends TFormItemValidateState<TInputNumber<T>> {
     }
     Widget child = TInputTheme(
       data: TInputThemeData(
+        status: formItemState?.inputStatus,
         borderColor: formItemState?.borderColor,
         boxShadow: formItemState?.shadows,
       ),

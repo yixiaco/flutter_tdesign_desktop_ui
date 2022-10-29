@@ -13,7 +13,7 @@ class _TTagInputExampleState extends State<TTagInputExample> {
 
   @override
   void initState() {
-    controller = TTagInputController(value: ['1', '2','3', '4','5', '6','7', '8','9', '10','11', '12']);
+    controller = TTagInputController(value: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']);
     super.initState();
   }
 

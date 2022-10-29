@@ -96,7 +96,7 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
 
   /// 焦点节点
   final FocusNode _node = FocusNode();
-  final FocusScopeNode _popupScopeNode = FocusScopeNode();
+  final FocusScopeNode _popupScopeNode = FocusScopeNode(skipTraversal: true);
 
   /// 动画控制器
   late AnimationController _controller;
@@ -252,6 +252,7 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
     _showTimer = null;
     assert(widget.content != null || widget.hideEmptyPopup);
     if (widget.content == null && widget.hideEmptyPopup) {
+      effectiveVisible.value = false;
       return;
     }
     if (_entry == null) {
@@ -375,10 +376,6 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
         child: widget.child,
       );
     } else if (widget.trigger == TPopupTrigger.focus) {
-      child = Focus(
-        focusNode: _node,
-        child: widget.child,
-      );
     }
     return NotificationListener<SizeChangedLayoutNotification>(
       onNotification: (notification) {
@@ -388,7 +385,12 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
       child: SizeChangedLayoutNotifier(
         child: Actions(
           actions: actions,
-          child: child,
+          child: Focus(
+            focusNode: _node,
+            child: RepaintBoundary(
+              child: child,
+            ),
+          ),
         ),
       ),
     );

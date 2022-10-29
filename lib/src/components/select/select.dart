@@ -1,11 +1,13 @@
 import 'dart:async';
 
+import 'package:dartx/dartx.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// Select 选择器
-class TSelect<T extends TSelectOption> extends StatefulWidget {
+/// 用于收纳大量选项的信息录入类组件。
+class TSelect<T extends TOption> extends StatefulWidget {
   const TSelect({
     super.key,
     this.autoWidth = false,
@@ -17,18 +19,17 @@ class TSelect<T extends TSelectOption> extends StatefulWidget {
     this.empty,
     this.filter,
     this.filterable = false,
-    this.inputProps,
     this.textController,
     this.loading = false,
     this.loadingText,
     this.max = 0,
     this.minCollapsedNum = 0,
     this.multiple = false,
-    this.options,
+    this.options = const [],
     this.panelBottomContent,
     this.panelTopContent,
     this.placeholder,
-    this.popupProps,
+    this.popupStyle,
     this.popupVisible,
     this.prefixIcon,
     this.readonly = false,
@@ -36,7 +37,7 @@ class TSelect<T extends TSelectOption> extends StatefulWidget {
     this.scroll,
     this.showArrow = true,
     this.size,
-    this.status = TInputStatus.defaultStatus,
+    this.status,
     this.tips,
     this.value,
     this.defaultValue,
@@ -86,9 +87,6 @@ class TSelect<T extends TSelectOption> extends StatefulWidget {
   /// 是否可搜索
   final bool filterable;
 
-  /// 透传 Input 输入框组件的全部属性
-  final dynamic inputProps;
-
   /// 输入框的控制器
   final TextEditingController? textController;
 
@@ -108,7 +106,7 @@ class TSelect<T extends TSelectOption> extends StatefulWidget {
   final bool multiple;
 
   /// 数据化配置选项内容。
-  final List<T>? options;
+  final List<T> options;
 
   /// 面板内的底部内容。
   final Widget? panelBottomContent;
@@ -119,8 +117,8 @@ class TSelect<T extends TSelectOption> extends StatefulWidget {
   /// 占位符
   final String? placeholder;
 
-  /// 透传给 popup 组件的全部属性
-  final dynamic popupProps;
+  /// 浮层样式
+  final TPopupStyle? popupStyle;
 
   /// 是否显示下拉框。
   final TPopupVisible? popupVisible;
@@ -144,7 +142,7 @@ class TSelect<T extends TSelectOption> extends StatefulWidget {
   final TComponentSize? size;
 
   /// 输入框状态
-  final TInputStatus status;
+  final TInputStatus? status;
 
   /// 输入框下方提示文本，会根据不同的 status 呈现不同的样式。
   final Widget? tips;
@@ -210,7 +208,7 @@ class TSelect<T extends TSelectOption> extends StatefulWidget {
   /// context.selectedOptions 表示选中值的完整对象，数组长度一定和 value 相同；
   /// context.option 表示当前操作的选项，不一定存在。
   /// {@macro tdesign.components.select.value}
-  final void Function(dynamic value, {List<T> selectedOptions, TSelectValueChangeTrigger trigger})? onChange;
+  final void Function(dynamic value, List<T> selectedOptions, TSelectValueChangeTrigger trigger)? onChange;
 
   /// 焦点
   final FocusNode? focusNode;
@@ -219,12 +217,280 @@ class TSelect<T extends TSelectOption> extends StatefulWidget {
   final bool autofocus;
 
   @override
-  State<TSelect> createState() => _TSelectState();
+  State<TSelect<T>> createState() => _TSelectState<T>();
 }
 
-class _TSelectState extends State<TSelect> {
+class _TSelectState<T extends TOption> extends State<TSelect<T>> {
+  TPopupVisible? _popupVisible;
+
+  TPopupVisible get effectivePopupVisible => widget.popupVisible ?? (_popupVisible ??= TPopupVisible());
+
+  @override
+  void dispose() {
+    super.dispose();
+    _popupVisible?.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return TSelectInput();
+    var theme = TTheme.of(context);
+    var colorScheme = theme.colorScheme;
+    return TSelectInput(
+      autoWidth: widget.autoWidth,
+      autofocus: widget.autofocus,
+      focusNode: widget.focusNode,
+      onPopupVisibleChange: widget.onPopupVisibleChange,
+      size: widget.size,
+      onClear: widget.onClear,
+      borderless: widget.borderless,
+      loading: widget.loading,
+      allowInput: widget.filterable,
+      popupStyle: TPopupStyle(
+        padding: EdgeInsets.zero,
+        radius: BorderRadius.circular(TVar.borderRadiusMedium),
+        shadows: colorScheme.shadow2,
+      ).merge(widget.popupStyle),
+      placeholder: widget.placeholder ?? GlobalTDesignLocalizations.of(context).selectPlaceholder,
+      readonly: widget.readonly,
+      showArrow: widget.showArrow,
+      clearable: widget.clearable,
+      max: widget.max,
+      suffixIcon: AnimatedBuilder(
+        animation: effectivePopupVisible,
+        builder: (context, child) {
+          return TFakeArrow(
+            placement: effectivePopupVisible.value ? TFakeArrowPlacement.top : TFakeArrowPlacement.bottom,
+          );
+        },
+      ),
+      popupVisible: effectivePopupVisible,
+      panel: _buildPanel(theme),
+    );
+  }
+
+  Widget _buildPanel(TThemeData theme) {
+    var colorScheme = theme.colorScheme;
+
+    TComponentSize size = widget.size ?? theme.size;
+
+    EdgeInsets padding;
+    switch (size) {
+      case TComponentSize.small:
+        padding = const EdgeInsets.all(_kSelectDropdownPaddingS);
+        break;
+      case TComponentSize.medium:
+        padding = const EdgeInsets.all(_kSelectDropdownPadding);
+        break;
+      case TComponentSize.large:
+        padding = const EdgeInsets.all(_kSelectDropdownPaddingL);
+        break;
+    }
+
+    if (widget.options.isEmpty) {
+      return SizedBox(
+        height: 32,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Text(
+                GlobalTDesignLocalizations.of(context).selectEmpty,
+                style: TextStyle(color: colorScheme.textColorDisabled),
+              ),
+            )
+          ],
+        ),
+      );
+    }
+    return Padding(
+      padding: padding,
+      child: FixedCrossFlex(
+        direction: Axis.vertical,
+        mainAxisSize: MainAxisSize.min,
+        children: List.generate(widget.options.length, (index) {
+          var option = widget.options[index];
+          if (option is TSelectOptionGroup) {
+            return _TOptionGroup(
+              optionGroup: option,
+            );
+          }
+          return _TOption(
+            options: widget.options,
+            option: option as TSelectOption,
+            multiple: widget.multiple,
+            value: widget.value,
+            size: widget.size,
+            onClick: (check) {
+              _handleClick(index, check);
+            },
+          );
+        }),
+      ),
+    );
+  }
+
+  /// 处理option点击事件
+  void _handleClick(int index, bool check) {
+    var option = widget.options[index] as TSelectOption;
+    dynamic value = widget.value;
+    if (widget.multiple) {
+      value ??= [];
+      var list = List.of(value);
+      if (check) {
+        list.remove(option.value);
+      } else {
+        list.add(option.value);
+      }
+      value = list;
+    } else {
+      value = option.value;
+    }
+    var trigger = check ? TSelectValueChangeTrigger.check : TSelectValueChangeTrigger.uncheck;
+    widget.onChange?.call(value, search(value, widget.options), trigger);
+  }
+
+  List<T> search(dynamic value, List<T> options) {
+    return options.flatMap<T>((element) {
+      if (element is TSelectOptionGroup) {
+        return search(value, element.chlidren.cast());
+      }
+      if (widget.multiple) {
+        var list = (value as List);
+        if (element is TSelectOption && list.contains(element.value)) {
+          return [element];
+        }
+        return [];
+      } else {
+        if (element is TSelectOption && value == element.value) {
+          return [element];
+        }
+        return [];
+      }
+    }).toList();
+  }
+}
+
+class _TOptionGroup<TSelectOptionGroup> extends StatelessWidget {
+  const _TOptionGroup({
+    Key? key,
+    required this.optionGroup,
+  }) : super(key: key);
+
+  final TSelectOptionGroup optionGroup;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container();
+  }
+}
+
+const double _kSelectOptionHeightS = 20;
+const double _kSelectOptionHeightDefault = 28;
+const double _kSelectOptionHeightL = 36;
+const double _kSelectDropdownPadding = 6;
+const double _kSelectDropdownPaddingL = 8;
+const double _kSelectDropdownPaddingS = 4;
+
+class _TOption extends StatelessWidget {
+  const _TOption({
+    Key? key,
+    required this.options,
+    required this.option,
+    this.value,
+    required this.multiple,
+    this.size,
+    this.onClick,
+  }) : super(key: key);
+
+  /// 选中的值
+  final dynamic value;
+
+  /// 是否多选
+  final bool multiple;
+
+  /// 全部选项
+  final List<TOption> options;
+
+  /// 数据化配置选项内容
+  final TSelectOption option;
+
+  /// 组件大小
+  final TComponentSize? size;
+
+  /// 点击回调
+  final void Function(bool check)? onClick;
+
+  @override
+  Widget build(BuildContext context) {
+    var theme = TTheme.of(context);
+    var colorScheme = theme.colorScheme;
+    TComponentSize size = this.size ?? theme.size;
+    Color textColor = _check ? colorScheme.brandColor : colorScheme.textColorPrimary;
+    MaterialStateProperty<Color?> backgroundColor = MaterialStateProperty.resolveWith((states) {
+      if (states.contains(MaterialState.selected)) {
+        return colorScheme.brandColorLight;
+      }
+      if (states.containsAny([MaterialState.focused, MaterialState.hovered, MaterialState.pressed])) {
+        return colorScheme.bgColorContainerHover;
+      }
+      return colorScheme.bgColorContainerHover.withOpacity(0);
+    });
+
+    TextStyle textStyle;
+    double height;
+    switch (size) {
+      case TComponentSize.small:
+        textStyle = theme.fontData.fontBodySmall;
+        height = _kSelectOptionHeightS;
+        break;
+      case TComponentSize.medium:
+        textStyle = theme.fontData.fontBodyMedium;
+        height = _kSelectOptionHeightDefault;
+        break;
+      case TComponentSize.large:
+        textStyle = theme.fontData.fontBodyLarge;
+        height = _kSelectOptionHeightL;
+        break;
+    }
+
+    return TRipple(
+      fixedRippleColor: colorScheme.bgColorContainerActive,
+      backgroundColor: backgroundColor,
+      selected: _check,
+      animatedDuration: TVar.animDurationBase,
+      radius: BorderRadius.circular(TVar.borderRadiusDefault),
+      builder: (context, states) {
+        return Container(
+          height: height,
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: Stack(
+            alignment: Alignment.centerLeft,
+            children: [
+              DefaultTextStyle(
+                style: textStyle.merge(TextStyle(
+                  color: textColor,
+                )),
+                child: option.child ?? Text(option.label),
+              )
+            ],
+          ),
+        );
+      },
+      onTap: () {
+        onClick?.call(!_check);
+      },
+    );
+  }
+
+  /// 是否选中
+  bool get _check {
+    if (value == null) {
+      return false;
+    }
+    if (multiple) {
+      return (value as List).any((element) => option.value == element);
+    }
+    return value == option.value;
   }
 }

@@ -47,8 +47,12 @@ enum TSelectValueChangeTrigger {
   uncheck;
 }
 
+abstract class TOption {
+  const TOption();
+}
+
 /// [TSelect]数据项
-class TSelectOption {
+class TSelectOption extends TOption {
   const TSelectOption({
     this.checkAll = false,
     this.child,
@@ -71,4 +75,21 @@ class TSelectOption {
 
   /// 选项值
   final dynamic value;
+}
+
+///  [TSelect]数据项分组
+class TSelectOptionGroup extends TOption {
+  const TSelectOptionGroup({
+    this.divider = true,
+    required this.group,
+    this.chlidren = const [],
+  });
+
+  final bool divider;
+
+  /// 分组名称
+  final String group;
+
+  /// [TSelect]数据项
+  final List<TSelectOption> chlidren;
 }

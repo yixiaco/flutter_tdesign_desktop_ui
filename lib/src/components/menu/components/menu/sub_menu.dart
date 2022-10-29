@@ -206,6 +206,7 @@ class _TSubMenu<T> extends StatelessWidget {
                           top: 0,
                           bottom: 0,
                           child: TFakeArrow(
+                            dimension: 16,
                             placement: isExpanded ? TFakeArrowPlacement.top : TFakeArrowPlacement.bottom,
                             color: textColor ?? textStyle.style.color,
                           ),

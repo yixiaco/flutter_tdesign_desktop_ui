@@ -29,7 +29,7 @@ class TSingleSelectInput<T extends SelectInputValue> extends StatefulWidget {
     this.popupStyle,
     this.popupVisible,
     this.readonly = false,
-    this.status = TInputStatus.defaultStatus,
+    this.status,
     this.suffix,
     this.suffixIcon,
     this.tips,
@@ -120,7 +120,7 @@ class TSingleSelectInput<T extends SelectInputValue> extends StatefulWidget {
   final bool readonly;
 
   /// 输入框状态
-  final TInputStatus status;
+  final TInputStatus? status;
 
   /// 后置图标前的后置内容
   final Widget? suffix;
@@ -217,6 +217,13 @@ class _TSingleSelectInputState<T extends SelectInputValue> extends State<TSingle
 
   @override
   Widget build(BuildContext context) {
+    Widget? panel;
+    if (widget.panel != null) {
+      panel = LimitedBox(
+        maxWidth: 1000,
+        child: widget.panel,
+      );
+    }
     return TPopup(
       disabled: widget.disabled || widget.readonly,
       showDuration: widget.showDuration,
@@ -225,8 +232,8 @@ class _TSingleSelectInputState<T extends SelectInputValue> extends State<TSingle
       onClose: widget.onClose,
       destroyOnClose: widget.destroyOnClose,
       visible: widget.popupVisible,
-      style: const TPopupStyle(followBoxWidth: true).merge(style: widget.popupStyle),
-      content: widget.panel,
+      style: const TPopupStyle(followBoxWidth: true).merge(widget.popupStyle),
+      content: panel,
       trigger: widget.trigger ?? (widget.allowInput ? TPopupTrigger.focus : TPopupTrigger.click),
       placement: widget.placement ?? TPopupPlacement.bottomLeft,
       showArrow: widget.showArrow ?? false,

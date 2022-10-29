@@ -26,7 +26,7 @@ class TTagInput extends TFormItemValidate {
     this.readonly = false,
     this.allowInput = true,
     this.size,
-    this.status = TInputStatus.defaultStatus,
+    this.status,
     this.suffix,
     this.suffixIcon,
     this.tag,
@@ -49,6 +49,7 @@ class TTagInput extends TFormItemValidate {
     this.textAlign = TextAlign.left,
     this.borderless = false,
     this.enterClearInput = true,
+    this.onTap,
     super.focusNode,
     super.name,
   });
@@ -100,7 +101,7 @@ class TTagInput extends TFormItemValidate {
   final TComponentSize? size;
 
   /// 输入框状态
-  final TInputStatus status;
+  final TInputStatus? status;
 
   /// 后置图标前的后置内容
   final Widget? suffix;
@@ -168,6 +169,9 @@ class TTagInput extends TFormItemValidate {
   /// 按下enter事件清除input文本
   final bool enterClearInput;
 
+  /// {@macro tdesign.components.inputBase.onTap}
+  final GestureTapCallback? onTap;
+
   @override
   TFormItemValidateState<TTagInput> createState() => _TTagInputState();
 }
@@ -215,6 +219,7 @@ class _TTagInputState extends TFormItemValidateState<TTagInput> {
       animation: effectiveController,
       builder: (BuildContext context, Widget? child) {
         return TInput(
+          onTap: widget.onTap,
           padding: EdgeInsets.only(left: TVar.spacerS),
           borderless: widget.borderless,
           align: widget.textAlign,

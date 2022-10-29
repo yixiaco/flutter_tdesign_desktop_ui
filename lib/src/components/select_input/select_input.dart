@@ -35,7 +35,7 @@ class TSelectInput<T extends SelectInputValue> extends StatelessWidget {
     this.popupStyle,
     this.popupVisible,
     this.readonly = false,
-    this.status = TInputStatus.defaultStatus,
+    this.status,
     this.suffix,
     this.suffixIcon,
     this.tag,
@@ -146,7 +146,7 @@ class TSelectInput<T extends SelectInputValue> extends StatelessWidget {
   final bool readonly;
 
   /// 输入框状态
-  final TInputStatus status;
+  final TInputStatus? status;
 
   /// 后置图标前的后置内容
   final Widget? suffix;

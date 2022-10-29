@@ -73,6 +73,7 @@ class TPopupStyle {
     this.transform,
     this.transformAlignment,
     this.followBoxWidth,
+    this.shadows,
   });
 
   /// 浮层背景色
@@ -110,6 +111,9 @@ class TPopupStyle {
   /// 最小宽度跟随组件大小
   final bool? followBoxWidth;
 
+  /// 覆盖默认阴影
+  final List<BoxShadow>? shadows;
+
   TPopupStyle copyWith({
     Color? backgroundColor,
     EdgeInsetsGeometry? padding,
@@ -122,6 +126,7 @@ class TPopupStyle {
     Matrix4? transform,
     AlignmentGeometry? transformAlignment,
     bool? followBoxWidth,
+    List<BoxShadow>? shadows,
   }) {
     return TPopupStyle(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -135,12 +140,11 @@ class TPopupStyle {
       transform: transform ?? this.transform,
       transformAlignment: transformAlignment ?? this.transformAlignment,
       followBoxWidth: followBoxWidth ?? this.followBoxWidth,
+      shadows: shadows ?? this.shadows,
     );
   }
 
-  TPopupStyle merge({
-    TPopupStyle? style,
-  }) {
+  TPopupStyle merge([TPopupStyle? style]) {
     return TPopupStyle(
       backgroundColor: backgroundColor ?? style?.backgroundColor,
       padding: padding ?? style?.padding,
@@ -153,6 +157,7 @@ class TPopupStyle {
       transform: transform ?? style?.transform,
       transformAlignment: transformAlignment ?? style?.transformAlignment,
       followBoxWidth: followBoxWidth ?? style?.followBoxWidth,
+      shadows: shadows ?? style?.shadows,
     );
   }
 
@@ -171,7 +176,8 @@ class TPopupStyle {
           constraints == other.constraints &&
           transform == other.transform &&
           transformAlignment == other.transformAlignment &&
-          followBoxWidth == other.followBoxWidth;
+          followBoxWidth == other.followBoxWidth &&
+          shadows == other.shadows;
 
   @override
   int get hashCode =>
@@ -185,7 +191,8 @@ class TPopupStyle {
       constraints.hashCode ^
       transform.hashCode ^
       transformAlignment.hashCode ^
-      followBoxWidth.hashCode;
+      followBoxWidth.hashCode ^
+      shadows.hashCode;
 }
 
 /// 浮层出现位置

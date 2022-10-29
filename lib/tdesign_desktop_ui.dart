@@ -95,7 +95,6 @@ export 'src/components/input_number/input_number.dart';
 export 'src/components/input_number/type.dart';
 /// Select 选择器
 export 'src/components/select/select.dart';
-export 'src/components/select/option.dart';
 export 'src/components/select/type.dart';
 /// 筛选器输入框
 export 'src/components/select_input/select_input.dart';

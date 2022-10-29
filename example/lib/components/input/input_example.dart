@@ -19,6 +19,10 @@ class TInputExample extends StatelessWidget {
           disabled: true,
         ),
         TInput(
+          readonly: true,
+          placeholder: '只读',
+        ),
+        TInput(
           clearable: true,
           status: TInputStatus.defaultStatus,
           placeholder: 'brand',
@@ -58,12 +62,11 @@ class TInputExample extends StatelessWidget {
           clearable: true,
           type: TInputType.password,
           placeholder: '密码框',
-          label: Text('价格:'),
           maxLength: 10,
           suffix: Text('元'),
           obscuringCharacter: '*',
           showLimitNumber: true,
-          prefixIcon: Icon(TIcons.time),
+          prefixIcon: Icon(TIcons.lockOn),
         ),
         TInput(
           showClearIconOnEmpty: true,

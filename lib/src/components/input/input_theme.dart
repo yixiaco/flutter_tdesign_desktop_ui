@@ -11,6 +11,7 @@ class TInputThemeData with Diagnosticable {
     this.backgroundColor,
     this.borderColor,
     this.boxShadow,
+    this.status,
   });
 
   /// 用户最多可以输入的文本长度，一个中文等于一个计数长度。值小于等于 0 的时候，则表示不限制输入长度。
@@ -32,6 +33,9 @@ class TInputThemeData with Diagnosticable {
   /// 边框阴影
   final List<BoxShadow>? boxShadow;
 
+  /// 输入框状态
+  final TInputStatus? status;
+
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
@@ -41,6 +45,7 @@ class TInputThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<Color>('backgroundColor', backgroundColor, defaultValue: null));
     properties.add(DiagnosticsProperty<Color>('borderColor', borderColor, defaultValue: null));
     properties.add(DiagnosticsProperty<List<BoxShadow>>('boxShadow', boxShadow, defaultValue: null));
+    properties.add(DiagnosticsProperty<TInputStatus>('status', status, defaultValue: null));
   }
 
   TInputThemeData copyWith({
@@ -50,6 +55,7 @@ class TInputThemeData with Diagnosticable {
     Color? backgroundColor,
     Color? borderColor,
     List<BoxShadow>? boxShadow,
+    TInputStatus? status,
   }) {
     return TInputThemeData(
       maxLength: maxLength ?? this.maxLength,
@@ -58,6 +64,7 @@ class TInputThemeData with Diagnosticable {
       backgroundColor: backgroundColor ?? this.backgroundColor,
       borderColor: borderColor ?? this.borderColor,
       boxShadow: boxShadow ?? this.boxShadow,
+      status: status ?? this.status,
     );
   }
 
@@ -71,7 +78,8 @@ class TInputThemeData with Diagnosticable {
           borderRadius == other.borderRadius &&
           backgroundColor == other.backgroundColor &&
           borderColor == other.borderColor &&
-          boxShadow == other.boxShadow;
+          boxShadow == other.boxShadow &&
+          status == other.status;
 
   @override
   int get hashCode =>
@@ -80,10 +88,11 @@ class TInputThemeData with Diagnosticable {
       borderRadius.hashCode ^
       backgroundColor.hashCode ^
       borderColor.hashCode ^
-      boxShadow.hashCode;
+      boxShadow.hashCode ^
+      status.hashCode;
 }
 
-/// 弹出层主题
+/// 输入框主题
 class TInputTheme extends InheritedTheme {
   final TInputThemeData data;
 
