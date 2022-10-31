@@ -193,15 +193,18 @@ class TSelectInput<T extends SelectInputValue> extends StatelessWidget {
   final List<Widget> Function(List<T> value, void Function(int index, T item) onClose)? multipleValueDisplay;
 
   /// 失去焦点时触发
+  /// value: 值为数组表示多个标签，值为非数组表示单个数值。
   final void Function(dynamic value, TSelectInputFocusContext context)? onBlur;
 
   /// 清空按钮点击时触发
   final VoidCallback? onClear;
 
   /// 按键按下 Enter 时触发
+  /// value: 值为数组表示多个标签，值为非数组表示单个数值。
   final void Function(dynamic value, String inputValue)? onEnter;
 
   /// 聚焦时触发
+  /// value: 值为数组表示多个标签，值为非数组表示单个数值。
   final void Function(dynamic value, String inputValue, List<String>? tagInputValue)? onFocus;
 
   /// 输入框值发生变化时触发，context.trigger 表示触发输入框值变化的来源：文本输入触发、清除按钮触发等
@@ -217,7 +220,7 @@ class TSelectInput<T extends SelectInputValue> extends StatelessWidget {
   final void Function(bool visible)? onPopupVisibleChange;
 
   /// 值变化时触发，参数 context.trigger 表示数据变化的触发来源；context.index 指当前变化项的下标；context.item 指当前变化项
-  final void Function(dynamic value, TagInputChangeContext context)? onTagChange;
+  final void Function(List<T> value, TagInputChangeContext context)? onTagChange;
 
   /// 焦点
   final FocusNode? focusNode;

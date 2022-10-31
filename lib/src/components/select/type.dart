@@ -82,7 +82,7 @@ class TSelectOptionGroup extends TOption {
   const TSelectOptionGroup({
     this.divider = true,
     required this.group,
-    this.chlidren = const [],
+    this.children = const [],
   });
 
   final bool divider;
@@ -91,5 +91,5 @@ class TSelectOptionGroup extends TOption {
   final String group;
 
   /// [TSelect]数据项
-  final List<TSelectOption> chlidren;
+  final List<TSelectOption> children;
 }

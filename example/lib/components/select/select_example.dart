@@ -11,6 +11,7 @@ class TSelectExample extends StatefulWidget {
 class _TSelectExampleState extends State<TSelectExample> {
   late List<TOption> options;
   dynamic value = '2';
+  dynamic value2 = ['2'];
 
   @override
   void initState() {
@@ -31,13 +32,35 @@ class _TSelectExampleState extends State<TSelectExample> {
       direction: Axis.vertical,
       children: [
         const TSelect(autoWidth: true),
-        TSelect(
-          value: value,
-          options: options,
-          autoWidth: true,
-          placeholder: '请选择云解决方案',
-          onChange: (value, selectedOptions, trigger) {
-            this.value = value;
+        StatefulBuilder(
+          builder: (context, setState) {
+            return TSelect(
+              value: value,
+              options: options,
+              autoWidth: true,
+              placeholder: '请选择云解决方案',
+              onChange: (value, selectedOptions, trigger) {
+                setState(() {
+                  this.value = value;
+                });
+              },
+            );
+          },
+        ),
+        StatefulBuilder(
+          builder: (context, setState) {
+            return TSelect(
+              value: value2,
+              multiple: true,
+              options: options,
+              autoWidth: true,
+              placeholder: '请选择云解决方案',
+              onChange: (value, selectedOptions, trigger) {
+                setState(() {
+                  value2 = value;
+                });
+              },
+            );
           },
         ),
       ],

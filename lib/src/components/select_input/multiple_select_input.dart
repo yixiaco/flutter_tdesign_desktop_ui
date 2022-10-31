@@ -231,8 +231,8 @@ class _TMultipleSelectInputState<T extends SelectInputValue> extends State<TMult
 
   @override
   void initState() {
-    _value = [];
-    _tagInputController = TTagInputController(value: widget.value.map((e) => e.label).toList(), update: false);
+    _value = List.of(widget.value);
+    _tagInputController = TTagInputController(value: _value.map((e) => e.label).toList(), update: false);
     super.initState();
   }
 
@@ -240,7 +240,7 @@ class _TMultipleSelectInputState<T extends SelectInputValue> extends State<TMult
   void didUpdateWidget(covariant TMultipleSelectInput<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (!widget.value.contentEquals(_value)) {
-      _value = List.from(widget.value);
+      _value = List.of(widget.value);
       _handleChange();
     }
   }

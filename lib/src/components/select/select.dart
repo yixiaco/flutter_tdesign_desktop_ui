@@ -208,7 +208,7 @@ class TSelect<T extends TOption> extends StatefulWidget {
   /// context.selectedOptions 表示选中值的完整对象，数组长度一定和 value 相同；
   /// context.option 表示当前操作的选项，不一定存在。
   /// {@macro tdesign.components.select.value}
-  final void Function(dynamic value, List<T> selectedOptions, TSelectValueChangeTrigger trigger)? onChange;
+  final void Function(dynamic value, List<TOption> selectedOptions, TSelectValueChangeTrigger trigger)? onChange;
 
   /// 焦点
   final FocusNode? focusNode;
@@ -225,9 +225,32 @@ class _TSelectState<T extends TOption> extends State<TSelect<T>> {
 
   TPopupVisible get effectivePopupVisible => widget.popupVisible ?? (_popupVisible ??= TPopupVisible());
 
+  late List<TOption> _selectOptions;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectOptions = _search(widget.value, widget.options);
+  }
+
+  @override
+  void didUpdateWidget(covariant TSelect<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.multiple != oldWidget.multiple) {
+      _selectOptions = _search(widget.value, widget.options);
+    } else if (widget.multiple) {
+      if (!(widget.value as List).contentEquals(oldWidget.value)) {
+        _selectOptions = _search(widget.value, widget.options);
+      }
+    } else if (widget.value != oldWidget.value) {
+      _selectOptions = _search(widget.value, widget.options);
+    }
+  }
+
   @override
   void dispose() {
     super.dispose();
+    _selectOptions.clear();
     _popupVisible?.dispose();
   }
 
@@ -235,7 +258,22 @@ class _TSelectState<T extends TOption> extends State<TSelect<T>> {
   Widget build(BuildContext context) {
     var theme = TTheme.of(context);
     var colorScheme = theme.colorScheme;
-    return TSelectInput(
+
+    dynamic value;
+    if (widget.multiple) {
+      value = _selectOptions.map((e) {
+        var option = e as TSelectOption;
+        return SelectInputValue(label: option.label, value: option.value);
+      }).toList();
+    } else {
+      if (_selectOptions.isNotEmpty) {
+        var option = _selectOptions[0] as TSelectOption;
+        value = SelectInputValue(label: option.label, value: option.value);
+      }
+    }
+    return TSelectInput<SelectInputValue>(
+      multiple: widget.multiple,
+      value: value,
       autoWidth: widget.autoWidth,
       autofocus: widget.autofocus,
       focusNode: widget.focusNode,
@@ -263,9 +301,38 @@ class _TSelectState<T extends TOption> extends State<TSelect<T>> {
           );
         },
       ),
+      onTagChange: _handleTagChange,
       popupVisible: effectivePopupVisible,
       panel: _buildPanel(theme),
     );
+  }
+
+  /// 处理标签变更--多选
+  void _handleTagChange(List<SelectInputValue> value, TagInputChangeContext context) {
+    if (context.trigger == TagInputTriggerSource.clear || context.trigger == TagInputTriggerSource.reset) {
+      widget.onChange?.call([], [], TSelectValueChangeTrigger.clear);
+    }
+    if (TagInputTriggerSource.tagRemove == context.trigger || TagInputTriggerSource.backspace == context.trigger) {
+      var list = List.of(widget.value);
+      var options = List.of(_selectOptions);
+      list.removeLast();
+      options.removeLast();
+      TSelectValueChangeTrigger trigger;
+      if (TagInputTriggerSource.tagRemove == context.trigger) {
+        trigger = TSelectValueChangeTrigger.tagRemove;
+      } else {
+        trigger = TSelectValueChangeTrigger.backspace;
+      }
+      widget.onChange?.call(list, options, trigger);
+    }
+    if (widget.creatable && TagInputTriggerSource.enter == context.trigger) {
+      var list = List.of(widget.value);
+      var options = List.of(_selectOptions);
+      var inputValue = TSelectOption(label: context.item!, value: context.item!);
+      list.add(context.item!);
+      options.add(inputValue);
+      widget.onChange?.call(list, options, TSelectValueChangeTrigger.check);
+    }
   }
 
   Widget _buildPanel(TThemeData theme) {
@@ -308,22 +375,27 @@ class _TSelectState<T extends TOption> extends State<TSelect<T>> {
       child: FixedCrossFlex(
         direction: Axis.vertical,
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: List.generate(widget.options.length, (index) {
           var option = widget.options[index];
+          bool isFirst = index == 0;
           if (option is TSelectOptionGroup) {
             return _TOptionGroup(
               optionGroup: option,
             );
           }
-          return _TOption(
-            options: widget.options,
-            option: option as TSelectOption,
-            multiple: widget.multiple,
-            value: widget.value,
-            size: widget.size,
-            onClick: (check) {
-              _handleClick(index, check);
-            },
+          return Padding(
+            padding: EdgeInsets.only(top: isFirst ? 0 : 2),
+            child: _TOption(
+              options: widget.options,
+              option: option as TSelectOption,
+              multiple: widget.multiple,
+              value: widget.value,
+              size: widget.size,
+              onClick: (check) {
+                _handleClick(index, check);
+              },
+            ),
           );
         }),
       ),
@@ -334,44 +406,50 @@ class _TSelectState<T extends TOption> extends State<TSelect<T>> {
   void _handleClick(int index, bool check) {
     var option = widget.options[index] as TSelectOption;
     dynamic value = widget.value;
+    var options = List.of(_selectOptions);
     if (widget.multiple) {
       value ??= [];
       var list = List.of(value);
       if (check) {
-        list.remove(option.value);
-      } else {
         list.add(option.value);
+        options.add(option as T);
+      } else {
+        var index = list.indexOf(option.value);
+        list.removeAt(index);
+        options.removeAt(index);
       }
       value = list;
     } else {
       value = option.value;
+      effectivePopupVisible.value = false;
     }
     var trigger = check ? TSelectValueChangeTrigger.check : TSelectValueChangeTrigger.uncheck;
-    widget.onChange?.call(value, search(value, widget.options), trigger);
+    widget.onChange?.call(value, options, trigger);
   }
 
-  List<T> search(dynamic value, List<T> options) {
-    return options.flatMap<T>((element) {
+  List<TSelectOption> _getSelectOptions(List<TOption> options) {
+    return options.flatMap<TSelectOption>((element) {
       if (element is TSelectOptionGroup) {
-        return search(value, element.chlidren.cast());
+        return _getSelectOptions(element.children.cast());
       }
-      if (widget.multiple) {
-        var list = (value as List);
-        if (element is TSelectOption && list.contains(element.value)) {
-          return [element];
-        }
-        return [];
-      } else {
-        if (element is TSelectOption && value == element.value) {
-          return [element];
-        }
-        return [];
-      }
+      return [element as TSelectOption];
     }).toList();
+  }
+
+  List<TOption> _search(dynamic value, List<TOption> options) {
+    if (value is List) {
+      return value.flatMap<TOption>((element) {
+        return _search(element, options);
+      }).toList();
+    } else {
+      var allOptions = _getSelectOptions(options);
+      var checkOption = allOptions.firstOrNullWhere((element) => element.value == value);
+      return [if (checkOption != null) checkOption];
+    }
   }
 }
 
-class _TOptionGroup<TSelectOptionGroup> extends StatelessWidget {
+class _TOptionGroup extends StatelessWidget {
   const _TOptionGroup({
     Key? key,
     required this.optionGroup,
@@ -478,7 +556,7 @@ class _TOption extends StatelessWidget {
         );
       },
       onTap: () {
-        onClick?.call(!_check);
+        onClick?.call(!multiple || !_check);
       },
     );
   }

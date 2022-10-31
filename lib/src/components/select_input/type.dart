@@ -1,8 +1,13 @@
 import 'package:flutter/foundation.dart';
 
 class SelectInputValue {
+  /// 标签名称
   final String label;
+
+  /// 值
   final dynamic value;
+
+  /// 子选项
   final List<SelectInputValue>? children;
 
   const SelectInputValue({

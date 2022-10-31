@@ -59,7 +59,8 @@ class MyApp extends HookConsumerWidget {
     return TTheme(
       data: theme.copyWith(size: size),
       child: MaterialApp(
-        showPerformanceOverlay: fps, // 开启FPS监控
+        showPerformanceOverlay: fps,
+        // 开启FPS监控
         title: 'TDesign Desktop UI Demo',
         locale: locale,
         supportedLocales: GlobalTDesignLocalizations.delegate.supportedLocales,
@@ -505,22 +506,27 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
         ),
       );
     }
-    return FractionallySizedBox(
-      heightFactor: 1,
-      child: TMenu(
-        width: 260,
-        collapsed: collapsed,
-        controller: menuController,
-        menus: menus,
-        logo: logo,
-        operations: TMenuIconButton(
-          onClick: () {
-            setState(() {
-              collapsed = !collapsed;
-            });
-          },
-          child: TFakeArrow(placement: collapsed ? TFakeArrowPlacement.right : TFakeArrowPlacement.left),
-          // child: Icon(collapsed ? TIcons.chevronRight : TIcons.chevronLeft),
+    return Container(
+      decoration: BoxDecoration(
+        border: Border(right: BorderSide(color: theme.colorScheme.borderLevel2Color)),
+      ),
+      child: FractionallySizedBox(
+        heightFactor: 1,
+        child: TMenu(
+          width: 240,
+          collapsed: collapsed,
+          controller: menuController,
+          menus: menus,
+          logo: logo,
+          operations: TMenuIconButton(
+            onClick: () {
+              setState(() {
+                collapsed = !collapsed;
+              });
+            },
+            child: TFakeArrow(placement: collapsed ? TFakeArrowPlacement.right : TFakeArrowPlacement.left),
+            // child: Icon(collapsed ? TIcons.chevronRight : TIcons.chevronLeft),
+          ),
         ),
       ),
     );
