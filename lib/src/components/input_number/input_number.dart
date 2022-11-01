@@ -339,7 +339,7 @@ class _TInputNumberState<T> extends TFormItemValidateState<TInputNumber<T>> {
         autoWidth: widget.autoWidth,
         tips: widget.inputTips,
         scrollController: widget.scrollController,
-        suffixPadding: widget.theme == TInputNumberTheme.column ? const EdgeInsets.only(right: 0) : null,
+        padding: widget.theme == TInputNumberTheme.column ? const EdgeInsets.only(right: 0) : null,
       ),
     );
 

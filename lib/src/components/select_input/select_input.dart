@@ -31,11 +31,12 @@ class TSelectInput<T extends SelectInputValue> extends StatelessWidget {
     this.onClose,
     this.showDuration = const Duration(milliseconds: 250),
     this.hideDuration = const Duration(milliseconds: 150),
-    this.destroyOnClose = true,
+    this.destroyOnClose = false,
     this.popupStyle,
     this.popupVisible,
     this.readonly = false,
     this.status,
+    this.prefixIcon,
     this.suffix,
     this.suffixIcon,
     this.tag,
@@ -46,7 +47,6 @@ class TSelectInput<T extends SelectInputValue> extends StatelessWidget {
     this.excessTagsDisplayType = TTagExcessTagsDisplayType.breakLine,
     this.dragSort = false,
     this.onDragSort,
-    this.max,
     this.value,
     this.singleValueDisplay,
     this.multipleValueDisplay,
@@ -61,7 +61,7 @@ class TSelectInput<T extends SelectInputValue> extends StatelessWidget {
     this.onTagChange,
     this.focusNode,
     this.autofocus = false,
-  })  : assert(value == null || multiple && value is List<T> || !multiple && value is T);
+  }) : assert(value == null || multiple && value is List<T> || !multiple && value is T);
 
   /// 尺寸
   final TComponentSize? size;
@@ -148,6 +148,9 @@ class TSelectInput<T extends SelectInputValue> extends StatelessWidget {
   /// 输入框状态
   final TInputStatus? status;
 
+  /// 前缀图标
+  final Widget? prefixIcon;
+
   /// 后置图标前的后置内容
   final Widget? suffix;
 
@@ -176,9 +179,6 @@ class TSelectInput<T extends SelectInputValue> extends StatelessWidget {
 
   /// 拖拽调整标签顺序
   final bool dragSort;
-
-  /// 最大允许输入的标签数量
-  final int? max;
 
   /// 拖拽排序时触发
   final void Function(TagInputDragSortContext context)? onDragSort;
@@ -230,11 +230,17 @@ class TSelectInput<T extends SelectInputValue> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Widget child;
     if (multiple) {
-      return _buildMultiple();
+      child = _buildMultiple();
     } else {
-      return _buildSingle();
+      child = _buildSingle();
     }
+    return Semantics(
+      button: true,
+      enabled: !disabled,
+      child: child,
+    );
   }
 
   /// 构建单选组件
@@ -257,6 +263,7 @@ class TSelectInput<T extends SelectInputValue> extends StatelessWidget {
       placeholder: placeholder,
       onMouseleave: onMouseleave,
       onMouseenter: onMouseenter,
+      prefixIcon: prefixIcon,
       suffixIcon: suffixIcon,
       onClear: onClear,
       clearable: clearable,
@@ -298,6 +305,7 @@ class TSelectInput<T extends SelectInputValue> extends StatelessWidget {
       minCollapsedNum: minCollapsedNum,
       tips: tips,
       tag: tag,
+      prefixIcon: prefixIcon,
       suffix: suffix,
       label: label,
       onBlur: onBlur,

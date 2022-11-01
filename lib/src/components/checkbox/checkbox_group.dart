@@ -113,31 +113,29 @@ class TCheckboxGroupState<T> extends TFormItemValidateState<TCheckboxGroup<T>> {
   @override
   Widget build(BuildContext context) {
     var formDisabled = this.formDisabled;
-    List<Widget> box = widget.options
-        .map(
-          (e) {
-            return TCheckbox<T>(
-            disabled: formDisabled || widget.disabled || e.disabled,
-            label: e.label,
-            value: e.value,
-            checked: _value.contains(e.value),
-            onChange: (checked, indeterminate, value) {
-              List<T>? list;
-              if (checked) {
-                if (widget.max == null || _value.length < widget.max!) {
-                  list = [..._value, e.value];
-                }
-              } else {
-                list = _value.where((element) => element != e.value).toList();
+    List<Widget> box = widget.options.map(
+      (e) {
+        return TCheckbox<T>(
+          disabled: formDisabled || widget.disabled || e.disabled,
+          label: e.label,
+          value: e.value,
+          checked: _value.contains(e.value),
+          onChange: (checked, indeterminate, value) {
+            List<T>? list;
+            if (checked) {
+              if (widget.max == null || _value.length < widget.max!) {
+                list = [..._value, e.value];
               }
-              if (list != null) {
-                widget.onChange?.call(checked, e, list);
-              }
-            },
-          );
+            } else {
+              list = _value.where((element) => element != e.value).toList();
+            }
+            if (list != null) {
+              widget.onChange?.call(checked, e, list);
+            }
           },
-        )
-        .toList();
+        );
+      },
+    ).toList();
 
     return TSpace(
       breakLine: true,
@@ -160,6 +158,5 @@ class TCheckboxGroupState<T> extends TFormItemValidateState<TCheckboxGroup<T>> {
         break;
     }
     widget.onChange?.call(false, null, _value);
-
   }
 }

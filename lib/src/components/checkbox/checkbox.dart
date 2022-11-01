@@ -51,8 +51,7 @@ class TCheckbox<T> extends TFormItemValidate {
   TFormItemValidateState<TCheckbox<T>> createState() => _TCheckboxState<T>();
 }
 
-class _TCheckboxState<T> extends TFormItemValidateState<TCheckbox<T>>
-    with SingleTickerProviderStateMixin, MaterialStateMixin {
+class _TCheckboxState<T> extends TFormItemValidateState<TCheckbox<T>> with SingleTickerProviderStateMixin {
   final _TCheckboxPaint _painter = _TCheckboxPaint();
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
@@ -109,20 +108,12 @@ class _TCheckboxState<T> extends TFormItemValidateState<TCheckbox<T>>
     }
   }
 
-  get states => materialStates;
-
   bool get _checked => widget.indeterminate || checked;
 
   bool get disabled => formDisabled || widget.disabled;
 
   @override
   Widget build(BuildContext context) {
-    var disabled = this.disabled;
-    if (disabled) {
-      materialStates.add(MaterialState.disabled);
-    } else {
-      materialStates.remove(MaterialState.disabled);
-    }
     var theme = TTheme.of(context);
     var colorScheme = theme.colorScheme;
     var themeData = TCheckboxTheme.of(context);
@@ -191,20 +182,19 @@ class _TCheckboxState<T> extends TFormItemValidateState<TCheckbox<T>>
 
     return Semantics(
       checked: widget.checked,
-      child: FocusableActionDetector(
-        enabled: !disabled,
+      child: TMaterialStateButton(
+        disabled: disabled,
         actions: actionMap,
+        selected: widget.checked == true,
         focusNode: widget.focusNode,
         autofocus: widget.autofocus,
-        mouseCursor: effectiveMouseCursor.resolve(states),
-        onShowFocusHighlight: _handleFocusHighlightChanged,
-        onShowHoverHighlight: _handleHoverChanged,
-        child: GestureDetector(
-          behavior: HitTestBehavior.translucent,
-          onTap: () {
-            _handleTap();
-          },
-          child: SizedBox(
+        cursor: effectiveMouseCursor,
+        behavior: HitTestBehavior.translucent,
+        onTap: () {
+          _handleTap();
+        },
+        builder: (context, states) {
+          return SizedBox(
             height: 22,
             child: TSpace(
               spacing: 0,
@@ -233,8 +223,8 @@ class _TCheckboxState<T> extends TFormItemValidateState<TCheckbox<T>>
                 label,
               ],
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }
@@ -263,14 +253,6 @@ class _TCheckboxState<T> extends TFormItemValidateState<TCheckbox<T>>
       ),
     };
     return actionMap;
-  }
-
-  void _handleHoverChanged(bool value) {
-    setMaterialState(MaterialState.hovered, value);
-  }
-
-  void _handleFocusHighlightChanged(bool value) {
-    setMaterialState(MaterialState.focused, value);
   }
 
   @override

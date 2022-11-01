@@ -25,11 +25,12 @@ class TSingleSelectInput<T extends SelectInputValue> extends StatefulWidget {
     this.onClose,
     this.showDuration = const Duration(milliseconds: 250),
     this.hideDuration = const Duration(milliseconds: 150),
-    this.destroyOnClose = true,
+    this.destroyOnClose = false,
     this.popupStyle,
     this.popupVisible,
     this.readonly = false,
     this.status,
+    this.prefixIcon,
     this.suffix,
     this.suffixIcon,
     this.tips,
@@ -121,6 +122,9 @@ class TSingleSelectInput<T extends SelectInputValue> extends StatefulWidget {
 
   /// 输入框状态
   final TInputStatus? status;
+
+  /// 组件前置图标
+  final Widget? prefixIcon;
 
   /// 后置图标前的后置内容
   final Widget? suffix;
@@ -224,6 +228,7 @@ class _TSingleSelectInputState<T extends SelectInputValue> extends State<TSingle
         child: widget.panel,
       );
     }
+    var trigger = widget.trigger ?? (widget.allowInput ? TPopupTrigger.focus : TPopupTrigger.notifier);
     return TPopup(
       disabled: widget.disabled || widget.readonly,
       showDuration: widget.showDuration,
@@ -234,50 +239,60 @@ class _TSingleSelectInputState<T extends SelectInputValue> extends State<TSingle
       visible: widget.popupVisible,
       style: const TPopupStyle(followBoxWidth: true).merge(widget.popupStyle),
       content: panel,
-      trigger: widget.trigger ?? (widget.allowInput ? TPopupTrigger.focus : TPopupTrigger.click),
+      trigger: trigger,
       placement: widget.placement ?? TPopupPlacement.bottomLeft,
       showArrow: widget.showArrow ?? false,
       hideEmptyPopup: true,
-      child: TInput(
-        focusNode: widget.focusNode,
-        autofocus: widget.autofocus,
-        controller: effectiveTextEditingController,
-        readonly: !widget.allowInput || widget.readonly,
-        disabled: widget.disabled,
-        autoWidth: widget.autoWidth,
-        tips: widget.tips,
-        onChange: (text) {
-          widget.onInputChange?.call(text, InputValueChangeContext.input);
-        },
-        align: widget.textAlign,
-        status: widget.status,
-        onEnter: (value) {
-          widget.onEnter?.call(widget.value, value);
-        },
-        placeholder: widget.placeholder,
-        onMouseenter: (event) {
-          _isHovered = true;
-          _handleClearChange();
-          widget.onMouseenter?.call(event);
-        },
-        onMouseleave: (event) {
-          _isHovered = false;
-          _handleClearChange();
-          widget.onMouseleave?.call(event);
-        },
-        onFocus: (text) {
-          widget.onFocus?.call(widget.value, text);
-        },
-        onBlur: (text) {
-          widget.onBlur?.call(widget.value, TSelectInputFocusContext(inputValue: text));
-          _valueChange();
-        },
-        label: widget.label,
-        suffix: widget.suffix,
-        suffixIcon:
-            !widget.disabled && widget.loading ? const TLoading(size: TComponentSize.small) : _buildSuffixIcon(),
-        borderless: widget.borderless,
-        size: widget.size,
+      child: Builder(
+        builder: (context) {
+          return TInput(
+            onTap: () {
+              if(trigger == TPopupTrigger.notifier) {
+                popupNotification.dispatch(context);
+              }
+            },
+            focusNode: widget.focusNode,
+            autofocus: widget.autofocus,
+            controller: effectiveTextEditingController,
+            readonly: !widget.allowInput || widget.readonly,
+            disabled: widget.disabled,
+            autoWidth: widget.autoWidth,
+            tips: widget.tips,
+            onChange: (text) {
+              widget.onInputChange?.call(text, InputValueChangeContext.input);
+            },
+            align: widget.textAlign,
+            status: widget.status,
+            onEnter: (value) {
+              widget.onEnter?.call(widget.value, value);
+            },
+            placeholder: widget.placeholder,
+            onMouseenter: (event) {
+              _isHovered = true;
+              _handleClearChange();
+              widget.onMouseenter?.call(event);
+            },
+            onMouseleave: (event) {
+              _isHovered = false;
+              _handleClearChange();
+              widget.onMouseleave?.call(event);
+            },
+            onFocus: (text) {
+              widget.onFocus?.call(widget.value, text);
+            },
+            onBlur: (text) {
+              widget.onBlur?.call(widget.value, TSelectInputFocusContext(inputValue: text));
+              _valueChange();
+            },
+            label: widget.label,
+            prefixIcon: widget.prefixIcon,
+            suffix: widget.suffix,
+            suffixIcon:
+                !widget.disabled && widget.loading ? const TLoading(size: TComponentSize.small) : _buildSuffixIcon(),
+            borderless: widget.borderless,
+            size: widget.size,
+          );
+        }
       ),
     );
   }

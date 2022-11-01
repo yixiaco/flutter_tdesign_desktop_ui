@@ -27,6 +27,7 @@ class TTagInput extends TFormItemValidate {
     this.allowInput = true,
     this.size,
     this.status,
+    this.prefixIcon,
     this.suffix,
     this.suffixIcon,
     this.tag,
@@ -102,6 +103,9 @@ class TTagInput extends TFormItemValidate {
 
   /// 输入框状态
   final TInputStatus? status;
+
+  /// 组件前置图标
+  final Widget? prefixIcon;
 
   /// 后置图标前的后置内容
   final Widget? suffix;
@@ -214,13 +218,21 @@ class _TTagInputState extends TFormItemValidateState<TTagInput> {
   }
 
   @override
+  void didUpdateWidget(covariant TTagInput oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.allowInput != oldWidget.allowInput && !widget.allowInput) {
+      effectiveTextController.clear();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: effectiveController,
       builder: (BuildContext context, Widget? child) {
         return TInput(
           onTap: widget.onTap,
-          padding: EdgeInsets.only(left: TVar.spacerS),
+          padding: EdgeInsets.only(left: TVar.spacerS, right: TVar.spacer),
           borderless: widget.borderless,
           align: widget.textAlign,
           disabled: disabled,
@@ -229,6 +241,8 @@ class _TTagInputState extends TFormItemValidateState<TTagInput> {
           focusNode: effectiveFocusNode,
           autoWidth: widget.autoWidth,
           breakLine: widget.excessTagsDisplayType == TTagExcessTagsDisplayType.breakLine,
+          prefixIcon: widget.prefixIcon,
+          prefixPadding: EdgeInsets.only(left: TVar.spacerS),
           suffixIcon: TClearIcon(
             onClick: _handleClear,
             show: showClearIcon,
@@ -242,12 +256,12 @@ class _TTagInputState extends TFormItemValidateState<TTagInput> {
           prefixLabels: _buildTags(),
           onMouseenter: (event) {
             _isHovered = true;
-            _handleClearChange();
+            _handleClearIconChange();
             widget.onMouseenter?.call(event);
           },
           onMouseleave: (event) {
             _isHovered = false;
-            _handleClearChange();
+            _handleClearIconChange();
             widget.onMouseleave?.call(event);
           },
           placeholder: effectiveController.value.isNotEmpty ? '' : widget.placeholder,
@@ -256,7 +270,7 @@ class _TTagInputState extends TFormItemValidateState<TTagInput> {
           onFocus: (text) => widget.onFocus?.call(effectiveController.value, text),
           onBlur: (text) => widget.onBlur?.call(effectiveController.value, text),
           onChange: (text) {
-            _handleClearChange();
+            _handleClearIconChange();
             widget.onInputChange?.call(effectiveTextController.text, InputValueChangeContext.input);
           },
         );
@@ -384,9 +398,9 @@ class _TTagInputState extends TFormItemValidateState<TTagInput> {
       if (widget.max == null || effectiveController.value.length < widget.max!) {
         effectiveController.add(text);
       }
-      _handleClearChange();
+      _handleClearIconChange();
       widget.onInputChange?.call(text, InputValueChangeContext.enter);
-      _handleValueChange(TagInputTriggerSource.enter, index: effectiveController.value.lastIndex, item: text);
+      _handleValueChange(TagInputTriggerSource.enter, item: text);
     }
     widget.onEnter?.call(effectiveController.value);
   }
@@ -404,7 +418,7 @@ class _TTagInputState extends TFormItemValidateState<TTagInput> {
   }
 
   /// 处理清理icon状态变更
-  void _handleClearChange() {
+  void _handleClearIconChange() {
     if ((effectiveController.value.isNotEmpty || effectiveTextController.text.isNotEmpty) &&
         widget.clearable &&
         !disabled &&

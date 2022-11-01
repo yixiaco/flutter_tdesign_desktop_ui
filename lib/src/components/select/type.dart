@@ -75,6 +75,13 @@ class TSelectOption extends TOption {
 
   /// 选项值
   final dynamic value;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) || other is TSelectOption && runtimeType == other.runtimeType && value == other.value;
+
+  @override
+  int get hashCode => value.hashCode;
 }
 
 ///  [TSelect]数据项分组
@@ -92,4 +99,20 @@ class TSelectOptionGroup extends TOption {
 
   /// [TSelect]数据项
   final List<TSelectOption> children;
+}
+
+class TSelectChangeContext {
+  /// 表示选中值的完整对象，数组长度一定和 value 相同；
+  /// 当value中的值在options中不存在时，数组中为null
+  final List<TOption?> selectedOptions;
+  /// 表示当前操作的选项，不一定存在。
+  final TOption? option;
+  /// 表示触发变化的来源
+  final TSelectValueChangeTrigger trigger;
+
+  const TSelectChangeContext({
+    required this.selectedOptions,
+    this.option,
+    required this.trigger,
+  });
 }

@@ -431,7 +431,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                 const Text('语义：'),
                 TButton(
                   onPressed: () => ref.read(semanticsProvider.notifier).update((state) => !state),
-                  child: Text(semantics ? '显示语义' : '隐藏语义'),
+                  child: Text(semantics ? '隐藏语义' : '显示语义'),
                 ),
               ],
             ),

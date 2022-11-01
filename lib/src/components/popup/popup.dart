@@ -153,17 +153,17 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
     if (event is PointerHoverEvent && widget.trigger.isTrue(hover: true)) {
       _handlePointerBounds(event);
     }
-    // 点击与右键监听鼠标松开事件
-    else if (event is PointerUpEvent && widget.trigger.isTrue(click: true, contextMenu: true)) {
+    // 通知、点击与右键监听鼠标松开事件
+    else if (event is PointerUpEvent && widget.trigger.isTrue(click: true, contextMenu: true, notifier: true)) {
       // 先检查子浮层的事件
       var popupOverlayState = _overlayKey.currentState;
       if (popupOverlayState != null) {
-        var set = popupOverlayState.levelNotifier.children.toSet();
+        var set = popupOverlayState.levelNotifier.children;
         for (var child in set) {
           child.currentState?.widget.popupState._globalPointerRoute(event);
         }
       }
-      // 检查当前浮层的事件
+      // 检查当前浮层的事件,处理鼠标越界时隐藏
       _handlePointerBounds(event);
     } else if (event is PointerUpEvent && widget.trigger.isTrue(focus: true)) {
       _handlePointerBounds(event);
@@ -358,24 +358,40 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
       return child;
     }
     _notifyPopupUpdate();
-    if (widget.trigger == TPopupTrigger.hover) {
-      child = MouseRegion(
-        hitTestBehavior: HitTestBehavior.translucent,
-        onEnter: (event) => _updateVisible(true),
-        onExit: (event) => _updateVisible(false),
-        child: widget.child,
-      );
-    } else if (widget.trigger == TPopupTrigger.click) {
-      child = AllowTapListener(
-        onTap: () => _updateVisible(),
-        child: widget.child,
-      );
-    } else if (widget.trigger == TPopupTrigger.contextMenu) {
-      child = AllowTapListener(
-        onSecondaryTap: () => _updateVisible(),
-        child: widget.child,
-      );
-    } else if (widget.trigger == TPopupTrigger.focus) {
+    switch (widget.trigger) {
+      case TPopupTrigger.hover:
+        child = MouseRegion(
+          hitTestBehavior: HitTestBehavior.translucent,
+          onEnter: (event) => _updateVisible(true),
+          onExit: (event) => _updateVisible(false),
+          child: widget.child,
+        );
+        break;
+      case TPopupTrigger.click:
+        child = AllowTapListener(
+          onTap: () => _updateVisible(),
+          child: widget.child,
+        );
+        break;
+      case TPopupTrigger.contextMenu:
+        child = AllowTapListener(
+          onSecondaryTap: () => _updateVisible(),
+          child: widget.child,
+        );
+        break;
+      case TPopupTrigger.notifier:
+        child = NotificationListener<TPopupNotification>(
+          onNotification: (notification) {
+            _updateVisible();
+            return true;
+          },
+          child: widget.child,
+        );
+        break;
+      case TPopupTrigger.focus:
+        break;
+      case TPopupTrigger.none:
+        break;
     }
     return NotificationListener<SizeChangedLayoutNotification>(
       onNotification: (notification) {

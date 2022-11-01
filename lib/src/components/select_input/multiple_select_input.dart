@@ -28,11 +28,12 @@ class TMultipleSelectInput<T extends SelectInputValue> extends StatefulWidget {
     this.onClose,
     this.showDuration = const Duration(milliseconds: 250),
     this.hideDuration = const Duration(milliseconds: 150),
-    this.destroyOnClose = true,
+    this.destroyOnClose = false,
     this.popupStyle,
     this.popupVisible,
     this.readonly = false,
     this.status,
+    this.prefixIcon,
     this.suffix,
     this.suffixIcon,
     this.tag,
@@ -43,7 +44,6 @@ class TMultipleSelectInput<T extends SelectInputValue> extends StatefulWidget {
     this.excessTagsDisplayType = TTagExcessTagsDisplayType.breakLine,
     this.dragSort = false,
     this.onDragSort,
-    this.max,
     this.value = const [],
     this.valueDisplay,
     this.onBlur,
@@ -141,6 +141,9 @@ class TMultipleSelectInput<T extends SelectInputValue> extends StatefulWidget {
   /// 输入框状态
   final TInputStatus? status;
 
+  /// 组件前置图标
+  final Widget? prefixIcon;
+
   /// 后置图标前的后置内容
   final Widget? suffix;
 
@@ -169,9 +172,6 @@ class TMultipleSelectInput<T extends SelectInputValue> extends StatefulWidget {
 
   /// 拖拽调整标签顺序
   final bool dragSort;
-
-  /// 最大允许输入的标签数量
-  final int? max;
 
   /// 拖拽排序时触发
   final void Function(TagInputDragSortContext context)? onDragSort;
@@ -265,6 +265,7 @@ class _TMultipleSelectInputState<T extends SelectInputValue> extends State<TMult
         child: widget.panel,
       );
     }
+    var trigger = widget.trigger ?? (widget.allowInput ? TPopupTrigger.focus : TPopupTrigger.notifier);
     return TPopup(
       disabled: widget.disabled || widget.readonly,
       showDuration: widget.showDuration,
@@ -281,58 +282,67 @@ class _TMultipleSelectInputState<T extends SelectInputValue> extends State<TMult
       visible: widget.popupVisible,
       style: const TPopupStyle(followBoxWidth: true).merge(widget.popupStyle),
       content: panel,
-      trigger: widget.trigger ?? (widget.allowInput ? TPopupTrigger.focus : TPopupTrigger.click),
+      trigger: trigger,
       placement: widget.placement ?? TPopupPlacement.bottomLeft,
       showArrow: widget.showArrow ?? false,
       hideEmptyPopup: true,
-      child: TTagInput(
-        controller: _tagInputController,
-        readonly: widget.readonly,
-        allowInput: widget.allowInput,
-        disabled: widget.disabled,
-        textController: effectiveTextEditingController,
-        autoWidth: widget.autoWidth,
-        tips: widget.tips,
-        onInputChange: widget.onInputChange,
-        // 筛选器统一特性：筛选器按下回车时不清空输入框
-        enterClearInput: false,
-        textAlign: widget.textAlign,
-        status: widget.status,
-        onEnter: (value) {
-          widget.onEnter?.call(widget.value, effectiveTextEditingController.text);
-        },
-        placeholder: widget.placeholder,
-        onMouseenter: widget.onMouseenter,
-        onMouseleave: widget.onMouseleave,
-        onFocus: (value, inputValue) {
-          widget.onFocus?.call(widget.value, inputValue, value);
-        },
-        clearable: widget.clearable,
-        onClear: widget.onClear,
-        onBlur: (value, inputValue) {
-          widget.onBlur?.call(widget.value,
-              TSelectInputFocusContext(inputValue: inputValue, tagInputValue: value));
-        },
-        label: widget.label,
-        suffix: widget.suffix,
-        suffixIcon: !widget.disabled && widget.loading ? const TLoading(size: TComponentSize.small) : widget.suffixIcon,
-        tag: widget.tag != null
-            ? (index, value) => widget.tag!.call(index, widget.value[index])
-            : null,
-        minCollapsedNum: widget.minCollapsedNum,
-        collapsedItems: widget.collapsedItems != null ? _handleCollapsedTags : null,
-        tagVariant: widget.tagVariant,
-        tagTheme: widget.tagTheme,
-        borderless: widget.borderless,
-        excessTagsDisplayType: widget.excessTagsDisplayType,
-        onDragSort: widget.onDragSort,
-        size: widget.size,
-        max: widget.max,
-        onChange: (value, context) {
-          widget.onTagChange?.call(widget.value, context);
-        },
-        dragSort: widget.dragSort,
-        valueDisplay: widget.valueDisplay != null ? _handleValueDisplay : null,
+      child: Builder(
+        builder: (context) {
+          return TTagInput(
+            onTap: () {
+              if(trigger == TPopupTrigger.notifier) {
+                popupNotification.dispatch(context);
+              }
+            },
+            controller: _tagInputController,
+            readonly: widget.readonly,
+            allowInput: widget.allowInput,
+            disabled: widget.disabled,
+            textController: effectiveTextEditingController,
+            autoWidth: widget.autoWidth,
+            tips: widget.tips,
+            onInputChange: widget.onInputChange,
+            // 筛选器统一特性：筛选器按下回车时不清空输入框
+            enterClearInput: false,
+            textAlign: widget.textAlign,
+            status: widget.status,
+            onEnter: (value) {
+              widget.onEnter?.call(widget.value, effectiveTextEditingController.text);
+            },
+            placeholder: widget.placeholder,
+            onMouseenter: widget.onMouseenter,
+            onMouseleave: widget.onMouseleave,
+            onFocus: (value, inputValue) {
+              widget.onFocus?.call(widget.value, inputValue, value);
+            },
+            clearable: widget.clearable,
+            onClear: widget.onClear,
+            onBlur: (value, inputValue) {
+              widget.onBlur?.call(widget.value,
+                  TSelectInputFocusContext(inputValue: inputValue, tagInputValue: value));
+            },
+            label: widget.label,
+            prefixIcon: widget.prefixIcon,
+            suffix: widget.suffix,
+            suffixIcon: !widget.disabled && widget.loading ? const TLoading(size: TComponentSize.small) : widget.suffixIcon,
+            tag: widget.tag != null
+                ? (index, value) => widget.tag!.call(index, widget.value[index])
+                : null,
+            minCollapsedNum: widget.minCollapsedNum,
+            collapsedItems: widget.collapsedItems != null ? _handleCollapsedTags : null,
+            tagVariant: widget.tagVariant,
+            tagTheme: widget.tagTheme,
+            borderless: widget.borderless,
+            excessTagsDisplayType: widget.excessTagsDisplayType,
+            onDragSort: widget.onDragSort,
+            size: widget.size,
+            onChange: (value, context) {
+              widget.onTagChange?.call(widget.value, context);
+            },
+            dragSort: widget.dragSort,
+            valueDisplay: widget.valueDisplay != null ? _handleValueDisplay : null,
+          );
+        }
       ),
     );
   }

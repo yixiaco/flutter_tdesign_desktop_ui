@@ -58,6 +58,18 @@ class TSelect<T extends TOption> extends StatefulWidget {
     this.onSearch,
     this.focusNode,
     this.autofocus = false,
+    this.tagTheme = TTagTheme.defaultTheme,
+    this.tagVariant = TTagVariant.dark,
+    this.textAlign = TextAlign.left,
+    this.excessTagsDisplayType = TTagExcessTagsDisplayType.breakLine,
+    this.onOpen,
+    this.onClose,
+    this.showDuration = const Duration(milliseconds: 250),
+    this.hideDuration = const Duration(milliseconds: 150),
+    this.destroyOnClose = false,
+    this.trigger,
+    this.placement,
+    this.label,
   }) : assert(!multiple || multiple && value is List);
 
   /// 宽度随内容自适应
@@ -70,7 +82,7 @@ class TSelect<T extends TOption> extends StatefulWidget {
   final bool clearable;
 
   /// 多选情况下，用于设置折叠项内容，默认为 +N。如果需要悬浮就显示其他内容，可以使用 collapsedItems 自定义
-  final TSelectInputCollapsedItemsCallback<T>? collapsedItems;
+  final TSelectInputCollapsedItemsCallback<TSelectOption>? collapsedItems;
 
   /// 是否允许用户创建新条目，需配合 filterable 使用
   final bool creatable;
@@ -161,10 +173,11 @@ class TSelect<T extends TOption> extends StatefulWidget {
   final TSelectValueType valueType;
 
   /// 自定义值呈现的全部内容
-  final String Function(T? value)? singleValueDisplay;
+  final String Function(TSelectOption? value)? singleValueDisplay;
 
   /// 自定义值呈现的全部内容，参数为所有标签的值。
-  final List<Widget> Function(List<T> value, void Function(int index, T item) onClose)? multipleValueDisplay;
+  final List<Widget> Function(List<TSelectOption> value, void Function(int index, TSelectOption item) onClose)?
+      multipleValueDisplay;
 
   /// 失去焦点时触发
   /// {@macro tdesign.components.select.value}
@@ -198,7 +211,7 @@ class TSelect<T extends TOption> extends StatefulWidget {
 
   /// 多选模式下，选中数据被移除时触发
   /// {@macro tdesign.components.select.value}
-  final void Function(dynamic value, T data)? onRemove;
+  final void Function(dynamic value, TOption? data)? onRemove;
 
   /// 输入值变化时，触发搜索事件。主要用于远程搜索新数据
   final void Function(String filterWords)? onSearch;
@@ -208,13 +221,50 @@ class TSelect<T extends TOption> extends StatefulWidget {
   /// context.selectedOptions 表示选中值的完整对象，数组长度一定和 value 相同；
   /// context.option 表示当前操作的选项，不一定存在。
   /// {@macro tdesign.components.select.value}
-  final void Function(dynamic value, List<TOption> selectedOptions, TSelectValueChangeTrigger trigger)? onChange;
+  final void Function(dynamic value, TSelectChangeContext changeContext)? onChange;
 
   /// 焦点
   final FocusNode? focusNode;
 
   /// 自动聚焦
   final bool autofocus;
+
+  /// 标签主题
+  final TTagTheme tagTheme;
+
+  /// 标签风格变体
+  final TTagVariant tagVariant;
+
+  /// 文本对齐方式
+  final TextAlign textAlign;
+
+  /// 标签超出时的呈现方式，有两种：横向滚动显示 和 换行显示
+  final TTagExcessTagsDisplayType excessTagsDisplayType;
+
+  /// 浮层出现位置
+  final TPopupPlacement? placement;
+
+  /// 触发浮层出现的方式
+  final TPopupTrigger? trigger;
+
+  /// 打开事件
+  final TCallback? onOpen;
+
+  /// 关闭事件
+  final TCallback? onClose;
+
+  /// hover和focus时，显示的延迟
+  final Duration showDuration;
+
+  /// hover和focus时，隐藏的延迟
+  final Duration hideDuration;
+
+  /// 是否在关闭浮层时销毁浮层，默认为false.
+  /// 因为一般不需要维护浮层内容的状态，这可以显著提升运行速度
+  final bool destroyOnClose;
+
+  /// 左侧文本
+  final Widget? label;
 
   @override
   State<TSelect<T>> createState() => _TSelectState<T>();
@@ -225,25 +275,56 @@ class _TSelectState<T extends TOption> extends State<TSelect<T>> {
 
   TPopupVisible get effectivePopupVisible => widget.popupVisible ?? (_popupVisible ??= TPopupVisible());
 
-  late List<TOption> _selectOptions;
+  late List<TOption?> _selectOptions;
+
+  dynamic _value;
+
+  dynamic get _innerValue {
+    if (widget.valueType == TSelectValueType.value) {
+      return _value;
+    }
+    if (widget.multiple) {
+      return (_value as List).map((e) => (e as TSelectOption).value).toList();
+    }
+    return (_value as TSelectOption?)?.value;
+  }
 
   @override
   void initState() {
     super.initState();
-    _selectOptions = _search(widget.value, widget.options);
+    _value = widget.value ?? widget.defaultValue;
+    _syncSelectOptions();
   }
 
   @override
   void didUpdateWidget(covariant TSelect<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.multiple != oldWidget.multiple) {
-      _selectOptions = _search(widget.value, widget.options);
+    if (widget.multiple != oldWidget.multiple || widget.valueType != oldWidget.valueType) {
+      _value = widget.value;
+      _syncSelectOptions();
     } else if (widget.multiple) {
-      if (!(widget.value as List).contentEquals(oldWidget.value)) {
-        _selectOptions = _search(widget.value, widget.options);
+      if (!(widget.value as List).contentEquals(_value)) {
+        _value = widget.value;
+        _syncSelectOptions();
       }
-    } else if (widget.value != oldWidget.value) {
-      _selectOptions = _search(widget.value, widget.options);
+    } else if (widget.value != _value) {
+      _value = widget.value;
+      _syncSelectOptions();
+    }
+  }
+
+  /// 将值同步为option
+  void _syncSelectOptions() {
+    var selectOptions = _search(_innerValue, widget.options);
+    var optionMap = selectOptions.associateBy((element) => (element as TSelectOption).value);
+    if(widget.multiple) {
+      _selectOptions = (_innerValue as List).map((e) => optionMap[e]).toList();
+    } else {
+      if(_innerValue == null) {
+        _selectOptions = [];
+      } else {
+        _selectOptions = [optionMap[_innerValue]];
+      }
     }
   }
 
@@ -262,13 +343,13 @@ class _TSelectState<T extends TOption> extends State<TSelect<T>> {
     dynamic value;
     if (widget.multiple) {
       value = _selectOptions.map((e) {
-        var option = e as TSelectOption;
-        return SelectInputValue(label: option.label, value: option.value);
+        var option = e as TSelectOption?;
+        return SelectInputValue(label: option?.label ?? 'undefined', value: option);
       }).toList();
     } else {
       if (_selectOptions.isNotEmpty) {
         var option = _selectOptions[0] as TSelectOption;
-        value = SelectInputValue(label: option.label, value: option.value);
+        value = SelectInputValue(label: option.label, value: option);
       }
     }
     return TSelectInput<SelectInputValue>(
@@ -279,7 +360,7 @@ class _TSelectState<T extends TOption> extends State<TSelect<T>> {
       focusNode: widget.focusNode,
       onPopupVisibleChange: widget.onPopupVisibleChange,
       size: widget.size,
-      onClear: widget.onClear,
+      onClear: _handleClear,
       borderless: widget.borderless,
       loading: widget.loading,
       allowInput: widget.filterable,
@@ -287,12 +368,13 @@ class _TSelectState<T extends TOption> extends State<TSelect<T>> {
         padding: EdgeInsets.zero,
         radius: BorderRadius.circular(TVar.borderRadiusMedium),
         shadows: colorScheme.shadow2,
+        constraints: const BoxConstraints(maxHeight: _kSelectDropdownMaxHeight),
       ).merge(widget.popupStyle),
       placeholder: widget.placeholder ?? GlobalTDesignLocalizations.of(context).selectPlaceholder,
       readonly: widget.readonly,
       showArrow: widget.showArrow,
       clearable: widget.clearable,
-      max: widget.max,
+      prefixIcon: widget.prefixIcon,
       suffixIcon: AnimatedBuilder(
         animation: effectivePopupVisible,
         builder: (context, child) {
@@ -301,132 +383,111 @@ class _TSelectState<T extends TOption> extends State<TSelect<T>> {
           );
         },
       ),
+      minCollapsedNum: widget.minCollapsedNum,
       onTagChange: _handleTagChange,
+      onMouseleave: widget.onMouseleave,
+      onMouseenter: widget.onMouseenter,
       popupVisible: effectivePopupVisible,
-      panel: _buildPanel(theme),
+      panel: _TSelectPanel(selectState: this),
+      onInputChange: widget.onInputChange,
+      onFocus: (value, inputValue, tagInputValue) => widget.onFocus?.call(_value),
+      onBlur: (value, context) => widget.onBlur?.call(_value),
+      onEnter: (value, inputValue) => widget.onEnter?.call(_value, inputValue),
+      tagTheme: widget.tagTheme,
+      tagVariant: widget.tagVariant,
+      textAlign: widget.textAlign,
+      label: widget.label,
+      disabled: widget.disabled,
+      status: widget.status,
+      excessTagsDisplayType: widget.excessTagsDisplayType,
+      tips: widget.tips,
+      trigger: widget.trigger,
+      placement: widget.placement,
+      destroyOnClose: widget.destroyOnClose,
+      onClose: widget.onClose,
+      onOpen: widget.onOpen,
+      hideDuration: widget.hideDuration,
+      showDuration: widget.showDuration,
+      inputController: widget.textController,
+      collapsedItems: widget.collapsedItems != null
+          ? (value, collapsedTags, count) {
+              var valueList = value.map((e) => e.value as TSelectOption).toList();
+              var collapsedTagsList = collapsedTags.map((e) => e.value as TSelectOption).toList();
+              return widget.collapsedItems!(valueList, collapsedTagsList, count);
+            }
+          : null,
+      singleValueDisplay: widget.singleValueDisplay != null
+          ? (value) => widget.singleValueDisplay!.call(value?.value as TSelectOption?)
+          : null,
+      multipleValueDisplay: widget.singleValueDisplay != null
+          ? (value, onClose) {
+              var list = value.map((e) => e.value as TSelectOption).toList();
+              return widget.multipleValueDisplay!.call(list, (index, item) {
+                onClose(index, SelectInputValue(label: item.label, value: item));
+              });
+            }
+          : null,
     );
   }
 
   /// 处理标签变更--多选
   void _handleTagChange(List<SelectInputValue> value, TagInputChangeContext context) {
-    if (context.trigger == TagInputTriggerSource.clear || context.trigger == TagInputTriggerSource.reset) {
-      widget.onChange?.call([], [], TSelectValueChangeTrigger.clear);
-    }
     if (TagInputTriggerSource.tagRemove == context.trigger || TagInputTriggerSource.backspace == context.trigger) {
-      var list = List.of(widget.value);
+      var list = List.of(_value);
       var options = List.of(_selectOptions);
-      list.removeLast();
-      options.removeLast();
+      var option = options[context.index!];
+      var currentValue = list[context.index!];
+      list.removeAt(context.index!);
+      options.removeAt(context.index!);
       TSelectValueChangeTrigger trigger;
       if (TagInputTriggerSource.tagRemove == context.trigger) {
         trigger = TSelectValueChangeTrigger.tagRemove;
       } else {
         trigger = TSelectValueChangeTrigger.backspace;
       }
-      widget.onChange?.call(list, options, trigger);
+      widget.onRemove?.call(currentValue, option);
+      widget.onChange?.call(list, TSelectChangeContext(selectedOptions: options, option: option, trigger: trigger));
     }
     if (widget.creatable && TagInputTriggerSource.enter == context.trigger) {
-      var list = List.of(widget.value);
+      var list = List.of(_value);
       var options = List.of(_selectOptions);
-      var inputValue = TSelectOption(label: context.item!, value: context.item!);
-      list.add(context.item!);
-      options.add(inputValue);
-      widget.onChange?.call(list, options, TSelectValueChangeTrigger.check);
-    }
-  }
-
-  Widget _buildPanel(TThemeData theme) {
-    var colorScheme = theme.colorScheme;
-
-    TComponentSize size = widget.size ?? theme.size;
-
-    EdgeInsets padding;
-    switch (size) {
-      case TComponentSize.small:
-        padding = const EdgeInsets.all(_kSelectDropdownPaddingS);
-        break;
-      case TComponentSize.medium:
-        padding = const EdgeInsets.all(_kSelectDropdownPadding);
-        break;
-      case TComponentSize.large:
-        padding = const EdgeInsets.all(_kSelectDropdownPaddingL);
-        break;
-    }
-
-    if (widget.options.isEmpty) {
-      return SizedBox(
-        height: 32,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Text(
-                GlobalTDesignLocalizations.of(context).selectEmpty,
-                style: TextStyle(color: colorScheme.textColorDisabled),
-              ),
-            )
-          ],
-        ),
-      );
-    }
-    return Padding(
-      padding: padding,
-      child: FixedCrossFlex(
-        direction: Axis.vertical,
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: List.generate(widget.options.length, (index) {
-          var option = widget.options[index];
-          bool isFirst = index == 0;
-          if (option is TSelectOptionGroup) {
-            return _TOptionGroup(
-              optionGroup: option,
-            );
-          }
-          return Padding(
-            padding: EdgeInsets.only(top: isFirst ? 0 : 2),
-            child: _TOption(
-              options: widget.options,
-              option: option as TSelectOption,
-              multiple: widget.multiple,
-              value: widget.value,
-              size: widget.size,
-              onClick: (check) {
-                _handleClick(index, check);
-              },
-            ),
-          );
-        }),
-      ),
-    );
-  }
-
-  /// 处理option点击事件
-  void _handleClick(int index, bool check) {
-    var option = widget.options[index] as TSelectOption;
-    dynamic value = widget.value;
-    var options = List.of(_selectOptions);
-    if (widget.multiple) {
-      value ??= [];
-      var list = List.of(value);
-      if (check) {
-        list.add(option.value);
-        options.add(option as T);
-      } else {
-        var index = list.indexOf(option.value);
-        list.removeAt(index);
-        options.removeAt(index);
+      if (widget.max > 0 && list.length < widget.max) {
+        var inputValue = TSelectOption(label: context.item!, value: context.item!);
+        if (widget.valueType == TSelectValueType.object) {
+          list.add(inputValue);
+        } else {
+          list.add(context.item!);
+        }
+        options.add(inputValue);
+        widget.onChange?.call(
+          list,
+          TSelectChangeContext(
+            selectedOptions: options,
+            option: inputValue,
+            trigger: TSelectValueChangeTrigger.check,
+          ),
+        );
+        widget.onCreate?.call(context.item!);
       }
-      value = list;
-    } else {
-      value = option.value;
-      effectivePopupVisible.value = false;
     }
-    var trigger = check ? TSelectValueChangeTrigger.check : TSelectValueChangeTrigger.uncheck;
-    widget.onChange?.call(value, options, trigger);
   }
 
+  /// 处理清理请求
+  void _handleClear() {
+    var changeContext = const TSelectChangeContext(
+      selectedOptions: [],
+      option: null,
+      trigger: TSelectValueChangeTrigger.clear,
+    );
+    if (widget.multiple) {
+      widget.onChange?.call([], changeContext);
+    } else {
+      widget.onChange?.call(null, changeContext);
+    }
+    widget.onClear?.call();
+  }
+
+  /// 搜索选项中的[TSelectOption]对象
   List<TSelectOption> _getSelectOptions(List<TOption> options) {
     return options.flatMap<TSelectOption>((element) {
       if (element is TSelectOptionGroup) {
@@ -436,6 +497,7 @@ class _TSelectState<T extends TOption> extends State<TSelect<T>> {
     }).toList();
   }
 
+  /// 根据值，获取对应的选项
   List<TOption> _search(dynamic value, List<TOption> options) {
     if (value is List) {
       return value.flatMap<TOption>((element) {
@@ -449,35 +511,151 @@ class _TSelectState<T extends TOption> extends State<TSelect<T>> {
   }
 }
 
-class _TOptionGroup extends StatelessWidget {
-  const _TOptionGroup({
-    Key? key,
-    required this.optionGroup,
-  }) : super(key: key);
-
-  final TSelectOptionGroup optionGroup;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container();
-  }
-}
-
 const double _kSelectOptionHeightS = 20;
 const double _kSelectOptionHeightDefault = 28;
 const double _kSelectOptionHeightL = 36;
-const double _kSelectDropdownPadding = 6;
-const double _kSelectDropdownPaddingL = 8;
-const double _kSelectDropdownPaddingS = 4;
+const EdgeInsets _kSelectDropdownPaddingS = EdgeInsets.all(4);
+const EdgeInsets _kSelectDropdownPadding = EdgeInsets.all(6);
+const EdgeInsets _kSelectDropdownPaddingL = EdgeInsets.all(8);
+const double _kSelectDropdownMaxHeight = 300;
+const EdgeInsets _kSelectOptionPaddingS = EdgeInsets.symmetric(horizontal: 8);
+const EdgeInsets _kSelectOptionPaddingDefault = EdgeInsets.symmetric(horizontal: 8);
+const EdgeInsets _kSelectOptionPaddingL = EdgeInsets.symmetric(vertical: 7, horizontal: 12);
 
-class _TOption extends StatelessWidget {
-  const _TOption({
+/// 面板
+class _TSelectPanel<T extends TOption> extends StatelessWidget {
+  const _TSelectPanel({Key? key, required this.selectState}) : super(key: key);
+
+  final _TSelectState<T> selectState;
+
+  TSelect<T> get selectWidget => selectState.widget;
+
+  @override
+  Widget build(BuildContext context) {
+    var theme = TTheme.of(context);
+    var colorScheme = theme.colorScheme;
+
+    TComponentSize size = selectWidget.size ?? theme.size;
+
+    EdgeInsets padding;
+    switch (size) {
+      case TComponentSize.small:
+        padding = _kSelectDropdownPaddingS;
+        break;
+      case TComponentSize.medium:
+        padding = _kSelectDropdownPadding;
+        break;
+      case TComponentSize.large:
+        padding = _kSelectDropdownPaddingL;
+        break;
+    }
+
+    if (selectWidget.options.isEmpty || selectWidget.loading) {
+      String text;
+      if (selectWidget.loading) {
+        text = GlobalTDesignLocalizations.of(context).selectLoadingText;
+      } else {
+        text = GlobalTDesignLocalizations.of(context).selectEmpty;
+      }
+      return SizedBox(
+        height: 32,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: DefaultTextStyle.merge(
+                style: TextStyle(color: colorScheme.textColorDisabled),
+                child: selectWidget.empty ?? Text(text),
+              ),
+            )
+          ],
+        ),
+      );
+    }
+    return TSingleChildScrollView(
+      child: Padding(
+        padding: padding,
+        child: FixedCrossFlex(
+          direction: Axis.vertical,
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: List.generate(selectWidget.options.length, (index) {
+            var option = selectWidget.options[index];
+            bool isFirst = index == 0;
+            if (option is TSelectOptionGroup) {
+              return _TOptionGroup(
+                max: selectWidget.max,
+                value: selectState._innerValue,
+                multiple: selectWidget.multiple,
+                optionGroup: option,
+                size: size,
+                onClick: (option, check) {
+                  _handleClick(option, check);
+                },
+              );
+            }
+            return Padding(
+              padding: EdgeInsets.only(top: isFirst ? 0 : 2),
+              child: _TOption(
+                max: selectWidget.max,
+                option: option as TSelectOption,
+                multiple: selectWidget.multiple,
+                value: selectState._innerValue,
+                size: size,
+                onClick: (option, check) {
+                  _handleClick(option, check);
+                },
+              ),
+            );
+          }),
+        ),
+      ),
+    );
+  }
+
+  /// 处理option点击事件
+  void _handleClick(TSelectOption option, bool check) {
+    dynamic value = selectState._value;
+    var options = List.of(selectState._selectOptions);
+    if (selectWidget.multiple) {
+      value ??= [];
+      var list = List.of(value);
+      if (check) {
+        if (selectWidget.valueType == TSelectValueType.object) {
+          list.add(option);
+        } else {
+          list.add(option.value);
+        }
+        options.add(option);
+      } else {
+        var index = selectState._innerValue.indexOf(option.value);
+        list.removeAt(index);
+        options.removeAt(index);
+      }
+      value = list;
+    } else {
+      if (selectWidget.valueType == TSelectValueType.object) {
+        value = option;
+      } else {
+        value = option.value;
+      }
+      selectState.effectivePopupVisible.value = false;
+    }
+    var trigger = check ? TSelectValueChangeTrigger.check : TSelectValueChangeTrigger.uncheck;
+    selectWidget.onChange?.call(value, TSelectChangeContext(selectedOptions: options, option: option, trigger: trigger));
+  }
+}
+
+/// 分组
+class _TOptionGroup extends StatelessWidget {
+  const _TOptionGroup({
     Key? key,
-    required this.options,
-    required this.option,
     this.value,
     required this.multiple,
-    this.size,
+    required this.optionGroup,
+    required this.size,
+    required this.max,
     this.onClick,
   }) : super(key: key);
 
@@ -487,25 +665,141 @@ class _TOption extends StatelessWidget {
   /// 是否多选
   final bool multiple;
 
-  /// 全部选项
-  final List<TOption> options;
-
-  /// 数据化配置选项内容
-  final TSelectOption option;
+  final TSelectOptionGroup optionGroup;
 
   /// 组件大小
-  final TComponentSize? size;
+  final TComponentSize size;
+
+  /// 用于控制多选数量，值为 0 则不限制
+  final int max;
 
   /// 点击回调
-  final void Function(bool check)? onClick;
+  final void Function(TSelectOption option, bool check)? onClick;
 
   @override
   Widget build(BuildContext context) {
     var theme = TTheme.of(context);
     var colorScheme = theme.colorScheme;
-    TComponentSize size = this.size ?? theme.size;
-    Color textColor = _check ? colorScheme.brandColor : colorScheme.textColorPrimary;
+
+    double height;
+    EdgeInsets groupPadding;
+    EdgeInsets optionPadding;
+    switch (size) {
+      case TComponentSize.small:
+        height = _kSelectOptionHeightS;
+        groupPadding = _kSelectOptionPaddingS;
+        optionPadding = _kSelectDropdownPaddingS;
+        break;
+      case TComponentSize.medium:
+        height = _kSelectOptionHeightDefault;
+        groupPadding = _kSelectOptionPaddingDefault;
+        optionPadding = _kSelectDropdownPadding;
+        break;
+      case TComponentSize.large:
+        height = _kSelectOptionHeightL;
+        groupPadding = _kSelectOptionPaddingL;
+        optionPadding = _kSelectDropdownPaddingL;
+        break;
+    }
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          height: height,
+          padding: groupPadding,
+          child: DefaultTextStyle.merge(
+            style: TextStyle(color: colorScheme.textColorPlaceholder),
+            child: Text(optionGroup.group),
+          ),
+        ),
+        Container(
+          padding: optionPadding,
+          child: FixedCrossFlex(
+            direction: Axis.vertical,
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: List.generate(optionGroup.children.length, (index) {
+              var option = optionGroup.children[index];
+              bool isFirst = index == 0;
+              return Padding(
+                padding: EdgeInsets.only(top: isFirst ? 0 : 2),
+                child: _TOption(
+                  option: option,
+                  max: max,
+                  multiple: multiple,
+                  value: value,
+                  size: size,
+                  onClick: onClick,
+                ),
+              );
+            }),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// 选项
+class _TOption extends StatelessWidget {
+  const _TOption({
+    Key? key,
+    required this.option,
+    this.value,
+    required this.multiple,
+    required this.size,
+    required this.max,
+    this.onClick,
+  }) : super(key: key);
+
+  /// 选中的值
+  final dynamic value;
+
+  /// 是否多选
+  final bool multiple;
+
+  /// 数据化配置选项内容
+  final TSelectOption option;
+
+  /// 组件大小
+  final TComponentSize size;
+
+  /// 用于控制多选数量，值为 0 则不限制
+  final int max;
+
+  /// 点击回调
+  final void Function(TSelectOption option, bool check)? onClick;
+
+  bool get disabled {
+    if (option.disabled) {
+      return true;
+    }
+    if (!_check && max > 0 && multiple && value.length >= max) {
+      return true;
+    }
+    return false;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    var theme = TTheme.of(context);
+    var colorScheme = theme.colorScheme;
+    TComponentSize size = this.size;
+    MaterialStateProperty<Color?> labelTextColor = MaterialStateProperty.resolveWith((states) {
+      if (states.contains(MaterialState.disabled)) {
+        return colorScheme.textColorDisabled;
+      }
+      if (states.contains(MaterialState.selected)) {
+        return colorScheme.brandColor;
+      }
+      return colorScheme.textColorPrimary;
+    });
     MaterialStateProperty<Color?> backgroundColor = MaterialStateProperty.resolveWith((states) {
+      if (states.contains(MaterialState.disabled)) {
+        return colorScheme.bgColorContainerHover.withOpacity(0);
+      }
       if (states.contains(MaterialState.selected)) {
         return colorScheme.brandColorLight;
       }
@@ -533,30 +827,41 @@ class _TOption extends StatelessWidget {
     }
 
     return TRipple(
+      disabled: disabled,
       fixedRippleColor: colorScheme.bgColorContainerActive,
       backgroundColor: backgroundColor,
       selected: _check,
       animatedDuration: TVar.animDurationBase,
       radius: BorderRadius.circular(TVar.borderRadiusDefault),
       builder: (context, states) {
+        Widget label = DefaultTextStyle(
+          style: textStyle.merge(TextStyle(
+            overflow: TextOverflow.ellipsis,
+            color: labelTextColor.resolve(states),
+          )),
+          child: option.child ?? Text(option.label),
+        );
+        if (multiple) {
+          label = TCheckbox(
+            disabled: disabled,
+            checked: _check,
+            label: label,
+            onChange: (checked, indeterminate, value) {
+              onClick?.call(option, checked);
+            },
+          );
+        }
         return Container(
           height: height,
           padding: const EdgeInsets.symmetric(horizontal: 8),
           child: Stack(
             alignment: Alignment.centerLeft,
-            children: [
-              DefaultTextStyle(
-                style: textStyle.merge(TextStyle(
-                  color: textColor,
-                )),
-                child: option.child ?? Text(option.label),
-              )
-            ],
+            children: [label],
           ),
         );
       },
       onTap: () {
-        onClick?.call(!multiple || !_check);
+        onClick?.call(option, !multiple || !_check);
       },
     );
   }

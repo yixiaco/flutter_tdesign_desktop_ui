@@ -283,11 +283,11 @@ class TInput extends TFormItemValidate {
   /// {@macro tdesign.components.inputBase.textInputAction}
   final TextInputAction? textInputAction;
 
-  /// 前缀内边距
-  final EdgeInsetsGeometry? prefixPadding;
+  /// 前缀内边距，换行时只会生效横轴
+  final EdgeInsets? prefixPadding;
 
   /// 后缀内边距
-  final EdgeInsetsGeometry? suffixPadding;
+  final EdgeInsets? suffixPadding;
 
   /// 指定输入框展示值的格式
   final String Function(String text)? format;
@@ -300,7 +300,7 @@ class TInput extends TFormItemValidate {
   final bool breakLine;
 
   /// 边框内边距
-  final EdgeInsetsGeometry? padding;
+  final EdgeInsets? padding;
 
   /// 无边框模式
   final bool borderless;
@@ -707,8 +707,8 @@ class _TInputState extends TFormItemValidateState<TInput> {
     if (suffixIconList.isNotEmpty) {
       suffixIcon = IconTheme(
         data: const IconThemeData(size: 16),
-        child: Padding(
-          padding: widget.suffixPadding ?? const EdgeInsets.only(right: 8.0),
+        child: Container(
+          padding: widget.suffixPadding,
           child: TSpace(
             breakLine: true,
             spacing: 2,
@@ -748,30 +748,24 @@ class _TInputState extends TFormItemValidateState<TInput> {
                 ),
               );
               List<Widget> prefixList = List.generate(prefixIconList.length, (index) {
-                var padding = (widget.prefixPadding ?? EdgeInsets.only(left: TVar.spacer, right: 2)) as EdgeInsets;
-                var isFirst = index == 0;
-                var isLast = index == prefixIconList.length - 1;
                 return SizedBox(
                   height: _inputHeight(size),
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
-                      Padding(
-                        padding: EdgeInsets.only(left: isFirst ? padding.left : 0, right: isLast ? padding.right : 0),
-                        child: IconTheme(
-                          data: IconThemeData(
-                            size: 16,
-                            color: status.lazyValueOf(
-                              defaultStatus: () => decorationContext.states.contains(MaterialState.focused)
-                                  ? colorScheme.brandColor
-                                  : colorScheme.borderLevel2Color,
-                              success: () => colorScheme.successColor,
-                              warning: () => colorScheme.warningColor,
-                              error: () => colorScheme.errorColor,
-                            ),
+                      IconTheme(
+                        data: IconThemeData(
+                          size: 16,
+                          color: status.lazyValueOf(
+                            defaultStatus: () => decorationContext.states.contains(MaterialState.focused)
+                                ? colorScheme.brandColor
+                                : colorScheme.borderLevel2Color,
+                            success: () => colorScheme.successColor,
+                            warning: () => colorScheme.warningColor,
+                            error: () => colorScheme.errorColor,
                           ),
-                          child: prefixIconList[index]!,
                         ),
+                        child: prefixIconList[index]!,
                       )
                     ],
                   ),
@@ -783,7 +777,7 @@ class _TInputState extends TFormItemValidateState<TInput> {
 
               if (prefixList.isNotEmpty) {
                 prefixIcon = TSpace(
-                  spacing: 2,
+                  spacing: 0,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: prefixList,
                 );
@@ -869,11 +863,20 @@ class _TInputState extends TFormItemValidateState<TInput> {
   Widget _buildWrapDecoration(MaterialStateProperty<BoxDecoration> border, TextDecorationContext decorationContext,
       List<Widget> prefixList, TComponentSize size, Widget? placeholder, Widget? suffixIcon) {
     var textDirection = Directionality.of(context);
+    List<Widget> prefix = List.generate(prefixList.length, (index) {
+      EdgeInsets padding = widget.prefixPadding ?? EdgeInsets.zero;
+      var isFirst = index == 0;
+      var isLast = index == prefixList.length - 1;
+      return Container(
+        padding: EdgeInsets.only(left: isFirst ? padding.left : 0, right: isLast ? padding.right : 0),
+        child: prefixList[index],
+      );
+    });
 
     return Container(
       constraints: BoxConstraints(minHeight: _inputHeight(size)),
       decoration: border.resolve(decorationContext.states),
-      padding: widget.padding,
+      padding: widget.padding ?? EdgeInsets.symmetric(horizontal: TVar.spacer),
       child: TInputDecorator(
         breakLine: true,
         autoWidth: widget.autoWidth,
@@ -881,10 +884,9 @@ class _TInputState extends TFormItemValidateState<TInput> {
         textAlign: widget.align,
         textBaseline: TextBaseline.alphabetic,
         suffix: suffixIcon,
-        padding: EdgeInsets.symmetric(horizontal: TVar.spacer),
         placeholder: placeholder,
         input: decorationContext.child!,
-        prefix: prefixList,
+        prefix: prefix,
       ),
     );
   }
@@ -915,7 +917,7 @@ class _TInputState extends TFormItemValidateState<TInput> {
     var textDirection = Directionality.of(context);
     return Container(
       height: _inputHeight(size),
-      padding: widget.padding,
+      padding: widget.padding ?? EdgeInsets.symmetric(horizontal: TVar.spacer),
       decoration: border.resolve(decorationContext.states),
       child: TInputDecorator(
         breakLine: false,
@@ -924,7 +926,6 @@ class _TInputState extends TFormItemValidateState<TInput> {
         textAlign: widget.align,
         textBaseline: TextBaseline.alphabetic,
         suffix: suffixIcon,
-        padding: EdgeInsets.symmetric(horizontal: TVar.spacer),
         placeholder: placeholder,
         input: decorationContext.child!,
         prefix: prefixes,
@@ -990,25 +991,23 @@ class TClearIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     var theme = TTheme.of(context);
     var colorScheme = theme.colorScheme;
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      child: GestureDetector(
-        onTap: onClick,
-        child: AbsorbPointer(
-          child: ValueListenableBuilder<bool>(
-            valueListenable: show,
-            builder: (context, value, child) {
-              if (icon != null && !value) {
-                return icon!;
-              }
-              return Visibility(
-                visible: value,
-                child: Icon(TIcons.closeCircleFilled, color: colorScheme.textColorPlaceholder),
-              );
-            },
+    return ValueListenableBuilder<bool>(
+      valueListenable: show,
+      builder: (context, value, child) {
+        if (icon != null && !value) {
+          return icon!;
+        }
+        return MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: GestureDetector(
+            onTap: onClick,
+            child: Visibility(
+              visible: value,
+              child: Icon(TIcons.closeCircleFilled, color: colorScheme.textColorPlaceholder),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
