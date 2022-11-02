@@ -249,7 +249,7 @@ class _TRadioGroupState<T> extends TFormItemValidateState<TRadioGroup<T>> with S
       child: RepaintBoundary(
         child: CustomPaint(
           painter: _indicatorPainter
-            ..t = _position
+            ..animation = _position
             ..optionKeys = _optionKeys
             ..color = blockColor
             ..index = widget._index,
@@ -438,9 +438,9 @@ class _IndicatorBlockPainter extends AnimationChangeNotifierPainter {
     var paint = Paint()..color = color;
     if (index == -1) {
       if (_currentRect != null) {
-        var rect = Rect.lerp(_currentRect!.center & Size.zero, _currentRect, t.value);
+        var rect = Rect.lerp(_currentRect!.center & Size.zero, _currentRect, animation.value);
         canvas.drawRRect(RRect.fromRectAndRadius(rect!, Radius.circular(TVar.borderRadiusDefault)), paint);
-        if (t.value == 0) {
+        if (animation.value == 0) {
           _currentRect = null;
         }
       }
@@ -452,7 +452,7 @@ class _IndicatorBlockPainter extends AnimationChangeNotifierPainter {
     _currentRect = Rect.fromLTWH(offsetX, 0, optionWidth, optionHeight);
 
     var oldRect = _oldRect ?? _currentRect!.center & Size.zero;
-    var rect = Rect.lerp(oldRect, _currentRect, t.value);
+    var rect = Rect.lerp(oldRect, _currentRect, animation.value);
 
     canvas.drawRRect(RRect.fromRectAndRadius(rect!, Radius.circular(TVar.borderRadiusDefault)), paint);
   }

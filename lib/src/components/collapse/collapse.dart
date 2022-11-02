@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
@@ -292,7 +294,8 @@ class _TCollapsePanelState<T> extends State<_TCollapsePanel<T>> {
     Widget chevronIcon = widget.panel.expandIcon ??
         widget.expandIcon ??
         TFakeArrow(
-          placement: widget.expand ? TFakeArrowPlacement.bottom : TFakeArrowPlacement.right,
+          placement: TFakeArrowPlacement.right,
+          transform: widget.expand ? Matrix4.rotationZ(pi / 2) : Matrix4.rotationZ(0),
         );
     if (widget.expandIconPlacement == TCollapseExpandIconPlacement.left) {
       chevronIcon = Padding(

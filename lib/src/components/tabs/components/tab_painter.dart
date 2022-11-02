@@ -89,9 +89,9 @@ class _LabelPainter extends AnimationChangeNotifierPainter {
     var paint = Paint()..color = color;
     if (index == -1) {
       if (_currentRect != null) {
-        var rect = Rect.lerp(_originOffset() & Size.zero, _currentRect, t.value);
+        var rect = Rect.lerp(_originOffset() & Size.zero, _currentRect, animation.value);
         canvas.drawRRect(RRect.fromRectAndRadius(rect!, Radius.circular(TVar.borderRadiusDefault)), paint);
-        if (t.value == 0) {
+        if (animation.value == 0) {
           _currentRect = null;
         }
       }
@@ -104,7 +104,7 @@ class _LabelPainter extends AnimationChangeNotifierPainter {
     _currentRect = _currentPlacementRect(rect);
 
     var oldRect = _oldRect ?? _originOffset() & Size.zero;
-    var rectLerp = Rect.lerp(oldRect, _currentRect, t.value);
+    var rectLerp = Rect.lerp(oldRect, _currentRect, animation.value);
     canvas.drawRect(rectLerp!, paint);
   }
 

@@ -12,7 +12,7 @@ dependencies:
     sdk: flutter
   intl: ^0.17.0 #多语言
   flutter_svg: ^1.1.6 #显示svg
-  animations: ^2.0.7 #动画
+#  animations: ^2.0.7 #动画
 #  boxy: ^2.0.6+2
   decimal: ^2.3.0 #大数计算
   url_launcher: ^6.1.6 #打开外部网页

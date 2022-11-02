@@ -364,7 +364,6 @@ typedef AnimationPainter = CustomPainter Function(Animation<double> animation);
 
 class _TProgressActionPaint extends StatefulWidget {
   const _TProgressActionPaint({
-    super.key,
     this.painter,
     this.size = Size.zero,
     this.isComplex = false,

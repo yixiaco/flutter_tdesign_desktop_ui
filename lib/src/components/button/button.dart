@@ -74,7 +74,6 @@ Map<String, Color> _variables(TColorScheme scheme) {
 /// 实现了填充按钮、描边按钮、虚框按钮、文字按钮
 class _TButton extends StatelessWidget {
   const _TButton({
-    super.key,
     this.size,
     required this.variant,
     required this.themeStyle,

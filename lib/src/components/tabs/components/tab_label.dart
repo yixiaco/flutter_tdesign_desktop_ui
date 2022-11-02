@@ -243,7 +243,7 @@ class _TabsLabelState<T> extends State<_TabsLabel<T>> with SingleTickerProviderS
             foregroundPainter: _painter
               .._painterKey = _painterKey
               ..placement = widget.placement
-              ..t = _position
+              ..animation = _position
               ..tabKeys = _tabKeys
               ..color = colorScheme.brandColor
               ..index = _index

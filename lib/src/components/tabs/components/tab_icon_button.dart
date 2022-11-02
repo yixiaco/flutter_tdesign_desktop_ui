@@ -3,7 +3,6 @@ part of '../tabs.dart';
 /// 图标
 class _TabIconButton extends StatelessWidget {
   const _TabIconButton({
-    super.key,
     this.onTap,
     this.size,
     required this.icon,

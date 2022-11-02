@@ -26,7 +26,6 @@ class _PopupLevel extends InheritedTheme {
   final _PopupLevelNotifier popupLevel;
 
   const _PopupLevel({
-    super.key,
     required this.overlayState,
     required this.popupLevel,
     required super.child,
