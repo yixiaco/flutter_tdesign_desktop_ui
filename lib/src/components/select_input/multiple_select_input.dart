@@ -243,6 +243,9 @@ class _TMultipleSelectInputState<T extends SelectInputValue> extends State<TMult
       _value = List.of(widget.value);
       _handleChange();
     }
+    if (widget.allowInput != oldWidget.allowInput && !widget.allowInput) {
+      effectiveTextEditingController.clear();
+    }
   }
 
   @override

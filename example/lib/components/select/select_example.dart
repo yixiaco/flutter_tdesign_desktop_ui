@@ -12,6 +12,7 @@ class _TSelectExampleState extends State<TSelectExample> {
   late List<TOption> options;
   dynamic value = const TSelectOption(label: '大数据', value: '2');
   dynamic value2 = [const TSelectOption(label: '大数据', value: '2')];
+  bool filter = true;
 
   @override
   void initState() {
@@ -42,6 +43,15 @@ class _TSelectExampleState extends State<TSelectExample> {
     return TSpace(
       direction: Axis.vertical,
       children: [
+        TButton(
+          themeStyle: TButtonThemeStyle.primary,
+          child: Text(filter ? '可搜索' : '不可搜索'),
+          onPressed: () {
+            setState(() {
+              filter = !filter;
+            });
+          },
+        ),
         const TSelect(),
         const TSelect(placeholder: '空数据', disabled: true),
         // const TSelect(placeholder: '加载中', loading: true),
@@ -66,32 +76,34 @@ class _TSelectExampleState extends State<TSelectExample> {
             );
           },
         ),
-        StatefulBuilder(
-          builder: (context, setState) {
-            return TSelect(
-              value: value2,
-              multiple: true,
-              options: options,
-              autoWidth: true,
-              clearable: true,
-              minCollapsedNum: 2,
-              max: 3,
-              tagVariant: TTagVariant.light,
-              tagTheme: TTagTheme.primary,
-              prefixIcon: const Padding(
-                padding: EdgeInsets.only(right: 8.0),
-                child: Icon(TIcons.browse),
-              ),
-              valueType: TSelectValueType.object,
-              placeholder: '请选择云解决方案',
-              // filterable: true,
-              creatable: true,
-              onChange: (value, changeContext) {
-                setState(() {
-                  value2 = value;
-                });
-              },
-            );
+        TSelect(
+          value: value2,
+          multiple: true,
+          options: options,
+          autoWidth: true,
+          clearable: true,
+          minCollapsedNum: 2,
+          max: 3,
+          tagVariant: TTagVariant.light,
+          tagTheme: TTagTheme.primary,
+          prefixIcon: const Padding(
+            padding: EdgeInsets.only(right: 8.0),
+            child: Icon(TIcons.browse),
+          ),
+          valueType: TSelectValueType.object,
+          placeholder: '请选择云解决方案',
+          filterable: filter,
+          creatable: true,
+          filter: (filterWords, option) {
+            // return option.label.contains(filterWords);
+            return Future.delayed(const Duration(milliseconds: 50), () {
+              return option.label.contains(filterWords);
+            });
+          },
+          onChange: (value, changeContext) {
+            setState(() {
+              value2 = value;
+            });
           },
         ),
       ],

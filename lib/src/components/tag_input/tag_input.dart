@@ -218,14 +218,6 @@ class _TTagInputState extends TFormItemValidateState<TTagInput> {
   }
 
   @override
-  void didUpdateWidget(covariant TTagInput oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.allowInput != oldWidget.allowInput && !widget.allowInput) {
-      effectiveTextController.clear();
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: effectiveController,

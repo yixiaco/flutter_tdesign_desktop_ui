@@ -2,12 +2,13 @@ import 'dart:async';
 
 import 'package:dartx/dartx.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// Select 选择器
 /// 用于收纳大量选项的信息录入类组件。
-class TSelect<T extends TOption> extends StatefulWidget {
+class TSelect extends StatefulWidget {
   const TSelect({
     super.key,
     this.autoWidth = false,
@@ -94,7 +95,7 @@ class TSelect<T extends TOption> extends StatefulWidget {
   final Widget? empty;
 
   /// 自定义过滤方法，用于对现有数据进行搜索过滤，判断是否过滤某一项数据。
-  final FutureOr<bool> Function(String filterWords, T option)? filter;
+  final FutureOr<bool> Function(String filterWords, TSelectOption option)? filter;
 
   /// 是否可搜索
   final bool filterable;
@@ -118,7 +119,7 @@ class TSelect<T extends TOption> extends StatefulWidget {
   final bool multiple;
 
   /// 数据化配置选项内容。
-  final List<T> options;
+  final List<TOption> options;
 
   /// 面板内的底部内容。
   final Widget? panelBottomContent;
@@ -267,15 +268,22 @@ class TSelect<T extends TOption> extends StatefulWidget {
   final Widget? label;
 
   @override
-  State<TSelect<T>> createState() => _TSelectState<T>();
+  State<TSelect> createState() => _TSelectState();
 }
 
-class _TSelectState<T extends TOption> extends State<TSelect<T>> {
+class _TSelectState extends State<TSelect> {
   TPopupVisible? _popupVisible;
 
   TPopupVisible get effectivePopupVisible => widget.popupVisible ?? (_popupVisible ??= TPopupVisible());
 
   late List<TOption?> _selectOptions;
+  TextEditingController? _textController;
+
+  TextEditingController get effectiveTextController =>
+      widget.textController ?? (_textController ??= TextEditingController());
+
+  /// 加载状态
+  late ValueNotifier<bool> _loadingStatus;
 
   dynamic _value;
 
@@ -292,12 +300,13 @@ class _TSelectState<T extends TOption> extends State<TSelect<T>> {
   @override
   void initState() {
     super.initState();
+    _loadingStatus = ValueNotifier(false);
     _value = widget.value ?? widget.defaultValue;
     _syncSelectOptions();
   }
 
   @override
-  void didUpdateWidget(covariant TSelect<T> oldWidget) {
+  void didUpdateWidget(covariant TSelect oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.multiple != oldWidget.multiple || widget.valueType != oldWidget.valueType) {
       _value = widget.value;
@@ -317,10 +326,10 @@ class _TSelectState<T extends TOption> extends State<TSelect<T>> {
   void _syncSelectOptions() {
     var selectOptions = _search(_innerValue, widget.options);
     var optionMap = selectOptions.associateBy((element) => (element as TSelectOption).value);
-    if(widget.multiple) {
+    if (widget.multiple) {
       _selectOptions = (_innerValue as List).map((e) => optionMap[e]).toList();
     } else {
-      if(_innerValue == null) {
+      if (_innerValue == null) {
         _selectOptions = [];
       } else {
         _selectOptions = [optionMap[_innerValue]];
@@ -333,6 +342,7 @@ class _TSelectState<T extends TOption> extends State<TSelect<T>> {
     super.dispose();
     _selectOptions.clear();
     _popupVisible?.dispose();
+    _textController?.dispose();
   }
 
   @override
@@ -352,81 +362,96 @@ class _TSelectState<T extends TOption> extends State<TSelect<T>> {
         value = SelectInputValue(label: option.label, value: option);
       }
     }
-    return TSelectInput<SelectInputValue>(
-      multiple: widget.multiple,
-      value: value,
-      autoWidth: widget.autoWidth,
-      autofocus: widget.autofocus,
-      focusNode: widget.focusNode,
-      onPopupVisibleChange: widget.onPopupVisibleChange,
-      size: widget.size,
-      onClear: _handleClear,
-      borderless: widget.borderless,
-      loading: widget.loading,
-      allowInput: widget.filterable,
-      popupStyle: TPopupStyle(
-        padding: EdgeInsets.zero,
-        radius: BorderRadius.circular(TVar.borderRadiusMedium),
-        shadows: colorScheme.shadow2,
-        constraints: const BoxConstraints(maxHeight: _kSelectDropdownMaxHeight),
-      ).merge(widget.popupStyle),
-      placeholder: widget.placeholder ?? GlobalTDesignLocalizations.of(context).selectPlaceholder,
-      readonly: widget.readonly,
-      showArrow: widget.showArrow,
-      clearable: widget.clearable,
-      prefixIcon: widget.prefixIcon,
-      suffixIcon: AnimatedBuilder(
-        animation: effectivePopupVisible,
-        builder: (context, child) {
-          return TFakeArrow(
-            placement: effectivePopupVisible.value ? TFakeArrowPlacement.top : TFakeArrowPlacement.bottom,
-          );
-        },
-      ),
-      minCollapsedNum: widget.minCollapsedNum,
-      onTagChange: _handleTagChange,
-      onMouseleave: widget.onMouseleave,
-      onMouseenter: widget.onMouseenter,
-      popupVisible: effectivePopupVisible,
-      panel: _TSelectPanel(selectState: this),
-      onInputChange: widget.onInputChange,
-      onFocus: (value, inputValue, tagInputValue) => widget.onFocus?.call(_value),
-      onBlur: (value, context) => widget.onBlur?.call(_value),
-      onEnter: (value, inputValue) => widget.onEnter?.call(_value, inputValue),
-      tagTheme: widget.tagTheme,
-      tagVariant: widget.tagVariant,
-      textAlign: widget.textAlign,
-      label: widget.label,
-      disabled: widget.disabled,
-      status: widget.status,
-      excessTagsDisplayType: widget.excessTagsDisplayType,
-      tips: widget.tips,
-      trigger: widget.trigger,
-      placement: widget.placement,
-      destroyOnClose: widget.destroyOnClose,
-      onClose: widget.onClose,
-      onOpen: widget.onOpen,
-      hideDuration: widget.hideDuration,
-      showDuration: widget.showDuration,
-      inputController: widget.textController,
-      collapsedItems: widget.collapsedItems != null
-          ? (value, collapsedTags, count) {
-              var valueList = value.map((e) => e.value as TSelectOption).toList();
-              var collapsedTagsList = collapsedTags.map((e) => e.value as TSelectOption).toList();
-              return widget.collapsedItems!(valueList, collapsedTagsList, count);
-            }
-          : null,
-      singleValueDisplay: widget.singleValueDisplay != null
-          ? (value) => widget.singleValueDisplay!.call(value?.value as TSelectOption?)
-          : null,
-      multipleValueDisplay: widget.singleValueDisplay != null
-          ? (value, onClose) {
-              var list = value.map((e) => e.value as TSelectOption).toList();
-              return widget.multipleValueDisplay!.call(list, (index, item) {
-                onClose(index, SelectInputValue(label: item.label, value: item));
-              });
-            }
-          : null,
+    Widget panel = _TSelectPanel(
+      selectState: this,
+      loadingStatus: _loadingStatus,
+      textController: effectiveTextController,
+    );
+    Widget suffixIcon = AnimatedBuilder(
+      animation: effectivePopupVisible,
+      builder: (context, child) {
+        return TFakeArrow(
+          placement: effectivePopupVisible.value ? TFakeArrowPlacement.top : TFakeArrowPlacement.bottom,
+        );
+      },
+    );
+    return ValueListenableBuilder(
+      valueListenable: _loadingStatus,
+      builder: (context, loading, child) {
+        return TSelectInput<SelectInputValue>(
+          multiple: widget.multiple,
+          value: value,
+          autoWidth: widget.autoWidth,
+          autofocus: widget.autofocus,
+          focusNode: widget.focusNode,
+          onPopupVisibleChange: widget.onPopupVisibleChange,
+          size: widget.size,
+          onClear: _handleClear,
+          borderless: widget.borderless,
+          loading: widget.loading || (widget.filterable && loading),
+          allowInput: widget.filterable,
+          popupStyle: TPopupStyle(
+            padding: EdgeInsets.zero,
+            radius: BorderRadius.circular(TVar.borderRadiusMedium),
+            shadows: colorScheme.shadow2,
+            constraints: const BoxConstraints(maxHeight: _kSelectDropdownMaxHeight),
+          ).merge(widget.popupStyle),
+          placeholder: widget.placeholder ?? GlobalTDesignLocalizations.of(context).selectPlaceholder,
+          readonly: widget.readonly,
+          showArrow: widget.showArrow,
+          clearable: widget.clearable,
+          prefixIcon: widget.prefixIcon,
+          suffixIcon: suffixIcon,
+          minCollapsedNum: widget.minCollapsedNum,
+          onTagChange: _handleTagChange,
+          onMouseleave: widget.onMouseleave,
+          onMouseenter: widget.onMouseenter,
+          popupVisible: effectivePopupVisible,
+          panel: panel,
+          onInputChange: widget.onInputChange,
+          onFocus: (value, inputValue, tagInputValue) => widget.onFocus?.call(_value),
+          onBlur: (value, context) {
+            widget.onBlur?.call(_value);
+            // 失去焦点时，清空搜索框
+            effectiveTextController.clear();
+          },
+          onEnter: (value, inputValue) => widget.onEnter?.call(_value, inputValue),
+          tagTheme: widget.tagTheme,
+          tagVariant: widget.tagVariant,
+          textAlign: widget.textAlign,
+          label: widget.label,
+          disabled: widget.disabled,
+          status: widget.status,
+          excessTagsDisplayType: widget.excessTagsDisplayType,
+          tips: widget.tips,
+          trigger: widget.trigger,
+          placement: widget.placement,
+          destroyOnClose: widget.destroyOnClose,
+          onClose: widget.onClose,
+          onOpen: widget.onOpen,
+          hideDuration: widget.hideDuration,
+          showDuration: widget.showDuration,
+          inputController: effectiveTextController,
+          collapsedItems: widget.collapsedItems != null
+              ? (value, collapsedTags, count) {
+                  var valueList = value.map((e) => e.value as TSelectOption).toList();
+                  var collapsedTagsList = collapsedTags.map((e) => e.value as TSelectOption).toList();
+                  return widget.collapsedItems!(valueList, collapsedTagsList, count);
+                }
+              : null,
+          singleValueDisplay: widget.singleValueDisplay != null
+              ? (value) => widget.singleValueDisplay!.call(value?.value as TSelectOption?)
+              : null,
+          multipleValueDisplay: widget.singleValueDisplay != null
+              ? (value, onClose) {
+                  var list = value.map((e) => e.value as TSelectOption).toList();
+                  return widget.multipleValueDisplay!.call(list, (index, item) {
+                    onClose(index, SelectInputValue(label: item.label, value: item));
+                  });
+                }
+              : null,
+        );
+      },
     );
   }
 
@@ -523,17 +548,74 @@ const EdgeInsets _kSelectOptionPaddingDefault = EdgeInsets.symmetric(horizontal:
 const EdgeInsets _kSelectOptionPaddingL = EdgeInsets.symmetric(vertical: 7, horizontal: 12);
 
 /// 面板
-class _TSelectPanel<T extends TOption> extends StatelessWidget {
-  const _TSelectPanel({Key? key, required this.selectState}) : super(key: key);
+class _TSelectPanel extends StatefulWidget {
+  const _TSelectPanel({
+    Key? key,
+    required this.selectState,
+    required this.textController,
+    required this.loadingStatus,
+  }) : super(key: key);
 
-  final _TSelectState<T> selectState;
+  final _TSelectState selectState;
 
-  TSelect<T> get selectWidget => selectState.widget;
+  /// 可编辑文本字段的控制器
+  final TextEditingController textController;
+
+  /// 加载状态
+  final ValueNotifier<bool> loadingStatus;
+
+  @override
+  State<_TSelectPanel> createState() => _TSelectPanelState();
+}
+
+class _TSelectPanelState extends State<_TSelectPanel> {
+  TSelect get selectWidget => widget.selectState.widget;
+  late String _filterWords;
+  Future<List<TOption>>? future;
+
+  @override
+  void initState() {
+    super.initState();
+    _filterWords = widget.textController.text;
+    widget.textController.addListener(_handleTextChange);
+  }
+
+  @override
+  void dispose() {
+    widget.textController.removeListener(_handleTextChange);
+    super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(covariant _TSelectPanel oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.textController != oldWidget.textController) {
+      oldWidget.textController.removeListener(_handleTextChange);
+      widget.textController.removeListener(_handleTextChange);
+      _handleTextChange();
+    }
+  }
+
+  /// 文本变更
+  void _handleTextChange() {
+    if (_filterWords != widget.textController.text) {
+      _filterWords = widget.textController.text;
+      if (selectWidget.filterable) {
+        if (mounted) {
+          setState(() {
+            // 在迭代中使用过滤选项
+            future = _handleFilter(widget.textController.text, selectWidget.options);
+          });
+        } else {
+          future = _handleFilter(widget.textController.text, selectWidget.options);
+        }
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     var theme = TTheme.of(context);
-    var colorScheme = theme.colorScheme;
 
     TComponentSize size = selectWidget.size ?? theme.size;
 
@@ -550,74 +632,159 @@ class _TSelectPanel<T extends TOption> extends StatelessWidget {
         break;
     }
 
-    if (selectWidget.options.isEmpty || selectWidget.loading) {
-      String text;
-      if (selectWidget.loading) {
-        text = GlobalTDesignLocalizations.of(context).selectLoadingText;
-      } else {
-        text = GlobalTDesignLocalizations.of(context).selectEmpty;
-      }
-      return SizedBox(
-        height: 32,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: DefaultTextStyle.merge(
-                style: TextStyle(color: colorScheme.textColorDisabled),
-                child: selectWidget.empty ?? Text(text),
-              ),
-            )
-          ],
-        ),
-      );
+    if (selectWidget.loading) {
+      return _buildLoading(theme);
     }
-    return TSingleChildScrollView(
-      child: Padding(
-        padding: padding,
-        child: FixedCrossFlex(
-          direction: Axis.vertical,
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: List.generate(selectWidget.options.length, (index) {
-            var option = selectWidget.options[index];
-            bool isFirst = index == 0;
-            if (option is TSelectOptionGroup) {
-              return _TOptionGroup(
-                max: selectWidget.max,
-                value: selectState._innerValue,
-                multiple: selectWidget.multiple,
-                optionGroup: option,
-                size: size,
-                onClick: (option, check) {
-                  _handleClick(option, check);
-                },
-              );
-            }
-            return Padding(
-              padding: EdgeInsets.only(top: isFirst ? 0 : 2),
-              child: _TOption(
-                max: selectWidget.max,
-                option: option as TSelectOption,
-                multiple: selectWidget.multiple,
-                value: selectState._innerValue,
-                size: size,
-                onClick: (option, check) {
-                  _handleClick(option, check);
-                },
-              ),
-            );
-          }),
-        ),
+    if (selectWidget.options.isEmpty) {
+      return _buildEmpty(theme);
+    }
+    return FutureBuilder(
+      initialData: selectWidget.options,
+      future: future,
+      builder: (context, snapshot) {
+        var list = snapshot.data!;
+        if (snapshot.connectionState != ConnectionState.done) {
+          _updateLoadingStatus(true);
+          return _buildLoading(theme);
+        }
+        _updateLoadingStatus(false);
+        if (list.isEmpty) {
+          return _buildEmpty(theme);
+        }
+        return TSingleChildScrollView(
+          child: Padding(
+            padding: padding,
+            child: FixedCrossFlex(
+              direction: Axis.vertical,
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: List.generate(list.length, (index) {
+                var option = list[index];
+                bool isFirst = index == 0;
+                if (option is TSelectOptionGroup) {
+                  return _TOptionGroup(
+                    max: selectWidget.max,
+                    value: widget.selectState._innerValue,
+                    multiple: selectWidget.multiple,
+                    optionGroup: option,
+                    size: size,
+                    onClick: (option, check) {
+                      _handleClick(option, check);
+                    },
+                  );
+                }
+                return Padding(
+                  padding: EdgeInsets.only(top: isFirst ? 0 : 2),
+                  child: _TOption(
+                    max: selectWidget.max,
+                    option: option as TSelectOption,
+                    multiple: selectWidget.multiple,
+                    value: widget.selectState._innerValue,
+                    size: size,
+                    onClick: (option, check) {
+                      _handleClick(option, check);
+                    },
+                  ),
+                );
+              }),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  /// 改变加载状态
+  void _updateLoadingStatus(bool loading) {
+    if(widget.textController.text.isEmpty) {
+      loading = false;
+    }
+    if (widget.loadingStatus.value != loading) {
+      if (selectWidget.filterable || !widget.loadingStatus.value) {
+        SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+          if (mounted) {
+            widget.loadingStatus.value = loading;
+          }
+        });
+      }
+    }
+  }
+
+  /// 处理过滤数据
+  Future<List<TOption>> _handleFilter(String filterWords, List<TOption> options) async {
+    List<TOption> list = [];
+    if (!selectWidget.filterable || widget.textController.text.isEmpty) {
+      return options;
+    }
+    for (var option in options) {
+      if (option is TSelectOptionGroup) {
+        var filterChildren = await _handleFilter(filterWords, option.children);
+        if (filterChildren.isNotEmpty) {
+          list.add(option.copyWith(children: filterChildren.cast()));
+        }
+      } else if (option is TSelectOption) {
+        var bool = await (selectWidget.filter ?? _filter).call(filterWords, option);
+        if (bool) {
+          list.add(option);
+        }
+      }
+    }
+    return list;
+  }
+
+  /// 处理过滤
+  FutureOr<bool> _filter(String filterWords, TSelectOption option) async {
+    return option.label.contains(filterWords);
+  }
+
+  /// 构建加载中
+  Widget _buildLoading(TThemeData theme) {
+    var colorScheme = theme.colorScheme;
+    String text = GlobalTDesignLocalizations.of(context).selectLoadingText;
+    Widget? child = selectWidget.loadingText;
+    return SizedBox(
+      height: 32,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: DefaultTextStyle.merge(
+              style: TextStyle(color: colorScheme.textColorDisabled),
+              child: child ?? Text(text),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  /// 构建空数据
+  Widget _buildEmpty(TThemeData theme) {
+    var colorScheme = theme.colorScheme;
+    String text = GlobalTDesignLocalizations.of(context).selectEmpty;
+    Widget? child = selectWidget.empty;
+    return SizedBox(
+      height: 32,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: DefaultTextStyle.merge(
+              style: TextStyle(color: colorScheme.textColorDisabled),
+              child: child ?? Text(text),
+            ),
+          )
+        ],
       ),
     );
   }
 
   /// 处理option点击事件
   void _handleClick(TSelectOption option, bool check) {
-    dynamic value = selectState._value;
-    var options = List.of(selectState._selectOptions);
+    dynamic value = widget.selectState._value;
+    var options = List.of(widget.selectState._selectOptions);
     if (selectWidget.multiple) {
       value ??= [];
       var list = List.of(value);
@@ -629,7 +796,7 @@ class _TSelectPanel<T extends TOption> extends StatelessWidget {
         }
         options.add(option);
       } else {
-        var index = selectState._innerValue.indexOf(option.value);
+        var index = widget.selectState._innerValue.indexOf(option.value);
         list.removeAt(index);
         options.removeAt(index);
       }
@@ -640,10 +807,11 @@ class _TSelectPanel<T extends TOption> extends StatelessWidget {
       } else {
         value = option.value;
       }
-      selectState.effectivePopupVisible.value = false;
+      widget.selectState.effectivePopupVisible.value = false;
     }
     var trigger = check ? TSelectValueChangeTrigger.check : TSelectValueChangeTrigger.uncheck;
-    selectWidget.onChange?.call(value, TSelectChangeContext(selectedOptions: options, option: option, trigger: trigger));
+    selectWidget.onChange
+        ?.call(value, TSelectChangeContext(selectedOptions: options, option: option, trigger: trigger));
   }
 }
 

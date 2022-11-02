@@ -201,6 +201,9 @@ class _TSingleSelectInputState<T extends SelectInputValue> extends State<TSingle
     if (widget.value != oldWidget.value) {
       _valueChange();
     }
+    if (widget.allowInput != oldWidget.allowInput && !widget.allowInput) {
+      effectiveTextEditingController.clear();
+    }
   }
 
   @override

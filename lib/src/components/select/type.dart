@@ -82,6 +82,22 @@ class TSelectOption extends TOption {
 
   @override
   int get hashCode => value.hashCode;
+
+  TSelectOption copyWith({
+    bool? checkAll,
+    Widget? child,
+    bool? disabled,
+    String? label,
+    dynamic? value,
+  }) {
+    return TSelectOption(
+      checkAll: checkAll ?? this.checkAll,
+      child: child ?? this.child,
+      disabled: disabled ?? this.disabled,
+      label: label ?? this.label,
+      value: value ?? this.value,
+    );
+  }
 }
 
 ///  [TSelect]数据项分组
@@ -99,14 +115,28 @@ class TSelectOptionGroup extends TOption {
 
   /// [TSelect]数据项
   final List<TSelectOption> children;
+
+  TSelectOptionGroup copyWith({
+    bool? divider,
+    String? group,
+    List<TSelectOption>? children,
+  }) {
+    return TSelectOptionGroup(
+      divider: divider ?? this.divider,
+      group: group ?? this.group,
+      children: children ?? this.children,
+    );
+  }
 }
 
 class TSelectChangeContext {
   /// 表示选中值的完整对象，数组长度一定和 value 相同；
   /// 当value中的值在options中不存在时，数组中为null
   final List<TOption?> selectedOptions;
+
   /// 表示当前操作的选项，不一定存在。
   final TOption? option;
+
   /// 表示触发变化的来源
   final TSelectValueChangeTrigger trigger;
 
