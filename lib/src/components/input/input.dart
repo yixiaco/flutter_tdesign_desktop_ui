@@ -404,15 +404,20 @@ class TInput extends TFormItemValidate {
           break;
       }
       if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
-        shadows = formItemState?.shadows ?? inputTheme.boxShadow ?? shadows;
+        shadows = formItemState?.shadows ?? MaterialStateProperty.resolveAs(inputTheme.boxShadow, states) ?? shadows;
       }
+      var backgroundColor = MaterialStateProperty.resolveAs(inputTheme.backgroundColor, states) ??
+          (borderless ? null : (disabled ? colorScheme.bgColorComponentDisabled : colorScheme.bgColorSpecialComponent));
+      var boxShadow = borderless ? null : shadows;
       return BoxDecoration(
-        backgroundBlendMode: BlendMode.src,
-        border: borderless ? null : Border.all(width: onePx, color: inputTheme.borderColor ?? color),
-        borderRadius: inputTheme.borderRadius ?? BorderRadius.circular(TVar.borderRadiusDefault),
-        boxShadow: borderless ? null : shadows,
-        color: inputTheme.backgroundColor ??
-            (disabled ? colorScheme.bgColorComponentDisabled : colorScheme.bgColorSpecialComponent),
+        backgroundBlendMode: backgroundColor == Colors.transparent && boxShadow != null ? BlendMode.src : null,
+        border: borderless
+            ? null
+            : Border.all(width: onePx, color: MaterialStateProperty.resolveAs(inputTheme.borderColor, states) ?? color),
+        borderRadius: MaterialStateProperty.resolveAs(inputTheme.borderRadius, states) ??
+            BorderRadius.circular(TVar.borderRadiusDefault),
+        boxShadow: boxShadow,
+        color: backgroundColor,
       );
     });
   }

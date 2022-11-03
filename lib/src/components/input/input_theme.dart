@@ -21,16 +21,16 @@ class TInputThemeData with Diagnosticable {
   /// 默认值为[TThemeData.size]
   final TComponentSize? size;
 
-  /// 边框圆角样式
+  /// 边框圆角样式,支持[MaterialStateProperty]
   final BorderRadiusGeometry? borderRadius;
 
-  /// 背景颜色
+  /// 背景颜色,支持[MaterialStateColor]
   final Color? backgroundColor;
 
-  /// 边框颜色
+  /// 边框颜色,支持[MaterialStateColor]
   final Color? borderColor;
 
-  /// 边框阴影
+  /// 边框阴影,支持[MaterialStateProperty]
   final List<BoxShadow>? boxShadow;
 
   /// 输入框状态

@@ -354,6 +354,7 @@ class _TSelectState extends State<TSelect> {
     _textController?.dispose();
     _filterTextController.dispose();
     _focusNode?.dispose();
+    _searchDebounceTimer?.cancel();
   }
 
   @override
@@ -364,9 +365,14 @@ class _TSelectState extends State<TSelect> {
     dynamic value;
     String placeholder = widget.placeholder ?? GlobalTDesignLocalizations.of(context).selectPlaceholder;
     if (widget.multiple) {
-      value = _selectOptions.map((e) {
+      value = _selectOptions.mapIndexed((index, e) {
         var option = e as TSelectOption?;
-        return SelectInputValue(label: option?.label ?? 'undefined', value: option);
+        if (option == null) {
+          // 如果option不存在，返回value值
+          var innerValue = _innerValue[index];
+          return SelectInputValue(label: innerValue ?? 'undefined', value: innerValue);
+        }
+        return SelectInputValue(label: option.label, value: option);
       }).toList();
     } else {
       if (_selectOptions.isNotEmpty) {
@@ -378,7 +384,16 @@ class _TSelectState extends State<TSelect> {
     Widget panel = _TSelectPanel(
       selectState: this,
       textController: _filterTextController,
+      options: widget.options,
+      filterable: widget.filterable || widget.filter != null,
       onClick: _handleClick,
+      loading: widget.loading,
+      size: widget.size ?? theme.size,
+      max: widget.max,
+      multiple: widget.multiple,
+      filter: widget.filter,
+      empty: widget.empty,
+      loadingText: widget.loadingText,
     );
     Widget suffixIcon = AnimatedBuilder(
       animation: effectivePopupVisible,
@@ -388,103 +403,130 @@ class _TSelectState extends State<TSelect> {
         );
       },
     );
-    return StatefulBuilder(
-      builder: (context, setState) {
-        return TSelectInput<SelectInputValue>(
-          multiple: widget.multiple,
-          value: value,
-          inputController: effectiveTextController,
-          autoWidth: widget.autoWidth,
-          autofocus: widget.autofocus,
-          focusNode: effectiveFocusNode,
-          onPopupVisibleChange: widget.onPopupVisibleChange,
-          size: widget.size,
-          onClear: _handleClear,
-          borderless: widget.borderless,
-          loading: widget.loading,
-          allowInput: _filterable,
-          popupStyle: TPopupStyle(
-            padding: EdgeInsets.zero,
-            radius: BorderRadius.circular(TVar.borderRadiusMedium),
-            shadows: colorScheme.shadow2,
-            constraints: const BoxConstraints(maxHeight: _kSelectDropdownMaxHeight),
-          ).merge(widget.popupStyle),
-          placeholder: placeholder,
-          readonly: widget.readonly,
-          showArrow: widget.showArrow,
-          clearable: widget.clearable,
-          prefixIcon: widget.prefixIcon,
-          suffixIcon: suffixIcon,
-          minCollapsedNum: widget.minCollapsedNum,
-          onTagChange: _handleTagChange,
-          onMouseleave: widget.onMouseleave,
-          onMouseenter: widget.onMouseenter,
-          popupVisible: effectivePopupVisible,
-          panel: panel,
-          onInputChange: (value, trigger) {
-            if (effectiveFocusNode.hasFocus) {
-              _filterTextController.text = value;
-            }
-            widget.onInputChange?.call(value, trigger);
-          },
-          onFocus: (value, inputValue, tagInputValue) {
-            if (_filterable) {
-              if (!widget.multiple) {
-                // 单选
-                effectiveTextController.clear();
+    MaterialStateColor backgroundColor = MaterialStateColor.resolveWith((states) {
+      if (states.containsAny([MaterialState.hovered, MaterialState.focused])) {
+        return colorScheme.bgColorContainerHover;
+      }
+      if(states.contains(MaterialState.disabled)){
+        return colorScheme.bgColorComponentDisabled;
+      }
+      return Colors.transparent;
+    });
+    return TInputTheme(
+      data: TInputThemeData(
+        backgroundColor: widget.borderless ? backgroundColor : null,
+      ),
+      child: StatefulBuilder(
+        builder: (context, setState) {
+          return TSelectInput<SelectInputValue>(
+            multiple: widget.multiple,
+            value: value,
+            inputController: effectiveTextController,
+            autoWidth: widget.autoWidth,
+            autofocus: widget.autofocus,
+            focusNode: effectiveFocusNode,
+            onPopupVisibleChange: widget.onPopupVisibleChange,
+            size: widget.size,
+            onClear: _handleClear,
+            borderless: widget.borderless,
+            loading: widget.loading,
+            allowInput: _filterable,
+            popupStyle: TPopupStyle(
+              padding: EdgeInsets.zero,
+              radius: BorderRadius.circular(TVar.borderRadiusMedium),
+              shadows: colorScheme.shadow2,
+              constraints: const BoxConstraints(maxHeight: _kSelectDropdownMaxHeight),
+            ).merge(widget.popupStyle),
+            placeholder: placeholder,
+            readonly: widget.readonly,
+            showArrow: widget.showArrow,
+            clearable: widget.clearable,
+            prefixIcon: widget.prefixIcon,
+            suffixIcon: suffixIcon,
+            minCollapsedNum: widget.minCollapsedNum,
+            onTagChange: _handleTagChange,
+            onMouseleave: widget.onMouseleave,
+            onMouseenter: widget.onMouseenter,
+            popupVisible: effectivePopupVisible,
+            panel: panel,
+            onInputChange: (value, trigger) {
+              if (effectiveFocusNode.hasFocus) {
+                _filterTextController.text = value;
+              }
+              widget.onInputChange?.call(value, trigger);
+              _handleSearch(value);
+            },
+            onFocus: (value, inputValue, tagInputValue) {
+              if (_filterable) {
+                if (!widget.multiple) {
+                  // 单选
+                  effectiveTextController.clear();
+                  _filterTextController.clear();
+                }
+              }
+              widget.onFocus?.call(_value);
+            },
+            onBlur: (value, context) {
+              widget.onBlur?.call(_value);
+              if (_filterable) {
+                if (widget.multiple) {
+                  // 多选
+                  // 失去焦点时，清空搜索框
+                  effectiveTextController.clear();
+                }
                 _filterTextController.clear();
               }
-            }
-            widget.onFocus?.call(_value);
-          },
-          onBlur: (value, context) {
-            widget.onBlur?.call(_value);
-            if (_filterable) {
-              if (widget.multiple) {
-                // 多选
-                // 失去焦点时，清空搜索框
-                effectiveTextController.clear();
-              }
-              _filterTextController.clear();
-            }
-          },
-          onEnter: (value, inputValue) => widget.onEnter?.call(_value, inputValue),
-          tagTheme: widget.tagTheme,
-          tagVariant: widget.tagVariant,
-          textAlign: widget.textAlign,
-          label: widget.label,
-          disabled: widget.disabled,
-          status: widget.status,
-          excessTagsDisplayType: widget.excessTagsDisplayType,
-          tips: widget.tips,
-          trigger: widget.trigger,
-          placement: widget.placement,
-          destroyOnClose: widget.destroyOnClose,
-          onClose: widget.onClose,
-          onOpen: widget.onOpen,
-          hideDuration: widget.hideDuration,
-          showDuration: widget.showDuration,
-          collapsedItems: widget.collapsedItems != null
-              ? (value, collapsedTags, count) {
-                  var valueList = value.map((e) => e.value as TSelectOption).toList();
-                  var collapsedTagsList = collapsedTags.map((e) => e.value as TSelectOption).toList();
-                  return widget.collapsedItems!(valueList, collapsedTagsList, count);
-                }
-              : null,
-          singleValueDisplay: widget.singleValueDisplay != null
-              ? (value) => widget.singleValueDisplay!.call(value?.value as TSelectOption?)
-              : null,
-          multipleValueDisplay: widget.singleValueDisplay != null
-              ? (value, onClose) {
-                  var list = value.map((e) => e.value as TSelectOption).toList();
-                  return widget.multipleValueDisplay!.call(list, (index, item) {
-                    onClose(index, SelectInputValue(label: item.label, value: item));
-                  });
-                }
-              : null,
-        );
-      },
+            },
+            onEnter: (value, inputValue) => widget.onEnter?.call(_value, inputValue),
+            tagTheme: widget.tagTheme,
+            tagVariant: widget.tagVariant,
+            textAlign: widget.textAlign,
+            label: widget.label,
+            disabled: widget.disabled,
+            status: widget.status,
+            excessTagsDisplayType: widget.excessTagsDisplayType,
+            tips: widget.tips,
+            trigger: widget.trigger,
+            placement: widget.placement,
+            destroyOnClose: widget.destroyOnClose,
+            onClose: widget.onClose,
+            onOpen: widget.onOpen,
+            hideDuration: widget.hideDuration,
+            showDuration: widget.showDuration,
+            collapsedItems: widget.collapsedItems != null
+                ? (value, collapsedTags, count) {
+                    var valueList = value.map((e) => e.value as TSelectOption).toList();
+                    var collapsedTagsList = collapsedTags.map((e) => e.value as TSelectOption).toList();
+                    return widget.collapsedItems!(valueList, collapsedTagsList, count);
+                  }
+                : null,
+            singleValueDisplay: widget.singleValueDisplay != null
+                ? (value) => widget.singleValueDisplay!.call(value?.value as TSelectOption?)
+                : null,
+            multipleValueDisplay: widget.singleValueDisplay != null
+                ? (value, onClose) {
+                    var list = value.map((e) => e.value as TSelectOption).toList();
+                    return widget.multipleValueDisplay!.call(list, (index, item) {
+                      onClose(index, SelectInputValue(label: item.label, value: item));
+                    });
+                  }
+                : null,
+          );
+        },
+      ),
     );
+  }
+
+  Timer? _searchDebounceTimer;
+
+  /// 处理搜索事件
+  void _handleSearch(String search) {
+    // 去抖
+    _searchDebounceTimer?.cancel();
+    _searchDebounceTimer = Timer(const Duration(milliseconds: 300), () {
+      _searchDebounceTimer = null;
+      widget.onSearch?.call(search);
+    });
   }
 
   /// 处理option点击事件
@@ -501,6 +543,10 @@ class _TSelectState extends State<TSelect> {
           list.add(option.value);
         }
         options.add(option);
+        // 选中后是否清空搜索关键词
+        if (!widget.reserveKeyword) {
+          effectiveTextController.clear();
+        }
       } else {
         var index = _innerValue.indexOf(option.value);
         list.removeAt(index);
@@ -619,6 +665,15 @@ class _TSelectPanel extends StatefulWidget {
     Key? key,
     required this.selectState,
     required this.textController,
+    required this.options,
+    required this.filterable,
+    this.filter,
+    required this.size,
+    required this.loading,
+    this.loadingText,
+    this.empty,
+    required this.max,
+    required this.multiple,
     required this.onClick,
   }) : super(key: key);
 
@@ -627,6 +682,34 @@ class _TSelectPanel extends StatefulWidget {
   /// 可编辑文本字段的控制器
   final TextEditingController textController;
 
+  /// 选项
+  final List<TOption> options;
+
+  /// 是否可搜索
+  final bool filterable;
+
+  /// 自定义过滤方法，用于对现有数据进行搜索过滤，判断是否过滤某一项数据。
+  final FutureOr<bool> Function(String filterWords, TSelectOption option)? filter;
+
+  /// 组件大小
+  final TComponentSize size;
+
+  /// 是否为加载状态
+  final bool loading;
+
+  /// 远程加载时显示的文字，支持自定义。如加上超链接。
+  final Widget? loadingText;
+
+  /// 当下拉列表为空时显示的内容。
+  final Widget? empty;
+
+  /// 用于控制多选数量，值为 0 则不限制
+  final int max;
+
+  /// 是否允许多选
+  final bool multiple;
+
+  /// 点击事件
   final void Function(TSelectOption option, bool check) onClick;
 
   @override
@@ -634,11 +717,8 @@ class _TSelectPanel extends StatefulWidget {
 }
 
 class _TSelectPanelState extends State<_TSelectPanel> {
-  TSelect get selectWidget => widget.selectState.widget;
   late String _filterWords;
   Future<List<TOption>>? future;
-
-  bool get filterable => selectWidget.filterable || selectWidget.filter != null;
 
   @override
   void initState() {
@@ -661,20 +741,23 @@ class _TSelectPanelState extends State<_TSelectPanel> {
       widget.textController.removeListener(_handleTextChange);
       _handleTextChange();
     }
+    if (widget.options != oldWidget.options) {
+      _handleTextChange(true);
+    }
   }
 
   /// 文本变更
-  void _handleTextChange() {
-    if (_filterWords != widget.textController.text) {
+  void _handleTextChange([bool update = false]) {
+    if (_filterWords != widget.textController.text || update) {
       _filterWords = widget.textController.text;
-      if (filterable) {
+      if (widget.filterable) {
         if (mounted) {
           setState(() {
             // 在迭代中使用过滤选项
-            future = _handleFilter(_filterWords, selectWidget.options);
+            future = _handleFilter(_filterWords, widget.options);
           });
         } else {
-          future = _handleFilter(_filterWords, selectWidget.options);
+          future = _handleFilter(_filterWords, widget.options);
         }
       }
     }
@@ -684,7 +767,7 @@ class _TSelectPanelState extends State<_TSelectPanel> {
   Widget build(BuildContext context) {
     var theme = TTheme.of(context);
 
-    TComponentSize size = selectWidget.size ?? theme.size;
+    TComponentSize size = widget.size;
 
     EdgeInsets padding;
     switch (size) {
@@ -699,14 +782,14 @@ class _TSelectPanelState extends State<_TSelectPanel> {
         break;
     }
 
-    if (selectWidget.loading) {
+    if (widget.loading) {
       return _buildLoading(theme);
     }
-    if (selectWidget.options.isEmpty) {
+    if (widget.options.isEmpty) {
       return _buildEmpty(theme);
     }
     return FutureBuilder(
-      initialData: selectWidget.options,
+      initialData: widget.options,
       future: future,
       builder: (context, snapshot) {
         var list = snapshot.data!;
@@ -725,9 +808,9 @@ class _TSelectPanelState extends State<_TSelectPanel> {
                 bool isFirst = index == 0;
                 if (option is TSelectOptionGroup) {
                   return _TOptionGroup(
-                    max: selectWidget.max,
+                    max: widget.max,
                     value: widget.selectState._innerValue,
-                    multiple: selectWidget.multiple,
+                    multiple: widget.multiple,
                     optionGroup: option,
                     size: size,
                     onClick: (option, check) {
@@ -738,9 +821,9 @@ class _TSelectPanelState extends State<_TSelectPanel> {
                 return Padding(
                   padding: EdgeInsets.only(top: isFirst ? 0 : 2),
                   child: _TOption(
-                    max: selectWidget.max,
+                    max: widget.max,
                     option: option as TSelectOption,
-                    multiple: selectWidget.multiple,
+                    multiple: widget.multiple,
                     value: widget.selectState._innerValue,
                     size: size,
                     onClick: (option, check) {
@@ -759,7 +842,7 @@ class _TSelectPanelState extends State<_TSelectPanel> {
   /// 处理过滤数据
   Future<List<TOption>> _handleFilter(String filterWords, List<TOption> options) async {
     List<TOption> list = [];
-    if (!filterable || widget.textController.text.isEmpty) {
+    if (!widget.filterable || widget.textController.text.isEmpty) {
       return options;
     }
     for (var option in options) {
@@ -769,7 +852,7 @@ class _TSelectPanelState extends State<_TSelectPanel> {
           list.add(option.copyWith(children: filterChildren.cast()));
         }
       } else if (option is TSelectOption) {
-        var bool = await (selectWidget.filter ?? _filter).call(filterWords, option);
+        var bool = await (widget.filter ?? _filter).call(filterWords, option);
         if (bool) {
           list.add(option);
         }
@@ -787,7 +870,7 @@ class _TSelectPanelState extends State<_TSelectPanel> {
   Widget _buildLoading(TThemeData theme) {
     var colorScheme = theme.colorScheme;
     String text = GlobalTDesignLocalizations.of(context).selectLoadingText;
-    Widget? child = selectWidget.loadingText;
+    Widget? child = widget.loadingText;
     return SizedBox(
       height: 32,
       child: Stack(
@@ -809,7 +892,7 @@ class _TSelectPanelState extends State<_TSelectPanel> {
   Widget _buildEmpty(TThemeData theme) {
     var colorScheme = theme.colorScheme;
     String text = GlobalTDesignLocalizations.of(context).selectEmpty;
-    Widget? child = selectWidget.empty;
+    Widget? child = widget.empty;
     return SizedBox(
       height: 32,
       child: Stack(

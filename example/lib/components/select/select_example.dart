@@ -10,10 +10,14 @@ class TSelectExample extends StatefulWidget {
 
 class _TSelectExampleState extends State<TSelectExample> {
   late List<TOption> options;
-  dynamic inputSelectValue;
+  late List<TOption> options3;
+  dynamic prependValue = 'https://';
+  dynamic appendValue = '.com';
   dynamic value = const TSelectOption(label: '大数据', value: '2');
   dynamic value2 = [const TSelectOption(label: '大数据', value: '2')];
+  dynamic value3 = [];
   bool filter = true;
+  bool loading3 = false;
 
   @override
   void initState() {
@@ -37,6 +41,7 @@ class _TSelectExampleState extends State<TSelectExample> {
         TSelectOption(label: '激光炮', value: '13'),
       ]),
     ];
+    options3 = [];
   }
 
   @override
@@ -55,22 +60,39 @@ class _TSelectExampleState extends State<TSelectExample> {
         ),
         TInputAdornment(
           prepend: TSelect(
-            value: inputSelectValue,
+            value: prependValue,
             autoWidth: true,
             borderless: true,
             options: const [
-              TSelectOption(label: 'https', value: 'https'),
-              TSelectOption(label: 'http', value: 'http'),
+              TSelectOption(label: 'https://', value: 'https://'),
+              TSelectOption(label: 'http://', value: 'http://'),
             ],
             onChange: (value, changeContext) {
               setState(() {
-                inputSelectValue = value;
+                prependValue = value;
+              });
+            },
+          ),
+          append: TSelect(
+            value: appendValue,
+            autoWidth: true,
+            borderless: true,
+            options: const [
+              TSelectOption(label: '.com', value: '.com'),
+              TSelectOption(label: '.cn', value: '.cn'),
+              TSelectOption(label: '.net', value: '.net'),
+              TSelectOption(label: '.org', value: '.org')
+            ],
+            onChange: (value, changeContext) {
+              setState(() {
+                appendValue = value;
               });
             },
           ),
           child: const TInput(),
         ),
         const TSelect(),
+        const TSelect(readonly: true),
         const TSelect(placeholder: '空数据', disabled: true),
         // const TSelect(placeholder: '加载中', loading: true),
         StatefulBuilder(
@@ -109,6 +131,7 @@ class _TSelectExampleState extends State<TSelectExample> {
               placeholder: '请选择云解决方案',
               // filterable: filter,
               creatable: true,
+              reserveKeyword: true,
               filter: (filterWords, option) {
                 return option.label.contains(filterWords);
                 // return Future.delayed(const Duration(milliseconds: 50), () {
@@ -122,7 +145,47 @@ class _TSelectExampleState extends State<TSelectExample> {
               },
             );
           },
-        )
+        ),
+        StatefulBuilder(
+          builder: (context, setState) {
+            return TSelect(
+              value: value3,
+              multiple: true,
+              options: options3,
+              autoWidth: true,
+              clearable: true,
+              tagVariant: TTagVariant.light,
+              tagTheme: TTagTheme.primary,
+              prefixIcon: const Icon(TIcons.browse),
+              placeholder: '请选择云解决方案',
+              filterable: filter,
+              loading: loading3,
+              onSearch: (search) {
+                print('搜索：$search');
+                if (search.isNotEmpty) {
+                  setState(() {
+                    loading3 = true;
+                  });
+                  Future.delayed(const Duration(milliseconds: 500), () {
+                    setState(() {
+                      loading3 = false;
+                      options3 = [
+                        TSelectOption(label: '${search}_test1', value: '${search}_test1'),
+                        TSelectOption(label: '${search}_test2', value: '${search}_test2'),
+                        TSelectOption(label: '${search}_test3', value: '${search}_test3'),
+                      ];
+                    });
+                  });
+                }
+              },
+              onChange: (value, changeContext) {
+                setState(() {
+                  value3 = value;
+                });
+              },
+            );
+          },
+        ),
       ],
     );
   }
