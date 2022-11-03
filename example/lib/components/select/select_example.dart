@@ -92,8 +92,8 @@ class _TSelectExampleState extends State<TSelectExample> {
           child: const TInput(),
         ),
         const TSelect(),
-        const TSelect(readonly: true),
-        const TSelect(placeholder: '空数据', disabled: true),
+        const TSelect(readonly: true, borderless: true),
+        const TSelect(borderless: true, disabled: true),
         // const TSelect(placeholder: '加载中', loading: true),
         StatefulBuilder(
           builder: (context, setState) {

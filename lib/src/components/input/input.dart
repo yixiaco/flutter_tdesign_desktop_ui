@@ -600,7 +600,7 @@ class _TInputState extends TFormItemValidateState<TInput> {
     var size = widget.size ?? inputTheme.size ?? theme.size;
 
     var fontSize = getFontSize(theme, size);
-    var cursor = widget.readonly ? SystemMouseCursors.click : TMaterialStateMouseCursor.textable;
+    var cursor = widget.readonly && !widget.disabled ? SystemMouseCursors.click : TMaterialStateMouseCursor.textable;
 
     // 边框样式
     var border = TInput.defaultInputBorder(
