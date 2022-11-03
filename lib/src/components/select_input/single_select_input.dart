@@ -43,6 +43,9 @@ class TSingleSelectInput<T extends SelectInputValue> extends StatefulWidget {
     this.onInputChange,
     this.onMouseenter,
     this.onMouseleave,
+    this.onKeyDown,
+    this.onKeyPress,
+    this.onKeyUp,
     this.onPopupVisibleChange,
     this.focusNode,
     this.autofocus = false,
@@ -162,6 +165,15 @@ class TSingleSelectInput<T extends SelectInputValue> extends StatefulWidget {
   /// 离开输入框时触发
   final PointerExitEventListener? onMouseleave;
 
+  /// 键盘按下时触发
+  final TInputKeyEvent? onKeyDown;
+
+  /// 按下字符键时触发（keydown -> keypress -> keyup）
+  final TInputKeyEvent? onKeyPress;
+
+  /// 释放键盘时触发
+  final TInputKeyEvent? onKeyUp;
+
   /// 下拉框显示或隐藏时触发。
   final void Function(bool visible)? onPopupVisibleChange;
 
@@ -191,18 +203,15 @@ class _TSingleSelectInputState<T extends SelectInputValue> extends State<TSingle
   @override
   void initState() {
     showClearIcon = ValueNotifier(false);
-    effectiveTextEditingController.text = widget.value?.label ?? '';
+    _valueChange();
     super.initState();
   }
 
   @override
   void didUpdateWidget(covariant TSingleSelectInput<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.value != oldWidget.value) {
+    if (widget.value != oldWidget.value || widget.inputController != oldWidget.inputController) {
       _valueChange();
-    }
-    if (widget.allowInput != oldWidget.allowInput && !widget.allowInput) {
-      effectiveTextEditingController.clear();
     }
   }
 
@@ -246,57 +255,59 @@ class _TSingleSelectInputState<T extends SelectInputValue> extends State<TSingle
       placement: widget.placement ?? TPopupPlacement.bottomLeft,
       showArrow: widget.showArrow ?? false,
       hideEmptyPopup: true,
-      child: Builder(
-        builder: (context) {
-          return TInput(
-            onTap: () {
-              if(trigger == TPopupTrigger.notifier) {
-                popupNotification.dispatch(context);
-              }
-            },
-            focusNode: widget.focusNode,
-            autofocus: widget.autofocus,
-            controller: effectiveTextEditingController,
-            readonly: !widget.allowInput || widget.readonly,
-            disabled: widget.disabled,
-            autoWidth: widget.autoWidth,
-            tips: widget.tips,
-            onChange: (text) {
-              widget.onInputChange?.call(text, InputValueChangeContext.input);
-            },
-            align: widget.textAlign,
-            status: widget.status,
-            onEnter: (value) {
-              widget.onEnter?.call(widget.value, value);
-            },
-            placeholder: widget.placeholder,
-            onMouseenter: (event) {
-              _isHovered = true;
-              _handleClearChange();
-              widget.onMouseenter?.call(event);
-            },
-            onMouseleave: (event) {
-              _isHovered = false;
-              _handleClearChange();
-              widget.onMouseleave?.call(event);
-            },
-            onFocus: (text) {
-              widget.onFocus?.call(widget.value, text);
-            },
-            onBlur: (text) {
-              widget.onBlur?.call(widget.value, TSelectInputFocusContext(inputValue: text));
-              _valueChange();
-            },
-            label: widget.label,
-            prefixIcon: widget.prefixIcon,
-            suffix: widget.suffix,
-            suffixIcon:
-                !widget.disabled && widget.loading ? const TLoading(size: TComponentSize.small) : _buildSuffixIcon(),
-            borderless: widget.borderless,
-            size: widget.size,
-          );
-        }
-      ),
+      child: Builder(builder: (context) {
+        return TInput(
+          onTap: () {
+            if (trigger == TPopupTrigger.notifier) {
+              popupNotification.dispatch(context);
+            }
+          },
+          focusNode: widget.focusNode,
+          autofocus: widget.autofocus,
+          controller: effectiveTextEditingController,
+          readonly: !widget.allowInput || widget.readonly,
+          disabled: widget.disabled,
+          autoWidth: widget.autoWidth,
+          tips: widget.tips,
+          onChange: (text) {
+            widget.onInputChange?.call(text, InputValueChangeContext.input);
+          },
+          align: widget.textAlign,
+          status: widget.status,
+          onEnter: (value) {
+            widget.onEnter?.call(widget.value, value);
+            widget.onInputChange?.call(value, InputValueChangeContext.enter);
+          },
+          placeholder: widget.placeholder,
+          onMouseenter: (event) {
+            _isHovered = true;
+            _handleClearChange();
+            widget.onMouseenter?.call(event);
+          },
+          onMouseleave: (event) {
+            _isHovered = false;
+            _handleClearChange();
+            widget.onMouseleave?.call(event);
+          },
+          onKeyDown: widget.onKeyDown,
+          onKeyPress: widget.onKeyPress,
+          onKeyUp: widget.onKeyUp,
+          onFocus: (text) {
+            widget.onFocus?.call(widget.value, text);
+          },
+          onBlur: (text) {
+            _valueChange();
+            widget.onBlur?.call(widget.value, TSelectInputFocusContext(inputValue: text));
+          },
+          label: widget.label,
+          prefixIcon: widget.prefixIcon,
+          suffix: widget.suffix,
+          suffixIcon:
+              !widget.disabled && widget.loading ? const TLoading(size: TComponentSize.small) : _buildSuffixIcon(),
+          borderless: widget.borderless,
+          size: widget.size,
+        );
+      }),
     );
   }
 
@@ -306,6 +317,7 @@ class _TSingleSelectInputState<T extends SelectInputValue> extends State<TSingle
       onClick: () {
         effectiveTextEditingController.clear();
         widget.onClear?.call();
+        widget.onInputChange?.call(effectiveTextEditingController.text, InputValueChangeContext.clear);
       },
       show: showClearIcon,
       icon: widget.suffixIcon,

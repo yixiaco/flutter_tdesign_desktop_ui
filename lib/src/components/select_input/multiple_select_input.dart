@@ -53,6 +53,9 @@ class TMultipleSelectInput<T extends SelectInputValue> extends StatefulWidget {
     this.onInputChange,
     this.onMouseenter,
     this.onMouseleave,
+    this.onKeyDown,
+    this.onKeyPress,
+    this.onKeyUp,
     this.onPopupVisibleChange,
     this.onTagChange,
     this.focusNode,
@@ -203,6 +206,15 @@ class TMultipleSelectInput<T extends SelectInputValue> extends StatefulWidget {
   /// 离开输入框时触发
   final PointerExitEventListener? onMouseleave;
 
+  /// 键盘按下时触发
+  final TInputKeyEvent? onKeyDown;
+
+  /// 按下字符键时触发（keydown -> keypress -> keyup）
+  final TInputKeyEvent? onKeyPress;
+
+  /// 释放键盘时触发
+  final TInputKeyEvent? onKeyUp;
+
   /// 下拉框显示或隐藏时触发。
   final void Function(bool visible)? onPopupVisibleChange;
 
@@ -242,9 +254,6 @@ class _TMultipleSelectInputState<T extends SelectInputValue> extends State<TMult
     if (!widget.value.contentEquals(_value)) {
       _value = List.of(widget.value);
       _handleChange();
-    }
-    if (widget.allowInput != oldWidget.allowInput && !widget.allowInput) {
-      effectiveTextEditingController.clear();
     }
   }
 
@@ -297,6 +306,8 @@ class _TMultipleSelectInputState<T extends SelectInputValue> extends State<TMult
                 popupNotification.dispatch(context);
               }
             },
+            focusNode: widget.focusNode,
+            autofocus: widget.autofocus,
             controller: _tagInputController,
             readonly: widget.readonly,
             allowInput: widget.allowInput,
@@ -315,6 +326,9 @@ class _TMultipleSelectInputState<T extends SelectInputValue> extends State<TMult
             placeholder: widget.placeholder,
             onMouseenter: widget.onMouseenter,
             onMouseleave: widget.onMouseleave,
+            onKeyDown: widget.onKeyDown,
+            onKeyPress: widget.onKeyPress,
+            onKeyUp: widget.onKeyUp,
             onFocus: (value, inputValue) {
               widget.onFocus?.call(widget.value, inputValue, value);
             },

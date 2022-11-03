@@ -87,6 +87,7 @@ class TInput extends TFormItemValidate {
     this.breakLine = false,
     this.padding,
     this.borderless = false,
+    this.preferredHeight,
   });
 
   /// 控制正在编辑的文本。
@@ -304,6 +305,9 @@ class TInput extends TFormItemValidate {
 
   /// 无边框模式
   final bool borderless;
+
+  /// 首选高度,单行固定高度，多行最小高度
+  final double? preferredHeight;
 
   @override
   TFormItemValidateState createState() => _TInputState();
@@ -622,12 +626,18 @@ class _TInputState extends TFormItemValidateState<TInput> {
     Widget? suffixIcon;
 
     if (widget.prefixIcon != null) {
-      prefixIconList.add(widget.prefixIcon);
+      prefixIconList.add(Padding(
+        padding: EdgeInsets.only(right: TVar.spacer),
+        child: widget.prefixIcon,
+      ));
     }
     // 密码框icon
     if (widget.type == TInputType.password) {
       if (widget.prefixIcon == null) {
-        prefixIconList.add(Icon(TIcons.lockOn, color: iconColor));
+        prefixIconList.add(Padding(
+          padding: EdgeInsets.only(right: TVar.spacer),
+          child: Icon(TIcons.lockOn, color: iconColor),
+        ));
       }
       suffixIconList.add(
         MouseRegion(
@@ -933,11 +943,15 @@ class _TInputState extends TFormItemValidateState<TInput> {
     );
   }
 
-  double _inputHeight(TComponentSize size) => size.sizeOf(
-        small: _kInputHeightS,
-        medium: _kInputHeightDefault,
-        large: _kInputHeightL,
-      );
+  double _inputHeight(TComponentSize size) {
+    var diff = widget.borderless ? 2 : 0;
+    return widget.preferredHeight ??
+        size.sizeOf(
+          small: _kInputHeightS - diff,
+          medium: _kInputHeightDefault - diff,
+          large: _kInputHeightL - diff,
+        );
+  }
 
   /// 构建清空按钮
   Widget _buildClearIcon(TColorScheme colorScheme) {

@@ -51,6 +51,10 @@ class TTagInput extends TFormItemValidate {
     this.borderless = false,
     this.enterClearInput = true,
     this.onTap,
+    this.onKeyDown,
+    this.onKeyPress,
+    this.onKeyUp,
+    this.autofocus = false,
     super.focusNode,
     super.name,
   });
@@ -176,6 +180,18 @@ class TTagInput extends TFormItemValidate {
   /// {@macro tdesign.components.inputBase.onTap}
   final GestureTapCallback? onTap;
 
+  /// 键盘按下时触发
+  final TInputKeyEvent? onKeyDown;
+
+  /// 按下字符键时触发（keydown -> keypress -> keyup）
+  final TInputKeyEvent? onKeyPress;
+
+  /// 释放键盘时触发
+  final TInputKeyEvent? onKeyUp;
+
+  /// 自动聚焦
+  final bool autofocus;
+
   @override
   TFormItemValidateState<TTagInput> createState() => _TTagInputState();
 }
@@ -231,6 +247,7 @@ class _TTagInputState extends TFormItemValidateState<TTagInput> {
           readonly: !widget.allowInput || widget.readonly,
           controller: effectiveTextController,
           focusNode: effectiveFocusNode,
+          autofocus: widget.autofocus,
           autoWidth: widget.autoWidth,
           breakLine: widget.excessTagsDisplayType == TTagExcessTagsDisplayType.breakLine,
           prefixIcon: widget.prefixIcon,
@@ -256,9 +273,11 @@ class _TTagInputState extends TFormItemValidateState<TTagInput> {
             _handleClearIconChange();
             widget.onMouseleave?.call(event);
           },
+          onKeyDown: _handleBackspace,
+          onKeyPress: widget.onKeyPress,
+          onKeyUp: widget.onKeyUp,
           placeholder: effectiveController.value.isNotEmpty ? '' : widget.placeholder,
           onEnter: _handleEnter,
-          onKeyDown: _handleBackspace,
           onFocus: (text) => widget.onFocus?.call(effectiveController.value, text),
           onBlur: (text) => widget.onBlur?.call(effectiveController.value, text),
           onChange: (text) {
@@ -366,6 +385,7 @@ class _TTagInputState extends TFormItemValidateState<TTagInput> {
 
   /// 处理退格键
   void _handleBackspace(String text, KeyEvent event) {
+    widget.onKeyDown?.call(text, event);
     if (event.physicalKey == PhysicalKeyboardKey.backspace && text.isEmpty) {
       var lastIndex = effectiveController.value.lastIndex;
       var item = effectiveController.value[lastIndex];

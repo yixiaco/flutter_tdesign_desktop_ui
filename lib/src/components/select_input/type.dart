@@ -15,6 +15,13 @@ class SelectInputValue {
     this.value,
     this.children,
   });
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) || other is SelectInputValue && runtimeType == other.runtimeType && value == other.value;
+
+  @override
+  int get hashCode => value.hashCode;
 }
 
 class TSelectInputFocusContext {

@@ -57,6 +57,9 @@ class TSelectInput<T extends SelectInputValue> extends StatelessWidget {
     this.onInputChange,
     this.onMouseenter,
     this.onMouseleave,
+    this.onKeyDown,
+    this.onKeyPress,
+    this.onKeyUp,
     this.onPopupVisibleChange,
     this.onTagChange,
     this.focusNode,
@@ -216,6 +219,15 @@ class TSelectInput<T extends SelectInputValue> extends StatelessWidget {
   /// 离开输入框时触发
   final PointerExitEventListener? onMouseleave;
 
+  /// 键盘按下时触发
+  final TInputKeyEvent? onKeyDown;
+
+  /// 按下字符键时触发（keydown -> keypress -> keyup）
+  final TInputKeyEvent? onKeyPress;
+
+  /// 释放键盘时触发
+  final TInputKeyEvent? onKeyUp;
+
   /// 下拉框显示或隐藏时触发。
   final void Function(bool visible)? onPopupVisibleChange;
 
@@ -263,6 +275,9 @@ class TSelectInput<T extends SelectInputValue> extends StatelessWidget {
       placeholder: placeholder,
       onMouseleave: onMouseleave,
       onMouseenter: onMouseenter,
+      onKeyDown: onKeyDown,
+      onKeyPress: onKeyPress,
+      onKeyUp: onKeyUp,
       prefixIcon: prefixIcon,
       suffixIcon: suffixIcon,
       onClear: onClear,
@@ -313,6 +328,9 @@ class TSelectInput<T extends SelectInputValue> extends StatelessWidget {
       placeholder: placeholder,
       onMouseleave: onMouseleave,
       onMouseenter: onMouseenter,
+      onKeyDown: onKeyDown,
+      onKeyPress: onKeyPress,
+      onKeyUp: onKeyUp,
       suffixIcon: suffixIcon,
       onClear: onClear,
       clearable: clearable,

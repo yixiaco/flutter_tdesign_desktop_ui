@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:dartx/dartx.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
@@ -274,19 +273,26 @@ class TSelect extends StatefulWidget {
 class _TSelectState extends State<TSelect> {
   TPopupVisible? _popupVisible;
 
+  /// 浮层控制器
   TPopupVisible get effectivePopupVisible => widget.popupVisible ?? (_popupVisible ??= TPopupVisible());
 
+  /// 选中的选项
   late List<TOption?> _selectOptions;
   TextEditingController? _textController;
 
+  /// 文本控制器
   TextEditingController get effectiveTextController =>
       widget.textController ?? (_textController ??= TextEditingController());
+  late TextEditingController _filterTextController;
 
-  /// 加载状态
-  late ValueNotifier<bool> _loadingStatus;
+  FocusNode? _focusNode;
 
+  FocusNode get effectiveFocusNode => widget.focusNode ?? (_focusNode ??= FocusNode());
+
+  /// 当前值
   dynamic _value;
 
+  /// 内部格式化的值
   dynamic get _innerValue {
     if (widget.valueType == TSelectValueType.value) {
       return _value;
@@ -297,11 +303,14 @@ class _TSelectState extends State<TSelect> {
     return (_value as TSelectOption?)?.value;
   }
 
+  /// 可过滤
+  bool get _filterable => widget.filterable || widget.filter != null;
+
   @override
   void initState() {
     super.initState();
-    _loadingStatus = ValueNotifier(false);
     _value = widget.value ?? widget.defaultValue;
+    _filterTextController = TextEditingController();
     _syncSelectOptions();
   }
 
@@ -343,6 +352,8 @@ class _TSelectState extends State<TSelect> {
     _selectOptions.clear();
     _popupVisible?.dispose();
     _textController?.dispose();
+    _filterTextController.dispose();
+    _focusNode?.dispose();
   }
 
   @override
@@ -351,6 +362,7 @@ class _TSelectState extends State<TSelect> {
     var colorScheme = theme.colorScheme;
 
     dynamic value;
+    String placeholder = widget.placeholder ?? GlobalTDesignLocalizations.of(context).selectPlaceholder;
     if (widget.multiple) {
       value = _selectOptions.map((e) {
         var option = e as TSelectOption?;
@@ -360,12 +372,13 @@ class _TSelectState extends State<TSelect> {
       if (_selectOptions.isNotEmpty) {
         var option = _selectOptions[0] as TSelectOption;
         value = SelectInputValue(label: option.label, value: option);
+        placeholder = option.label;
       }
     }
     Widget panel = _TSelectPanel(
       selectState: this,
-      loadingStatus: _loadingStatus,
-      textController: effectiveTextController,
+      textController: _filterTextController,
+      onClick: _handleClick,
     );
     Widget suffixIcon = AnimatedBuilder(
       animation: effectivePopupVisible,
@@ -375,28 +388,28 @@ class _TSelectState extends State<TSelect> {
         );
       },
     );
-    return ValueListenableBuilder(
-      valueListenable: _loadingStatus,
-      builder: (context, loading, child) {
+    return StatefulBuilder(
+      builder: (context, setState) {
         return TSelectInput<SelectInputValue>(
           multiple: widget.multiple,
           value: value,
+          inputController: effectiveTextController,
           autoWidth: widget.autoWidth,
           autofocus: widget.autofocus,
-          focusNode: widget.focusNode,
+          focusNode: effectiveFocusNode,
           onPopupVisibleChange: widget.onPopupVisibleChange,
           size: widget.size,
           onClear: _handleClear,
           borderless: widget.borderless,
-          loading: widget.loading || (widget.filterable && loading),
-          allowInput: widget.filterable,
+          loading: widget.loading,
+          allowInput: _filterable,
           popupStyle: TPopupStyle(
             padding: EdgeInsets.zero,
             radius: BorderRadius.circular(TVar.borderRadiusMedium),
             shadows: colorScheme.shadow2,
             constraints: const BoxConstraints(maxHeight: _kSelectDropdownMaxHeight),
           ).merge(widget.popupStyle),
-          placeholder: widget.placeholder ?? GlobalTDesignLocalizations.of(context).selectPlaceholder,
+          placeholder: placeholder,
           readonly: widget.readonly,
           showArrow: widget.showArrow,
           clearable: widget.clearable,
@@ -408,12 +421,32 @@ class _TSelectState extends State<TSelect> {
           onMouseenter: widget.onMouseenter,
           popupVisible: effectivePopupVisible,
           panel: panel,
-          onInputChange: widget.onInputChange,
-          onFocus: (value, inputValue, tagInputValue) => widget.onFocus?.call(_value),
+          onInputChange: (value, trigger) {
+            if (effectiveFocusNode.hasFocus) {
+              _filterTextController.text = value;
+            }
+            widget.onInputChange?.call(value, trigger);
+          },
+          onFocus: (value, inputValue, tagInputValue) {
+            if (_filterable) {
+              if (!widget.multiple) {
+                // 单选
+                effectiveTextController.clear();
+                _filterTextController.clear();
+              }
+            }
+            widget.onFocus?.call(_value);
+          },
           onBlur: (value, context) {
             widget.onBlur?.call(_value);
-            // 失去焦点时，清空搜索框
-            effectiveTextController.clear();
+            if (_filterable) {
+              if (widget.multiple) {
+                // 多选
+                // 失去焦点时，清空搜索框
+                effectiveTextController.clear();
+              }
+              _filterTextController.clear();
+            }
           },
           onEnter: (value, inputValue) => widget.onEnter?.call(_value, inputValue),
           tagTheme: widget.tagTheme,
@@ -431,7 +464,6 @@ class _TSelectState extends State<TSelect> {
           onOpen: widget.onOpen,
           hideDuration: widget.hideDuration,
           showDuration: widget.showDuration,
-          inputController: effectiveTextController,
           collapsedItems: widget.collapsedItems != null
               ? (value, collapsedTags, count) {
                   var valueList = value.map((e) => e.value as TSelectOption).toList();
@@ -453,6 +485,40 @@ class _TSelectState extends State<TSelect> {
         );
       },
     );
+  }
+
+  /// 处理option点击事件
+  void _handleClick(TSelectOption option, bool check) {
+    dynamic value = _value;
+    var options = List.of(_selectOptions);
+    if (widget.multiple) {
+      value ??= [];
+      var list = List.of(value);
+      if (check) {
+        if (widget.valueType == TSelectValueType.object) {
+          list.add(option);
+        } else {
+          list.add(option.value);
+        }
+        options.add(option);
+      } else {
+        var index = _innerValue.indexOf(option.value);
+        list.removeAt(index);
+        options.removeAt(index);
+      }
+      value = list;
+    } else {
+      if (widget.valueType == TSelectValueType.object) {
+        value = option;
+      } else {
+        value = option.value;
+      }
+      // 先提前移除焦点，选中文本时防止覆盖过滤文本控制器
+      effectiveFocusNode.unfocus();
+      effectivePopupVisible.value = false;
+    }
+    var trigger = check ? TSelectValueChangeTrigger.check : TSelectValueChangeTrigger.uncheck;
+    widget.onChange?.call(value, TSelectChangeContext(selectedOptions: options, option: option, trigger: trigger));
   }
 
   /// 处理标签变更--多选
@@ -553,7 +619,7 @@ class _TSelectPanel extends StatefulWidget {
     Key? key,
     required this.selectState,
     required this.textController,
-    required this.loadingStatus,
+    required this.onClick,
   }) : super(key: key);
 
   final _TSelectState selectState;
@@ -561,8 +627,7 @@ class _TSelectPanel extends StatefulWidget {
   /// 可编辑文本字段的控制器
   final TextEditingController textController;
 
-  /// 加载状态
-  final ValueNotifier<bool> loadingStatus;
+  final void Function(TSelectOption option, bool check) onClick;
 
   @override
   State<_TSelectPanel> createState() => _TSelectPanelState();
@@ -572,6 +637,8 @@ class _TSelectPanelState extends State<_TSelectPanel> {
   TSelect get selectWidget => widget.selectState.widget;
   late String _filterWords;
   Future<List<TOption>>? future;
+
+  bool get filterable => selectWidget.filterable || selectWidget.filter != null;
 
   @override
   void initState() {
@@ -600,14 +667,14 @@ class _TSelectPanelState extends State<_TSelectPanel> {
   void _handleTextChange() {
     if (_filterWords != widget.textController.text) {
       _filterWords = widget.textController.text;
-      if (selectWidget.filterable) {
+      if (filterable) {
         if (mounted) {
           setState(() {
             // 在迭代中使用过滤选项
-            future = _handleFilter(widget.textController.text, selectWidget.options);
+            future = _handleFilter(_filterWords, selectWidget.options);
           });
         } else {
-          future = _handleFilter(widget.textController.text, selectWidget.options);
+          future = _handleFilter(_filterWords, selectWidget.options);
         }
       }
     }
@@ -643,11 +710,6 @@ class _TSelectPanelState extends State<_TSelectPanel> {
       future: future,
       builder: (context, snapshot) {
         var list = snapshot.data!;
-        if (snapshot.connectionState != ConnectionState.done) {
-          _updateLoadingStatus(true);
-          return _buildLoading(theme);
-        }
-        _updateLoadingStatus(false);
         if (list.isEmpty) {
           return _buildEmpty(theme);
         }
@@ -669,7 +731,7 @@ class _TSelectPanelState extends State<_TSelectPanel> {
                     optionGroup: option,
                     size: size,
                     onClick: (option, check) {
-                      _handleClick(option, check);
+                      widget.onClick(option, check);
                     },
                   );
                 }
@@ -682,7 +744,7 @@ class _TSelectPanelState extends State<_TSelectPanel> {
                     value: widget.selectState._innerValue,
                     size: size,
                     onClick: (option, check) {
-                      _handleClick(option, check);
+                      widget.onClick(option, check);
                     },
                   ),
                 );
@@ -694,26 +756,10 @@ class _TSelectPanelState extends State<_TSelectPanel> {
     );
   }
 
-  /// 改变加载状态
-  void _updateLoadingStatus(bool loading) {
-    if(widget.textController.text.isEmpty) {
-      loading = false;
-    }
-    if (widget.loadingStatus.value != loading) {
-      if (selectWidget.filterable || !widget.loadingStatus.value) {
-        SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
-          if (mounted) {
-            widget.loadingStatus.value = loading;
-          }
-        });
-      }
-    }
-  }
-
   /// 处理过滤数据
   Future<List<TOption>> _handleFilter(String filterWords, List<TOption> options) async {
     List<TOption> list = [];
-    if (!selectWidget.filterable || widget.textController.text.isEmpty) {
+    if (!filterable || widget.textController.text.isEmpty) {
       return options;
     }
     for (var option in options) {
@@ -734,7 +780,7 @@ class _TSelectPanelState extends State<_TSelectPanel> {
 
   /// 处理过滤
   FutureOr<bool> _filter(String filterWords, TSelectOption option) async {
-    return option.label.contains(filterWords);
+    return option.label.toLowerCase().contains(filterWords.toLowerCase());
   }
 
   /// 构建加载中
@@ -779,39 +825,6 @@ class _TSelectPanelState extends State<_TSelectPanel> {
         ],
       ),
     );
-  }
-
-  /// 处理option点击事件
-  void _handleClick(TSelectOption option, bool check) {
-    dynamic value = widget.selectState._value;
-    var options = List.of(widget.selectState._selectOptions);
-    if (selectWidget.multiple) {
-      value ??= [];
-      var list = List.of(value);
-      if (check) {
-        if (selectWidget.valueType == TSelectValueType.object) {
-          list.add(option);
-        } else {
-          list.add(option.value);
-        }
-        options.add(option);
-      } else {
-        var index = widget.selectState._innerValue.indexOf(option.value);
-        list.removeAt(index);
-        options.removeAt(index);
-      }
-      value = list;
-    } else {
-      if (selectWidget.valueType == TSelectValueType.object) {
-        value = option;
-      } else {
-        value = option.value;
-      }
-      widget.selectState.effectivePopupVisible.value = false;
-    }
-    var trigger = check ? TSelectValueChangeTrigger.check : TSelectValueChangeTrigger.uncheck;
-    selectWidget.onChange
-        ?.call(value, TSelectChangeContext(selectedOptions: options, option: option, trigger: trigger));
   }
 }
 

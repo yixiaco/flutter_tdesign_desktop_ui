@@ -10,6 +10,7 @@ class TSelectExample extends StatefulWidget {
 
 class _TSelectExampleState extends State<TSelectExample> {
   late List<TOption> options;
+  dynamic inputSelectValue;
   dynamic value = const TSelectOption(label: '大数据', value: '2');
   dynamic value2 = [const TSelectOption(label: '大数据', value: '2')];
   bool filter = true;
@@ -52,6 +53,23 @@ class _TSelectExampleState extends State<TSelectExample> {
             });
           },
         ),
+        TInputAdornment(
+          prepend: TSelect(
+            value: inputSelectValue,
+            autoWidth: true,
+            borderless: true,
+            options: const [
+              TSelectOption(label: 'https', value: 'https'),
+              TSelectOption(label: 'http', value: 'http'),
+            ],
+            onChange: (value, changeContext) {
+              setState(() {
+                inputSelectValue = value;
+              });
+            },
+          ),
+          child: const TInput(),
+        ),
         const TSelect(),
         const TSelect(placeholder: '空数据', disabled: true),
         // const TSelect(placeholder: '加载中', loading: true),
@@ -62,10 +80,8 @@ class _TSelectExampleState extends State<TSelectExample> {
               options: options,
               autoWidth: true,
               clearable: true,
-              prefixIcon: const Padding(
-                padding: EdgeInsets.only(right: 8.0),
-                child: Icon(TIcons.browse),
-              ),
+              filterable: filter,
+              prefixIcon: const Icon(TIcons.browse),
               valueType: TSelectValueType.object,
               placeholder: '请选择云解决方案',
               onChange: (value, changeContext) {
@@ -76,36 +92,37 @@ class _TSelectExampleState extends State<TSelectExample> {
             );
           },
         ),
-        TSelect(
-          value: value2,
-          multiple: true,
-          options: options,
-          autoWidth: true,
-          clearable: true,
-          minCollapsedNum: 2,
-          max: 3,
-          tagVariant: TTagVariant.light,
-          tagTheme: TTagTheme.primary,
-          prefixIcon: const Padding(
-            padding: EdgeInsets.only(right: 8.0),
-            child: Icon(TIcons.browse),
-          ),
-          valueType: TSelectValueType.object,
-          placeholder: '请选择云解决方案',
-          filterable: filter,
-          creatable: true,
-          filter: (filterWords, option) {
-            // return option.label.contains(filterWords);
-            return Future.delayed(const Duration(milliseconds: 50), () {
-              return option.label.contains(filterWords);
-            });
+        StatefulBuilder(
+          builder: (context, setState) {
+            return TSelect(
+              value: value2,
+              multiple: true,
+              options: options,
+              autoWidth: true,
+              clearable: true,
+              minCollapsedNum: 2,
+              max: 3,
+              tagVariant: TTagVariant.light,
+              tagTheme: TTagTheme.primary,
+              prefixIcon: const Icon(TIcons.browse),
+              valueType: TSelectValueType.object,
+              placeholder: '请选择云解决方案',
+              // filterable: filter,
+              creatable: true,
+              filter: (filterWords, option) {
+                return option.label.contains(filterWords);
+                // return Future.delayed(const Duration(milliseconds: 50), () {
+                //   return option.label.contains(filterWords);
+                // });
+              },
+              onChange: (value, changeContext) {
+                setState(() {
+                  value2 = value;
+                });
+              },
+            );
           },
-          onChange: (value, changeContext) {
-            setState(() {
-              value2 = value;
-            });
-          },
-        ),
+        )
       ],
     );
   }
