@@ -154,6 +154,7 @@ class TSelect extends StatefulWidget {
   /// 多选且可搜索时，是否在选中一个选项后保留当前的搜索关键词
   final bool reserveKeyword;
 
+  /// 开发中...
   /// 懒加载和虚拟滚动。为保证组件收益最大化，当数据量小于阈值 scroll.threshold 时，无论虚拟滚动的配置是否存在，组件内部都不会开启虚拟滚动，scroll.threshold 默认为 100
   final TSelectScroll? scroll;
 
@@ -821,6 +822,9 @@ class _TSelectPanelState extends State<_TSelectPanel> {
               direction: Axis.vertical,
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
+              boxConstraintsCallback: (child, innerConstraints, boxConstraints) {
+                return innerConstraints.copyWith(minWidth: boxConstraints.minWidth);
+              },
               children: List.generate(list.length, (index) {
                 var option = list[index];
                 bool isFirst = index == 0;
@@ -984,9 +988,13 @@ class _TOptionGroup extends StatelessWidget {
         break;
     }
 
-    return Column(
+    return FixedCrossFlex(
+      direction: Axis.vertical,
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
+      boxConstraintsCallback: (child, innerConstraints, boxConstraints) {
+        return innerConstraints.copyWith(minWidth: boxConstraints.minWidth);
+      },
       children: [
         Container(
           height: height,
@@ -1002,6 +1010,9 @@ class _TOptionGroup extends StatelessWidget {
             direction: Axis.vertical,
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
+            boxConstraintsCallback: (child, innerConstraints, boxConstraints) {
+              return innerConstraints.copyWith(minWidth: boxConstraints.minWidth);
+            },
             children: List.generate(optionGroup.children.length, (index) {
               var option = optionGroup.children[index];
               bool isFirst = index == 0;

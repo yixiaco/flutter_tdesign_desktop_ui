@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
+import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 class TSelectScroll {
   /// 表示除可视区域外，额外渲染的行数，避免快速滚动过程中，新出现的内容来不及渲染从而出现空白
@@ -21,10 +24,10 @@ class TSelectScroll {
   final TSelectScrollType type;
 
   const TSelectScroll({
-    required this.bufferSize,
-    required this.isFixedRowHeight,
+    this.bufferSize = 20,
+    this.isFixedRowHeight = false,
     this.rowHeight,
-    required this.threshold,
+    this.threshold = 100,
     required this.type,
   });
 }
@@ -88,7 +91,7 @@ class TSelectOption extends TOption {
     Widget? child,
     bool? disabled,
     String? label,
-    dynamic? value,
+    dynamic value,
   }) {
     return TSelectOption(
       checkAll: checkAll ?? this.checkAll,
@@ -145,4 +148,89 @@ class TSelectChangeContext {
     this.option,
     required this.trigger,
   });
+}
+
+class TSelectPopupDataChannel {
+  final dynamic value;
+
+  /// 可编辑文本字段的控制器
+  final TextEditingController textController;
+
+  /// 选项
+  final List<TOption> options;
+
+  /// 是否可搜索
+  final bool filterable;
+
+  /// 自定义过滤方法，用于对现有数据进行搜索过滤，判断是否过滤某一项数据。
+  final FutureOr<bool> Function(String filterWords, TSelectOption option)? filter;
+
+  /// 组件大小
+  final TComponentSize size;
+
+  /// 是否为加载状态
+  final bool loading;
+
+  /// 远程加载时显示的文字，支持自定义。如加上超链接。
+  final Widget? loadingText;
+
+  /// 当下拉列表为空时显示的内容。
+  final Widget? empty;
+
+  /// 用于控制多选数量，值为 0 则不限制
+  final int max;
+
+  /// 是否允许多选
+  final bool multiple;
+
+  /// 点击事件
+  final void Function(TSelectOption option, bool check) onClick;
+
+  const TSelectPopupDataChannel({
+    this.value,
+    required this.textController,
+    required this.options,
+    required this.filterable,
+    this.filter,
+    required this.size,
+    required this.loading,
+    this.loadingText,
+    this.empty,
+    required this.max,
+    required this.multiple,
+    required this.onClick,
+  });
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is TSelectPopupDataChannel &&
+          runtimeType == other.runtimeType &&
+          value == other.value &&
+          textController == other.textController &&
+          options == other.options &&
+          filterable == other.filterable &&
+          filter == other.filter &&
+          size == other.size &&
+          loading == other.loading &&
+          loadingText == other.loadingText &&
+          empty == other.empty &&
+          max == other.max &&
+          multiple == other.multiple &&
+          onClick == other.onClick;
+
+  @override
+  int get hashCode =>
+      value.hashCode ^
+      textController.hashCode ^
+      options.hashCode ^
+      filterable.hashCode ^
+      filter.hashCode ^
+      size.hashCode ^
+      loading.hashCode ^
+      loadingText.hashCode ^
+      empty.hashCode ^
+      max.hashCode ^
+      multiple.hashCode ^
+      onClick.hashCode;
 }

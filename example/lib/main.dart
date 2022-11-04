@@ -455,18 +455,19 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 const Text('国际化：'),
-                DropdownButton<Locale>(
+                TSelect(
                   value: locale,
-                  items: const [
-                    DropdownMenuItem(value: Locale('zh', 'CN'), child: Text('中文')),
-                    DropdownMenuItem(value: Locale('en', 'US'), child: Text('English')),
-                    DropdownMenuItem(value: Locale('ja', 'JP'), child: Text('日本語')),
-                    DropdownMenuItem(value: Locale('ko', 'KR'), child: Text('한글')),
+                  autoWidth: true,
+                  options: const [
+                    TSelectOption(label: '中文', value: Locale('zh', 'CN')),
+                    TSelectOption(label: 'English', value: Locale('en', 'US')),
+                    TSelectOption(label: '日本語', value: Locale('ja', 'JP')),
+                    TSelectOption(label: '한글', value: Locale('ko', 'KR')),
                   ],
-                  onChanged: (value) {
+                  onChange: (value, changeContext) {
                     ref.read(localeProvider.state).state = value!;
                   },
-                )
+                ),
               ],
             ),
             Row(
