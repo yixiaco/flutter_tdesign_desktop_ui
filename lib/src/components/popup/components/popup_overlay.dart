@@ -167,10 +167,10 @@ class _PopupOverlayState extends State<_PopupOverlay> {
                   if (placement == BubbleDirection.left) ...popupLeftArrowShadow
                 ],
                 shape: BubbleShapeBorder(
-                  smooth: 0,
+                  smooth: 1,
                   arrowQuadraticBezierLength: 0,
-                  arrowAngle: 6,
-                  arrowHeight: 6,
+                  arrowAngle: 5,
+                  arrowHeight: 5,
                   direction: placement,
                   radius: style?.radius ?? BorderRadius.circular(TVar.borderRadiusDefault),
                   border: style?.border,

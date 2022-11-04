@@ -32,16 +32,20 @@ class TSelect extends StatefulWidget {
     this.popupStyle,
     this.popupVisible,
     this.prefixIcon,
+    this.suffix,
+    this.suffixIcon,
     this.readonly = false,
     this.reserveKeyword = false,
     this.scroll,
     this.showArrow = true,
+    this.showPopupArrow = false,
     this.size,
     this.status,
     this.tips,
     this.value,
     this.defaultValue,
     this.valueType = TSelectValueType.value,
+    this.tag,
     this.singleValueDisplay,
     this.multipleValueDisplay,
     this.onBlur,
@@ -138,6 +142,12 @@ class TSelect extends StatefulWidget {
   /// 组件前置图标。
   final Widget? prefixIcon;
 
+  /// 后置图标前的后置内容
+  final Widget? suffix;
+
+  /// 组件后置图标
+  final Widget? suffixIcon;
+
   /// 只读状态，值为真会隐藏输入框，且无法打开下拉框
   final bool readonly;
 
@@ -149,6 +159,9 @@ class TSelect extends StatefulWidget {
 
   /// 是否显示右侧箭头，默认显示
   final bool showArrow;
+
+  /// 是否显示浮层箭头
+  final bool showPopupArrow;
 
   /// 组件尺寸
   final TComponentSize? size;
@@ -171,6 +184,9 @@ class TSelect extends StatefulWidget {
   /// 用于控制选中值的类型。假设数据选项为：[{ label: '姓名', value: 'name' }]，value 表示值仅返回数据选项中的 value， object 表示值返回全部数据。
   /// 可选项：value/object
   final TSelectValueType valueType;
+
+  /// 自定义标签的内部内容，每一个标签的当前值。注意和 valueDisplay 区分，valueDisplay 是用来定义全部标签内容，而非某一个标签
+  final String Function(int index, TSelectOption value)? tag;
 
   /// 自定义值呈现的全部内容
   final String Function(TSelectOption? value)? singleValueDisplay;
@@ -407,7 +423,7 @@ class _TSelectState extends State<TSelect> {
       if (states.containsAny([MaterialState.hovered, MaterialState.focused])) {
         return colorScheme.bgColorContainerHover;
       }
-      if(states.contains(MaterialState.disabled)){
+      if (states.contains(MaterialState.disabled)) {
         return colorScheme.bgColorComponentDisabled;
       }
       return Colors.transparent;
@@ -439,10 +455,11 @@ class _TSelectState extends State<TSelect> {
             ).merge(widget.popupStyle),
             placeholder: placeholder,
             readonly: widget.readonly,
-            showArrow: widget.showArrow,
+            showPopupArrow: widget.showPopupArrow,
             clearable: widget.clearable,
             prefixIcon: widget.prefixIcon,
-            suffixIcon: suffixIcon,
+            suffixIcon: widget.showArrow ? widget.suffixIcon ?? suffixIcon : null,
+            suffix: widget.suffix,
             minCollapsedNum: widget.minCollapsedNum,
             onTagChange: _handleTagChange,
             onMouseleave: widget.onMouseleave,
@@ -500,6 +517,7 @@ class _TSelectState extends State<TSelect> {
                     return widget.collapsedItems!(valueList, collapsedTagsList, count);
                   }
                 : null,
+            tag: widget.tag != null ? (index, value) => widget.tag!(index, value.value as TSelectOption) : null,
             singleValueDisplay: widget.singleValueDisplay != null
                 ? (value) => widget.singleValueDisplay!.call(value?.value as TSelectOption?)
                 : null,

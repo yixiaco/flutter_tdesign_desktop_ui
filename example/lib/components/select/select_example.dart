@@ -132,6 +132,7 @@ class _TSelectExampleState extends State<TSelectExample> {
               // filterable: filter,
               creatable: true,
               reserveKeyword: true,
+              showArrow: false,
               filter: (filterWords, option) {
                 return option.label.contains(filterWords);
                 // return Future.delayed(const Duration(milliseconds: 50), () {

@@ -23,7 +23,7 @@ class TMultipleSelectInput<T extends SelectInputValue> extends StatefulWidget {
     this.placeholder,
     this.placement,
     this.trigger,
-    this.showArrow,
+    this.showPopupArrow,
     this.onOpen,
     this.onClose,
     this.showDuration = const Duration(milliseconds: 250),
@@ -114,7 +114,7 @@ class TMultipleSelectInput<T extends SelectInputValue> extends StatefulWidget {
   final TPopupTrigger? trigger;
 
   /// 是否显示浮层箭头
-  final bool? showArrow;
+  final bool? showPopupArrow;
 
   /// 打开事件
   final TCallback? onOpen;
@@ -296,7 +296,7 @@ class _TMultipleSelectInputState<T extends SelectInputValue> extends State<TMult
       content: panel,
       trigger: trigger,
       placement: widget.placement ?? TPopupPlacement.bottomLeft,
-      showArrow: widget.showArrow ?? false,
+      showArrow: widget.showPopupArrow ?? false,
       hideEmptyPopup: true,
       child: Builder(
         builder: (context) {

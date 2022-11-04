@@ -26,7 +26,7 @@ class TSelectInput<T extends SelectInputValue> extends StatelessWidget {
     this.placeholder,
     this.placement,
     this.trigger,
-    this.showArrow,
+    this.showPopupArrow,
     this.onOpen,
     this.onClose,
     this.showDuration = const Duration(milliseconds: 250),
@@ -121,7 +121,7 @@ class TSelectInput<T extends SelectInputValue> extends StatelessWidget {
   final TPopupTrigger? trigger;
 
   /// 是否显示浮层箭头
-  final bool? showArrow;
+  final bool? showPopupArrow;
 
   /// 打开事件
   final TCallback? onOpen;
@@ -280,6 +280,7 @@ class TSelectInput<T extends SelectInputValue> extends StatelessWidget {
       onKeyUp: onKeyUp,
       prefixIcon: prefixIcon,
       suffixIcon: suffixIcon,
+      showPopupArrow: showPopupArrow,
       onClear: onClear,
       clearable: clearable,
       onEnter: onEnter,
@@ -332,6 +333,7 @@ class TSelectInput<T extends SelectInputValue> extends StatelessWidget {
       onKeyPress: onKeyPress,
       onKeyUp: onKeyUp,
       suffixIcon: suffixIcon,
+      showPopupArrow: showPopupArrow,
       onClear: onClear,
       clearable: clearable,
       onEnter: onEnter,
