@@ -540,12 +540,14 @@ class _TSelectState extends State<TSelect> {
 
   /// 处理搜索事件
   void _handleSearch(String search) {
-    // 去抖
-    _searchDebounceTimer?.cancel();
-    _searchDebounceTimer = Timer(const Duration(milliseconds: 300), () {
-      _searchDebounceTimer = null;
-      widget.onSearch?.call(search);
-    });
+    if (widget.onSearch != null) {
+      // 去抖
+      _searchDebounceTimer?.cancel();
+      _searchDebounceTimer = Timer(const Duration(milliseconds: 300), () {
+        _searchDebounceTimer = null;
+        widget.onSearch?.call(search);
+      });
+    }
   }
 
   /// 处理option点击事件
@@ -760,7 +762,7 @@ class _TSelectPanelState extends State<_TSelectPanel> {
       widget.textController.removeListener(_handleTextChange);
       _handleTextChange();
     }
-    if (widget.options != oldWidget.options) {
+    if (!widget.options.contentEquals(oldWidget.options)) {
       _handleTextChange(true);
     }
   }
@@ -786,6 +788,30 @@ class _TSelectPanelState extends State<_TSelectPanel> {
   Widget build(BuildContext context) {
     var theme = TTheme.of(context);
 
+    if (widget.loading) {
+      return _buildLoading(theme);
+    }
+    if (widget.options.isEmpty) {
+      return _buildEmpty(theme);
+    }
+    if(widget.filterable) {
+      return FutureBuilder(
+        initialData: widget.options,
+        future: future,
+        builder: (context, snapshot) {
+          var list = snapshot.data!;
+          if (list.isEmpty) {
+            return _buildEmpty(theme);
+          }
+          return _buildList(theme, list);
+        },
+      );
+    }
+    return _buildList(theme, widget.options);
+  }
+
+  /// 构建列表
+  TSingleChildScrollView _buildList(TThemeData theme, List<TOption> options) {
     TComponentSize size = widget.size;
 
     EdgeInsets padding;
@@ -801,63 +827,47 @@ class _TSelectPanelState extends State<_TSelectPanel> {
         break;
     }
 
-    if (widget.loading) {
-      return _buildLoading(theme);
-    }
-    if (widget.options.isEmpty) {
-      return _buildEmpty(theme);
-    }
-    return FutureBuilder(
-      initialData: widget.options,
-      future: future,
-      builder: (context, snapshot) {
-        var list = snapshot.data!;
-        if (list.isEmpty) {
-          return _buildEmpty(theme);
-        }
-        return TSingleChildScrollView(
-          child: Padding(
-            padding: padding,
-            child: FixedCrossFlex(
-              direction: Axis.vertical,
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              boxConstraintsCallback: (child, innerConstraints, boxConstraints) {
-                return innerConstraints.copyWith(minWidth: boxConstraints.minWidth);
-              },
-              children: List.generate(list.length, (index) {
-                var option = list[index];
-                bool isFirst = index == 0;
-                if (option is TSelectOptionGroup) {
-                  return _TOptionGroup(
-                    max: widget.max,
-                    value: widget.selectState._innerValue,
-                    multiple: widget.multiple,
-                    optionGroup: option,
-                    size: size,
-                    onClick: (option, check) {
-                      widget.onClick(option, check);
-                    },
-                  );
-                }
-                return Padding(
-                  padding: EdgeInsets.only(top: isFirst ? 0 : 2),
-                  child: _TOption(
-                    max: widget.max,
-                    option: option as TSelectOption,
-                    multiple: widget.multiple,
-                    value: widget.selectState._innerValue,
-                    size: size,
-                    onClick: (option, check) {
-                      widget.onClick(option, check);
-                    },
-                  ),
-                );
-              }),
-            ),
-          ),
-        );
-      },
+    return TSingleChildScrollView(
+      child: Padding(
+        padding: padding,
+        child: FixedCrossFlex(
+          direction: Axis.vertical,
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          boxConstraintsCallback: (child, innerConstraints, boxConstraints) {
+            return innerConstraints.copyWith(minWidth: boxConstraints.minWidth);
+          },
+          children: List.generate(options.length, (index) {
+            var option = options[index];
+            bool isFirst = index == 0;
+            if (option is TSelectOptionGroup) {
+              return _TOptionGroup(
+                max: widget.max,
+                value: widget.selectState._innerValue,
+                multiple: widget.multiple,
+                optionGroup: option,
+                size: size,
+                onClick: (option, check) {
+                  widget.onClick(option, check);
+                },
+              );
+            }
+            return Padding(
+              padding: EdgeInsets.only(top: isFirst ? 0 : 2),
+              child: _TOption(
+                max: widget.max,
+                option: option as TSelectOption,
+                multiple: widget.multiple,
+                value: widget.selectState._innerValue,
+                size: size,
+                onClick: (option, check) {
+                  widget.onClick(option, check);
+                },
+              ),
+            );
+          }),
+        ),
+      ),
     );
   }
 

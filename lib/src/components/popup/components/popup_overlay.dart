@@ -39,34 +39,37 @@ class _PopupOverlayState extends State<_PopupOverlay> {
     levelNotifier = _PopupLevelNotifier({});
     _visible = ValueNotifier(false);
     _isReverse = ValueNotifier(false);
-    _updateIgnore();
-    widget.animation.addListener(_updateIgnore);
+    _updateShow();
+    widget.animation.addListener(_updateShow);
   }
 
   @override
   void didUpdateWidget(covariant _PopupOverlay oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.animation != oldWidget.animation) {
-      oldWidget.animation.removeListener(_updateIgnore);
-      widget.animation.addListener(_updateIgnore);
+      oldWidget.animation.removeListener(_updateShow);
+      widget.animation.addListener(_updateShow);
     }
   }
 
   @override
   void dispose() {
     levelNotifier.dispose();
-    widget.animation.removeListener(_updateIgnore);
+    widget.animation.removeListener(_updateShow);
     _visible.dispose();
     _isReverse.dispose();
     widget.onRemove();
     super.dispose();
   }
 
-  void _updateIgnore() {
-    if (widget.animation.value > 0) {
+  /// 在动画值大于0时显示页面
+  void _updateShow() {
+    if(widget.animation.isCompleted) {
       if (widget.popupState.widget.trigger != TPopupTrigger.focus && !widget.popupState._node.hasFocus) {
         widget.focusScopeNode.requestFocus();
       }
+    }
+    if (widget.animation.value > 0) {
       _visible.value = true;
     } else {
       _visible.value = false;

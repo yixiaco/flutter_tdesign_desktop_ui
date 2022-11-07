@@ -305,8 +305,12 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
 
   /// 销毁浮层对象.不应该直接使用这个方法，而是使用[_hidePopup]
   void _removeEntry({bool force = false}) {
-    _node.unfocus();
-    _popupScopeNode.unfocus();
+    if (_node.hasFocus) {
+      _node.unfocus();
+    }
+    if (_popupScopeNode.hasFocus) {
+      _popupScopeNode.unfocus();
+    }
     if (_existGlobalPointerRoute) {
       // 移除监听全局指针事件
       GestureBinding.instance.pointerRouter.removeGlobalRoute(_globalPointerRoute);

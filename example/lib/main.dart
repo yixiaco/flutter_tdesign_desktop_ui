@@ -458,6 +458,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                 TSelect(
                   value: locale,
                   autoWidth: true,
+                  filterable: true,
                   options: const [
                     TSelectOption(label: '中文', value: Locale('zh', 'CN')),
                     TSelectOption(label: 'English', value: Locale('en', 'US')),
