@@ -69,7 +69,7 @@ class TInputNumber<T> extends TFormItemValidate {
     this.restorationId,
     this.autofocus = false,
     this.autocorrect = true,
-  })  : assert(T == num || T == String || T == int || T == double);
+  }) : assert(T == num || T == String || T == int || T == double);
 
   /// 文本内容位置，居左/居中/居右
   final TextAlign? align;
@@ -179,6 +179,9 @@ class _TInputNumberState<T> extends TFormItemValidateState<TInputNumber<T>> {
 
   late String _text;
 
+  /// 显示后缀icon
+  late ValueNotifier<bool> _showSuffixIcon;
+
   /// 是否禁用
   bool get _disabled => formDisabled || widget.disabled;
 
@@ -192,6 +195,7 @@ class _TInputNumberState<T> extends TFormItemValidateState<TInputNumber<T>> {
 
   @override
   void initState() {
+    _showSuffixIcon = ValueNotifier(false);
     _controller = TextEditingController(text: widget.value?.toString() ?? widget.defaultValue?.toString());
     _text = _controller.text;
     super.initState();
@@ -202,13 +206,15 @@ class _TInputNumberState<T> extends TFormItemValidateState<TInputNumber<T>> {
     super.dispose();
     _controller.dispose();
     _focusNode?.dispose();
+    _showSuffixIcon.dispose();
   }
 
   @override
   void didUpdateWidget(covariant TInputNumber<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.value != oldWidget.value && _text != widget.value) {
-      _controller.text = widget.value?.toString() ?? '';
+    var value = widget.value?.toString() ?? '';
+    if (widget.value != oldWidget.value && _text != value) {
+      _controller.text = value;
       _handle();
       _text = _controller.text;
       if (_text != widget.value) {
@@ -263,27 +269,39 @@ class _TInputNumberState<T> extends TFormItemValidateState<TInputNumber<T>> {
             return colorScheme.bgColorSecondaryContainer;
           }),
         );
-        suffixIcon = Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TButton(
-              disabled: _disabled || (_max != null && _current >= _max!),
-              style: buttonStyle,
-              radius: const BorderRadius.only(topRight: Radius.circular(2)),
-              softWrap: true,
-              onPressed: _handleAdd,
-              child: _buildRightIcon(colorScheme, size, theme, TIcons.chevronUp),
-            ),
-            const SizedBox(height: 2),
-            TButton(
-              disabled: _disabled || (_min != null && _current <= _min!),
-              style: buttonStyle,
-              radius: const BorderRadius.only(bottomRight: Radius.circular(2)),
-              softWrap: true,
-              onPressed: _handleRemove,
-              child: _buildRightIcon(colorScheme, size, theme, TIcons.chevronDown),
-            ),
-          ],
+        suffixIcon = ValueListenableBuilder(
+          valueListenable: _showSuffixIcon,
+          builder: (context, value, child) {
+            return Visibility(
+              visible: value,
+              maintainState: true,
+              maintainSize: true,
+              maintainAnimation: true,
+              child: child!,
+            );
+          },
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TButton(
+                disabled: _disabled || (_max != null && _current >= _max!),
+                style: buttonStyle,
+                radius: const BorderRadius.only(topRight: Radius.circular(2)),
+                softWrap: true,
+                onPressed: _handleAdd,
+                child: _buildRightIcon(colorScheme, size, theme, TIcons.chevronUp),
+              ),
+              const SizedBox(height: 2),
+              TButton(
+                disabled: _disabled || (_min != null && _current <= _min!),
+                style: buttonStyle,
+                radius: const BorderRadius.only(bottomRight: Radius.circular(2)),
+                softWrap: true,
+                onPressed: _handleRemove,
+                child: _buildRightIcon(colorScheme, size, theme, TIcons.chevronDown),
+              ),
+            ],
+          ),
         );
         break;
       case TInputNumberTheme.row:
@@ -325,8 +343,14 @@ class _TInputNumberState<T> extends TFormItemValidateState<TInputNumber<T>> {
         onEnter: (text) => widget.onEnter?.call(),
         onFocus: (text) => widget.onFocus?.call(),
         onKeyDown: (text, event) => widget.onKeyDown?.call(),
-        onMouseenter: widget.onMouseenter,
-        onMouseleave: widget.onMouseleave,
+        onMouseenter: (event) {
+          _showSuffixIcon.value = true;
+          widget.onMouseenter?.call(event);
+        },
+        onMouseleave: (event) {
+          _showSuffixIcon.value = false;
+          widget.onMouseleave?.call(event);
+        },
         status: widget.status,
         suffix: widget.suffix,
         suffixIcon: suffixIcon,
@@ -375,25 +399,30 @@ class _TInputNumberState<T> extends TFormItemValidateState<TInputNumber<T>> {
       case TInputNumberTheme.normal:
     }
 
-    if (!widget.autoWidth) {
-      double minWidth;
-      if (widget.theme == TInputNumberTheme.column) {
-        minWidth = size.sizeOf(
-            small: _kInputNumberRightWidthS, medium: _kInputNumberRightWidth, large: _kInputNumberRightWidthL);
-      } else {
-        minWidth = size.sizeOf(small: _kInputNumberWidthS, medium: _kInputNumberWidth, large: _kInputNumberWidthL);
-      }
-      child = ConstrainedBox(
-        constraints: BoxConstraints(
-          minWidth: minWidth,
-          maxWidth: minWidth,
-        ),
-        child: child,
-      );
+    double minWidth;
+    if (widget.theme == TInputNumberTheme.column) {
+      minWidth = size.sizeOf(
+          small: _kInputNumberRightWidthS, medium: _kInputNumberRightWidth, large: _kInputNumberRightWidthL);
+    } else {
+      minWidth = size.sizeOf(small: _kInputNumberWidthS, medium: _kInputNumberWidth, large: _kInputNumberWidthL);
     }
-    return Column(
+    BoxConstraints boxConstraints;
+    if (widget.autoWidth) {
+      boxConstraints = BoxConstraints(minWidth: minWidth);
+    } else {
+      boxConstraints = BoxConstraints(minWidth: minWidth, maxWidth: minWidth);
+    }
+    child = ConstrainedBox(
+      constraints: boxConstraints,
+      child: child,
+    );
+    return FixedCrossFlex(
+      direction: Axis.vertical,
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
+      boxConstraintsCallback: (child, innerConstraints, boxConstraints) {
+        return innerConstraints.copyWith(minWidth: boxConstraints.minWidth);
+      },
       children: [
         child,
         if (widget.tips != null)
@@ -410,29 +439,27 @@ class _TInputNumberState<T> extends TFormItemValidateState<TInputNumber<T>> {
   }
 
   Widget _buildRightIcon(TColorScheme colorScheme, TComponentSize size, TThemeData theme, IconData icon) {
-    return Builder(
-      builder: (context) {
-        var states = TMaterialStateScope.of(context)!;
-        Color color = colorScheme.textColorSecondary;
-        if (states.contains(MaterialState.hovered) || states.contains(MaterialState.focused)) {
-          color = colorScheme.textColorPrimary;
-        }
-        if (states.contains(MaterialState.disabled)) {
-          color = colorScheme.textColorDisabled;
-        }
-        return Center(
-          child: Icon(
-            icon,
-            size: size.sizeOf(
-              small: theme.fontData.fontSize,
-              medium: theme.fontData.fontSizeBase,
-              large: theme.fontData.fontSizeL,
-            ),
-            color: color,
-          ),
-        );
+    return Builder(builder: (context) {
+      var states = TMaterialStateScope.of(context)!;
+      Color color = colorScheme.textColorSecondary;
+      if (states.contains(MaterialState.hovered) || states.contains(MaterialState.focused)) {
+        color = colorScheme.textColorPrimary;
       }
-    );
+      if (states.contains(MaterialState.disabled)) {
+        color = colorScheme.textColorDisabled;
+      }
+      return Center(
+        child: Icon(
+          icon,
+          size: size.sizeOf(
+            small: theme.fontData.fontSize,
+            medium: theme.fontData.fontSizeBase,
+            large: theme.fontData.fontSizeL,
+          ),
+          color: color,
+        ),
+      );
+    });
   }
 
   /// 处理递增事件

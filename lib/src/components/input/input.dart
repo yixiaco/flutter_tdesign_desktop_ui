@@ -734,9 +734,13 @@ class _TInputState extends TFormItemValidateState<TInput> {
       );
     }
 
-    return Column(
+    return FixedCrossFlex(
+      direction: Axis.vertical,
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
+      boxConstraintsCallback: (child, innerConstraints, boxConstraints) {
+        return innerConstraints.copyWith(minWidth: boxConstraints.minWidth);
+      },
       children: [
         MouseRegion(
           onEnter: (event) {

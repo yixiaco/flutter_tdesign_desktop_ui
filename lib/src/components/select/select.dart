@@ -7,7 +7,8 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// Select 选择器
 /// 用于收纳大量选项的信息录入类组件。
-class TSelect extends StatefulWidget {
+/// TODO：滚动到第一个选项位置、全选、懒加载/虚拟加载
+class TSelect extends TFormItemValidate {
   const TSelect({
     super.key,
     this.autoWidth = false,
@@ -60,7 +61,8 @@ class TSelect extends StatefulWidget {
     this.onPopupVisibleChange,
     this.onRemove,
     this.onSearch,
-    this.focusNode,
+    super.focusNode,
+    super.name,
     this.autofocus = false,
     this.tagTheme = TTagTheme.defaultTheme,
     this.tagVariant = TTagVariant.dark,
@@ -240,9 +242,6 @@ class TSelect extends StatefulWidget {
   /// {@macro tdesign.components.select.value}
   final void Function(dynamic value, TSelectChangeContext changeContext)? onChange;
 
-  /// 焦点
-  final FocusNode? focusNode;
-
   /// 自动聚焦
   final bool autofocus;
 
@@ -284,10 +283,10 @@ class TSelect extends StatefulWidget {
   final Widget? label;
 
   @override
-  State<TSelect> createState() => _TSelectState();
+  TFormItemValidateState<TSelect> createState() => _TSelectState();
 }
 
-class _TSelectState extends State<TSelect> {
+class _TSelectState extends TFormItemValidateState<TSelect> {
   TPopupVisible? _popupVisible;
 
   /// 浮层控制器
@@ -310,14 +309,20 @@ class _TSelectState extends State<TSelect> {
   dynamic _value;
 
   /// 内部格式化的值
-  dynamic get _innerValue {
+  dynamic get _innerValue => _toInnerValue(_value);
+
+  /// 转为内部值
+  dynamic _toInnerValue(dynamic value) {
     if (widget.valueType == TSelectValueType.value) {
-      return _value;
+      return value;
     }
     if (widget.multiple) {
-      return (_value as List).map((e) => (e as TSelectOption).value).toList();
+      if (value == null) {
+        return [];
+      }
+      return (value as List).map((e) => (e as TSelectOption).value).toList();
     }
-    return (_value as TSelectOption?)?.value;
+    return (value as TSelectOption?)?.value;
   }
 
   /// 可过滤
@@ -328,37 +333,41 @@ class _TSelectState extends State<TSelect> {
     super.initState();
     _value = widget.value ?? widget.defaultValue;
     _filterTextController = TextEditingController();
-    _syncSelectOptions();
+    _selectOptions = _toSelectOptions(_innerValue);
   }
 
   @override
   void didUpdateWidget(covariant TSelect oldWidget) {
     super.didUpdateWidget(oldWidget);
+    update() {
+      _value = widget.value;
+      _selectOptions = _toSelectOptions(_innerValue);
+      formChange();
+    }
+
     if (widget.multiple != oldWidget.multiple || widget.valueType != oldWidget.valueType) {
-      _value = widget.value;
-      _syncSelectOptions();
+      update();
     } else if (widget.multiple) {
-      if (!(widget.value as List).contentEquals(_value)) {
-        _value = widget.value;
-        _syncSelectOptions();
+      if (widget.value != oldWidget.value || !(widget.value as List).contentEquals(_value)) {
+        update();
       }
-    } else if (widget.value != _value) {
-      _value = widget.value;
-      _syncSelectOptions();
+    } else if (widget.value != oldWidget.value && widget.value != _value) {
+      update();
     }
   }
 
   /// 将值同步为option
-  void _syncSelectOptions() {
-    var selectOptions = _search(_innerValue, widget.options);
+  List<TOption?> _toSelectOptions(dynamic value) {
+    var selectOptions = _search(value, widget.options);
+    // 将list转为map
     var optionMap = selectOptions.associateBy((element) => (element as TSelectOption).value);
     if (widget.multiple) {
-      _selectOptions = (_innerValue as List).map((e) => optionMap[e]).toList();
+      return (value as List).map((e) => optionMap[e]).toList();
     } else {
-      if (_innerValue == null) {
-        _selectOptions = [];
+      if (value == null) {
+        return [];
       } else {
-        _selectOptions = [optionMap[_innerValue]];
+        return [optionMap[value]];
       }
     }
   }
@@ -667,6 +676,43 @@ class _TSelectState extends State<TSelect> {
       return [if (checkOption != null) checkOption];
     }
   }
+
+  @override
+  get formItemValue => _value;
+
+  @override
+  void reset(TFormResetType type) {
+    switch (type) {
+      case TFormResetType.empty:
+        if (widget.multiple) {
+          _value = [];
+        } else {
+          _value = null;
+        }
+        _selectOptions = _toSelectOptions(_toInnerValue(_value));
+        var changeContext = const TSelectChangeContext(
+          selectedOptions: [],
+          option: null,
+          trigger: TSelectValueChangeTrigger.clear,
+        );
+        widget.onChange?.call(_value, changeContext);
+        break;
+      case TFormResetType.initial:
+        _value = widget.defaultValue;
+        _selectOptions = _toSelectOptions(_toInnerValue(widget.defaultValue));
+        var changeContext = TSelectChangeContext(
+          selectedOptions: _selectOptions,
+          option: null,
+          trigger: TSelectValueChangeTrigger.clear,
+        );
+        if (widget.multiple) {
+          widget.onChange?.call(widget.defaultValue ?? [], changeContext);
+        } else {
+          widget.onChange?.call(widget.defaultValue, changeContext);
+        }
+        break;
+    }
+  }
 }
 
 const double _kSelectOptionHeightS = 20;
@@ -794,7 +840,7 @@ class _TSelectPanelState extends State<_TSelectPanel> {
     if (widget.options.isEmpty) {
       return _buildEmpty(theme);
     }
-    if(widget.filterable) {
+    if (widget.filterable) {
       return FutureBuilder(
         initialData: widget.options,
         future: future,

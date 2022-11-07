@@ -143,10 +143,7 @@ class TFormState extends State<TForm> {
     return _TFormScope(
       formState: this,
       version: _version,
-      child: TSingleChildScrollView(
-        // alwaysShowPadding: true,
-        child: child,
-      ),
+      child: child,
     );
   }
 
