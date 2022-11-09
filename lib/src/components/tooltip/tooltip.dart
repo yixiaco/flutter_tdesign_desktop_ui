@@ -119,16 +119,16 @@ class TTooltip extends StatelessWidget {
     );
     Widget content;
     if (richMessage != null) {
-      content = Text.rich(richMessage!, style: textStyle);
+      content = Text.rich(richMessage!);
     } else {
-      content = Text(
-        message!,
-        style: textStyle,
-      );
+      content = Text(message!);
     }
-    content = IconTheme(
-      data: IconThemeData(size: theme.fontSize, color: textColor),
-      child: content,
+    content = DefaultTextStyle(
+      style: textStyle,
+      child: IconTheme(
+        data: IconThemeData(size: theme.fontSize, color: textColor),
+        child: content,
+      ),
     );
     return TPopup(
       disabled: disabled,

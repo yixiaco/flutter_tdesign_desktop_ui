@@ -103,7 +103,7 @@ class TBreadcrumb extends StatelessWidget {
             richMessage: TextSpan(
               children: [
                 WidgetSpan(
-                  child: DefaultTextStyle(
+                  child: DefaultTextStyle.merge(
                     style: theme.fontData.fontBodyMedium,
                     child: IconTheme.merge(
                       data: IconThemeData(size: theme.fontData.fontSizeL),
