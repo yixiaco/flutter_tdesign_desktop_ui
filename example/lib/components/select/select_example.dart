@@ -61,6 +61,8 @@ class _TSelectExampleState extends State<TSelectExample> {
 
   @override
   Widget build(BuildContext context) {
+    var theme = TTheme.of(context);
+    var colorScheme = theme.colorScheme;
     return TSpace(
       direction: Axis.vertical,
       children: [
@@ -148,6 +150,13 @@ class _TSelectExampleState extends State<TSelectExample> {
               creatable: true,
               reserveKeyword: true,
               showArrow: false,
+              panelTopContent: const Text('头部'),
+              panelBottomContent: Container(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                margin: const EdgeInsets.only(top: 8),
+                decoration: BoxDecoration(border: Border(top: BorderSide(color: colorScheme.borderLevel2Color))),
+                child: const Text('尾部'),
+              ),
               filter: (filterWords, option) {
                 return option.label.contains(filterWords);
                 // return Future.delayed(const Duration(milliseconds: 50), () {

@@ -183,7 +183,7 @@ class _TDropdownMenuState<T> extends State<_TDropdownMenu<T>> {
 
     const divider = TDivider(
       layout: Axis.vertical,
-      space: 0,
+      length: 0,
       margin: EdgeInsets.symmetric(vertical: 0, horizontal: 2),
     );
     var list = menus.expand((element) => [element, divider]).toList();
@@ -253,7 +253,7 @@ class _TDropdownMenuState<T> extends State<_TDropdownMenu<T>> {
               if (element.option.divider) {
                 // 让组件被自动拉伸
                 list.add(const TDivider(
-                  space: 0,
+                  length: 0,
                   margin: EdgeInsets.symmetric(vertical: 4),
                 ));
               }

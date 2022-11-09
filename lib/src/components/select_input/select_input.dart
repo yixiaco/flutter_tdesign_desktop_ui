@@ -4,6 +4,8 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 typedef TSelectInputCollapsedItemsCallback<T> = Widget Function(List<T> value, List<T> collapsedTags, int count);
 
+const double kSelectInputDefaultMaxWidth = 1000;
+
 /// 筛选器输入框
 /// 定义：筛选器通用输入框
 class TSelectInput<T extends SelectInputValue> extends StatelessWidget {

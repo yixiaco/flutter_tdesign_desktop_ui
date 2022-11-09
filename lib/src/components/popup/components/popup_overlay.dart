@@ -140,7 +140,7 @@ class _PopupOverlayState extends State<_PopupOverlay> {
               if (boxConstraints == null) {
                 boxConstraints = BoxConstraints(minWidth: box.size.width);
               } else {
-                boxConstraints = boxConstraints.enforce(BoxConstraints(minWidth: box.size.width));
+                boxConstraints = boxConstraints.copyWith(minWidth: boxConstraints.constrainWidth(box.size.width));
               }
             }
             var placement = currentPopupWidget.showArrow

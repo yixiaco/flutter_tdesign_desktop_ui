@@ -339,9 +339,10 @@ class _TSelectState extends TFormItemValidateState<TSelect> {
   @override
   void didUpdateWidget(covariant TSelect oldWidget) {
     super.didUpdateWidget(oldWidget);
+    bool updateOptions = false;
     update() {
       _value = widget.value;
-      _selectOptions = _toSelectOptions(_innerValue);
+      updateOptions = true;
       formChange();
     }
 
@@ -353,6 +354,9 @@ class _TSelectState extends TFormItemValidateState<TSelect> {
       }
     } else if (widget.value != oldWidget.value && widget.value != _value) {
       update();
+    }
+    if (updateOptions || !widget.options.contentEquals(oldWidget.options)) {
+      _selectOptions = _toSelectOptions(_innerValue);
     }
   }
 
@@ -408,7 +412,7 @@ class _TSelectState extends TFormItemValidateState<TSelect> {
       }
     }
     Widget panel = _TSelectPanel(
-      selectState: this,
+      innerValue: _innerValue,
       textController: _filterTextController,
       options: widget.options,
       filterable: widget.filterable || widget.filter != null,
@@ -420,6 +424,8 @@ class _TSelectState extends TFormItemValidateState<TSelect> {
       filter: widget.filter,
       empty: widget.empty,
       loadingText: widget.loadingText,
+      panelTopContent: widget.panelTopContent,
+      panelBottomContent: widget.panelBottomContent,
     );
     Widget suffixIcon = AnimatedBuilder(
       animation: effectivePopupVisible,
@@ -730,7 +736,7 @@ const EdgeInsets _kSelectOptionPaddingL = EdgeInsets.symmetric(vertical: 7, hori
 class _TSelectPanel extends StatefulWidget {
   const _TSelectPanel({
     Key? key,
-    required this.selectState,
+    this.innerValue,
     required this.textController,
     required this.options,
     required this.filterable,
@@ -741,10 +747,13 @@ class _TSelectPanel extends StatefulWidget {
     this.empty,
     required this.max,
     required this.multiple,
+    this.panelTopContent,
+    this.panelBottomContent,
     required this.onClick,
   }) : super(key: key);
 
-  final _TSelectState selectState;
+  /// 格式化后的选项值
+  final dynamic innerValue;
 
   /// 可编辑文本字段的控制器
   final TextEditingController textController;
@@ -776,12 +785,23 @@ class _TSelectPanel extends StatefulWidget {
   /// 是否允许多选
   final bool multiple;
 
+  /// 面板内的底部内容。
+  final Widget? panelBottomContent;
+
+  /// 面板内的顶部内容。
+  final Widget? panelTopContent;
+
   /// 点击事件
   final void Function(TSelectOption option, bool check) onClick;
 
   @override
   State<_TSelectPanel> createState() => _TSelectPanelState();
 }
+
+/// 在列表中的每项元素强制要求最小宽度与容器的最小宽度一致
+FixedCrossFlexBoxConstraintsCallback _boxConstraintsCallback = (child, innerConstraints, boxConstraints) {
+  return innerConstraints.copyWith(minWidth: boxConstraints.minWidth);
+};
 
 class _TSelectPanelState extends State<_TSelectPanel> {
   late String _filterWords;
@@ -874,45 +894,53 @@ class _TSelectPanelState extends State<_TSelectPanel> {
     }
 
     return TSingleChildScrollView(
-      child: Padding(
-        padding: padding,
-        child: FixedCrossFlex(
-          direction: Axis.vertical,
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          boxConstraintsCallback: (child, innerConstraints, boxConstraints) {
-            return innerConstraints.copyWith(minWidth: boxConstraints.minWidth);
-          },
-          children: List.generate(options.length, (index) {
-            var option = options[index];
-            bool isFirst = index == 0;
-            if (option is TSelectOptionGroup) {
-              return _TOptionGroup(
-                max: widget.max,
-                value: widget.selectState._innerValue,
-                multiple: widget.multiple,
-                optionGroup: option,
-                size: size,
-                onClick: (option, check) {
-                  widget.onClick(option, check);
-                },
-              );
-            }
-            return Padding(
-              padding: EdgeInsets.only(top: isFirst ? 0 : 2),
-              child: _TOption(
-                max: widget.max,
-                option: option as TSelectOption,
-                multiple: widget.multiple,
-                value: widget.selectState._innerValue,
-                size: size,
-                onClick: (option, check) {
-                  widget.onClick(option, check);
-                },
-              ),
-            );
-          }),
-        ),
+      child: FixedCrossFlex(
+        direction: Axis.vertical,
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        boxConstraintsCallback: _boxConstraintsCallback,
+        children: [
+          if(widget.panelTopContent != null) widget.panelTopContent!,
+          Padding(
+            padding: padding,
+            child: FixedCrossFlex(
+              direction: Axis.vertical,
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              boxConstraintsCallback: _boxConstraintsCallback,
+              children: List.generate(options.length, (index) {
+                var option = options[index];
+                bool isFirst = index == 0;
+                if (option is TSelectOptionGroup) {
+                  return _TOptionGroup(
+                    max: widget.max,
+                    value: widget.innerValue,
+                    multiple: widget.multiple,
+                    optionGroup: option,
+                    size: size,
+                    onClick: (option, check) {
+                      widget.onClick(option, check);
+                    },
+                  );
+                }
+                return Padding(
+                  padding: EdgeInsets.only(top: isFirst ? 0 : 2),
+                  child: _TOption(
+                    max: widget.max,
+                    option: option as TSelectOption,
+                    multiple: widget.multiple,
+                    value: widget.innerValue,
+                    size: size,
+                    onClick: (option, check) {
+                      widget.onClick(option, check);
+                    },
+                  ),
+                );
+              }),
+            ),
+          ),
+          if(widget.panelBottomContent != null) widget.panelBottomContent!,
+        ],
       ),
     );
   }
@@ -1048,9 +1076,7 @@ class _TOptionGroup extends StatelessWidget {
       direction: Axis.vertical,
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
-      boxConstraintsCallback: (child, innerConstraints, boxConstraints) {
-        return innerConstraints.copyWith(minWidth: boxConstraints.minWidth);
-      },
+      boxConstraintsCallback: _boxConstraintsCallback,
       children: [
         Container(
           height: height,
@@ -1066,9 +1092,7 @@ class _TOptionGroup extends StatelessWidget {
             direction: Axis.vertical,
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
-            boxConstraintsCallback: (child, innerConstraints, boxConstraints) {
-              return innerConstraints.copyWith(minWidth: boxConstraints.minWidth);
-            },
+            boxConstraintsCallback: _boxConstraintsCallback,
             children: List.generate(optionGroup.children.length, (index) {
               var option = optionGroup.children[index];
               bool isFirst = index == 0;

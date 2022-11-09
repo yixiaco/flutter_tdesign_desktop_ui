@@ -19,7 +19,7 @@ class TDivider extends StatelessWidget {
     this.align = TDividerAlign.center,
     this.dashed = false,
     this.layout = Axis.horizontal,
-    this.space,
+    this.length,
     this.thickness,
     this.margin,
     this.color,
@@ -37,8 +37,10 @@ class TDivider extends StatelessWidget {
   /// 分隔线类型有两种：水平和垂直
   final Axis layout;
 
-  /// 线条宽（horizontal）/高(vertical)
-  final double? space;
+  /// 线条长度
+  /// [layout]为[Axis.horizontal]时这里为宽度
+  /// [layout]为[Axis.vertical]时这里为高度
+  final double? length;
 
   /// 线条厚度
   final double? thickness;
@@ -66,7 +68,7 @@ class TDivider extends StatelessWidget {
         EdgeInsetsGeometry margin;
         Widget? child;
         if (layout == Axis.horizontal) {
-          width = space ?? maxWidth;
+          width = length ?? maxWidth;
           height = thickness ?? d;
           margin = this.margin ?? EdgeInsets.symmetric(vertical: TVar.spacer2);
           if (this.child != null) {
@@ -100,7 +102,7 @@ class TDivider extends StatelessWidget {
           }
         } else {
           width = thickness ?? d;
-          height = space ?? fontSize * 0.9;
+          height = length ?? fontSize * 0.9;
           margin = this.margin ?? EdgeInsets.symmetric(horizontal: TVar.spacer * 1.5);
         }
 

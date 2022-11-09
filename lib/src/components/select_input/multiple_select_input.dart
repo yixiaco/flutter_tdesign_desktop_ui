@@ -270,14 +270,11 @@ class _TMultipleSelectInputState<T extends SelectInputValue> extends State<TMult
 
   @override
   Widget build(BuildContext context) {
-    Widget? panel;
-    if (widget.panel != null) {
-      panel = LimitedBox(
-        maxWidth: 1000,
-        child: widget.panel,
-      );
-    }
     var trigger = widget.trigger ?? (widget.allowInput ? TPopupTrigger.focus : TPopupTrigger.notifier);
+    BoxConstraints boxConstraints = const BoxConstraints(maxWidth: kSelectInputDefaultMaxWidth);
+    if(widget.popupStyle?.constraints?.maxWidth == double.infinity) {
+      boxConstraints = (widget.popupStyle?.constraints ?? boxConstraints).copyWith(maxWidth: kSelectInputDefaultMaxWidth);
+    }
     return TPopup(
       disabled: widget.disabled || widget.readonly,
       showDuration: widget.showDuration,
@@ -292,8 +289,13 @@ class _TMultipleSelectInputState<T extends SelectInputValue> extends State<TMult
       },
       destroyOnClose: widget.destroyOnClose,
       visible: widget.popupVisible,
-      style: const TPopupStyle(followBoxWidth: true).merge(widget.popupStyle),
-      content: panel,
+      style: TPopupStyle(
+        followBoxWidth: true,
+        constraints: boxConstraints,
+      ).merge(widget.popupStyle?.copyWith(
+        constraints: boxConstraints,
+      )),
+      content: widget.panel,
       trigger: trigger,
       placement: widget.placement ?? TPopupPlacement.bottomLeft,
       showArrow: widget.showPopupArrow ?? false,

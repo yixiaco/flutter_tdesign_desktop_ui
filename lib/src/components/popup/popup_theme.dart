@@ -20,7 +20,8 @@ class TPopupThemeData with Diagnosticable {
   }
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is TPopupThemeData && runtimeType == other.runtimeType && style == other.style;
+  bool operator ==(Object other) =>
+      identical(this, other) || other is TPopupThemeData && runtimeType == other.runtimeType && style == other.style;
 
   @override
   int get hashCode => style.hashCode;
@@ -146,18 +147,18 @@ class TPopupStyle {
 
   TPopupStyle merge([TPopupStyle? style]) {
     return TPopupStyle(
-      backgroundColor: backgroundColor ?? style?.backgroundColor,
-      padding: padding ?? style?.padding,
-      margin: margin ?? style?.margin,
-      radius: radius ?? style?.radius,
-      border: border ?? style?.border,
-      width: width ?? style?.width,
-      height: height ?? style?.height,
-      constraints: constraints ?? style?.constraints,
-      transform: transform ?? style?.transform,
-      transformAlignment: transformAlignment ?? style?.transformAlignment,
-      followBoxWidth: followBoxWidth ?? style?.followBoxWidth,
-      shadows: shadows ?? style?.shadows,
+      backgroundColor: style?.backgroundColor ?? backgroundColor,
+      padding: style?.padding ?? padding,
+      margin: style?.margin ?? margin,
+      radius: style?.radius ?? radius,
+      border: style?.border ?? border,
+      width: style?.width ?? width,
+      height: style?.height ?? height,
+      constraints: style?.constraints ?? constraints,
+      transform: style?.transform ?? transform,
+      transformAlignment: style?.transformAlignment ?? transformAlignment,
+      followBoxWidth: style?.followBoxWidth ?? followBoxWidth,
+      shadows: style?.shadows ?? shadows,
     );
   }
 

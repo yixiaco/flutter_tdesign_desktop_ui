@@ -81,10 +81,11 @@ class TSelectOption extends TOption {
 
   @override
   bool operator ==(Object other) =>
-      identical(this, other) || other is TSelectOption && runtimeType == other.runtimeType && value == other.value;
+      identical(this, other) ||
+      other is TSelectOption && runtimeType == other.runtimeType && label == other.label && value == other.value;
 
   @override
-  int get hashCode => value.hashCode;
+  int get hashCode => label.hashCode ^ value.hashCode;
 
   TSelectOption copyWith({
     bool? checkAll,

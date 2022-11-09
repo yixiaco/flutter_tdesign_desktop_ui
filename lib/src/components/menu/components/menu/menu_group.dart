@@ -59,7 +59,7 @@ class _TMenuGroup<T> extends StatelessWidget {
             child: TDivider(
               layout: Axis.horizontal,
               thickness: 1,
-              space: 20,
+              length: 20,
               color: dividerColor,
             ),
           ),
