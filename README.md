@@ -25,7 +25,7 @@ TDesign 适配桌面端的组件库，适合在 Flutter 3.x 技术栈项目中�
 
 ```yaml
 dependencies:
-  bubble_box: ^0.0.1
+  flutter_tdesign_desktop_ui: ^0.0.x
 ```
 
 ### 基础使用
