@@ -7,7 +7,7 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 class TSpace extends StatelessWidget {
   /// 间距组件
   const TSpace({
-    Key? key,
+    super.key,
     this.children = const <Widget?>[],
     this.direction = Axis.horizontal,
     this.align = MainAxisAlignment.start,
@@ -23,7 +23,7 @@ class TSpace extends StatelessWidget {
     this.breakLine = false,
     this.textBaseline,
     this.mainAxisSize = MainAxisSize.min,
-  }) : super(key: key);
+  });
 
   /// 间距方向
   final Axis direction;

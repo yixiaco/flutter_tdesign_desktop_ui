@@ -4,12 +4,12 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 /// 判断文本是否展开
 class TExpandableText extends StatelessWidget {
   const TExpandableText({
-    Key? key,
+    super.key,
     required this.text,
     required this.builder,
     this.style,
     this.maxLines,
-  }) : super(key: key);
+  });
 
   /// 判断的子组件
   final String text;

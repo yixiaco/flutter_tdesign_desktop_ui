@@ -601,7 +601,7 @@ class RenderTDecoration extends RenderBox
         (constraints.constrainHeight(maxHeight) - _boxSize(suffix).height) / 2,
       );
     }
-    size = Size(maxWidth, constraints.constrainHeight(maxHeight));
+    size = Size(constraints.constrainWidth(maxWidth), constraints.constrainHeight(maxHeight));
   }
 
   /// 计算布局宽高

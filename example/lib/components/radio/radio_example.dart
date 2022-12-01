@@ -3,7 +3,7 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// 单选框示例
 class TRadioExample extends StatefulWidget {
-  const TRadioExample({Key? key}) : super(key: key);
+  const TRadioExample({super.key});
 
   @override
   State<TRadioExample> createState() => _TRadioExampleState();

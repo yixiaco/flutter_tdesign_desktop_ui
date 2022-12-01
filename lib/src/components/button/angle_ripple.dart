@@ -14,7 +14,7 @@ typedef RippleAfterBuilder = Widget Function(BuildContext context, Set<MaterialS
 /// 水波纹
 class TRipple extends StatefulWidget {
   const TRipple({
-    Key? key,
+    super.key,
     required this.builder,
     this.afterBuilder,
     this.disabled = false,
@@ -41,7 +41,7 @@ class TRipple extends StatefulWidget {
     this.backgroundColor,
     this.animatedDuration,
     this.curve = Curves.linear,
-  }) : super(key: key);
+  });
 
   /// 是否禁用
   final bool disabled;
@@ -133,11 +133,6 @@ class _TRippleState extends State<TRipple> with TickerProviderStateMixin {
   _TAngleRipplePainter painter = _TAngleRipplePainter();
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   void dispose() {
     super.dispose();
     painter.dispose();
@@ -160,10 +155,21 @@ class _TRippleState extends State<TRipple> with TickerProviderStateMixin {
     }
   }
 
+  bool get _isClick {
+    if (widget.disabled) {
+      return false;
+    }
+    if (widget.selected && !widget.selectedClick) {
+      return false;
+    }
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     return AllowTapListener(
-      onTapUp: _handleCancel,
+      onTapDown: _handleOnTapDown,
+      onTapUp: _handleUp,
       onTapCancel: _handleCancel,
       child: TMaterialStateButton(
         shortcuts: widget.shortcuts,
@@ -171,8 +177,8 @@ class _TRippleState extends State<TRipple> with TickerProviderStateMixin {
         focusNode: widget.focusNode,
         autofocus: widget.autofocus,
         disabled: widget.disabled,
-        onTapDown: _handleOnTapDown,
-        onTap: _handleTap,
+        onTapDown: widget.onTapDown,
+        onTap: widget.onTap,
         onTapUp: widget.onTapUp,
         onTapCancel: widget.onTapCancel,
         onLongPress: widget.onLongPress,
@@ -240,7 +246,8 @@ class _TRippleState extends State<TRipple> with TickerProviderStateMixin {
             return;
           }
           _doSplash();
-          _handleTap();
+          _confirm();
+          widget.onTap?.call();
           context.findRenderObject()!.sendSemanticsEvent(const TapSemanticEvent());
           return null;
         },
@@ -251,8 +258,10 @@ class _TRippleState extends State<TRipple> with TickerProviderStateMixin {
 
   /// 处理点击事件
   void _handleOnTapDown(TapDownDetails details) {
+    if(!_isClick) {
+      return;
+    }
     _doSplash();
-    widget.onTapDown?.call(details);
   }
 
   void _doSplash() {
@@ -292,9 +301,8 @@ class _TRippleState extends State<TRipple> with TickerProviderStateMixin {
     return splash;
   }
 
-  void _handleTap() {
+  void _handleUp(TapUpDetails details) {
     _confirm();
-    widget.onTap?.call();
   }
 
   void _handleCancel([TapUpDetails? details]) {

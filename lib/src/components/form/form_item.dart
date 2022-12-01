@@ -6,7 +6,7 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 /// 注意：子组件不能指定多个name组件注册到该子项中。
 class TFormItem extends StatefulWidget {
   const TFormItem({
-    Key? key,
+    super.key,
     this.help,
     this.label,
     this.labelText,
@@ -20,7 +20,7 @@ class TFormItem extends StatefulWidget {
     this.showStatusIcon,
     this.successBorder = false,
     required this.child,
-  }) : super(key: key);
+  });
 
   /// 表单项说明内容
   final Widget? help;
@@ -78,6 +78,7 @@ class TFormItemState extends State<TFormItem> {
   TFormState? _formState;
   TFormItemValidateState? _field;
   Color? _borderColor;
+  TInputStatus? _inputStatus;
   List<BoxShadow>? _shadows;
   TFormItemStatus? _currentStatus;
   int _version = 1;
@@ -87,6 +88,9 @@ class TFormItemState extends State<TFormItem> {
 
   /// 边框颜色
   Color? get borderColor => _borderColor;
+
+  /// input状态
+  TInputStatus? get inputStatus => _inputStatus;
 
   /// 边框阴影
   List<BoxShadow>? get shadows => _shadows;
@@ -364,6 +368,7 @@ class TFormItemState extends State<TFormItem> {
   void clearValidate([bool update = true]) {
     _message = null;
     _borderColor = null;
+    _inputStatus = null;
     _shadows = null;
     _currentStatus = null;
     _version++;
@@ -451,14 +456,17 @@ class TFormItemState extends State<TFormItem> {
     if (status != null) {
       switch (status) {
         case TFormItemStatus.success:
+          _inputStatus = TInputStatus.success;
           _borderColor = colorScheme.successColor;
           shadowColor = colorScheme.successColorFocus;
           break;
         case TFormItemStatus.error:
+          _inputStatus = TInputStatus.error;
           _borderColor = colorScheme.errorColor;
           shadowColor = colorScheme.errorColorFocus;
           break;
         case TFormItemStatus.warning:
+          _inputStatus = TInputStatus.warning;
           _borderColor = colorScheme.warningColor;
           shadowColor = colorScheme.warningColorFocus;
           break;
@@ -499,10 +507,10 @@ class _TFormItemScope extends InheritedWidget {
 
 abstract class TFormItemValidate extends StatefulWidget {
   const TFormItemValidate({
-    Key? key,
+    super.key,
     this.name,
     this.focusNode,
-  }) : super(key: key);
+  });
 
   /// 表单字段名称
   final String? name;

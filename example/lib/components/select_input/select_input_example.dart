@@ -3,25 +3,26 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// 筛选器输入框示例代码
 class TSelectInputExample extends StatefulWidget {
-  const TSelectInputExample({Key? key}) : super(key: key);
+  const TSelectInputExample({super.key});
 
   @override
   State<TSelectInputExample> createState() => _TSelectInputExampleState();
 }
 
 class _TSelectInputExampleState extends State<TSelectInputExample> {
-  late TSelectInputSingleController _controller;
-  late TSelectInputMultipleController _multipleController;
-  late ValueNotifier<bool> _popupVisible;
+  SelectInputValue? _singleValue;
+  late List<SelectInputValue> _multipleValue;
+  late TPopupVisible _multiplePopupVisible;
+  late TPopupVisible _singlePopupVisible;
   late List<SelectInputValue> options;
   FocusNode singleFocusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
-    _popupVisible = ValueNotifier(false);
-    _controller = TSelectInputSingleController();
-    _multipleController = TSelectInputMultipleController(value: []);
+    _multiplePopupVisible = TPopupVisible();
+    _singlePopupVisible = TPopupVisible();
+    _multipleValue = [];
     options = [
       const SelectInputValue(label: 'tdesign-vue', value: 1),
       const SelectInputValue(label: 'tdesign-react', value: 2),
@@ -35,9 +36,8 @@ class _TSelectInputExampleState extends State<TSelectInputExample> {
   @override
   void dispose() {
     super.dispose();
-    _controller.dispose();
-    _multipleController.dispose();
-    _popupVisible.dispose();
+    _multiplePopupVisible.dispose();
+    _singlePopupVisible.dispose();
     singleFocusNode.dispose();
   }
 
@@ -46,14 +46,21 @@ class _TSelectInputExampleState extends State<TSelectInputExample> {
     return TSpace(
       direction: Axis.vertical,
       children: [
-        TSelectInput(
+        TSelectInput<SelectInputValue>(
           autoWidth: true,
-          controller: _controller,
+          value: _singleValue,
           focusNode: singleFocusNode,
-          allowInput: true,
+          // allowInput: true,
           clearable: true,
           suffixIcon: const Icon(TIcons.chevronDown),
           popupStyle: const TPopupStyle(constraints: BoxConstraints(maxHeight: 280)),
+          popupVisible: _singlePopupVisible,
+          singleValueDisplay: (value) => value != null ? '${value.label} Student' : '',
+          onClear: () {
+            setState(() {
+              _singleValue = null;
+            });
+          },
           panel: TSingleChildScrollView(
             scrollDirection: Axis.vertical,
             child: TSpace(
@@ -65,8 +72,11 @@ class _TSelectInputExampleState extends State<TSelectInputExample> {
                   variant: TButtonVariant.text,
                   child: Text(options[index].label),
                   onPressed: () {
-                    _controller.value = options[index];
+                    setState(() {
+                      _singleValue = options[index];
+                    });
                     singleFocusNode.unfocus();
+                    _singlePopupVisible.value = false;
                   },
                 );
               }),
@@ -76,29 +86,31 @@ class _TSelectInputExampleState extends State<TSelectInputExample> {
         SizedBox(
           width: 350,
           child: TSelectInput(
-            controller: _multipleController,
+            value: _multipleValue,
             // autoWidth: true,
             multiple: true,
             allowInput: true,
             // readonly: true,
             clearable: true,
-            popupVisible: _popupVisible,
+            popupVisible: _multiplePopupVisible,
             suffixIcon: const Icon(TIcons.chevronDown),
             onTagChange: (value, context) {
               if (context.trigger == TagInputTriggerSource.clear || context.trigger == TagInputTriggerSource.reset) {
-                _multipleController.clear();
+                setState(() {
+                  _multipleValue.clear();
+                });
               }
               if (TagInputTriggerSource.tagRemove == context.trigger ||
                   TagInputTriggerSource.backspace == context.trigger) {
                 setState(() {
-                  _multipleController.removeAt(context.index!);
+                  _multipleValue.removeAt(context.index!);
                 });
               }
               if (TagInputTriggerSource.enter == context.trigger) {
                 setState(() {
                   var inputValue = SelectInputValue(label: context.item!, value: context.item!);
                   options.add(inputValue);
-                  _multipleController.add(inputValue);
+                  _multipleValue.add(inputValue);
                 });
               }
             },
@@ -114,7 +126,9 @@ class _TSelectInputExampleState extends State<TSelectInputExample> {
                     variant: TButtonVariant.text,
                     child: Text(options[index].label),
                     onPressed: () {
-                      _multipleController.add(options[index]);
+                      setState(() {
+                        _multipleValue.add(options[index]);
+                      });
                     },
                   );
                 }),

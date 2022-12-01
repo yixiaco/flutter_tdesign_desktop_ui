@@ -5,7 +5,7 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// 弹出层示例
 class TPopupExample extends StatefulWidget {
-  const TPopupExample({Key? key}) : super(key: key);
+  const TPopupExample({super.key});
 
   @override
   State<TPopupExample> createState() => _TPopupExampleState();

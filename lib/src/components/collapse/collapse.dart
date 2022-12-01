@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
@@ -6,7 +8,7 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 /// 可以将较多或较复杂的内容进行分组，分组内容区可以折叠展开或隐藏。
 class TCollapse<T> extends StatefulWidget {
   const TCollapse({
-    Key? key,
+    super.key,
     this.borderless = false,
     this.defaultExpandAll = false,
     this.disabled = false,
@@ -18,7 +20,7 @@ class TCollapse<T> extends StatefulWidget {
     this.value,
     this.onChange,
     required this.panels,
-  }) : super(key: key);
+  });
 
   /// 是否为无边框模式
   final bool borderless;
@@ -132,7 +134,7 @@ class _TCollapseState<T> extends State<TCollapse<T>> {
 /// 折叠单面板
 class _TCollapsePanel<T> extends StatefulWidget {
   const _TCollapsePanel({
-    Key? key,
+    super.key,
     required this.expand,
     required this.disabled,
     required this.showExpandIcon,
@@ -143,7 +145,7 @@ class _TCollapsePanel<T> extends StatefulWidget {
     required this.panel,
     required this.last,
     required this.borderless,
-  }) : super(key: key);
+  });
 
   /// 是否展开
   final bool expand;
@@ -190,7 +192,8 @@ class _TCollapsePanelState<T> extends State<_TCollapsePanel<T>> {
 
     Widget child = _buildHeader(theme, icon);
 
-    var borderSide = widget.last || widget.borderless ? BorderSide.none : BorderSide(color: colorScheme.componentBorder);
+    var borderSide =
+        widget.last || widget.borderless ? BorderSide.none : BorderSide(color: colorScheme.componentBorder);
     var disabledColor = widget.disabled ? colorScheme.bgColorComponentDisabled : null;
     var bgColor = widget.borderless ? null : disabledColor ?? colorScheme.bgColorSecondaryContainer;
 
@@ -236,7 +239,9 @@ class _TCollapsePanelState<T> extends State<_TCollapsePanel<T>> {
   /// 头部
   Widget _buildHeader(TThemeData theme, Widget? icon) {
     var colorScheme = theme.colorScheme;
-    var borderSide = widget.last && !widget.expand || widget.borderless ? BorderSide.none : BorderSide(color: colorScheme.componentBorder);
+    var borderSide = widget.last && !widget.expand || widget.borderless
+        ? BorderSide.none
+        : BorderSide(color: colorScheme.componentBorder);
     Widget header = DefaultTextStyle.merge(
       style: TextStyle(fontSize: theme.fontData.fontSizeTitleSmall),
       child: Container(
@@ -286,10 +291,12 @@ class _TCollapsePanelState<T> extends State<_TCollapsePanel<T>> {
     if (!widget.showExpandIcon) {
       return null;
     }
-    Widget chevronIcon = TFakeArrow(
-      placement: widget.expand ? TFakeArrowPlacement.bottom : TFakeArrowPlacement.right,
-      child: widget.panel.expandIcon ?? widget.expandIcon,
-    );
+    Widget chevronIcon = widget.panel.expandIcon ??
+        widget.expandIcon ??
+        TFakeArrow(
+          placement: TFakeArrowPlacement.right,
+          transform: widget.expand ? Matrix4.rotationZ(pi / 2) : Matrix4.rotationZ(0),
+        );
     if (widget.expandIconPlacement == TCollapseExpandIconPlacement.left) {
       chevronIcon = Padding(
         padding: EdgeInsets.only(right: TVar.spacer1),

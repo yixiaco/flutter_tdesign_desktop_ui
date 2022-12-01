@@ -183,10 +183,10 @@ class TButtonThemeData with Diagnosticable {
 /// 按钮主题
 class TButtonTheme extends InheritedTheme {
   const TButtonTheme({
-    Key? key,
+    super.key,
     required this.data,
-    required Widget child,
-  }) : super(key: key, child: child);
+    required super.child,
+  });
 
   final TButtonThemeData data;
 

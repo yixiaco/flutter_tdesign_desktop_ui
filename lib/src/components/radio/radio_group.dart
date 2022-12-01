@@ -66,8 +66,8 @@ enum TRadioVariant {
 /// 单选框组
 class TRadioGroup<T> extends TFormItemValidate {
   const TRadioGroup({
-    Key? key,
-    String? name,
+    super.key,
+    super.name,
     this.disabled = false,
     required this.options,
     required this.value,
@@ -76,7 +76,7 @@ class TRadioGroup<T> extends TFormItemValidate {
     this.size,
     this.variant = TRadioVariant.radio,
     this.allowUncheck = false,
-  }) : super(key: key, name: name);
+  });
 
   /// 是否禁用组件
   final bool disabled;
@@ -246,17 +246,19 @@ class _TRadioGroupState<T> extends TFormItemValidateState<TRadioGroup<T>> with S
         color: colorScheme.bgColorComponent,
         borderRadius: BorderRadius.circular(TVar.borderRadiusDefault),
       ),
-      child: CustomPaint(
-        painter: _indicatorPainter
-          ..t = _position
-          ..optionKeys = _optionKeys
-          ..color = blockColor
-          ..index = widget._index,
-        child: TSpace(
-          breakLine: false,
-          spacing: 0,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: box,
+      child: RepaintBoundary(
+        child: CustomPaint(
+          painter: _indicatorPainter
+            ..animation = _position
+            ..optionKeys = _optionKeys
+            ..color = blockColor
+            ..index = widget._index,
+          child: TSpace(
+            breakLine: false,
+            spacing: 0,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: box,
+          ),
         ),
       ),
     );
@@ -364,13 +366,13 @@ class _TRadioGroupState<T> extends TFormItemValidateState<TRadioGroup<T>> with S
   void reset(TFormResetType type) {
     switch (type) {
       case TFormResetType.empty:
-        if(widget.allowUncheck) {
+        if (widget.allowUncheck) {
           _value = null;
           _valueChange(true, null);
         }
         break;
       case TFormResetType.initial:
-        if(widget.allowUncheck || widget.defaultValue != null) {
+        if (widget.allowUncheck || widget.defaultValue != null) {
           _value = widget.defaultValue;
           _valueChange(true, widget.defaultValue);
         }
@@ -436,9 +438,9 @@ class _IndicatorBlockPainter extends AnimationChangeNotifierPainter {
     var paint = Paint()..color = color;
     if (index == -1) {
       if (_currentRect != null) {
-        var rect = Rect.lerp(_currentRect!.center & Size.zero, _currentRect, t.value);
+        var rect = Rect.lerp(_currentRect!.center & Size.zero, _currentRect, animation.value);
         canvas.drawRRect(RRect.fromRectAndRadius(rect!, Radius.circular(TVar.borderRadiusDefault)), paint);
-        if (t.value == 0) {
+        if (animation.value == 0) {
           _currentRect = null;
         }
       }
@@ -450,7 +452,7 @@ class _IndicatorBlockPainter extends AnimationChangeNotifierPainter {
     _currentRect = Rect.fromLTWH(offsetX, 0, optionWidth, optionHeight);
 
     var oldRect = _oldRect ?? _currentRect!.center & Size.zero;
-    var rect = Rect.lerp(oldRect, _currentRect, t.value);
+    var rect = Rect.lerp(oldRect, _currentRect, animation.value);
 
     canvas.drawRRect(RRect.fromRectAndRadius(rect!, Radius.circular(TVar.borderRadiusDefault)), paint);
   }
@@ -459,7 +461,7 @@ class _IndicatorBlockPainter extends AnimationChangeNotifierPainter {
 /// 单选按钮
 class _TRadioButton<T> extends StatefulWidget {
   const _TRadioButton({
-    Key? key,
+    super.key,
     this.allowUncheck = false,
     this.checked,
     this.disabled = false,
@@ -474,7 +476,7 @@ class _TRadioButton<T> extends StatefulWidget {
     this.size,
     this.border,
     this.radius,
-  }) : super(key: key);
+  });
 
   /// 是否允许取消选中
   final bool allowUncheck;

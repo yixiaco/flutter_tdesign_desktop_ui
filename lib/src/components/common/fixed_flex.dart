@@ -27,6 +27,9 @@ bool? _startIsTopLeft(Axis direction, TextDirection? textDirection, VerticalDire
   }
 }
 
+typedef FixedCrossFlexBoxConstraintsCallback = BoxConstraints Function(
+    RenderBox child, BoxConstraints innerConstraints, BoxConstraints boxConstraints);
+
 /// 固定交叉轴的Flex组件
 /// 组件会先绘制一遍子布局的大小，得到最大组件宽度，然后强制应用到所有其他子组件中
 /// 这个类可能是昂贵的，因此应首先考虑使用[Flex]，而不是[FixedCrossFlex]
@@ -43,7 +46,13 @@ class FixedCrossFlex extends Flex {
     super.textBaseline, // NO DEFAULT: we don't know what the text's baseline should be
     super.clipBehavior = Clip.none,
     super.children = const <Widget>[],
+    this.boxConstraintsCallback,
   });
+
+  /// 返回一个新的子组件约束
+  /// [innerConstraints]：子组件在容器内的约束
+  /// [boxConstraints]：容器约束
+  final FixedCrossFlexBoxConstraintsCallback? boxConstraintsCallback;
 
   @override
   RenderFixedCrossFlex createRenderObject(BuildContext context) {
@@ -56,6 +65,7 @@ class FixedCrossFlex extends Flex {
       verticalDirection: verticalDirection,
       textBaseline: textBaseline,
       clipBehavior: clipBehavior,
+      boxConstraintsCallback: boxConstraintsCallback,
     );
   }
 
@@ -69,7 +79,8 @@ class FixedCrossFlex extends Flex {
       ..textDirection = getEffectiveTextDirection(context)
       ..verticalDirection = verticalDirection
       ..textBaseline = textBaseline
-      ..clipBehavior = clipBehavior;
+      ..clipBehavior = clipBehavior
+      .._boxConstraintsCallback = boxConstraintsCallback;
   }
 }
 
@@ -84,7 +95,21 @@ class RenderFixedCrossFlex extends RenderFlex {
     super.verticalDirection = VerticalDirection.down,
     super.textBaseline,
     super.clipBehavior = Clip.none,
-  });
+    FixedCrossFlexBoxConstraintsCallback? boxConstraintsCallback,
+  }) : _boxConstraintsCallback = boxConstraintsCallback;
+
+  /// 返回一个新的子组件约束
+  /// [innerConstraints]：子组件在容器内的约束
+  /// [boxConstraints]：容器约束
+  FixedCrossFlexBoxConstraintsCallback? get boxConstraintsCallback => _boxConstraintsCallback;
+  FixedCrossFlexBoxConstraintsCallback? _boxConstraintsCallback;
+
+  set boxConstraintsCallback(FixedCrossFlexBoxConstraintsCallback? value) {
+    if (_boxConstraintsCallback != value) {
+      _boxConstraintsCallback = value;
+      markNeedsLayout();
+    }
+  }
 
   // Set during layout if overflow occurred on the main axis.
   double _overflow = 0;
@@ -98,7 +123,8 @@ class RenderFixedCrossFlex extends RenderFlex {
       // i.e. there's more than one child
       switch (direction) {
         case Axis.horizontal:
-          assert(textDirection != null, 'Horizontal $runtimeType with multiple children has a null textDirection, so the layout order is undefined.');
+          assert(textDirection != null,
+              'Horizontal $runtimeType with multiple children has a null textDirection, so the layout order is undefined.');
           break;
         case Axis.vertical:
           break;
@@ -119,8 +145,8 @@ class RenderFixedCrossFlex extends RenderFlex {
         case Axis.horizontal:
           break;
         case Axis.vertical:
-          assert(
-              textDirection != null, 'Vertical $runtimeType with $crossAxisAlignment has a null textDirection, so the alignment cannot be resolved.');
+          assert(textDirection != null,
+              'Vertical $runtimeType with $crossAxisAlignment has a null textDirection, so the alignment cannot be resolved.');
           break;
       }
     }
@@ -142,7 +168,8 @@ class RenderFixedCrossFlex extends RenderFlex {
           DiagnosticsNode error, message;
           final List<DiagnosticsNode> addendum = <DiagnosticsNode>[];
           if (!canFlex && (mainAxisSize == MainAxisSize.max || _getFit(child) == FlexFit.tight)) {
-            error = ErrorSummary('RenderFlex children have non-zero flex but incoming $dimension constraints are unbounded.');
+            error = ErrorSummary(
+                'RenderFlex children have non-zero flex but incoming $dimension constraints are unbounded.');
             message = ErrorDescription(
               'When a $identity is in a parent that does not provide a finite $dimension constraint, for example '
               'if it is in a $axis scrollable, it will try to shrink-wrap its children along the $axis '
@@ -198,7 +225,8 @@ class RenderFixedCrossFlex extends RenderFlex {
               '  http://api.flutter.dev/flutter/rendering/debugDumpRenderTree.html',
             ),
             describeForError('The affected RenderFlex is', style: DiagnosticsTreeStyle.errorProperty),
-            DiagnosticsProperty<dynamic>('The creator information is set to', debugCreator, style: DiagnosticsTreeStyle.errorProperty),
+            DiagnosticsProperty<dynamic>('The creator information is set to', debugCreator,
+                style: DiagnosticsTreeStyle.errorProperty),
             ...addendum,
             ErrorDescription(
               "If none of the above helps enough to fix this problem, please don't hesitate to file a bug:\n"
@@ -286,7 +314,10 @@ class RenderFixedCrossFlex extends RenderFlex {
           }
         }
         cacheConstraints?[child] = innerConstraints;
-        final Size childSize = layoutChild(child, innerConstraints);
+        final Size childSize = layoutChild(
+          child,
+          boxConstraintsCallback?.call(child, innerConstraints, constraints) ?? innerConstraints,
+        );
         allocatedSize += _getMainSize(childSize);
         crossSize = math.max(crossSize, _getCrossSize(childSize));
       }
@@ -303,7 +334,9 @@ class RenderFixedCrossFlex extends RenderFlex {
       while (child != null) {
         final int flex = _getFlex(child);
         if (flex > 0) {
-          final double maxChildExtent = canFlex ? (child == lastFlexChild ? (freeSpace - allocatedFlexSpace) : spacePerFlex * flex) : double.infinity;
+          final double maxChildExtent = canFlex
+              ? (child == lastFlexChild ? (freeSpace - allocatedFlexSpace) : spacePerFlex * flex)
+              : double.infinity;
           late final double minChildExtent;
           switch (_getFit(child)) {
             case FlexFit.tight:
@@ -353,7 +386,10 @@ class RenderFixedCrossFlex extends RenderFlex {
             }
           }
           cacheConstraints?[child] = innerConstraints;
-          final Size childSize = layoutChild(child, innerConstraints);
+          final Size childSize = layoutChild(
+            child,
+            boxConstraintsCallback?.call(child, innerConstraints, constraints) ?? innerConstraints,
+          );
           final double childMainSize = _getMainSize(childSize);
           assert(childMainSize <= maxChildExtent);
           allocatedSize += childMainSize;
@@ -408,7 +444,8 @@ class RenderFixedCrossFlex extends RenderFlex {
       while (child != null) {
         assert(() {
           if (textBaseline == null) {
-            throw FlutterError('To use FlexAlignItems.baseline, you must also specify which baseline to use using the "baseline" argument.');
+            throw FlutterError(
+                'To use FlexAlignItems.baseline, you must also specify which baseline to use using the "baseline" argument.');
           }
           return true;
         }());
@@ -489,10 +526,10 @@ class RenderFixedCrossFlex extends RenderFlex {
       switch (crossAxisAlignment) {
         case CrossAxisAlignment.start:
         case CrossAxisAlignment.end:
-          childCrossPosition =
-              _startIsTopLeft(flipAxis(direction), textDirection, verticalDirection) == (crossAxisAlignment == CrossAxisAlignment.start)
-                  ? 0.0
-                  : crossSize - _getCrossSize(child.size);
+          childCrossPosition = _startIsTopLeft(flipAxis(direction), textDirection, verticalDirection) ==
+                  (crossAxisAlignment == CrossAxisAlignment.start)
+              ? 0.0
+              : crossSize - _getCrossSize(child.size);
           break;
         case CrossAxisAlignment.center:
           childCrossPosition = crossSize / 2.0 - _getCrossSize(child.size) / 2.0;

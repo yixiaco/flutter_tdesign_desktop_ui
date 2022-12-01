@@ -3,7 +3,7 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// 标签示例
 class TTagExample extends StatefulWidget {
-  const TTagExample({Key? key}) : super(key: key);
+  const TTagExample({super.key});
 
   @override
   State<TTagExample> createState() => _TTagExampleState();

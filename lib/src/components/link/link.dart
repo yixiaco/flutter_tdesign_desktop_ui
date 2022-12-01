@@ -5,7 +5,7 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 /// 文字超链接用于跳转一个新页面，如当前项目跳转，友情链接等
 class TLink extends StatelessWidget {
   const TLink({
-    Key? key,
+    super.key,
     required this.child,
     this.disabled = false,
     this.hover = TLinkHover.underline,
@@ -15,7 +15,7 @@ class TLink extends StatelessWidget {
     this.theme = TLinkTheme.defaultTheme,
     this.underline = false,
     this.onClick,
-  }) : super(key: key);
+  });
 
   /// 子组件
   final Widget child;

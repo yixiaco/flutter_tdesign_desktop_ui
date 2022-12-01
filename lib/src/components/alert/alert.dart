@@ -5,7 +5,7 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 /// 警告条用于承载需要用户注意的信息。
 class TAlert extends StatefulWidget {
   const TAlert({
-    Key? key,
+    super.key,
     this.closeIcon,
     this.showClose = false,
     this.icon,
@@ -17,7 +17,7 @@ class TAlert extends StatefulWidget {
     this.onClose,
     this.onClosed,
     this.maxSize = false,
-  }) : super(key: key);
+  });
 
   /// 关闭icon
   final Widget? closeIcon;

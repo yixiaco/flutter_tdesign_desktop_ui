@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// 标签
 /// 标签常用于标记、分类和选择
 class TTag extends StatefulWidget {
   const TTag({
-    Key? key,
+    super.key,
     this.closable = false,
     required this.child,
     this.disabled = false,
@@ -20,7 +19,7 @@ class TTag extends StatefulWidget {
     this.onClose,
     this.backgroundColor,
     this.textColor,
-  }) : super(key: key);
+  });
 
   /// 标签是否可关闭
   final bool closable;
@@ -103,9 +102,9 @@ class _TTagState extends State<TTag> {
           case TTagVariant.dark:
             backgroundColor = colorScheme.bgColorComponent;
             break;
-            light:
+          light:
           case TTagVariant.light:
-              backgroundColor = colorScheme.bgColorContainerHover;
+            backgroundColor = colorScheme.bgColorContainerHover;
             break;
           case TTagVariant.outline:
             borderColor = colorScheme.borderLevel2Color;
@@ -226,7 +225,7 @@ class _TTagState extends State<TTag> {
     double height;
     EdgeInsetsGeometry padding;
     TextStyle style;
-    switch(size) {
+    switch (size) {
       case TComponentSize.small:
         height = 22;
         padding = EdgeInsets.symmetric(horizontal: TVar.spacerS);
@@ -289,7 +288,7 @@ class _TTagState extends State<TTag> {
     if (widget.icon != null) {
       icon = Padding(
         padding: const EdgeInsets.only(right: 4),
-        child: TAnimatedIcon(
+        child: TAnimatedIconTheme(
           duration: TVar.animDurationBase,
           curve: TVar.animTimeFnEasing,
           size: theme.fontData.fontSizeBodyLarge,
@@ -305,39 +304,43 @@ class _TTagState extends State<TTag> {
       children: [icon, child, closeIcon],
     );
 
-    child = GestureDetector(
-      onTap: widget.disabled ? null : widget.onClick,
-      onTapDown: (details) => _handleFocused(true),
-      onTapUp: (details) => _handleFocused(false),
-      onTapCancel: () => _handleFocused(false),
-      child: AnimatedContainer(
-        padding: padding,
-        height: height,
+    child = AnimatedContainer(
+      padding: padding,
+      height: height,
+      duration: TVar.animDurationBase,
+      decoration: decoration,
+      child: AnimatedDefaultTextStyle(
         duration: TVar.animDurationBase,
-        decoration: decoration,
-        child: AnimatedDefaultTextStyle(
-          duration: TVar.animDurationBase,
-          style: style.merge(TextStyle(
-            fontFamily: theme.fontFamily,
-            color: textColor,
-            overflow: TextOverflow.ellipsis,
-          )),
-          child: Stack(
-            alignment: Alignment.center,
-            children: [child],
-          ),
+        style: style.merge(TextStyle(
+          fontFamily: theme.fontFamily,
+          color: textColor,
+          overflow: TextOverflow.ellipsis,
+        )),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [child],
         ),
       ),
     );
 
+    if(!widget.disabled && (widget.onClick != null || widget.theme == TTagTheme.link)) {
+      child = GestureDetector(
+        onTap: widget.disabled ? null : widget.onClick,
+        onTapDown: (details) => _handleFocused(true),
+        onTapUp: (details) => _handleFocused(false),
+        onTapCancel: () => _handleFocused(false),
+        child: child,
+      );
+    }
+
     if (widget.theme == TTagTheme.link || widget.theme == TTagTheme.defaultTheme) {
-      SystemMouseCursor cursor;
+      MouseCursor cursor;
       if (widget.disabled) {
         cursor = SystemMouseCursors.noDrop;
       } else if (widget.theme == TTagTheme.link) {
         cursor = SystemMouseCursors.click;
       } else {
-        cursor = SystemMouseCursors.basic;
+        cursor = MouseCursor.defer;
       }
 
       return FocusableActionDetector(
@@ -361,7 +364,9 @@ class _TTagState extends State<TTag> {
       if (widget.variant == TTagVariant.dark) {
         closeColor = colorScheme.fontWhite1;
         closeHoverColor = colorScheme.fontWhite2;
-      } else if (widget.variant == TTagVariant.light || widget.variant == TTagVariant.outline || widget.variant == TTagVariant.lightOutline) {
+      } else if (widget.variant == TTagVariant.light ||
+          widget.variant == TTagVariant.outline ||
+          widget.variant == TTagVariant.lightOutline) {
         switch (widget.theme) {
           case TTagTheme.defaultTheme:
             break;
@@ -402,13 +407,12 @@ class _TTagState extends State<TTag> {
 /// 标签close icon
 class _TagCloseIcon extends StatefulWidget {
   const _TagCloseIcon({
-    Key? key,
     required this.size,
     required this.color,
     required this.hoverColor,
     this.disabled = false,
     this.click,
-  }) : super(key: key);
+  });
 
   /// icon大小
   final double size;
@@ -440,7 +444,7 @@ class _TagCloseIconState extends State<_TagCloseIcon> {
       cursor: widget.disabled ? SystemMouseCursors.noDrop : SystemMouseCursors.click,
       child: GestureDetector(
         onTap: widget.disabled ? null : widget.click,
-        child: TAnimatedIcon(
+        child: TAnimatedIconTheme(
           duration: TVar.animDurationBase,
           curve: TVar.animTimeFnEasing,
           size: widget.size,

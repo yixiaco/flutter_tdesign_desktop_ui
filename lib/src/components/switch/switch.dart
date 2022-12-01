@@ -5,10 +5,10 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 /// 用于两个互斥选项，用来打开或关闭选项的选择控件
 class TSwitch<T> extends TFormItemValidate {
   const TSwitch({
-    Key? key,
+    super.key,
     required this.value,
     this.defaultValue,
-    String? name,
+    super.name,
     this.disabled = false,
     this.checkLabel,
     this.uncheckLabel,
@@ -17,9 +17,9 @@ class TSwitch<T> extends TFormItemValidate {
     this.loading = false,
     this.size,
     this.onChange,
-    FocusNode? focusNode,
+    super.focusNode,
     this.autofocus = false,
-  }) : super(key: key, name: name, focusNode: focusNode);
+  });
 
   /// 开关值, 可选[bool]、[checkValue]、[uncheckValue]
   final dynamic value;

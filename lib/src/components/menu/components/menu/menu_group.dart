@@ -3,9 +3,9 @@ part of '../../menu.dart';
 /// 菜单分组
 class _TMenuGroup<T> extends StatelessWidget {
   const _TMenuGroup({
-    Key? key,
+    super.key,
     required this.props,
-  }) : super(key: key);
+  });
 
   /// 布局属性
   final _TMenuItemLayoutProps<T> props;
@@ -59,7 +59,7 @@ class _TMenuGroup<T> extends StatelessWidget {
             child: TDivider(
               layout: Axis.horizontal,
               thickness: 1,
-              space: 20,
+              length: 20,
               color: dividerColor,
             ),
           ),

@@ -4,7 +4,7 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// 间距示例
 class TSpaceExample extends StatelessWidget {
-  const TSpaceExample({Key? key}) : super(key: key);
+  const TSpaceExample({super.key});
 
   @override
   Widget build(BuildContext context) {

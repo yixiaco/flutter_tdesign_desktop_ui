@@ -21,7 +21,7 @@ typedef PopupPositionCallback = void Function(bool isReverse);
 /// 弹出层组件是其他弹窗类组件如气泡确认框实现的基础，当这些组件提供的能力不能满足定制需求时，可以在弹出层组件基础上封装
 class TPopup extends StatefulWidget {
   const TPopup({
-    Key? key,
+    super.key,
     this.placement = TPopupPlacement.top,
     this.trigger = TPopupTrigger.hover,
     this.showArrow = false,
@@ -36,7 +36,7 @@ class TPopup extends StatefulWidget {
     this.destroyOnClose = true,
     this.hideEmptyPopup = false,
     this.style,
-  }) : super(key: key);
+  });
 
   /// 浮层出现位置
   final TPopupPlacement placement;
@@ -50,8 +50,8 @@ class TPopup extends StatefulWidget {
   /// 是否禁用组件
   final bool disabled;
 
-  /// 是否显示浮层,默认为false,当你需要手动控制它时，你应该传输一个ValueNotifier
-  final ValueNotifier<bool>? visible;
+  /// 是否显示浮层,默认为false,当你需要手动控制它时，你应该传输一个[TPopupVisible]
+  final TPopupVisible? visible;
 
   /// The widget below this widget in the tree.
   ///
@@ -96,7 +96,7 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
 
   /// 焦点节点
   final FocusNode _node = FocusNode();
-  final FocusScopeNode _popupScopeNode = FocusScopeNode();
+  final FocusScopeNode _popupScopeNode = FocusScopeNode(skipTraversal: true);
 
   /// 动画控制器
   late AnimationController _controller;
@@ -153,17 +153,17 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
     if (event is PointerHoverEvent && widget.trigger.isTrue(hover: true)) {
       _handlePointerBounds(event);
     }
-    // 点击与右键监听鼠标松开事件
-    else if (event is PointerUpEvent && widget.trigger.isTrue(click: true, contextMenu: true)) {
+    // 通知、点击与右键监听鼠标松开事件
+    else if (event is PointerUpEvent && widget.trigger.isTrue(click: true, contextMenu: true, notifier: true)) {
       // 先检查子浮层的事件
       var popupOverlayState = _overlayKey.currentState;
       if (popupOverlayState != null) {
-        var set = popupOverlayState.levelNotifier.children.toSet();
+        var set = popupOverlayState.levelNotifier.children;
         for (var child in set) {
           child.currentState?.widget.popupState._globalPointerRoute(event);
         }
       }
-      // 检查当前浮层的事件
+      // 检查当前浮层的事件,处理鼠标越界时隐藏
       _handlePointerBounds(event);
     } else if (event is PointerUpEvent && widget.trigger.isTrue(focus: true)) {
       _handlePointerBounds(event);
@@ -252,6 +252,7 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
     _showTimer = null;
     assert(widget.content != null || widget.hideEmptyPopup);
     if (widget.content == null && widget.hideEmptyPopup) {
+      effectiveVisible.value = false;
       return;
     }
     if (_entry == null) {
@@ -304,8 +305,12 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
 
   /// 销毁浮层对象.不应该直接使用这个方法，而是使用[_hidePopup]
   void _removeEntry({bool force = false}) {
-    _node.unfocus();
-    _popupScopeNode.unfocus();
+    if (_node.hasFocus) {
+      _node.unfocus();
+    }
+    if (_popupScopeNode.hasFocus) {
+      _popupScopeNode.unfocus();
+    }
     if (_existGlobalPointerRoute) {
       // 移除监听全局指针事件
       GestureBinding.instance.pointerRouter.removeGlobalRoute(_globalPointerRoute);
@@ -357,28 +362,40 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
       return child;
     }
     _notifyPopupUpdate();
-    if (widget.trigger == TPopupTrigger.hover) {
-      child = MouseRegion(
-        hitTestBehavior: HitTestBehavior.translucent,
-        onEnter: (event) => _updateVisible(true),
-        onExit: (event) => _updateVisible(false),
-        child: widget.child,
-      );
-    } else if (widget.trigger == TPopupTrigger.click) {
-      child = AllowTapListener(
-        onTap: () => _updateVisible(),
-        child: widget.child,
-      );
-    } else if (widget.trigger == TPopupTrigger.contextMenu) {
-      child = AllowTapListener(
-        onSecondaryTap: () => _updateVisible(),
-        child: widget.child,
-      );
-    } else if (widget.trigger == TPopupTrigger.focus) {
-      child = Focus(
-        focusNode: _node,
-        child: widget.child,
-      );
+    switch (widget.trigger) {
+      case TPopupTrigger.hover:
+        child = MouseRegion(
+          hitTestBehavior: HitTestBehavior.translucent,
+          onEnter: (event) => _updateVisible(true),
+          onExit: (event) => _updateVisible(false),
+          child: widget.child,
+        );
+        break;
+      case TPopupTrigger.click:
+        child = AllowTapListener(
+          onTap: () => _updateVisible(),
+          child: widget.child,
+        );
+        break;
+      case TPopupTrigger.contextMenu:
+        child = AllowTapListener(
+          onSecondaryTap: () => _updateVisible(),
+          child: widget.child,
+        );
+        break;
+      case TPopupTrigger.notifier:
+        child = NotificationListener<TPopupNotification>(
+          onNotification: (notification) {
+            _updateVisible();
+            return true;
+          },
+          child: widget.child,
+        );
+        break;
+      case TPopupTrigger.focus:
+        break;
+      case TPopupTrigger.none:
+        break;
     }
     return NotificationListener<SizeChangedLayoutNotification>(
       onNotification: (notification) {
@@ -388,7 +405,12 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
       child: SizeChangedLayoutNotifier(
         child: Actions(
           actions: actions,
-          child: child,
+          child: Focus(
+            focusNode: _node,
+            child: RepaintBoundary(
+              child: child,
+            ),
+          ),
         ),
       ),
     );

@@ -5,7 +5,7 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 /// 用以收集、校验和提交数据，一般由输入框、单选框、复选框、选择器等控件组成。
 class TForm extends StatefulWidget {
   const TForm({
-    Key? key,
+    super.key,
     this.children = const [],
     this.colon = false,
     this.disabled,
@@ -24,7 +24,7 @@ class TForm extends StatefulWidget {
     this.onReset,
     this.onSubmit,
     this.onValidate,
-  }) : super(key: key);
+  });
 
   /// 表单子项
   final List<Widget> children;
@@ -39,7 +39,7 @@ class TForm extends StatefulWidget {
   final TFormErrorMessage? errorMessage;
 
   /// 允许表单统一控制禁用状态的自定义组件名称列表。
-  /// 默认会有组件库的全部输入类组件：[TInput]、[TInputNumber]、[TCascader]、[TSelect]、[TOption]、[TSwitch]、[TCheckbox]、[TCheckboxGroup]、[TRadio]、[TRadioGroup]、[TTreeSelect]、[TDatePicker]、[TTimePicker]、[TUpload]、[TTransfer]、[TSlider]。
+  /// 默认会有组件库的全部输入类组件：[TInput]、[TInputNumber]、[TCascader]、[TSelect]、[TSelectOption]、[TSwitch]、[TCheckbox]、[TCheckboxGroup]、[TRadio]、[TRadioGroup]、[TTreeSelect]、[TDatePicker]、[TTimePicker]、[TUpload]、[TTransfer]、[TSlider]。
   /// 对于自定义组件，组件内部需要包含可以控制表单禁用状态的变量 formDisabled。
   /// 示例：['CustomUpload', 'CustomInput']
   final List<String>? formControlledComponents;
@@ -143,10 +143,7 @@ class TFormState extends State<TForm> {
     return _TFormScope(
       formState: this,
       version: _version,
-      child: TSingleChildScrollView(
-        // alwaysShowPadding: true,
-        child: child,
-      ),
+      child: child,
     );
   }
 

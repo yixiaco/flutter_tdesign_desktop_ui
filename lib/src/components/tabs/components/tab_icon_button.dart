@@ -3,13 +3,12 @@ part of '../tabs.dart';
 /// 图标
 class _TabIconButton extends StatelessWidget {
   const _TabIconButton({
-    Key? key,
     this.onTap,
     this.size,
     required this.icon,
     this.right = true,
     this.showShadow = false,
-  }) : super(key: key);
+  });
 
   /// 点击事件
   final GestureTapCallback? onTap;

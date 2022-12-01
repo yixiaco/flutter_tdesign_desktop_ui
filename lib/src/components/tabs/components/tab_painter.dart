@@ -89,9 +89,9 @@ class _LabelPainter extends AnimationChangeNotifierPainter {
     var paint = Paint()..color = color;
     if (index == -1) {
       if (_currentRect != null) {
-        var rect = Rect.lerp(_originOffset() & Size.zero, _currentRect, t.value);
+        var rect = Rect.lerp(_originOffset() & Size.zero, _currentRect, animation.value);
         canvas.drawRRect(RRect.fromRectAndRadius(rect!, Radius.circular(TVar.borderRadiusDefault)), paint);
-        if (t.value == 0) {
+        if (animation.value == 0) {
           _currentRect = null;
         }
       }
@@ -104,7 +104,7 @@ class _LabelPainter extends AnimationChangeNotifierPainter {
     _currentRect = _currentPlacementRect(rect);
 
     var oldRect = _oldRect ?? _originOffset() & Size.zero;
-    var rectLerp = Rect.lerp(oldRect, _currentRect, t.value);
+    var rectLerp = Rect.lerp(oldRect, _currentRect, animation.value);
     canvas.drawRect(rectLerp!, paint);
   }
 
@@ -149,14 +149,19 @@ class _TabLabelTrackPainter extends CustomPainter {
     required this.tabKeys,
     required this.painterKey,
   });
+
   /// 轨道颜色
   final Color trackColor;
+
   /// 轨道宽度
   final double strokeWidth;
+
   /// 方向
   final TTabsPlacement placement;
+
   /// 标签key
   final List<GlobalKey> tabKeys;
+
   /// 画布key
   final GlobalKey painterKey;
 
@@ -196,5 +201,4 @@ class _TabLabelTrackPainter extends CustomPainter {
   bool shouldRepaint(covariant _TabLabelTrackPainter oldDelegate) {
     return true;
   }
-
 }

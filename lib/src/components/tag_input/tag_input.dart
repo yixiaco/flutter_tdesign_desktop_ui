@@ -4,13 +4,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
-typedef TTagInputCollapsedItemsCallback = Widget Function(List<String> collapsedTags, int count);
+typedef TTagInputCollapsedItemsCallback = Widget Function(List<String> value, List<String> collapsedTags, int count);
 
 /// 标签输入框
 /// 用于输入文本标签
 class TTagInput extends TFormItemValidate {
   const TTagInput({
-    Key? key,
+    super.key,
     this.autoWidth = false,
     this.clearable = false,
     this.collapsedItems,
@@ -26,7 +26,8 @@ class TTagInput extends TFormItemValidate {
     this.readonly = false,
     this.allowInput = true,
     this.size,
-    this.status = TInputStatus.defaultStatus,
+    this.status,
+    this.prefixIcon,
     this.suffix,
     this.suffixIcon,
     this.tag,
@@ -49,9 +50,14 @@ class TTagInput extends TFormItemValidate {
     this.textAlign = TextAlign.left,
     this.borderless = false,
     this.enterClearInput = true,
-    FocusNode? focusNode,
-    String? name,
-  }) : super(key: key, name: name, focusNode: focusNode);
+    this.onTap,
+    this.onKeyDown,
+    this.onKeyPress,
+    this.onKeyUp,
+    this.autofocus = false,
+    super.focusNode,
+    super.name,
+  });
 
   /// 宽度随内容自适应
   final bool autoWidth;
@@ -59,7 +65,8 @@ class TTagInput extends TFormItemValidate {
   /// 是否可清空
   final bool clearable;
 
-  /// 标签过多的情况下，折叠项内容，默认为 +N。如果需要悬浮就显示其他内容，可以使用 collapsedItems 自定义。value 表示标签值，collapsedTags 表示折叠标签值，count 表示总标签数量
+  /// 标签过多的情况下，折叠项内容，默认为 +N。如果需要悬浮就显示其他内容，可以使用 collapsedItems 自定义。
+  /// value 表示标签值，collapsedTags 表示折叠标签值，count 表示总标签数量
   final TTagInputCollapsedItemsCallback? collapsedItems;
 
   /// 是否禁用标签输入框
@@ -99,7 +106,10 @@ class TTagInput extends TFormItemValidate {
   final TComponentSize? size;
 
   /// 输入框状态
-  final TInputStatus status;
+  final TInputStatus? status;
+
+  /// 组件前置图标
+  final Widget? prefixIcon;
 
   /// 后置图标前的后置内容
   final Widget? suffix;
@@ -167,6 +177,21 @@ class TTagInput extends TFormItemValidate {
   /// 按下enter事件清除input文本
   final bool enterClearInput;
 
+  /// {@macro tdesign.components.inputBase.onTap}
+  final GestureTapCallback? onTap;
+
+  /// 键盘按下时触发
+  final TInputKeyEvent? onKeyDown;
+
+  /// 按下字符键时触发（keydown -> keypress -> keyup）
+  final TInputKeyEvent? onKeyPress;
+
+  /// 释放键盘时触发
+  final TInputKeyEvent? onKeyUp;
+
+  /// 自动聚焦
+  final bool autofocus;
+
   @override
   TFormItemValidateState<TTagInput> createState() => _TTagInputState();
 }
@@ -214,15 +239,19 @@ class _TTagInputState extends TFormItemValidateState<TTagInput> {
       animation: effectiveController,
       builder: (BuildContext context, Widget? child) {
         return TInput(
-          padding: EdgeInsets.only(left: TVar.spacerS),
+          onTap: widget.onTap,
+          padding: EdgeInsets.only(left: TVar.spacerS, right: TVar.spacer),
           borderless: widget.borderless,
           align: widget.textAlign,
           disabled: disabled,
           readonly: !widget.allowInput || widget.readonly,
           controller: effectiveTextController,
           focusNode: effectiveFocusNode,
+          autofocus: widget.autofocus,
           autoWidth: widget.autoWidth,
           breakLine: widget.excessTagsDisplayType == TTagExcessTagsDisplayType.breakLine,
+          prefixIcon: widget.prefixIcon,
+          prefixPadding: EdgeInsets.only(left: TVar.spacerS),
           suffixIcon: TClearIcon(
             onClick: _handleClear,
             show: showClearIcon,
@@ -236,21 +265,23 @@ class _TTagInputState extends TFormItemValidateState<TTagInput> {
           prefixLabels: _buildTags(),
           onMouseenter: (event) {
             _isHovered = true;
-            _handleClearChange();
+            _handleClearIconChange();
             widget.onMouseenter?.call(event);
           },
           onMouseleave: (event) {
             _isHovered = false;
-            _handleClearChange();
+            _handleClearIconChange();
             widget.onMouseleave?.call(event);
           },
+          onKeyDown: _handleBackspace,
+          onKeyPress: widget.onKeyPress,
+          onKeyUp: widget.onKeyUp,
           placeholder: effectiveController.value.isNotEmpty ? '' : widget.placeholder,
           onEnter: _handleEnter,
-          onKeyDown: _handleBackspace,
           onFocus: (text) => widget.onFocus?.call(effectiveController.value, text),
           onBlur: (text) => widget.onBlur?.call(effectiveController.value, text),
           onChange: (text) {
-            _handleClearChange();
+            _handleClearIconChange();
             widget.onInputChange?.call(effectiveTextController.text, InputValueChangeContext.input);
           },
         );
@@ -339,7 +370,7 @@ class _TTagInputState extends TFormItemValidateState<TTagInput> {
         if (value.length > length)
           Padding(
             padding: EdgeInsets.only(right: TVar.spacerS),
-            child: widget.collapsedItems?.call(value.sublist(length), value.length - length) ??
+            child: widget.collapsedItems?.call(value, value.sublist(length), value.length - length) ??
                 TTag(
                   theme: widget.tagTheme,
                   variant: widget.tagVariant,
@@ -354,6 +385,7 @@ class _TTagInputState extends TFormItemValidateState<TTagInput> {
 
   /// 处理退格键
   void _handleBackspace(String text, KeyEvent event) {
+    widget.onKeyDown?.call(text, event);
     if (event.physicalKey == PhysicalKeyboardKey.backspace && text.isEmpty) {
       var lastIndex = effectiveController.value.lastIndex;
       var item = effectiveController.value[lastIndex];
@@ -371,16 +403,16 @@ class _TTagInputState extends TFormItemValidateState<TTagInput> {
   /// 处理回车键
   void _handleEnter(String text) {
     if (text.isNotEmpty) {
-      if(widget.enterClearInput) {
+      if (widget.enterClearInput) {
         effectiveTextController.clear();
       }
       effectiveFocusNode.requestFocus();
       if (widget.max == null || effectiveController.value.length < widget.max!) {
         effectiveController.add(text);
       }
-      _handleClearChange();
+      _handleClearIconChange();
       widget.onInputChange?.call(text, InputValueChangeContext.enter);
-      _handleValueChange(TagInputTriggerSource.enter, index: effectiveController.value.lastIndex, item: text);
+      _handleValueChange(TagInputTriggerSource.enter, item: text);
     }
     widget.onEnter?.call(effectiveController.value);
   }
@@ -398,7 +430,7 @@ class _TTagInputState extends TFormItemValidateState<TTagInput> {
   }
 
   /// 处理清理icon状态变更
-  void _handleClearChange() {
+  void _handleClearIconChange() {
     if ((effectiveController.value.isNotEmpty || effectiveTextController.text.isNotEmpty) &&
         widget.clearable &&
         !disabled &&

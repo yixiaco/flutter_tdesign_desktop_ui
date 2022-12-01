@@ -3,7 +3,7 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// 下拉菜单示例
 class TDropdownExample extends StatefulWidget {
-  const TDropdownExample({Key? key}) : super(key: key);
+  const TDropdownExample({super.key});
 
   @override
   State<TDropdownExample> createState() => _TDropdownExampleState();

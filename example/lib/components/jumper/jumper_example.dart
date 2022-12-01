@@ -2,7 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 class TJumperExample extends StatelessWidget {
-  const TJumperExample({Key? key}) : super(key: key);
+  const TJumperExample({super.key});
 
   @override
   Widget build(BuildContext context) {

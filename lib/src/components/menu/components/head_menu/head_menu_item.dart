@@ -5,9 +5,9 @@ const Color menuItemHoverColorDark = Color.fromRGBO(255, 255, 255, .55);
 /// 子菜单
 class _THeadMenuItem<T> extends StatelessWidget {
   const _THeadMenuItem({
-    Key? key,
+    super.key,
     required this.props,
-  }) : super(key: key);
+  });
 
   /// 布局属性
   final _THeadMenuItemLayoutProps<T> props;

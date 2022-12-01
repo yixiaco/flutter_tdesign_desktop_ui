@@ -61,7 +61,7 @@ class TGutter {
 /// 水平栅格
 class TRow extends StatelessWidget {
   const TRow({
-    Key? key,
+    super.key,
     this.mainAxisAlignment = WrapAlignment.start,
     this.crossAlignment = WrapCrossAlignment.center,
     this.textDirection,
@@ -72,7 +72,7 @@ class TRow extends StatelessWidget {
     this.runAlignment = WrapAlignment.start,
     this.runGutter = const TGutter.all(0),
     this.children = const <TCol>[],
-  }) : super(key: key);
+  });
 
   ///子项应如何放置在主轴上
   final WrapAlignment mainAxisAlignment;
@@ -233,12 +233,12 @@ class TColSpan {
 /// 栅格列
 class TCol extends StatelessWidget {
   const TCol({
-    Key? key,
+    super.key,
     required this.child,
     required this.span,
     this.offset = const TColSpan.span(0),
     this.order = 0,
-  }) : super(key: key);
+  });
 
   /// 子布局
   final Widget child;

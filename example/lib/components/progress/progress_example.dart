@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 class TProgressExample extends StatefulWidget {
-  const TProgressExample({Key? key}) : super(key: key);
+  const TProgressExample({super.key});
 
   @override
   State<TProgressExample> createState() => _TProgressExampleState();

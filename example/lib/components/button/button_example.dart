@@ -3,7 +3,7 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// 按钮示例
 class TButtonExample extends StatelessWidget {
-  const TButtonExample({Key? key}) : super(key: key);
+  const TButtonExample({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -52,31 +52,77 @@ class TButtonExample extends StatelessWidget {
           TSpace(
             children: [
               TButton(
-                  onPressed: () {}, loading: true, themeStyle: TButtonThemeStyle.primary, variant: TButtonVariant.base, child: const Text('确定')),
+                  onPressed: () {},
+                  loading: true,
+                  themeStyle: TButtonThemeStyle.primary,
+                  variant: TButtonVariant.base,
+                  child: const Text('确定')),
               TButton(
-                  onPressed: () {}, loading: true, themeStyle: TButtonThemeStyle.success, variant: TButtonVariant.base, child: const Text('确定')),
-              TButton(onPressed: () {}, loading: true, themeStyle: TButtonThemeStyle.danger, variant: TButtonVariant.base, child: const Text('确定')),
+                  onPressed: () {},
+                  loading: true,
+                  themeStyle: TButtonThemeStyle.success,
+                  variant: TButtonVariant.base,
+                  child: const Text('确定')),
               TButton(
-                  onPressed: () {}, loading: true, themeStyle: TButtonThemeStyle.warning, variant: TButtonVariant.base, child: const Text('确定')),
+                  onPressed: () {},
+                  loading: true,
+                  themeStyle: TButtonThemeStyle.danger,
+                  variant: TButtonVariant.base,
+                  child: const Text('确定')),
+              TButton(
+                  onPressed: () {},
+                  loading: true,
+                  themeStyle: TButtonThemeStyle.warning,
+                  variant: TButtonVariant.base,
+                  child: const Text('确定')),
             ],
           ),
           TSpace(
             children: [
               TButton(
-                  onPressed: () {}, loading: true, themeStyle: TButtonThemeStyle.primary, variant: TButtonVariant.text, child: const Text('确定')),
+                  onPressed: () {},
+                  loading: true,
+                  themeStyle: TButtonThemeStyle.primary,
+                  variant: TButtonVariant.text,
+                  child: const Text('确定')),
               TButton(
-                  onPressed: () {}, loading: true, themeStyle: TButtonThemeStyle.success, variant: TButtonVariant.text, child: const Text('确定')),
-              TButton(onPressed: () {}, loading: true, themeStyle: TButtonThemeStyle.danger, variant: TButtonVariant.text, child: const Text('确定')),
+                  onPressed: () {},
+                  loading: true,
+                  themeStyle: TButtonThemeStyle.success,
+                  variant: TButtonVariant.text,
+                  child: const Text('确定')),
               TButton(
-                  onPressed: () {}, loading: true, themeStyle: TButtonThemeStyle.warning, variant: TButtonVariant.text, child: const Text('确定')),
+                  onPressed: () {},
+                  loading: true,
+                  themeStyle: TButtonThemeStyle.danger,
+                  variant: TButtonVariant.text,
+                  child: const Text('确定')),
+              TButton(
+                  onPressed: () {},
+                  loading: true,
+                  themeStyle: TButtonThemeStyle.warning,
+                  variant: TButtonVariant.text,
+                  child: const Text('确定')),
             ],
           ),
           TSpace(
             children: [
-              TButton(onPressed: () {}, ghost: true, loading: true, variant: TButtonVariant.base, child: const Text('确定')),
-              TButton(onPressed: () {}, ghost: true, loading: true, variant: TButtonVariant.outline, child: const Text('确定')),
-              TButton(onPressed: () {}, ghost: true, loading: true, variant: TButtonVariant.dashed, child: const Text('确定')),
-              TButton(onPressed: () {}, ghost: true, loading: true, variant: TButtonVariant.text, child: const Text('确定')),
+              TButton(
+                  onPressed: () {}, ghost: true, loading: true, variant: TButtonVariant.base, child: const Text('确定')),
+              TButton(
+                  onPressed: () {},
+                  ghost: true,
+                  loading: true,
+                  variant: TButtonVariant.outline,
+                  child: const Text('确定')),
+              TButton(
+                  onPressed: () {},
+                  ghost: true,
+                  loading: true,
+                  variant: TButtonVariant.dashed,
+                  child: const Text('确定')),
+              TButton(
+                  onPressed: () {}, ghost: true, loading: true, variant: TButtonVariant.text, child: const Text('确定')),
             ],
           ),
           TSpace(
@@ -317,7 +363,6 @@ class TButtonExample extends StatelessWidget {
                     ),
                   ],
                 )
-
               ],
             ),
           ),

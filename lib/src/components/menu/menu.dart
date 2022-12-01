@@ -19,7 +19,7 @@ const double _kMenuFoldingWidth = 64;
 /// 用于承载网站的架构，并提供跳转的菜单列表。
 class TMenu<T> extends StatefulWidget {
   const TMenu({
-    Key? key,
+    super.key,
     this.collapsed,
     this.expandMutex,
     this.expandType,
@@ -32,7 +32,7 @@ class TMenu<T> extends StatefulWidget {
     this.onChange,
     this.onExpand,
     this.menus = const [],
-  }) : super(key: key);
+  });
 
   /// 是否收起菜单
   final bool? collapsed;

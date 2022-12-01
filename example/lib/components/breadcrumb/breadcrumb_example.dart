@@ -2,7 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 class TBreadcrumbExample extends StatelessWidget {
-  const TBreadcrumbExample({Key? key}) : super(key: key);
+  const TBreadcrumbExample({super.key});
 
   @override
   Widget build(BuildContext context) {

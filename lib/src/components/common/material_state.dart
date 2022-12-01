@@ -7,7 +7,7 @@ import 'package:flutter/services.dart';
 /// 一个通用的按钮状态构建器
 class TMaterialStateButton extends StatefulWidget {
   const TMaterialStateButton({
-    Key? key,
+    super.key,
     this.builder,
     this.child,
     this.disabled = false,
@@ -28,9 +28,10 @@ class TMaterialStateButton extends StatefulWidget {
     this.onFocusChange,
     this.actions,
     this.shortcuts,
+    this.descendantsAreFocusable = true,
+    this.descendantsAreTraversable = true,
     this.enableFeedback = true,
-  })  : assert(child != null || builder != null),
-        super(key: key);
+  })  : assert(child != null || builder != null);
 
   /// 是否禁用
   final bool disabled;
@@ -91,6 +92,12 @@ class TMaterialStateButton extends StatefulWidget {
   /// {@macro flutter.widgets.shortcuts.shortcuts}
   final Map<ShortcutActivator, Intent>? shortcuts;
 
+  /// {@macro flutter.widgets.Focus.descendantsAreFocusable}
+  final bool descendantsAreFocusable;
+
+  /// {@macro flutter.widgets.Focus.descendantsAreTraversable}
+  final bool descendantsAreTraversable;
+
   /// 检测到的手势是否应该提供声音和/或触觉反馈。
   /// 例如，在Android上，当反馈功能被启用时，轻按会产生点击声，长按会产生短暂的震动。
   /// 通常组件的默认值是true
@@ -139,9 +146,11 @@ class _TMaterialStateButtonState extends State<TMaterialStateButton> with Materi
       focusNode: widget.focusNode,
       actions: widget.actions ?? activeMap(context),
       shortcuts: widget.shortcuts,
+      descendantsAreFocusable: widget.descendantsAreFocusable,
+      descendantsAreTraversable: widget.descendantsAreTraversable,
       child: GestureDetector(
         behavior: widget.behavior,
-        onTap: _handleTap,
+        onTap: widget.onTap != null ? _handleTap : null,
         onTapDown: (details) {
           _onTap(true);
           if (_isClick) widget.onTapDown?.call(details);

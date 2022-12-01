@@ -3,21 +3,21 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 abstract class AnimationChangeNotifierPainter extends ChangeNotifier implements CustomPainter {
-  Animation<double> get t => _t!;
-  Animation<double>? _t;
+  Animation<double> get animation => _animation!;
+  Animation<double>? _animation;
 
-  set t(Animation<double> value) {
-    if (value == _t) {
+  set animation(Animation<double> value) {
+    if (value == _animation) {
       return;
     }
-    _t?.removeListener(notifyListeners);
+    _animation?.removeListener(notifyListeners);
     value.addListener(notifyListeners);
-    _t = value;
+    _animation = value;
     notifyListeners();
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 
   @override
   bool? hitTest(Offset position) => null;
@@ -32,8 +32,9 @@ abstract class AnimationChangeNotifierPainter extends ChangeNotifier implements 
   String toString() => describeIdentity(this);
 
   @override
+  @mustCallSuper
   void dispose() {
     super.dispose();
-    _t?.removeListener(notifyListeners);
+    _animation?.removeListener(notifyListeners);
   }
 }

@@ -18,16 +18,19 @@ import 'package:example/components/menu/menu_example.dart';
 import 'package:example/components/popup/popup_example.dart';
 import 'package:example/components/progress/progress_example.dart';
 import 'package:example/components/radio/radio_example.dart';
+import 'package:example/components/select/select_example.dart';
 import 'package:example/components/select_input/select_input_example.dart';
 import 'package:example/components/space/space_example.dart';
 import 'package:example/components/switch/switch_example.dart';
 import 'package:example/components/tabs/tabs_example.dart';
 import 'package:example/components/tag/tag_example.dart';
 import 'package:example/components/tag_input/tag_input_example.dart';
+import 'package:example/state/fps_state.dart';
 import 'package:example/state/locale_state.dart';
 import 'package:example/state/semantics_state.dart';
 import 'package:example/state/size_state.dart';
 import 'package:example/state/theme_state.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -36,13 +39,14 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 void main() {
   // 初始化之前如果访问二进制文件，需要先初始化
   WidgetsFlutterBinding.ensureInitialized();
+  GestureBinding.instance.resamplingEnabled = true;
   runApp(const ProviderScope(
     child: MyApp(),
   ));
 }
 
 class MyApp extends HookConsumerWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   // This widget is the root of your application.
   @override
@@ -50,10 +54,13 @@ class MyApp extends HookConsumerWidget {
     var theme = ref.watch(themeProvider);
     var size = ref.watch(sizeProvider);
     var locale = ref.watch(localeProvider);
+    var fps = ref.watch(fpsProvider);
 
     return TTheme(
       data: theme.copyWith(size: size),
       child: MaterialApp(
+        showPerformanceOverlay: fps,
+        // 开启FPS监控
         title: 'TDesign Desktop UI Demo',
         locale: locale,
         supportedLocales: GlobalTDesignLocalizations.delegate.supportedLocales,
@@ -68,7 +75,7 @@ class MyApp extends HookConsumerWidget {
 }
 
 class MyHomePage extends StatefulHookConsumerWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
+  const MyHomePage({super.key, required this.title});
 
   final String title;
 
@@ -246,6 +253,15 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
           },
         ),
         TMenuItemProps(
+          value: 'select',
+          content: const Text('Select 选择器'),
+          onClick: () {
+            setState(() {
+              content = const TSelectExample();
+            });
+          },
+        ),
+        TMenuItemProps(
           value: 'select_input',
           content: const Text('SelectInput 筛选器输入框'),
           onClick: () {
@@ -392,6 +408,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
   }
 
   Widget _buildHeader(TThemeData theme, bool semantics, TComponentSize size, Locale locale) {
+    var fps = ref.watch(fpsProvider);
     return THeader(
       child: TSingleChildScrollView(
         scrollDirection: Axis.horizontal,
@@ -414,7 +431,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                 const Text('语义：'),
                 TButton(
                   onPressed: () => ref.read(semanticsProvider.notifier).update((state) => !state),
-                  child: Text(semantics ? '显示语义' : '隐藏语义'),
+                  child: Text(semantics ? '隐藏语义' : '显示语义'),
                 ),
               ],
             ),
@@ -438,20 +455,31 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 const Text('国际化：'),
-                DropdownButton<Locale>(
+                TSelect(
                   value: locale,
-                  items: const [
-                    DropdownMenuItem(value: Locale('zh', 'CN'), child: Text('中文')),
-                    DropdownMenuItem(value: Locale('en', 'US'), child: Text('English')),
-                    DropdownMenuItem(value: Locale('ja', 'JP'), child: Text('日本語')),
-                    DropdownMenuItem(value: Locale('ko', 'KR'), child: Text('한글')),
+                  autoWidth: true,
+                  options: const [
+                    TSelectOption(label: '中文', value: Locale('zh', 'CN')),
+                    TSelectOption(label: 'English', value: Locale('en', 'US')),
+                    TSelectOption(label: '日本語', value: Locale('ja', 'JP')),
+                    TSelectOption(label: '한글', value: Locale('ko', 'KR')),
                   ],
-                  onChanged: (value) {
+                  onChange: (value, changeContext) {
                     ref.read(localeProvider.state).state = value!;
                   },
-                )
+                ),
               ],
-            )
+            ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('FPS：'),
+                TButton(
+                  onPressed: () => ref.read(fpsProvider.notifier).update((state) => !state),
+                  child: Text(fps ? '关' : '开'),
+                ),
+              ],
+            ),
           ],
         ),
       ),
@@ -479,21 +507,27 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
         ),
       );
     }
-    return FractionallySizedBox(
-      heightFactor: 1,
-      child: TMenu(
-        width: 260,
-        collapsed: collapsed,
-        controller: menuController,
-        menus: menus,
-        logo: logo,
-        operations: TMenuIconButton(
-          onClick: () {
-            setState(() {
-              collapsed = !collapsed;
-            });
-          },
-          child: Icon(collapsed ? TIcons.chevronRight : TIcons.chevronLeft),
+    return Container(
+      decoration: BoxDecoration(
+        border: Border(right: BorderSide(color: theme.colorScheme.borderLevel2Color)),
+      ),
+      child: FractionallySizedBox(
+        heightFactor: 1,
+        child: TMenu(
+          width: 240,
+          collapsed: collapsed,
+          controller: menuController,
+          menus: menus,
+          logo: logo,
+          operations: TMenuIconButton(
+            onClick: () {
+              setState(() {
+                collapsed = !collapsed;
+              });
+            },
+            child: TFakeArrow(placement: collapsed ? TFakeArrowPlacement.right : TFakeArrowPlacement.left),
+            // child: Icon(collapsed ? TIcons.chevronRight : TIcons.chevronLeft),
+          ),
         ),
       ),
     );

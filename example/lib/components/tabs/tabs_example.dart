@@ -3,7 +3,7 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// 选项卡示例
 class TTabsExample extends StatefulWidget {
-  const TTabsExample({Key? key}) : super(key: key);
+  const TTabsExample({super.key});
 
   @override
   State<TTabsExample> createState() => _TTabsExampleState();

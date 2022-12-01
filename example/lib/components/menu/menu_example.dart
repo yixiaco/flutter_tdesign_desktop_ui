@@ -3,7 +3,7 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// 导航菜单示例
 class TMenuExample extends StatefulWidget {
-  const TMenuExample({Key? key}) : super(key: key);
+  const TMenuExample({super.key});
 
   @override
   State<TMenuExample> createState() => _TMenuExampleState();

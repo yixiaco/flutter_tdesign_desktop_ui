@@ -432,7 +432,7 @@ class TColorScheme with Diagnosticable {
       shadow2: [
         const BoxShadow(offset: Offset(0, 3), blurRadius: 14, spreadRadius: 2, color: Color(0x0C000000)),
         const BoxShadow(offset: Offset(0, 8), blurRadius: 10, spreadRadius: 1, color: Color(0x0F000000)),
-        const BoxShadow(offset: Offset(0, 5), blurRadius: 5, spreadRadius: 0, color: Color(0x19000000)),
+        const BoxShadow(offset: Offset(0, 5), blurRadius: 5, spreadRadius: -3, color: Color(0x19000000)),
       ],
       shadow3: [
         const BoxShadow(offset: Offset(0, 6), blurRadius: 30, spreadRadius: 5, color: Color(0x0C000000)),

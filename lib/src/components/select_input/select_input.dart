@@ -2,11 +2,15 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
+typedef TSelectInputCollapsedItemsCallback<T> = Widget Function(List<T> value, List<T> collapsedTags, int count);
+
+const double kSelectInputDefaultMaxWidth = 1000;
+
 /// 筛选器输入框
 /// 定义：筛选器通用输入框
 class TSelectInput<T extends SelectInputValue> extends StatelessWidget {
   const TSelectInput({
-    Key? key,
+    super.key,
     this.size,
     this.allowInput = false,
     this.autoWidth = false,
@@ -24,16 +28,17 @@ class TSelectInput<T extends SelectInputValue> extends StatelessWidget {
     this.placeholder,
     this.placement,
     this.trigger,
-    this.showArrow,
+    this.showPopupArrow,
     this.onOpen,
     this.onClose,
     this.showDuration = const Duration(milliseconds: 250),
     this.hideDuration = const Duration(milliseconds: 150),
-    this.destroyOnClose = true,
+    this.destroyOnClose = false,
     this.popupStyle,
     this.popupVisible,
     this.readonly = false,
-    this.status = TInputStatus.defaultStatus,
+    this.status,
+    this.prefixIcon,
     this.suffix,
     this.suffixIcon,
     this.tag,
@@ -44,8 +49,7 @@ class TSelectInput<T extends SelectInputValue> extends StatelessWidget {
     this.excessTagsDisplayType = TTagExcessTagsDisplayType.breakLine,
     this.dragSort = false,
     this.onDragSort,
-    this.max,
-    this.controller,
+    this.value,
     this.singleValueDisplay,
     this.multipleValueDisplay,
     this.onBlur,
@@ -55,14 +59,14 @@ class TSelectInput<T extends SelectInputValue> extends StatelessWidget {
     this.onInputChange,
     this.onMouseenter,
     this.onMouseleave,
+    this.onKeyDown,
+    this.onKeyPress,
+    this.onKeyUp,
     this.onPopupVisibleChange,
     this.onTagChange,
     this.focusNode,
     this.autofocus = false,
-  })  : assert(controller == null ||
-            multiple && controller is TSelectInputMultipleController ||
-            !multiple && controller is TSelectInputSingleController),
-        super(key: key);
+  }) : assert(value == null || multiple && value is List<T> || !multiple && value is T);
 
   /// 尺寸
   final TComponentSize? size;
@@ -82,7 +86,7 @@ class TSelectInput<T extends SelectInputValue> extends StatelessWidget {
   /// 标签过多的情况下，折叠项内容，默认为 `+N`。
   /// 如果需要悬浮就显示其他内容，可以使用 `collapsedItems` 自定义。
   /// `value` 表示所有标签值，`collapsedTags` 表示折叠标签值，`count` 表示总标签数量
-  final TTagInputCollapsedItemsCallback? collapsedItems;
+  final TSelectInputCollapsedItemsCallback<T>? collapsedItems;
 
   /// 是否禁用
   final bool disabled;
@@ -119,7 +123,7 @@ class TSelectInput<T extends SelectInputValue> extends StatelessWidget {
   final TPopupTrigger? trigger;
 
   /// 是否显示浮层箭头
-  final bool? showArrow;
+  final bool? showPopupArrow;
 
   /// 打开事件
   final TCallback? onOpen;
@@ -141,13 +145,16 @@ class TSelectInput<T extends SelectInputValue> extends StatelessWidget {
   final TPopupStyle? popupStyle;
 
   /// 是否显示下拉框
-  final ValueNotifier<bool>? popupVisible;
+  final TPopupVisible? popupVisible;
 
   /// 只读状态，值为真会隐藏输入框，且无法打开下拉框
   final bool readonly;
 
   /// 输入框状态
-  final TInputStatus status;
+  final TInputStatus? status;
+
+  /// 前缀图标
+  final Widget? prefixIcon;
 
   /// 后置图标前的后置内容
   final Widget? suffix;
@@ -178,31 +185,31 @@ class TSelectInput<T extends SelectInputValue> extends StatelessWidget {
   /// 拖拽调整标签顺序
   final bool dragSort;
 
-  /// 最大允许输入的标签数量
-  final int? max;
-
   /// 拖拽排序时触发
   final void Function(TagInputDragSortContext context)? onDragSort;
 
   /// 全部标签值。值为数组表示多个标签，值为非数组表示单个数值。
-  final TSelectInputController? controller;
+  final dynamic value;
 
-  /// 自定义值呈现的全部内容，参数为所有标签的值。
-  final Widget Function(T value, void Function(int index, T item) onClose)? singleValueDisplay;
+  /// 自定义值呈现的全部内容
+  final String Function(T? value)? singleValueDisplay;
 
   /// 自定义值呈现的全部内容，参数为所有标签的值。
   final List<Widget> Function(List<T> value, void Function(int index, T item) onClose)? multipleValueDisplay;
 
   /// 失去焦点时触发
+  /// value: 值为数组表示多个标签，值为非数组表示单个数值。
   final void Function(dynamic value, TSelectInputFocusContext context)? onBlur;
 
   /// 清空按钮点击时触发
   final VoidCallback? onClear;
 
   /// 按键按下 Enter 时触发
+  /// value: 值为数组表示多个标签，值为非数组表示单个数值。
   final void Function(dynamic value, String inputValue)? onEnter;
 
   /// 聚焦时触发
+  /// value: 值为数组表示多个标签，值为非数组表示单个数值。
   final void Function(dynamic value, String inputValue, List<String>? tagInputValue)? onFocus;
 
   /// 输入框值发生变化时触发，context.trigger 表示触发输入框值变化的来源：文本输入触发、清除按钮触发等
@@ -214,11 +221,20 @@ class TSelectInput<T extends SelectInputValue> extends StatelessWidget {
   /// 离开输入框时触发
   final PointerExitEventListener? onMouseleave;
 
+  /// 键盘按下时触发
+  final TInputKeyEvent? onKeyDown;
+
+  /// 按下字符键时触发（keydown -> keypress -> keyup）
+  final TInputKeyEvent? onKeyPress;
+
+  /// 释放键盘时触发
+  final TInputKeyEvent? onKeyUp;
+
   /// 下拉框显示或隐藏时触发。
   final void Function(bool visible)? onPopupVisibleChange;
 
   /// 值变化时触发，参数 context.trigger 表示数据变化的触发来源；context.index 指当前变化项的下标；context.item 指当前变化项
-  final void Function(dynamic value, TagInputChangeContext context)? onTagChange;
+  final void Function(List<T> value, TagInputChangeContext context)? onTagChange;
 
   /// 焦点
   final FocusNode? focusNode;
@@ -228,11 +244,17 @@ class TSelectInput<T extends SelectInputValue> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Widget child;
     if (multiple) {
-      return _buildMultiple();
+      child = _buildMultiple();
     } else {
-      return _buildSingle();
+      child = _buildSingle();
     }
+    return Semantics(
+      button: true,
+      enabled: !disabled,
+      child: child,
+    );
   }
 
   /// 构建单选组件
@@ -241,7 +263,7 @@ class TSelectInput<T extends SelectInputValue> extends StatelessWidget {
       size: size,
       allowInput: allowInput,
       disabled: disabled,
-      controller: controller as TSelectInputSingleController<T>,
+      value: value,
       readonly: readonly,
       borderless: borderless,
       autoWidth: autoWidth,
@@ -255,7 +277,12 @@ class TSelectInput<T extends SelectInputValue> extends StatelessWidget {
       placeholder: placeholder,
       onMouseleave: onMouseleave,
       onMouseenter: onMouseenter,
+      onKeyDown: onKeyDown,
+      onKeyPress: onKeyPress,
+      onKeyUp: onKeyUp,
+      prefixIcon: prefixIcon,
       suffixIcon: suffixIcon,
+      showPopupArrow: showPopupArrow,
       onClear: onClear,
       clearable: clearable,
       onEnter: onEnter,
@@ -274,6 +301,7 @@ class TSelectInput<T extends SelectInputValue> extends StatelessWidget {
       panel: panel,
       popupVisible: popupVisible,
       showDuration: showDuration,
+      valueDisplay: singleValueDisplay,
       focusNode: focusNode,
       autofocus: autofocus,
     );
@@ -285,7 +313,7 @@ class TSelectInput<T extends SelectInputValue> extends StatelessWidget {
       size: size,
       allowInput: allowInput,
       disabled: disabled,
-      controller: controller as TSelectInputMultipleController<T>,
+      value: value,
       readonly: readonly,
       borderless: borderless,
       tagTheme: tagTheme,
@@ -295,6 +323,7 @@ class TSelectInput<T extends SelectInputValue> extends StatelessWidget {
       minCollapsedNum: minCollapsedNum,
       tips: tips,
       tag: tag,
+      prefixIcon: prefixIcon,
       suffix: suffix,
       label: label,
       onBlur: onBlur,
@@ -302,7 +331,11 @@ class TSelectInput<T extends SelectInputValue> extends StatelessWidget {
       placeholder: placeholder,
       onMouseleave: onMouseleave,
       onMouseenter: onMouseenter,
+      onKeyDown: onKeyDown,
+      onKeyPress: onKeyPress,
+      onKeyUp: onKeyUp,
       suffixIcon: suffixIcon,
+      showPopupArrow: showPopupArrow,
       onClear: onClear,
       clearable: clearable,
       onEnter: onEnter,

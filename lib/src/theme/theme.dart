@@ -6,10 +6,10 @@ import 'theme_data.dart';
 /// 颜色主题
 class TTheme extends InheritedTheme {
   const TTheme({
-    Key? key,
+    super.key,
     required this.data,
-    required Widget child,
-  }) : super(key: key, child: child);
+    required super.child,
+  });
 
   /// 颜色主题数据
   final TThemeData data;

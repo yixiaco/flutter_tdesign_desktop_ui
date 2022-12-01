@@ -1,8 +1,13 @@
 import 'package:flutter/foundation.dart';
 
 class SelectInputValue {
+  /// 标签名称
   final String label;
+
+  /// 值
   final dynamic value;
+
+  /// 子选项
   final List<SelectInputValue>? children;
 
   const SelectInputValue({
@@ -10,6 +15,13 @@ class SelectInputValue {
     this.value,
     this.children,
   });
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) || other is SelectInputValue && runtimeType == other.runtimeType && value == other.value;
+
+  @override
+  int get hashCode => value.hashCode;
 }
 
 class TSelectInputFocusContext {

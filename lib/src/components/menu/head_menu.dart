@@ -14,7 +14,7 @@ part 'components/head_menu/head_menu_item.dart';
 /// 用于承载网站的架构，并提供跳转的菜单列表。
 class THeadMenu<T> extends StatefulWidget {
   const THeadMenu({
-    Key? key,
+    super.key,
     this.expandType,
     this.logo,
     this.operations,
@@ -23,7 +23,7 @@ class THeadMenu<T> extends StatefulWidget {
     this.onChange,
     this.onExpand,
     this.menus = const [],
-  }) : super(key: key);
+  });
 
   /// 二级菜单展开方式，平铺展开和浮层展开。
   final TMenuExpandType? expandType;

@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 class TIconExample extends StatelessWidget {
-  const TIconExample({Key? key}) : super(key: key);
+  const TIconExample({super.key});
 
   @override
   Widget build(BuildContext context) {

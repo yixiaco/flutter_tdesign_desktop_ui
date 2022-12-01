@@ -2,7 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 class TCollapseExample extends StatefulWidget {
-  const TCollapseExample({Key? key}) : super(key: key);
+  const TCollapseExample({super.key});
 
   @override
   State<TCollapseExample> createState() => _TCollapseExampleState();
@@ -28,7 +28,6 @@ class _TCollapseExampleState extends State<TCollapseExample> {
         TCollapse<int>(
           disabled: disabled,
           defaultExpandAll: true,
-          expandIconPlacement: TCollapseExpandIconPlacement.right,
           panels: const [
             TCollapsePanel(
               header: Text('这是一个折叠面板'),
@@ -48,7 +47,7 @@ class _TCollapseExampleState extends State<TCollapseExample> {
                 size: TComponentSize.small,
                 child: Text('操作'),
               ),
-              expandIcon: Icon(TIcons.arrowDown),
+              expandIcon: Icon(TIcons.discountFilled),
             ),
             TCollapsePanel(
               header: Text('销毁面板'),

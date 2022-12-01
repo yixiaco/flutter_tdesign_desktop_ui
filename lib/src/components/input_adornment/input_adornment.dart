@@ -3,16 +3,17 @@ import 'package:tdesign_desktop_ui/src/components/common/fixed_flex.dart';
 import 'package:tdesign_desktop_ui/src/components/input/input_theme.dart';
 import 'package:tdesign_desktop_ui/src/theme/theme.dart';
 import 'package:tdesign_desktop_ui/src/theme/theme_data.dart';
+import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// 输入装饰器
 /// 用于装饰输入类组件的装饰器
 class TInputAdornment extends StatelessWidget {
   const TInputAdornment({
-    Key? key,
+    super.key,
     this.prepend,
     this.append,
     required this.child,
-  }) : super(key: key);
+  });
 
   /// 前缀装饰
   final Widget? prepend;
@@ -53,7 +54,7 @@ class TInputAdornment extends StatelessWidget {
                   color: colorScheme.bgColorSecondaryContainerHover,
                   border: Border(left: borderSide, top: borderSide, bottom: borderSide),
                 ),
-                padding: padding,
+                padding: prepend is! TSelect ? padding : null,
                 alignment: Alignment.center,
                 child: prepend!,
               ),
@@ -74,7 +75,7 @@ class TInputAdornment extends StatelessWidget {
                   color: colorScheme.bgColorSecondaryContainerHover,
                   border: Border(right: borderSide, top: borderSide, bottom: borderSide),
                 ),
-                padding: padding,
+                padding: prepend is! TSelect ? padding : null,
                 alignment: Alignment.center,
                 child: append!,
               ),

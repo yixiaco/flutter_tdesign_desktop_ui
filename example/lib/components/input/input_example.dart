@@ -4,7 +4,7 @@ import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// 输入框示例
 class TInputExample extends StatelessWidget {
-  const TInputExample({Key? key}) : super(key: key);
+  const TInputExample({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -17,6 +17,10 @@ class TInputExample extends StatelessWidget {
           status: TInputStatus.success,
           placeholder: 'brand',
           disabled: true,
+        ),
+        TInput(
+          readonly: true,
+          placeholder: '只读',
         ),
         TInput(
           clearable: true,
@@ -58,12 +62,11 @@ class TInputExample extends StatelessWidget {
           clearable: true,
           type: TInputType.password,
           placeholder: '密码框',
-          label: Text('价格:'),
           maxLength: 10,
           suffix: Text('元'),
           obscuringCharacter: '*',
           showLimitNumber: true,
-          prefixIcon: Icon(TIcons.time),
+          prefixIcon: Icon(TIcons.lockOn),
         ),
         TInput(
           showClearIconOnEmpty: true,

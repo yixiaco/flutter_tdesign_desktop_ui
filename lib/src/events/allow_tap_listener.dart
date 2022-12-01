@@ -4,7 +4,7 @@ import 'package:flutter/widgets.dart';
 /// 不参与手势竞争，直接监听处理点击事件
 class AllowTapListener extends StatefulWidget {
   const AllowTapListener({
-    Key? key,
+    super.key,
     required this.child,
     this.onTap,
     this.onTapCancel,
@@ -18,7 +18,7 @@ class AllowTapListener extends StatefulWidget {
     this.onTertiaryTapUp,
     this.onTertiaryTapCancel,
     this.behavior,
-  }) : super(key: key);
+  });
 
   final Widget child;
 
@@ -165,13 +165,13 @@ class _AllowTapListenerState extends State<AllowTapListener> {
     return Listener(
       behavior: widget.behavior ?? HitTestBehavior.deferToChild,
       onPointerDown: _onPointerDown,
-      onPointerCancel: (event) => _onPointerCancel(_down, event),
-      onPointerUp: (event) => _onPointerUp(_down, event),
+      onPointerCancel: (event) => _onPointerCancel(_down!, event),
+      onPointerUp: (event) => _onPointerUp(_down!, event),
       child: widget.child,
     );
   }
 
-  void _onPointerDown(down) {
+  void _onPointerDown(PointerDownEvent down) {
     final TapDownDetails details = TapDownDetails(
       globalPosition: down.position,
       localPosition: down.localPosition,
@@ -192,7 +192,7 @@ class _AllowTapListenerState extends State<AllowTapListener> {
     }
   }
 
-  void _onPointerCancel(down, cancel) {
+  void _onPointerCancel(PointerDownEvent down,PointerCancelEvent cancel) {
     switch (down.buttons) {
       case kPrimaryButton:
         widget.onTapCancel?.call();
@@ -207,7 +207,7 @@ class _AllowTapListenerState extends State<AllowTapListener> {
     }
   }
 
-  void _onPointerUp(down, up) {
+  void _onPointerUp(PointerDownEvent down,PointerUpEvent up) {
     final TapUpDetails details = TapUpDetails(
       globalPosition: up.position,
       localPosition: up.localPosition,

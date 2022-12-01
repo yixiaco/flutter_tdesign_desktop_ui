@@ -29,7 +29,7 @@ class THollowChild {
 /// 镂空格子组件
 class THollow extends StatefulWidget {
   const THollow({
-    Key? key,
+    super.key,
     this.color,
     required this.children,
     this.onChange,
@@ -37,7 +37,7 @@ class THollow extends StatefulWidget {
     this.disabled,
     this.radius,
     this.strokeWidth,
-  }) : super(key: key);
+  });
 
   /// 颜色,可以指定[Color]或者[MaterialStateColor]
   final Color? color;

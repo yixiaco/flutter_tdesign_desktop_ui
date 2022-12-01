@@ -3,7 +3,7 @@ part of '../tabs.dart';
 /// 标签
 class _TabsLabel<T> extends StatefulWidget {
   const _TabsLabel({
-    Key? key,
+    super.key,
     this.addable = false,
     this.disabled = false,
     this.dragSort = false,
@@ -16,7 +16,7 @@ class _TabsLabel<T> extends StatefulWidget {
     this.onChange,
     this.onDragSort,
     this.onRemove,
-  }) : super(key: key);
+  });
 
   /// 选项卡是否可增加
   final bool addable;
@@ -163,7 +163,8 @@ class _TabsLabelState<T> extends State<_TabsLabel<T>> with SingleTickerProviderS
             if (offset + _kIconWidth > offset2.dx) {
               _animateTo(offset2.dx - _kIconWidth);
             } else if (offset + context.size!.width - _kIconWidth - _addableIconWidth < offset2.dx + width) {
-              _animateTo(offset + (offset2.dx + width - (offset + context.size!.width - _kIconWidth - _addableIconWidth)));
+              _animateTo(
+                  offset + (offset2.dx + width - (offset + context.size!.width - _kIconWidth - _addableIconWidth)));
             }
             break;
           case TTabsPlacement.left:
@@ -236,17 +237,19 @@ class _TabsLabelState<T> extends State<_TabsLabel<T>> with SingleTickerProviderS
     // 选中下划线
     switch (widget.theme) {
       case TTabsTheme.normal:
-        child = CustomPaint(
-          key: _painterKey,
-          foregroundPainter: _painter
-            .._painterKey = _painterKey
-            ..placement = widget.placement
-            ..t = _position
-            ..tabKeys = _tabKeys
-            ..color = colorScheme.brandColor
-            ..index = _index
-            ..strokeWidth = 1,
-          child: child,
+        child = RepaintBoundary(
+          child: CustomPaint(
+            key: _painterKey,
+            foregroundPainter: _painter
+              .._painterKey = _painterKey
+              ..placement = widget.placement
+              ..animation = _position
+              ..tabKeys = _tabKeys
+              ..color = colorScheme.brandColor
+              ..index = _index
+              ..strokeWidth = 1,
+            child: child,
+          ),
         );
         break;
       case TTabsTheme.card:
@@ -306,19 +309,21 @@ class _TabsLabelState<T> extends State<_TabsLabel<T>> with SingleTickerProviderS
             child: ClipRect(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
-                children: [_TabIconButton(
-                  size: widget.size,
-                  icon: TIcons.chevronLeft,
-                  right: false,
-                  showShadow: true,
-                  onTap: () {
-                    var offset = max(
-                      _scrollController.position.minScrollExtent,
-                      _scrollController.offset - context.size!.width + _kIconWidth * 2 + _addableIconWidth,
-                    );
-                    _animateTo(offset);
-                  },
-                )],
+                children: [
+                  _TabIconButton(
+                    size: widget.size,
+                    icon: TIcons.chevronLeft,
+                    right: false,
+                    showShadow: true,
+                    onTap: () {
+                      var offset = max(
+                        _scrollController.position.minScrollExtent,
+                        _scrollController.offset - context.size!.width + _kIconWidth * 2 + _addableIconWidth,
+                      );
+                      _animateTo(offset);
+                    },
+                  )
+                ],
               ),
             ),
           ),
@@ -326,27 +331,28 @@ class _TabsLabelState<T> extends State<_TabsLabel<T>> with SingleTickerProviderS
       }
       if (!_lastOffset) {
         lastOffsetIcon = Positioned.fill(
-          right: _addableIconWidth,
-          child: Align(
-            child: ClipRect(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [_TabIconButton(
-                  size: widget.size,
-                  icon: TIcons.chevronRight,
-                  showShadow: true,
-                  onTap: () {
-                    var offset = min(
-                      _scrollController.position.maxScrollExtent,
-                      _scrollController.offset + context.size!.width - _kIconWidth * 2 - _addableIconWidth,
-                    );
-                    _animateTo(offset);
-                  },
-                )],
+            right: _addableIconWidth,
+            child: Align(
+              child: ClipRect(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    _TabIconButton(
+                      size: widget.size,
+                      icon: TIcons.chevronRight,
+                      showShadow: true,
+                      onTap: () {
+                        var offset = min(
+                          _scrollController.position.maxScrollExtent,
+                          _scrollController.offset + context.size!.width - _kIconWidth * 2 - _addableIconWidth,
+                        );
+                        _animateTo(offset);
+                      },
+                    )
+                  ],
+                ),
               ),
-            ),
-          )
-        );
+            ));
       }
     }
 

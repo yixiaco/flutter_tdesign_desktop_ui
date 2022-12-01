@@ -3,9 +3,9 @@ part of '../../head_menu.dart';
 /// 次级菜单
 class _TSubHeadMenu<T> extends StatelessWidget {
   const _TSubHeadMenu({
-    Key? key,
+    super.key,
     required this.props,
-  }) : super(key: key);
+  });
 
   /// 布局属性
   final _THeadMenuItemLayoutProps<T> props;
@@ -181,6 +181,7 @@ class _TSubHeadMenu<T> extends StatelessWidget {
                           padding: const EdgeInsets.only(left: 8.0),
                           child: TFakeArrow(
                             placement: placement,
+                            dimension: 16,
                             color: textColor.resolve(states),
                           ),
                         )

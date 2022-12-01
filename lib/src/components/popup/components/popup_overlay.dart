@@ -3,13 +3,13 @@ part of '../popup.dart';
 /// 浮层内容对象
 class _PopupOverlay extends StatefulWidget {
   const _PopupOverlay({
-    Key? key,
+    super.key,
     required this.animation,
     this.onEnter,
     required this.popupState,
     required this.onRemove,
     required this.focusScopeNode,
-  }) : super(key: key);
+  });
 
   final Animation<double> animation;
   final PointerEnterEventListener? onEnter;
@@ -39,34 +39,37 @@ class _PopupOverlayState extends State<_PopupOverlay> {
     levelNotifier = _PopupLevelNotifier({});
     _visible = ValueNotifier(false);
     _isReverse = ValueNotifier(false);
-    _updateIgnore();
-    widget.animation.addListener(_updateIgnore);
+    _updateShow();
+    widget.animation.addListener(_updateShow);
   }
 
   @override
   void didUpdateWidget(covariant _PopupOverlay oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.animation != oldWidget.animation) {
-      oldWidget.animation.removeListener(_updateIgnore);
-      widget.animation.addListener(_updateIgnore);
+      oldWidget.animation.removeListener(_updateShow);
+      widget.animation.addListener(_updateShow);
     }
   }
 
   @override
   void dispose() {
     levelNotifier.dispose();
-    widget.animation.removeListener(_updateIgnore);
+    widget.animation.removeListener(_updateShow);
     _visible.dispose();
     _isReverse.dispose();
     widget.onRemove();
     super.dispose();
   }
 
-  void _updateIgnore() {
-    if (widget.animation.value > 0) {
-      if(widget.popupState.widget.trigger != TPopupTrigger.focus) {
+  /// 在动画值大于0时显示页面
+  void _updateShow() {
+    if(widget.animation.isCompleted) {
+      if (widget.popupState.widget.trigger != TPopupTrigger.focus && !widget.popupState._node.hasFocus) {
         widget.focusScopeNode.requestFocus();
       }
+    }
+    if (widget.animation.value > 0) {
       _visible.value = true;
     } else {
       _visible.value = false;
@@ -133,13 +136,21 @@ class _PopupOverlayState extends State<_PopupOverlay> {
           valueListenable: _isReverse,
           builder: (BuildContext context, bool value, Widget? child) {
             var boxConstraints = style?.constraints;
-            if(style?.followBoxWidth == true) {
-              if(boxConstraints == null) {
+            if (style?.followBoxWidth == true) {
+              if (boxConstraints == null) {
                 boxConstraints = BoxConstraints(minWidth: box.size.width);
               } else {
-                boxConstraints = boxConstraints.enforce(BoxConstraints(minWidth: box.size.width));
+                boxConstraints = boxConstraints.copyWith(minWidth: boxConstraints.constrainWidth(box.size.width));
               }
             }
+            var placement = currentPopupWidget.showArrow
+                ? currentPopupWidget.placement.sides(
+                    top: value ? BubbleDirection.top : BubbleDirection.bottom,
+                    left: value ? BubbleDirection.left : BubbleDirection.right,
+                    right: value ? BubbleDirection.right : BubbleDirection.left,
+                    bottom: value ? BubbleDirection.bottom : BubbleDirection.top,
+                  )
+                : BubbleDirection.none;
             return Container(
               key: _containerKey,
               margin: style?.margin,
@@ -151,26 +162,19 @@ class _PopupOverlayState extends State<_PopupOverlay> {
               transformAlignment: style?.transformAlignment,
               decoration: ShapeDecoration(
                 color: bgColorContainer,
-                shadows: [
+                shadows: style?.shadows ?? [
                   ...popupShadow,
-                  ...popupTopArrowShadow,
-                  ...popupRightArrowShadow,
-                  ...popupBottomArrowShadow,
-                  ...popupLeftArrowShadow
+                  if (placement == BubbleDirection.top) ...popupTopArrowShadow,
+                  if (placement == BubbleDirection.right) ...popupRightArrowShadow,
+                  if (placement == BubbleDirection.bottom) ...popupBottomArrowShadow,
+                  if (placement == BubbleDirection.left) ...popupLeftArrowShadow
                 ],
                 shape: BubbleShapeBorder(
-                  smooth: 0,
+                  smooth: 1,
                   arrowQuadraticBezierLength: 0,
-                  arrowAngle: 6,
-                  arrowHeight: 6,
-                  direction: currentPopupWidget.showArrow
-                      ? currentPopupWidget.placement.sides(
-                          top: value ? BubbleDirection.top : BubbleDirection.bottom,
-                          left: value ? BubbleDirection.left : BubbleDirection.right,
-                          right: value ? BubbleDirection.right : BubbleDirection.left,
-                          bottom: value ? BubbleDirection.bottom : BubbleDirection.top,
-                        )
-                      : BubbleDirection.none,
+                  arrowAngle: 5,
+                  arrowHeight: 5,
+                  direction: placement,
                   radius: style?.radius ?? BorderRadius.circular(TVar.borderRadiusDefault),
                   border: style?.border,
                   position: currentPopupWidget.placement.valueOf(
@@ -213,7 +217,7 @@ class _PopupOverlayState extends State<_PopupOverlay> {
           target: _PopupOffset.of(box.size, target),
           callback: (isReverse) {
             SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
-              if(mounted) {
+              if (mounted) {
                 _isReverse.value = isReverse;
               }
             });

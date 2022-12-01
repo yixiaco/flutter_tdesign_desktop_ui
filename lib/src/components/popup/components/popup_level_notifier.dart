@@ -26,11 +26,10 @@ class _PopupLevel extends InheritedTheme {
   final _PopupLevelNotifier popupLevel;
 
   const _PopupLevel({
-    Key? key,
     required this.overlayState,
     required this.popupLevel,
-    required Widget child,
-  }) : super(key: key, child: child);
+    required super.child,
+  });
 
   /// 来自封闭给定上下文的最近主题实例的数据
   static _PopupLevel? of(BuildContext context) {
