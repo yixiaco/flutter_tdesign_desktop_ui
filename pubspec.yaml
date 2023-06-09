@@ -5,7 +5,7 @@ homepage: https://github.com/yixiaco/flutter_tdesign_desktop_ui
 
 environment:
   sdk: ">=2.18.0 <3.0.0"
-  flutter: ">=1.17.0"
+  flutter: ">=1.17.0 <=3.3.10"
 
 dependencies:
   flutter:
