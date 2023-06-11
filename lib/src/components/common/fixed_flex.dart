@@ -35,7 +35,7 @@ typedef FixedCrossFlexBoxConstraintsCallback = BoxConstraints Function(
 /// 这个类可能是昂贵的，因此应首先考虑使用[Flex]，而不是[FixedCrossFlex]
 class FixedCrossFlex extends Flex {
   /// 固定交叉轴的Flex组件
-  FixedCrossFlex({
+  const FixedCrossFlex({
     super.key,
     required super.direction,
     super.mainAxisAlignment = MainAxisAlignment.start,

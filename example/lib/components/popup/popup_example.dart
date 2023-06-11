@@ -33,18 +33,18 @@ class _TPopupExampleState extends State<TPopupExample> {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        TPopup(
+        const TPopup(
           trigger: TPopupTrigger.hover,
           placement: TPopupPlacement.leftBottom,
           showArrow: true,
           content: Column(
             mainAxisSize: MainAxisSize.min,
-            children: const [
+            children: [
               TButton(themeStyle: TButtonThemeStyle.primary, child: Text('悬浮式触发')),
               TButton(themeStyle: TButtonThemeStyle.primary, child: Text('悬浮式触发')),
             ],
           ),
-          child: const TButton(
+          child: TButton(
             themeStyle: TButtonThemeStyle.primary,
             child: Text('悬浮式触发'),
           ),
@@ -78,26 +78,26 @@ class _TPopupExampleState extends State<TPopupExample> {
             );
           },
         ),
-        TPopup(
+        const TPopup(
           trigger: TPopupTrigger.focus,
           placement: TPopupPlacement.right,
           showArrow: true,
           content: Column(
             mainAxisSize: MainAxisSize.min,
-            children: const [
+            children: [
               TInput(autoWidth: true),
               TButton(themeStyle: TButtonThemeStyle.primary, child: Text('获取焦点时触发')),
             ],
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            children: const [
+            children: [
               SizedBox(width: 150, child: TInput(placeholder: '获取焦点时触发1')),
               SizedBox(width: 150, child: TInput(placeholder: '获取焦点时触发2')),
             ],
           ),
         ),
-        TPopup(
+        const TPopup(
           trigger: TPopupTrigger.contextMenu,
           placement: TPopupPlacement.bottom,
           destroyOnClose: false,
@@ -106,14 +106,14 @@ class _TPopupExampleState extends State<TPopupExample> {
             color: Colors.transparent,
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              children: const [
+              children: [
                 TInput(autoWidth: true),
                 TButton(themeStyle: TButtonThemeStyle.primary, child: Text('右击时触发')),
                 TButton(themeStyle: TButtonThemeStyle.primary, child: Text('右击时触发')),
               ],
             ),
           ),
-          child: const TButton(
+          child: TButton(
             themeStyle: TButtonThemeStyle.primary,
             child: Text('右击时触发'),
           ),

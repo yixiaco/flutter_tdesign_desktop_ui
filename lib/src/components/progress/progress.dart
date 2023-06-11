@@ -91,11 +91,6 @@ class _TProgressState extends AnimatedWidgetBaseState<TProgress> {
   }
 
   @override
-  void dispose() {
-    super.dispose();
-  }
-
-  @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
     _percentage = visitor(
       _percentage,

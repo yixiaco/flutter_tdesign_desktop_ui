@@ -87,11 +87,11 @@ class _TTabsExampleState extends State<TTabsExample> {
               placement: placement,
               addable: true,
               softWrap: false,
-              list: [
+              list: const [
                 TTabsPanel(
                   label: Row(
                     mainAxisSize: MainAxisSize.min,
-                    children: const [
+                    children: [
                       Padding(
                         padding: EdgeInsets.only(right: 4),
                         child: Icon(TIcons.home),
@@ -100,7 +100,7 @@ class _TTabsExampleState extends State<TTabsExample> {
                     ],
                   ),
                   value: 'first',
-                  panel: const Padding(
+                  panel: Padding(
                     padding: EdgeInsets.only(left: 25),
                     child: TInput(),
                   ),
@@ -110,7 +110,7 @@ class _TTabsExampleState extends State<TTabsExample> {
                 TTabsPanel(
                   label: Row(
                     mainAxisSize: MainAxisSize.min,
-                    children: const [
+                    children: [
                       Padding(
                         padding: EdgeInsets.only(right: 4),
                         child: Icon(TIcons.calendar),
@@ -119,7 +119,7 @@ class _TTabsExampleState extends State<TTabsExample> {
                     ],
                   ),
                   value: 'second1',
-                  panel: const Padding(
+                  panel: Padding(
                     padding: EdgeInsets.only(left: 25),
                     child: Text('选项卡2内容'),
                   ),
@@ -127,7 +127,7 @@ class _TTabsExampleState extends State<TTabsExample> {
                 TTabsPanel(
                   label: Row(
                     mainAxisSize: MainAxisSize.min,
-                    children: const [
+                    children: [
                       Padding(
                         padding: EdgeInsets.only(right: 4),
                         child: Icon(TIcons.calendar),
@@ -136,7 +136,7 @@ class _TTabsExampleState extends State<TTabsExample> {
                     ],
                   ),
                   value: 'second',
-                  panel: const Padding(
+                  panel: Padding(
                     padding: EdgeInsets.only(left: 25),
                     child: Text('选项卡2内容'),
                   ),
@@ -146,7 +146,7 @@ class _TTabsExampleState extends State<TTabsExample> {
                 TTabsPanel(
                   label: Row(
                     mainAxisSize: MainAxisSize.min,
-                    children: const [
+                    children: [
                       Padding(
                         padding: EdgeInsets.only(right: 4),
                         child: Icon(TIcons.layers),
@@ -155,7 +155,7 @@ class _TTabsExampleState extends State<TTabsExample> {
                     ],
                   ),
                   value: 'third',
-                  panel: const Padding(
+                  panel: Padding(
                     padding: EdgeInsets.only(left: 25),
                     child: TInput(),
                   ),

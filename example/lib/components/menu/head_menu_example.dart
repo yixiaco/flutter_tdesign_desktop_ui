@@ -178,9 +178,9 @@ class _THeadMenuExampleState extends State<THeadMenuExample> {
           controller: _controller1,
           menus: menus,
           logo: logo,
-          operations: Row(
+          operations: const Row(
             mainAxisSize: MainAxisSize.min,
-            children: const [
+            children: [
               TMenuIconButton(child: Icon(TIcons.search)),
               TMenuIconButton(child: Icon(TIcons.mail)),
               TMenuIconButton(child: Icon(TIcons.user)),
@@ -192,9 +192,9 @@ class _THeadMenuExampleState extends State<THeadMenuExample> {
           controller: _controller2,
           menus: menus2,
           logo: logo,
-          operations: Row(
+          operations: const Row(
             mainAxisSize: MainAxisSize.min,
-            children: const [
+            children: [
               TMenuIconButton(child: Icon(TIcons.search)),
               TMenuIconButton(child: Icon(TIcons.mail)),
               TMenuIconButton(child: Icon(TIcons.user)),

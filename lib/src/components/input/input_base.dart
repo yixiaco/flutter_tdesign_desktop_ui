@@ -56,33 +56,7 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
   }
 
   @override
-  void onSingleLongTapMoveUpdate(LongPressMoveUpdateDetails details) {
-    if (delegate.selectionEnabled) {
-      switch (Theme.of(_state.context).platform) {
-        case TargetPlatform.iOS:
-        case TargetPlatform.macOS:
-          renderEditable.selectPositionAt(
-            from: details.globalPosition,
-            cause: SelectionChangedCause.longPress,
-          );
-          break;
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.linux:
-        case TargetPlatform.windows:
-          renderEditable.selectWordsInRange(
-            from: details.globalPosition - details.offsetFromOrigin,
-            to: details.globalPosition,
-            cause: SelectionChangedCause.longPress,
-          );
-          break;
-      }
-    }
-  }
-
-  @override
-  void onSingleTapUp(TapUpDetails details) {
-    editableText.hideToolbar();
+  void onSingleTapUp(TapDragUpDetails details) {
     super.onSingleTapUp(details);
     _state._requestKeyboard();
     _state.widget.onTap?.call();
@@ -90,22 +64,17 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 
   @override
   void onSingleLongTapStart(LongPressStartDetails details) {
+    super.onSingleLongTapStart(details);
     if (delegate.selectionEnabled) {
       switch (Theme.of(_state.context).platform) {
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
-          renderEditable.selectPositionAt(
-            from: details.globalPosition,
-            cause: SelectionChangedCause.longPress,
-          );
           break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
-          renderEditable.selectWord(cause: SelectionChangedCause.longPress);
           Feedback.forLongPress(_state.context);
-          break;
       }
     }
   }
@@ -132,7 +101,7 @@ class TInputBase extends StatefulWidget {
   /// [maxLength] is set a character counter will be displayed below the
   /// field showing how many characters have been entered. If the value is
   /// set to a positive integer it will also display the maximum allowed
-  /// number of characters to be entered.  If the value is set to
+  /// number of characters to be entered. If the value is set to
   /// [TInputBase.noMaxLength] then only the current length is displayed.
   ///
   /// After [maxLength] characters have been input, additional input
@@ -169,6 +138,7 @@ class TInputBase extends StatefulWidget {
     this.decorationBuilder,
     this.controller,
     this.focusNode,
+    this.undoController,
     TextInputType? keyboardType,
     this.textInputAction,
     this.textCapitalization = TextCapitalization.none,
@@ -178,7 +148,11 @@ class TInputBase extends StatefulWidget {
     this.textAlignVertical,
     this.textDirection,
     this.readOnly = false,
-    ToolbarOptions? toolbarOptions,
+    @Deprecated(
+      'Use `contextMenuBuilder` instead. '
+      'This feature was deprecated after v3.3.0-0.5.pre.',
+    )
+    this.toolbarOptions,
     this.showCursor,
     this.autofocus = false,
     this.obscuringCharacter = '•',
@@ -201,6 +175,7 @@ class TInputBase extends StatefulWidget {
     this.cursorWidth = 2.0,
     this.cursorHeight,
     this.cursorRadius,
+    this.cursorOpacityAnimates,
     required this.cursorColor,
     this.backgroundCursorColor,
     this.selectionHeightStyle = ui.BoxHeightStyle.tight,
@@ -211,15 +186,21 @@ class TInputBase extends StatefulWidget {
     bool? enableInteractiveSelection,
     this.selectionControls,
     this.onTap,
+    this.onTapOutside,
     this.mouseCursor,
     this.selectionColor,
     this.scrollController,
     this.scrollPhysics,
     this.autofillHints = const <String>[],
+    this.contentInsertionConfiguration,
     this.clipBehavior = Clip.hardEdge,
     this.restorationId,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
+    this.contextMenuBuilder = _defaultContextMenuBuilder,
+    this.canRequestFocus = true,
+    this.spellCheckConfiguration,
+    this.magnifierConfiguration,
     this.forceLine = true,
     this.placeholder,
   })  : assert(obscuringCharacter.length == 1),
@@ -245,31 +226,24 @@ class TInputBase extends StatefulWidget {
           'Use keyboardType TextInputType.multiline when using TextInputAction.newline on a multiline TextField.',
         ),
         keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
-        enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText),
-        toolbarOptions = toolbarOptions ??
-            (obscureText
-                ? (readOnly
-                    // No point in even offering "Select All" in a read-only obscured
-                    // field.
-                    ? const ToolbarOptions()
-                    // Writable, but obscured.
-                    : const ToolbarOptions(
-                        selectAll: true,
-                        paste: true,
-                      ))
-                : (readOnly
-                    // Read-only, not obscured.
-                    ? const ToolbarOptions(
-                        selectAll: true,
-                        copy: true,
-                      )
-                    // Writable, not obscured.
-                    : const ToolbarOptions(
-                        copy: true,
-                        cut: true,
-                        selectAll: true,
-                        paste: true,
-                      )));
+        enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText);
+
+  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.intro}
+  ///
+  /// {@macro flutter.widgets.magnifier.intro}
+  ///
+  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.details}
+  ///
+  /// By default, builds a [CupertinoTextMagnifier] on iOS and [TextMagnifier]
+  /// on Android, and builds nothing on all other platforms. If it is desired to
+  /// suppress the magnifier, consider passing [TextMagnifierConfiguration.disabled].
+  ///
+  /// {@tool dartpad}
+  /// This sample demonstrates how to customize the magnifier that this text field uses.
+  ///
+  /// ** See code in examples/api/lib/widgets/text_magnifier/text_magnifier.0.dart **
+  /// {@end-tool}
+  final TextMagnifierConfiguration? magnifierConfiguration;
 
   /// {@template tdesign.components.inputBase.decorationBuilder}
   /// 装饰构建器
@@ -302,7 +276,7 @@ class TInputBase extends StatefulWidget {
   /// to the [focusNode]:
   ///
   /// ```dart
-  /// focusNode.addListener(() { print(myFocusNode.hasFocus); });
+  /// myFocusNode.addListener(() { print(myFocusNode.hasFocus); });
   /// ```
   ///
   /// If null, this widget will create its own [FocusNode].
@@ -314,7 +288,7 @@ class TInputBase extends StatefulWidget {
   ///
   /// On Android, the user can hide the keyboard - without changing the focus -
   /// with the system back button. They can restore the keyboard's visibility
-  /// by tapping on a text field.  The user might hide the keyboard and
+  /// by tapping on a text field. The user might hide the keyboard and
   /// switch to a physical keyboard, or they might just need to get it
   /// out of the way for a moment, to expose something it's
   /// obscuring. In this case requesting the focus again will not
@@ -400,7 +374,11 @@ class TInputBase extends StatefulWidget {
   /// will be disabled if [obscureText] is true. If [readOnly] is true,
   /// paste and cut will be disabled regardless.
   /// {@endtemplate}
-  final ToolbarOptions toolbarOptions;
+  @Deprecated(
+    'Use `contextMenuBuilder` instead. '
+    'This feature was deprecated after v3.3.0-0.5.pre.',
+  )
+  final ToolbarOptions? toolbarOptions;
 
   /// {@macro flutter.widgets.editableText.showCursor}
   final bool? showCursor;
@@ -410,8 +388,8 @@ class TInputBase extends StatefulWidget {
   static const int noMaxLength = -1;
 
   /// {@template tdesign.components.inputBase.maxLength}
-  /// The maximum number of characters (Unicode scalar values) to allow in the
-  /// text field.
+  /// The maximum number of characters (Unicode grapheme clusters) to allow in the
+  /// the text field.
   ///
   /// If set, a character counter will be displayed below the
   /// field showing how many characters have been entered. If set to a number
@@ -495,6 +473,9 @@ class TInputBase extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.cursorRadius}
   final Radius? cursorRadius;
 
+  /// {@macro flutter.widgets.editableText.cursorOpacityAnimates}
+  final bool? cursorOpacityAnimates;
+
   /// {@template tdesign.components.inputBase.cursorColor}
   /// The color to use when painting the cursor.
   ///
@@ -571,6 +552,24 @@ class TInputBase extends StatefulWidget {
   /// {@endtemplate}
   final GestureTapCallback? onTap;
 
+  /// {@macro flutter.widgets.editableText.onTapOutside}
+  ///
+  /// {@tool dartpad}
+  /// This example shows how to use a `TextFieldTapRegion` to wrap a set of
+  /// "spinner" buttons that increment and decrement a value in the [TextField]
+  /// without causing the text field to lose keyboard focus.
+  ///
+  /// This example includes a generic `SpinnerField<T>` class that you can copy
+  /// into your own project and customize.
+  ///
+  /// ** See code in examples/api/lib/widgets/tap_region/text_field_tap_region.0.dart **
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * [TapRegion] for how the region group is determined.
+  final TapRegionCallback? onTapOutside;
+
   /// {@template tdesign.components.inputBase.mouseCursor}
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
@@ -578,6 +577,7 @@ class TInputBase extends StatefulWidget {
   /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
   /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
   ///
+  ///  * [MaterialState.error].
   ///  * [MaterialState.hovered].
   ///  * [MaterialState.focused].
   ///  * [MaterialState.disabled].
@@ -639,6 +639,40 @@ class TInputBase extends StatefulWidget {
   /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
   final bool enableIMEPersonalizedLearning;
 
+  /// {@macro flutter.widgets.editableText.contentInsertionConfiguration}
+  final ContentInsertionConfiguration? contentInsertionConfiguration;
+
+  /// {@macro flutter.widgets.EditableText.contextMenuBuilder}
+  ///
+  /// If not provided, will build a default menu based on the platform.
+  ///
+  /// See also:
+  ///
+  ///  * [AdaptiveTextSelectionToolbar], which is built by default.
+  final EditableTextContextMenuBuilder? contextMenuBuilder;
+
+  /// Determine whether this text field can request the primary focus.
+  ///
+  /// Defaults to true. If false, the text field will not request focus
+  /// when tapped, or when its context menu is displayed. If false it will not
+  /// be possible to move the focus to the text field with tab key.
+  final bool canRequestFocus;
+
+  /// {@macro flutter.widgets.undoHistory.controller}
+  final UndoHistoryController? undoController;
+
+  static Widget _defaultContextMenuBuilder(BuildContext context, EditableTextState editableTextState) {
+    return AdaptiveTextSelectionToolbar.editableText(
+      editableTextState: editableTextState,
+    );
+  }
+
+  /// {@macro flutter.widgets.EditableText.spellCheckConfiguration}
+  ///
+  /// If [SpellCheckConfiguration.misspelledTextStyle] is not specified in this
+  /// configuration, then [materialMisspelledTextStyle] is used by default.
+  final SpellCheckConfiguration? spellCheckConfiguration;
+
   /// {@template tdesign.components.inputBase.forceLine}
   /// Whether the text will take the full width regardless of the text width.
   ///
@@ -654,6 +688,68 @@ class TInputBase extends StatefulWidget {
   /// {@endtemplate}
   final String? placeholder;
 
+  /// The [TextStyle] used to indicate misspelled words in the Material style.
+  ///
+  /// See also:
+  ///  * [SpellCheckConfiguration.misspelledTextStyle], the style configured to
+  ///    mark misspelled words with.
+  ///  * [CupertinoTextField.cupertinoMisspelledTextStyle], the style configured
+  ///    to mark misspelled words with in the Cupertino style.
+  static const TextStyle materialMisspelledTextStyle = TextStyle(
+    decoration: TextDecoration.underline,
+    decorationColor: Colors.red,
+    decorationStyle: TextDecorationStyle.wavy,
+  );
+
+  /// Default builder for [TextField]'s spell check suggestions toolbar.
+  ///
+  /// On Apple platforms, builds an iOS-style toolbar. Everywhere else, builds
+  /// an Android-style toolbar.
+  ///
+  /// See also:
+  ///  * [spellCheckConfiguration], where this is typically specified for
+  ///    [TextField].
+  ///  * [SpellCheckConfiguration.spellCheckSuggestionsToolbarBuilder], the
+  ///    parameter for which this is the default value for [TextField].
+  ///  * [CupertinoTextField.defaultSpellCheckSuggestionsToolbarBuilder], which
+  ///    is like this but specifies the default for [CupertinoTextField].
+  @visibleForTesting
+  static Widget defaultSpellCheckSuggestionsToolbarBuilder(
+    BuildContext context,
+    EditableTextState editableTextState,
+  ) {
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        return CupertinoSpellCheckSuggestionsToolbar.editableText(
+          editableTextState: editableTextState,
+        );
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        return SpellCheckSuggestionsToolbar.editableText(
+          editableTextState: editableTextState,
+        );
+    }
+  }
+
+  /// Returns a new [SpellCheckConfiguration] where the given configuration has
+  /// had any missing values replaced with their defaults for the Android
+  /// platform.
+  static SpellCheckConfiguration inferAndroidSpellCheckConfiguration(
+    SpellCheckConfiguration? configuration,
+  ) {
+    if (configuration == null || configuration == const SpellCheckConfiguration.disabled()) {
+      return const SpellCheckConfiguration.disabled();
+    }
+    return configuration.copyWith(
+      misspelledTextStyle: configuration.misspelledTextStyle ?? TInputBase.materialMisspelledTextStyle,
+      spellCheckSuggestionsToolbarBuilder:
+          configuration.spellCheckSuggestionsToolbarBuilder ?? TInputBase.defaultSpellCheckSuggestionsToolbarBuilder,
+    );
+  }
+
   @override
   State<TInputBase> createState() => TInputBaseState();
 
@@ -662,6 +758,7 @@ class TInputBase extends StatefulWidget {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<TextEditingController>('controller', controller, defaultValue: null));
     properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
+    properties.add(DiagnosticsProperty<UndoHistoryController>('undoController', undoController, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('enabled', enabled, defaultValue: null));
     properties.add(DiagnosticsProperty<TextInputType>('keyboardType', keyboardType, defaultValue: TextInputType.text));
     properties.add(DiagnosticsProperty<TextStyle>('style', style, defaultValue: null));
@@ -669,41 +766,36 @@ class TInputBase extends StatefulWidget {
     properties.add(DiagnosticsProperty<String>('obscuringCharacter', obscuringCharacter, defaultValue: '•'));
     properties.add(DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: true));
-    properties.add(EnumProperty<SmartDashesType>('smartDashesType', smartDashesType,
-        defaultValue: obscureText ? SmartDashesType.disabled : SmartDashesType.enabled));
-    properties.add(EnumProperty<SmartQuotesType>('smartQuotesType', smartQuotesType,
-        defaultValue: obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled));
+    properties.add(EnumProperty<SmartDashesType>('smartDashesType', smartDashesType, defaultValue: obscureText ? SmartDashesType.disabled : SmartDashesType.enabled));
+    properties.add(EnumProperty<SmartQuotesType>('smartQuotesType', smartQuotesType, defaultValue: obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled));
     properties.add(DiagnosticsProperty<bool>('enableSuggestions', enableSuggestions, defaultValue: true));
     properties.add(IntProperty('maxLines', maxLines, defaultValue: 1));
     properties.add(IntProperty('minLines', minLines, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('expands', expands, defaultValue: false));
     properties.add(IntProperty('maxLength', maxLength, defaultValue: null));
-    properties
-        .add(EnumProperty<MaxLengthEnforcement>('maxLengthEnforcement', maxLengthEnforcement, defaultValue: null));
+    properties.add(EnumProperty<MaxLengthEnforcement>('maxLengthEnforcement', maxLengthEnforcement, defaultValue: null));
     properties.add(EnumProperty<TextInputAction>('textInputAction', textInputAction, defaultValue: null));
-    properties.add(EnumProperty<TextCapitalization>('textCapitalization', textCapitalization,
-        defaultValue: TextCapitalization.none));
+    properties.add(EnumProperty<TextCapitalization>('textCapitalization', textCapitalization, defaultValue: TextCapitalization.none));
     properties.add(EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: TextAlign.start));
     properties.add(DiagnosticsProperty<TextAlignVertical>('textAlignVertical', textAlignVertical, defaultValue: null));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(DoubleProperty('cursorWidth', cursorWidth, defaultValue: 2.0));
     properties.add(DoubleProperty('cursorHeight', cursorHeight, defaultValue: null));
     properties.add(DiagnosticsProperty<Radius>('cursorRadius', cursorRadius, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('cursorOpacityAnimates', cursorOpacityAnimates, defaultValue: null));
     properties.add(ColorProperty('cursorColor', cursorColor, defaultValue: null));
     properties.add(ColorProperty('backgroundCursorColor', backgroundCursorColor, defaultValue: null));
     properties.add(DiagnosticsProperty<Brightness>('keyboardAppearance', keyboardAppearance, defaultValue: null));
-    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('scrollPadding', scrollPadding,
-        defaultValue: const EdgeInsets.all(20.0)));
-    properties.add(
-        FlagProperty('selectionEnabled', value: selectionEnabled, defaultValue: true, ifFalse: 'selection disabled'));
-    properties
-        .add(DiagnosticsProperty<TextSelectionControls>('selectionControls', selectionControls, defaultValue: null));
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('scrollPadding', scrollPadding, defaultValue: const EdgeInsets.all(20.0)));
+    properties.add(FlagProperty('selectionEnabled', value: selectionEnabled, defaultValue: true, ifFalse: 'selection disabled'));
+    properties.add(DiagnosticsProperty<TextSelectionControls>('selectionControls', selectionControls, defaultValue: null));
     properties.add(DiagnosticsProperty<ScrollController>('scrollController', scrollController, defaultValue: null));
     properties.add(DiagnosticsProperty<ScrollPhysics>('scrollPhysics', scrollPhysics, defaultValue: null));
     properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior, defaultValue: Clip.hardEdge));
     properties.add(DiagnosticsProperty<bool>('scribbleEnabled', scribbleEnabled, defaultValue: true));
-    properties.add(
-        DiagnosticsProperty<bool>('enableIMEPersonalizedLearning', enableIMEPersonalizedLearning, defaultValue: true));
+    properties.add(DiagnosticsProperty<bool>('enableIMEPersonalizedLearning', enableIMEPersonalizedLearning, defaultValue: true));
+    properties.add(DiagnosticsProperty<SpellCheckConfiguration>('spellCheckConfiguration', spellCheckConfiguration, defaultValue: null));
+    properties.add(DiagnosticsProperty<List<String>>('contentCommitMimeTypes', contentInsertionConfiguration?.allowedMimeTypes ?? const <String>[], defaultValue: contentInsertionConfiguration == null ? const <String>[] : kDefaultContentInsertionMimeTypes));
     properties.add(DiagnosticsProperty<bool>('forceLine', forceLine, defaultValue: true));
     properties.add(DiagnosticsProperty<String>('placeholder', placeholder, defaultValue: true));
   }
@@ -713,11 +805,9 @@ class TInputBaseState extends State<TInputBase>
     with RestorationMixin
     implements TextSelectionGestureDetectorBuilderDelegate, AutofillClient {
   RestorableTextEditingController? _controller;
-
   TextEditingController get _effectiveController => widget.controller ?? _controller!.value;
 
   FocusNode? _focusNode;
-
   FocusNode get _effectiveFocusNode => widget.focusNode ?? (_focusNode ??= FocusNode());
 
   MaxLengthEnforcement get _effectiveMaxLengthEnforcement =>
@@ -739,7 +829,6 @@ class TInputBaseState extends State<TInputBase>
 
   @override
   bool get selectionEnabled => widget.selectionEnabled;
-
   // End of API for TextSelectionGestureDetectorBuilderDelegate.
 
   bool get _isEnabled => widget.enabled ?? true;
@@ -753,15 +842,15 @@ class TInputBaseState extends State<TInputBase>
     if (widget.controller == null) {
       _createLocalController();
     }
-    _effectiveFocusNode.canRequestFocus = _isEnabled;
+    _effectiveFocusNode.canRequestFocus = widget.canRequestFocus && _isEnabled;
     _effectiveFocusNode.addListener(_handleFocusChanged);
   }
 
   bool get _canRequestFocus {
-    final NavigationMode mode = MediaQuery.maybeOf(context)?.navigationMode ?? NavigationMode.traditional;
+    final NavigationMode mode = MediaQuery.maybeNavigationModeOf(context) ?? NavigationMode.traditional;
     switch (mode) {
       case NavigationMode.traditional:
-        return _isEnabled;
+        return widget.canRequestFocus && _isEnabled;
       case NavigationMode.directional:
         return true;
     }
@@ -877,18 +966,26 @@ class TInputBaseState extends State<TInputBase>
     switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
-        if (cause == SelectionChangedCause.longPress || cause == SelectionChangedCause.drag) {
-          _editableText?.bringIntoView(selection.extent);
-        }
-        return;
       case TargetPlatform.linux:
       case TargetPlatform.windows:
       case TargetPlatform.fuchsia:
       case TargetPlatform.android:
-        if (cause == SelectionChangedCause.drag) {
+        if (cause == SelectionChangedCause.longPress) {
           _editableText?.bringIntoView(selection.extent);
         }
-        return;
+    }
+
+    switch (Theme.of(context).platform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.android:
+        break;
+      case TargetPlatform.macOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        if (cause == SelectionChangedCause.drag) {
+          _editableText?.hideToolbar();
+        }
     }
   }
 
@@ -928,14 +1025,15 @@ class TInputBaseState extends State<TInputBase>
 
     return _editableText!.textInputConfiguration.copyWith(autofillConfiguration: autofillConfiguration);
   }
-
   // AutofillClient implementation end.
 
-  Set<MaterialState> get states => {
-        if (!_isEnabled) MaterialState.disabled,
-        if (_isHovering) MaterialState.hovered,
-        if (_effectiveFocusNode.hasFocus) MaterialState.focused,
-      };
+  Set<MaterialState> get _materialState {
+    return <MaterialState>{
+      if (!_isEnabled) MaterialState.disabled,
+      if (_isHovering) MaterialState.hovered,
+      if (_effectiveFocusNode.hasFocus) MaterialState.focused,
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -945,6 +1043,7 @@ class TInputBaseState extends State<TInputBase>
     );
 
     final theme = TTheme.of(context);
+    final Brightness keyboardAppearance = widget.keyboardAppearance ?? theme.brightness;
     final TextEditingController controller = _effectiveController;
     final FocusNode focusNode = _effectiveFocusNode;
     final List<TextInputFormatter> formatters = <TextInputFormatter>[
@@ -956,9 +1055,29 @@ class TInputBaseState extends State<TInputBase>
         ),
     ];
 
+    // Set configuration as disabled if not otherwise specified. If specified,
+    // ensure that configuration uses the correct style for misspelled words for
+    // the current platform, unless a custom style is specified.
+    final SpellCheckConfiguration spellCheckConfiguration;
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        spellCheckConfiguration =
+            CupertinoTextField.inferIOSSpellCheckConfiguration(
+              widget.spellCheckConfiguration,
+            );
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        spellCheckConfiguration = TextField.inferAndroidSpellCheckConfiguration(
+          widget.spellCheckConfiguration,
+        );
+    }
+
     TextSelectionControls? textSelectionControls = widget.selectionControls;
     final bool paintCursorAboveText;
-    final bool cursorOpacityAnimates;
+    bool? cursorOpacityAnimates = widget.cursorOpacityAnimates;
     Offset? cursorOffset;
     Color? autocorrectionTextRectColor;
     Radius? cursorRadius = widget.cursorRadius;
@@ -969,54 +1088,49 @@ class TInputBaseState extends State<TInputBase>
         forcePressEnabled = true;
         textSelectionControls ??= cupertinoTextSelectionControls;
         paintCursorAboveText = true;
-        cursorOpacityAnimates = true;
+        cursorOpacityAnimates ??= true;
         cursorRadius ??= const Radius.circular(2.0);
-        cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.of(context).devicePixelRatio, 0);
+        cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.devicePixelRatioOf(context), 0);
         autocorrectionTextRectColor = widget.selectionColor;
-        break;
 
       case TargetPlatform.macOS:
         forcePressEnabled = false;
         textSelectionControls ??= cupertinoDesktopTextSelectionControls;
         paintCursorAboveText = true;
-        cursorOpacityAnimates = false;
+        cursorOpacityAnimates ??= false;
         cursorRadius ??= const Radius.circular(2.0);
-        cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.of(context).devicePixelRatio, 0);
+        cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.devicePixelRatioOf(context), 0);
         handleDidGainAccessibilityFocus = () {
           // Automatically activate the TextField when it receives accessibility focus.
           if (!_effectiveFocusNode.hasFocus && _effectiveFocusNode.canRequestFocus) {
             _effectiveFocusNode.requestFocus();
           }
         };
-        break;
 
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
         forcePressEnabled = false;
         textSelectionControls ??= materialTextSelectionControls;
         paintCursorAboveText = false;
-        cursorOpacityAnimates = false;
-        break;
+        cursorOpacityAnimates ??= false;
 
       case TargetPlatform.linux:
         forcePressEnabled = false;
         textSelectionControls ??= desktopTextSelectionControls;
         paintCursorAboveText = false;
-        cursorOpacityAnimates = false;
-        break;
+        cursorOpacityAnimates ??= false;
 
       case TargetPlatform.windows:
         forcePressEnabled = false;
         textSelectionControls ??= desktopTextSelectionControls;
         paintCursorAboveText = false;
-        cursorOpacityAnimates = false;
+        cursorOpacityAnimates ??= false;
         handleDidGainAccessibilityFocus = () {
           // Automatically activate the TextField when it receives accessibility focus.
           if (!_effectiveFocusNode.hasFocus && _effectiveFocusNode.canRequestFocus) {
             _effectiveFocusNode.requestFocus();
           }
         };
-        break;
     }
 
     Widget child = RepaintBoundary(
@@ -1030,6 +1144,7 @@ class TInputBaseState extends State<TInputBase>
           showSelectionHandles: _showSelectionHandles,
           controller: controller,
           focusNode: focusNode,
+          undoController: widget.undoController,
           keyboardType: widget.keyboardType,
           textInputAction: widget.textInputAction,
           textCapitalization: widget.textCapitalization,
@@ -1056,10 +1171,10 @@ class TInputBaseState extends State<TInputBase>
           onSubmitted: widget.onSubmitted,
           onAppPrivateCommand: widget.onAppPrivateCommand,
           onSelectionHandleTapped: _handleSelectionHandleTapped,
+          onTapOutside: widget.onTapOutside,
           inputFormatters: formatters,
           rendererIgnoresPointer: true,
-          mouseCursor: MouseCursor.defer,
-          // TextField will handle the cursor
+          mouseCursor: MouseCursor.defer, // TextField will handle the cursor
           cursorWidth: widget.cursorWidth,
           cursorHeight: widget.cursorHeight,
           cursorRadius: cursorRadius,
@@ -1071,7 +1186,7 @@ class TInputBaseState extends State<TInputBase>
           paintCursorAboveText: paintCursorAboveText,
           backgroundCursorColor: widget.backgroundCursorColor ?? CupertinoColors.inactiveGray,
           scrollPadding: widget.scrollPadding,
-          keyboardAppearance: widget.keyboardAppearance ?? theme.brightness,
+          keyboardAppearance: keyboardAppearance,
           enableInteractiveSelection: widget.enableInteractiveSelection,
           dragStartBehavior: widget.dragStartBehavior,
           scrollController: widget.scrollController,
@@ -1082,6 +1197,10 @@ class TInputBaseState extends State<TInputBase>
           restorationId: 'editable',
           scribbleEnabled: widget.scribbleEnabled,
           enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
+          contentInsertionConfiguration: widget.contentInsertionConfiguration,
+          contextMenuBuilder: widget.contextMenuBuilder,
+          spellCheckConfiguration: spellCheckConfiguration,
+          magnifierConfiguration: widget.magnifierConfiguration ?? TextMagnifier.adaptiveMagnifierConfiguration,
           forceLine: widget.forceLine,
         ),
       ),
@@ -1089,13 +1208,13 @@ class TInputBaseState extends State<TInputBase>
 
     if (widget.decorationBuilder != null) {
       child = AnimatedBuilder(
-        animation: Listenable.merge(<Listenable>[focusNode, controller]),
+        animation: Listenable.merge(<Listenable>[ focusNode, controller ]),
         builder: (BuildContext context, Widget? child) {
           return widget.decorationBuilder!(TextDecorationContext(
             context: context,
             focusNode: focusNode,
             controller: controller,
-            states: states,
+            states: _materialState,
             child: child,
           ));
         },
@@ -1104,24 +1223,23 @@ class TInputBaseState extends State<TInputBase>
     }
     final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
       widget.mouseCursor ?? MaterialStateMouseCursor.textable,
-      states,
+      _materialState,
     );
 
     final int? semanticsMaxValueLength;
     if (_effectiveMaxLengthEnforcement != MaxLengthEnforcement.none &&
-        widget.maxLength != null &&
-        widget.maxLength! > 0) {
+      widget.maxLength != null &&
+      widget.maxLength! > 0) {
       semanticsMaxValueLength = widget.maxLength;
     } else {
       semanticsMaxValueLength = null;
     }
 
-    return FocusTrapArea(
-      focusNode: focusNode,
-      child: MouseRegion(
-        cursor: effectiveMouseCursor,
-        onEnter: (PointerEnterEvent event) => _handleHover(true),
-        onExit: (PointerExitEvent event) => _handleHover(false),
+    return MouseRegion(
+      cursor: effectiveMouseCursor,
+      onEnter: (PointerEnterEvent event) => _handleHover(true),
+      onExit: (PointerExitEvent event) => _handleHover(false),
+      child: TextFieldTapRegion(
         child: IgnorePointer(
           ignoring: !_isEnabled,
           child: AnimatedBuilder(
@@ -1130,15 +1248,12 @@ class TInputBaseState extends State<TInputBase>
               return Semantics(
                 maxValueLength: semanticsMaxValueLength,
                 currentValueLength: _currentLength,
-                onTap: widget.readOnly
-                    ? null
-                    : () {
-                        if (!_effectiveController.selection.isValid) {
-                          _effectiveController.selection =
-                              TextSelection.collapsed(offset: _effectiveController.text.length);
-                        }
-                        _requestKeyboard();
-                      },
+                onTap: widget.readOnly ? null : () {
+                  if (!_effectiveController.selection.isValid) {
+                    _effectiveController.selection = TextSelection.collapsed(offset: _effectiveController.text.length);
+                  }
+                  _requestKeyboard();
+                },
                 onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
                 child: child,
               );

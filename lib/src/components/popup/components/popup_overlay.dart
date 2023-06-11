@@ -101,7 +101,7 @@ class _PopupOverlayState extends State<_PopupOverlay> {
     var box = widget.popupState.context.findRenderObject() as RenderBox;
     var target = box.localToGlobal(
       box.size.topLeft(Offset.zero),
-      ancestor: Overlay.of(widget.popupState.context)?.context.findRenderObject(),
+      ancestor: Overlay.of(widget.popupState.context).context.findRenderObject(),
     );
 
     // 当小部件完全不显示时，忽略所有事件
@@ -121,10 +121,7 @@ class _PopupOverlayState extends State<_PopupOverlay> {
             child: FocusScope(
               node: widget.focusScopeNode,
               skipTraversal: true,
-              child: FocusTrap(
-                focusScopeNode: widget.focusScopeNode,
-                child: RepaintBoundary(child: child!),
-              ),
+              child: RepaintBoundary(child: child!),
             ),
           ),
         );
