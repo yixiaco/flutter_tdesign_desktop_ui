@@ -352,7 +352,7 @@ class _TDialogState extends State<TDialog> with SingleTickerProviderStateMixin {
   void show() {
     _controller.forward();
     if (widget.mode != TDialogMode.normal) {
-      Navigator.of(context).focusScopeNode.requestFocus(focusScopeNode);
+      Navigator.of(context).focusNode.enclosingScope?.requestFocus(focusScopeNode);
     }
   }
 
@@ -360,7 +360,7 @@ class _TDialogState extends State<TDialog> with SingleTickerProviderStateMixin {
   void hide() {
     _controller.reverse();
     if (widget.mode != TDialogMode.normal) {
-      Navigator.of(context).focusScopeNode.unfocus();
+      Navigator.of(context).focusNode.enclosingScope?.unfocus();
     }
   }
 
@@ -409,7 +409,7 @@ class _TDialogState extends State<TDialog> with SingleTickerProviderStateMixin {
     final OverlayState overlayState = Overlay.of(
       context,
       debugRequiredFor: widget,
-    )!;
+    );
     var colorScheme = theme.colorScheme;
 
     _entry = OverlayEntry(
@@ -436,11 +436,8 @@ class _TDialogState extends State<TDialog> with SingleTickerProviderStateMixin {
             },
             child: FocusScope(
               node: focusScopeNode,
-              child: FocusTrap(
-                focusScopeNode: focusScopeNode,
-                child: RepaintBoundary(
-                  child: child,
-                ),
+              child: RepaintBoundary(
+                child: child,
               ),
             ),
           ),

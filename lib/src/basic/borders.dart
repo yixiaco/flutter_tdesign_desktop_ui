@@ -1,7 +1,6 @@
 import 'dart:ui';
 
 import 'dart:math' as math;
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
@@ -14,6 +13,7 @@ class TBorderSide extends BorderSide {
     super.color = const Color(0xFF000000),
     super.width = 1.0,
     super.style = BorderStyle.solid,
+    super.strokeAlign = BorderSide.strokeAlignInside,
     this.dashed = false,
   }) : assert(width >= 0.0);
 
@@ -102,6 +102,7 @@ class TBorderSide extends BorderSide {
     Color? color,
     double? width,
     BorderStyle? style,
+    double? strokeAlign,
     bool? dashed,
   }) {
     assert(width == null || width >= 0.0);
@@ -109,6 +110,7 @@ class TBorderSide extends BorderSide {
       color: color ?? this.color,
       width: width ?? this.width,
       style: style ?? this.style,
+      strokeAlign: strokeAlign ?? this.strokeAlign,
       dashed: dashed ?? this.dashed,
     );
   }
@@ -121,14 +123,16 @@ class TBorderSide extends BorderSide {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is TBorderSide && other.color == color && other.width == width && other.style == style && other.dashed == dashed;
+    return other is TBorderSide
+        && other.color == color
+        && other.width == width
+        && other.style == style
+        && other.strokeAlign == strokeAlign
+        && other.dashed == dashed;
   }
 
   @override
   int get hashCode => Object.hash(color, width, style, dashed);
-
-  @override
-  String toString() => '${objectRuntimeType(this, 'TBorderSide')}($color, ${width.toStringAsFixed(1)}, $style, $dashed)';
 }
 
 class TRoundedRectangleBorder extends RoundedRectangleBorder {

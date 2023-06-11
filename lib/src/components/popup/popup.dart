@@ -277,7 +277,7 @@ class TPopupState extends State<TPopup> with TickerProviderStateMixin {
     final OverlayState overlayState = Overlay.of(
       context,
       debugRequiredFor: widget,
-    )!;
+    );
 
     _entry = OverlayEntry(builder: (BuildContext context) {
       Widget child = _PopupOverlay(
