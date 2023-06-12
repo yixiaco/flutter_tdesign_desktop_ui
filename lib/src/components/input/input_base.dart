@@ -197,7 +197,7 @@ class TInputBase extends StatefulWidget {
     this.restorationId,
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
-    this.contextMenuBuilder = _defaultContextMenuBuilder,
+    this.contextMenuBuilder = defaultContextMenuBuilder,
     this.canRequestFocus = true,
     this.spellCheckConfiguration,
     this.magnifierConfiguration,
@@ -661,7 +661,7 @@ class TInputBase extends StatefulWidget {
   /// {@macro flutter.widgets.undoHistory.controller}
   final UndoHistoryController? undoController;
 
-  static Widget _defaultContextMenuBuilder(BuildContext context, EditableTextState editableTextState) {
+  static Widget defaultContextMenuBuilder(BuildContext context, EditableTextState editableTextState) {
     return AdaptiveTextSelectionToolbar.editableText(
       editableTextState: editableTextState,
     );

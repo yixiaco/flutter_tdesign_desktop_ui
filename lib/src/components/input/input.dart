@@ -21,6 +21,7 @@ class TInput extends TFormItemValidate {
     this.autofocus = false,
     this.readonly = false,
     super.focusNode,
+    this.undoController,
     this.clearable = false,
     this.disabled = false,
     this.label,
@@ -54,16 +55,23 @@ class TInput extends TFormItemValidate {
     this.restorationId,
     this.obscuringCharacter = '•',
     this.onTap,
+    this.onTapOutside,
     this.backgroundCursorColor,
     this.textDirection,
+    @Deprecated(
+      'Use `contextMenuBuilder` instead. '
+      'This feature was deprecated after v3.3.0-0.5.pre.',
+    )
     this.toolbarOptions,
     this.selectionControls,
     this.enableInteractiveSelection,
     this.clipBehavior = Clip.hardEdge,
     this.autocorrect = true,
-    this.autofillHints,
+    this.autofillHints = const <String>[],
+    this.contentInsertionConfiguration,
     this.cursorHeight,
     this.cursorRadius,
+    this.cursorOpacityAnimates,
     this.dragStartBehavior = DragStartBehavior.start,
     this.enableIMEPersonalizedLearning = true,
     this.enableSuggestions = true,
@@ -88,6 +96,10 @@ class TInput extends TFormItemValidate {
     this.padding,
     this.borderless = false,
     this.preferredHeight,
+    this.contextMenuBuilder = TInputBase.defaultContextMenuBuilder,
+    this.canRequestFocus = true,
+    this.spellCheckConfiguration,
+    this.magnifierConfiguration,
   });
 
   /// 控制正在编辑的文本。
@@ -99,6 +111,9 @@ class TInput extends TFormItemValidate {
 
   /// 自动聚焦
   final bool autofocus;
+
+  /// {@macro flutter.widgets.undoHistory.controller}
+  final UndoHistoryController? undoController;
 
   /// 是否只读
   final bool readonly;
@@ -203,6 +218,24 @@ class TInput extends TFormItemValidate {
   /// {@macro tdesign.components.inputBase.onTap}
   final GestureTapCallback? onTap;
 
+  /// {@macro flutter.widgets.editableText.onTapOutside}
+  ///
+  /// {@tool dartpad}
+  /// This example shows how to use a `TextFieldTapRegion` to wrap a set of
+  /// "spinner" buttons that increment and decrement a value in the [TextField]
+  /// without causing the text field to lose keyboard focus.
+  ///
+  /// This example includes a generic `SpinnerField<T>` class that you can copy
+  /// into your own project and customize.
+  ///
+  /// ** See code in examples/api/lib/widgets/tap_region/text_field_tap_region.0.dart **
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * [TapRegion] for how the region group is determined.
+  final TapRegionCallback? onTapOutside;
+
   /// {@macro tdesign.components.inputBase.backgroundCursorColor}
   final Color? backgroundCursorColor;
 
@@ -230,11 +263,17 @@ class TInput extends TFormItemValidate {
   /// {@macro flutter.services.AutofillConfiguration.autofillHints}
   final Iterable<String>? autofillHints;
 
+  /// {@macro flutter.widgets.editableText.contentInsertionConfiguration}
+  final ContentInsertionConfiguration? contentInsertionConfiguration;
+
   /// {@macro flutter.widgets.editableText.cursorHeight}
   final double? cursorHeight;
 
   /// {@macro flutter.widgets.editableText.cursorRadius}
   final Radius? cursorRadius;
+
+  /// {@macro flutter.widgets.editableText.cursorOpacityAnimates}
+  final bool? cursorOpacityAnimates;
 
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
@@ -308,6 +347,45 @@ class TInput extends TFormItemValidate {
 
   /// 首选高度,单行固定高度，多行最小高度
   final double? preferredHeight;
+
+  /// {@macro flutter.widgets.EditableText.contextMenuBuilder}
+  ///
+  /// If not provided, will build a default menu based on the platform.
+  ///
+  /// See also:
+  ///
+  ///  * [AdaptiveTextSelectionToolbar], which is built by default.
+  final EditableTextContextMenuBuilder? contextMenuBuilder;
+
+  /// Determine whether this text field can request the primary focus.
+  ///
+  /// Defaults to true. If false, the text field will not request focus
+  /// when tapped, or when its context menu is displayed. If false it will not
+  /// be possible to move the focus to the text field with tab key.
+  final bool canRequestFocus;
+
+  /// {@macro flutter.widgets.EditableText.spellCheckConfiguration}
+  ///
+  /// If [SpellCheckConfiguration.misspelledTextStyle] is not specified in this
+  /// configuration, then [materialMisspelledTextStyle] is used by default.
+  final SpellCheckConfiguration? spellCheckConfiguration;
+
+  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.intro}
+  ///
+  /// {@macro flutter.widgets.magnifier.intro}
+  ///
+  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.details}
+  ///
+  /// By default, builds a [CupertinoTextMagnifier] on iOS and [TextMagnifier]
+  /// on Android, and builds nothing on all other platforms. If it is desired to
+  /// suppress the magnifier, consider passing [TextMagnifierConfiguration.disabled].
+  ///
+  /// {@tool dartpad}
+  /// This sample demonstrates how to customize the magnifier that this text field uses.
+  ///
+  /// ** See code in examples/api/lib/widgets/text_magnifier/text_magnifier.0.dart **
+  /// {@end-tool}
+  final TextMagnifierConfiguration? magnifierConfiguration;
 
   @override
   TFormItemValidateState createState() => _TInputState();
@@ -805,9 +883,11 @@ class _TInputState extends TFormItemValidateState<TInput> {
                   size, placeholder, suffixIcon);
             },
             onTap: widget.onTap,
+            onTapOutside: widget.onTapOutside,
             backgroundCursorColor: widget.backgroundCursorColor,
             textDirection: widget.textDirection,
             toolbarOptions: widget.toolbarOptions,
+            contextMenuBuilder: widget.contextMenuBuilder,
             selectionControls: widget.selectionControls,
             enableInteractiveSelection: widget.enableInteractiveSelection,
             clipBehavior: widget.clipBehavior,
@@ -864,6 +944,12 @@ class _TInputState extends TFormItemValidateState<TInput> {
             },
             placeholder: widget.placeholder ?? GlobalTDesignLocalizations.of(context).inputPlaceholder,
             forceLine: !widget.autoWidth,
+            canRequestFocus: widget.canRequestFocus,
+            contentInsertionConfiguration: widget.contentInsertionConfiguration,
+            cursorOpacityAnimates: widget.cursorOpacityAnimates,
+            magnifierConfiguration: widget.magnifierConfiguration,
+            spellCheckConfiguration: widget.spellCheckConfiguration,
+            undoController: widget.undoController,
           ),
         ),
         if (widget.tips != null)
