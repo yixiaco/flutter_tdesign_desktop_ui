@@ -25,8 +25,8 @@ class TIconExample extends StatelessWidget {
     return Container(
       color: theme.isLight ? Colors.white : const Color(0xff242424),
       child: GridView.builder(
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 6,
+        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+          maxCrossAxisExtent: 150,
         ),
         itemBuilder: (context, index) {
           return TMaterialStateButton(

@@ -55,692 +55,713 @@ class TIcons {
   /// <icon name="arrow-right" /> or <ArrowRightIcon />
   static const IconData arrowRight = _TIcons(0xe008);
 
+  /// <icon name="arrow-triangle-down-filled" /> or <ArrowTriangleDownFilledIcon />
+  static const IconData arrowTriangleDownFilled = _TIcons(0xe009);
+
+  /// <icon name="arrow-triangle-down" /> or <ArrowTriangleDownIcon />
+  static const IconData arrowTriangleDown = _TIcons(0xe00a);
+
+  /// <icon name="arrow-triangle-up-filled" /> or <ArrowTriangleUpFilledIcon />
+  static const IconData arrowTriangleUpFilled = _TIcons(0xe00b);
+
+  /// <icon name="arrow-triangle-up" /> or <ArrowTriangleUpIcon />
+  static const IconData arrowTriangleUp = _TIcons(0xe00c);
+
   /// <icon name="arrow-up" /> or <ArrowUpIcon />
-  static const IconData arrowUp = _TIcons(0xe009);
+  static const IconData arrowUp = _TIcons(0xe00d);
 
   /// <icon name="attach" /> or <AttachIcon />
-  static const IconData attach = _TIcons(0xe00a);
+  static const IconData attach = _TIcons(0xe00e);
 
   /// <icon name="backtop-rectangle" /> or <BacktopRectangleIcon />
-  static const IconData backtopRectangle = _TIcons(0xe00b);
+  static const IconData backtopRectangle = _TIcons(0xe00f);
 
   /// <icon name="backtop" /> or <BacktopIcon />
-  static const IconData backtop = _TIcons(0xe00c);
+  static const IconData backtop = _TIcons(0xe010);
 
   /// <icon name="backward" /> or <BackwardIcon />
-  static const IconData backward = _TIcons(0xe00d);
+  static const IconData backward = _TIcons(0xe011);
 
   /// <icon name="barcode" /> or <BarcodeIcon />
-  static const IconData barcode = _TIcons(0xe00e);
+  static const IconData barcode = _TIcons(0xe012);
 
   /// <icon name="books" /> or <BooksIcon />
-  static const IconData books = _TIcons(0xe00f);
+  static const IconData books = _TIcons(0xe013);
 
   /// <icon name="browse-off" /> or <BrowseOffIcon />
-  static const IconData browseOff = _TIcons(0xe010);
+  static const IconData browseOff = _TIcons(0xe014);
 
   /// <icon name="browse" /> or <BrowseIcon />
-  static const IconData browse = _TIcons(0xe011);
+  static const IconData browse = _TIcons(0xe015);
 
   /// <icon name="bulletpoint" /> or <BulletpointIcon />
-  static const IconData bulletpoint = _TIcons(0xe012);
+  static const IconData bulletpoint = _TIcons(0xe016);
 
   /// <icon name="calendar" /> or <CalendarIcon />
-  static const IconData calendar = _TIcons(0xe013);
+  static const IconData calendar = _TIcons(0xe017);
 
   /// <icon name="call" /> or <CallIcon />
-  static const IconData call = _TIcons(0xe014);
+  static const IconData call = _TIcons(0xe018);
 
   /// <icon name="caret-down-small" /> or <CaretDownSmallIcon />
-  static const IconData caretDownSmall = _TIcons(0xe015);
+  static const IconData caretDownSmall = _TIcons(0xe019);
 
   /// <icon name="caret-down" /> or <CaretDownIcon />
-  static const IconData caretDown = _TIcons(0xe016);
+  static const IconData caretDown = _TIcons(0xe01a);
 
   /// <icon name="caret-left-small" /> or <CaretLeftSmallIcon />
-  static const IconData caretLeftSmall = _TIcons(0xe017);
+  static const IconData caretLeftSmall = _TIcons(0xe01b);
 
   /// <icon name="caret-left" /> or <CaretLeftIcon />
-  static const IconData caretLeft = _TIcons(0xe018);
+  static const IconData caretLeft = _TIcons(0xe01c);
 
   /// <icon name="caret-right-small" /> or <CaretRightSmallIcon />
-  static const IconData caretRightSmall = _TIcons(0xe019);
+  static const IconData caretRightSmall = _TIcons(0xe01d);
 
   /// <icon name="caret-right" /> or <CaretRightIcon />
-  static const IconData caretRight = _TIcons(0xe01a);
+  static const IconData caretRight = _TIcons(0xe01e);
 
   /// <icon name="caret-up-small" /> or <CaretUpSmallIcon />
-  static const IconData caretUpSmall = _TIcons(0xe01b);
+  static const IconData caretUpSmall = _TIcons(0xe01f);
 
   /// <icon name="caret-up" /> or <CaretUpIcon />
-  static const IconData caretUp = _TIcons(0xe01c);
+  static const IconData caretUp = _TIcons(0xe020);
 
   /// <icon name="cart" /> or <CartIcon />
-  static const IconData cart = _TIcons(0xe01d);
+  static const IconData cart = _TIcons(0xe021);
 
   /// <icon name="chart-bar" /> or <ChartBarIcon />
-  static const IconData chartBar = _TIcons(0xe01e);
+  static const IconData chartBar = _TIcons(0xe022);
 
   /// <icon name="chart-bubble" /> or <ChartBubbleIcon />
-  static const IconData chartBubble = _TIcons(0xe01f);
+  static const IconData chartBubble = _TIcons(0xe023);
 
   /// <icon name="chart-pie" /> or <ChartPieIcon />
-  static const IconData chartPie = _TIcons(0xe020);
+  static const IconData chartPie = _TIcons(0xe024);
 
   /// <icon name="chart" /> or <ChartIcon />
-  static const IconData chart = _TIcons(0xe021);
+  static const IconData chart = _TIcons(0xe025);
 
   /// <icon name="chat" /> or <ChatIcon />
-  static const IconData chat = _TIcons(0xe022);
+  static const IconData chat = _TIcons(0xe026);
 
   /// <icon name="check-circle-filled" /> or <CheckCircleFilledIcon />
-  static const IconData checkCircleFilled = _TIcons(0xe023);
+  static const IconData checkCircleFilled = _TIcons(0xe027);
 
   /// <icon name="check-circle" /> or <CheckCircleIcon />
-  static const IconData checkCircle = _TIcons(0xe024);
+  static const IconData checkCircle = _TIcons(0xe028);
 
   /// <icon name="check-rectangle-filled" /> or <CheckRectangleFilledIcon />
-  static const IconData checkRectangleFilled = _TIcons(0xe025);
+  static const IconData checkRectangleFilled = _TIcons(0xe029);
 
   /// <icon name="check-rectangle" /> or <CheckRectangleIcon />
-  static const IconData checkRectangle = _TIcons(0xe026);
+  static const IconData checkRectangle = _TIcons(0xe02a);
 
   /// <icon name="check" /> or <CheckIcon />
-  static const IconData check = _TIcons(0xe027);
+  static const IconData check = _TIcons(0xe02b);
 
   /// <icon name="chevron-down-circle" /> or <ChevronDownCircleIcon />
-  static const IconData chevronDownCircle = _TIcons(0xe028);
+  static const IconData chevronDownCircle = _TIcons(0xe02c);
 
   /// <icon name="chevron-down-rectangle" /> or <ChevronDownRectangleIcon />
-  static const IconData chevronDownRectangle = _TIcons(0xe029);
+  static const IconData chevronDownRectangle = _TIcons(0xe02d);
 
   /// <icon name="chevron-down" /> or <ChevronDownIcon />
-  static const IconData chevronDown = _TIcons(0xe02a);
+  static const IconData chevronDown = _TIcons(0xe02e);
 
   /// <icon name="chevron-left-circle" /> or <ChevronLeftCircleIcon />
-  static const IconData chevronLeftCircle = _TIcons(0xe02b);
+  static const IconData chevronLeftCircle = _TIcons(0xe02f);
 
   /// <icon name="chevron-left-double" /> or <ChevronLeftDoubleIcon />
-  static const IconData chevronLeftDouble = _TIcons(0xe02c);
+  static const IconData chevronLeftDouble = _TIcons(0xe030);
 
   /// <icon name="chevron-left-rectangle" /> or <ChevronLeftRectangleIcon />
-  static const IconData chevronLeftRectangle = _TIcons(0xe02d);
+  static const IconData chevronLeftRectangle = _TIcons(0xe031);
 
   /// <icon name="chevron-left" /> or <ChevronLeftIcon />
-  static const IconData chevronLeft = _TIcons(0xe02e);
+  static const IconData chevronLeft = _TIcons(0xe032);
 
   /// <icon name="chevron-right-circle" /> or <ChevronRightCircleIcon />
-  static const IconData chevronRightCircle = _TIcons(0xe02f);
+  static const IconData chevronRightCircle = _TIcons(0xe033);
 
   /// <icon name="chevron-right-double" /> or <ChevronRightDoubleIcon />
-  static const IconData chevronRightDouble = _TIcons(0xe030);
+  static const IconData chevronRightDouble = _TIcons(0xe034);
 
   /// <icon name="chevron-right-rectangle" /> or <ChevronRightRectangleIcon />
-  static const IconData chevronRightRectangle = _TIcons(0xe031);
+  static const IconData chevronRightRectangle = _TIcons(0xe035);
 
   /// <icon name="chevron-right" /> or <ChevronRightIcon />
-  static const IconData chevronRight = _TIcons(0xe032);
+  static const IconData chevronRight = _TIcons(0xe036);
 
   /// <icon name="chevron-up-circle" /> or <ChevronUpCircleIcon />
-  static const IconData chevronUpCircle = _TIcons(0xe033);
+  static const IconData chevronUpCircle = _TIcons(0xe037);
 
   /// <icon name="chevron-up-rectangle" /> or <ChevronUpRectangleIcon />
-  static const IconData chevronUpRectangle = _TIcons(0xe034);
+  static const IconData chevronUpRectangle = _TIcons(0xe038);
 
   /// <icon name="chevron-up" /> or <ChevronUpIcon />
-  static const IconData chevronUp = _TIcons(0xe035);
+  static const IconData chevronUp = _TIcons(0xe039);
 
   /// <icon name="circle" /> or <CircleIcon />
-  static const IconData circle = _TIcons(0xe036);
+  static const IconData circle = _TIcons(0xe03a);
 
   /// <icon name="clear" /> or <ClearIcon />
-  static const IconData clear = _TIcons(0xe037);
+  static const IconData clear = _TIcons(0xe03b);
 
   /// <icon name="close-circle-filled" /> or <CloseCircleFilledIcon />
-  static const IconData closeCircleFilled = _TIcons(0xe038);
+  static const IconData closeCircleFilled = _TIcons(0xe03c);
 
   /// <icon name="close-circle" /> or <CloseCircleIcon />
-  static const IconData closeCircle = _TIcons(0xe039);
+  static const IconData closeCircle = _TIcons(0xe03d);
 
   /// <icon name="close-rectangle" /> or <CloseRectangleIcon />
-  static const IconData closeRectangle = _TIcons(0xe03a);
+  static const IconData closeRectangle = _TIcons(0xe03e);
 
   /// <icon name="close" /> or <CloseIcon />
-  static const IconData close = _TIcons(0xe03b);
+  static const IconData close = _TIcons(0xe03f);
 
   /// <icon name="cloud-download" /> or <CloudDownloadIcon />
-  static const IconData cloudDownload = _TIcons(0xe03c);
+  static const IconData cloudDownload = _TIcons(0xe040);
 
   /// <icon name="cloud-upload" /> or <CloudUploadIcon />
-  static const IconData cloudUpload = _TIcons(0xe03d);
+  static const IconData cloudUpload = _TIcons(0xe041);
 
   /// <icon name="cloud" /> or <CloudIcon />
-  static const IconData cloud = _TIcons(0xe03e);
+  static const IconData cloud = _TIcons(0xe042);
 
   /// <icon name="code" /> or <CodeIcon />
-  static const IconData code = _TIcons(0xe03f);
+  static const IconData code = _TIcons(0xe043);
 
   /// <icon name="control-platform" /> or <ControlPlatformIcon />
-  static const IconData controlPlatform = _TIcons(0xe040);
+  static const IconData controlPlatform = _TIcons(0xe044);
 
   /// <icon name="creditcard" /> or <CreditcardIcon />
-  static const IconData creditcard = _TIcons(0xe041);
+  static const IconData creditcard = _TIcons(0xe045);
 
   /// <icon name="dashboard" /> or <DashboardIcon />
-  static const IconData dashboard = _TIcons(0xe042);
+  static const IconData dashboard = _TIcons(0xe046);
 
   /// <icon name="delete" /> or <DeleteIcon />
-  static const IconData delete = _TIcons(0xe043);
+  static const IconData delete = _TIcons(0xe047);
 
   /// <icon name="desktop" /> or <DesktopIcon />
-  static const IconData desktop = _TIcons(0xe044);
+  static const IconData desktop = _TIcons(0xe048);
 
   /// <icon name="discount-filled" /> or <DiscountFilledIcon />
-  static const IconData discountFilled = _TIcons(0xe045);
+  static const IconData discountFilled = _TIcons(0xe049);
 
   /// <icon name="discount" /> or <DiscountIcon />
-  static const IconData discount = _TIcons(0xe046);
+  static const IconData discount = _TIcons(0xe04a);
 
   /// <icon name="download" /> or <DownloadIcon />
-  static const IconData download = _TIcons(0xe047);
+  static const IconData download = _TIcons(0xe04b);
 
   /// <icon name="edit-1" /> or <Edit1Icon />
-  static const IconData edit1 = _TIcons(0xe048);
+  static const IconData edit1 = _TIcons(0xe04c);
 
   /// <icon name="edit" /> or <EditIcon />
-  static const IconData edit = _TIcons(0xe049);
+  static const IconData edit = _TIcons(0xe04d);
 
   /// <icon name="ellipsis" /> or <EllipsisIcon />
-  static const IconData ellipsis = _TIcons(0xe04a);
+  static const IconData ellipsis = _TIcons(0xe04e);
 
   /// <icon name="enter" /> or <EnterIcon />
-  static const IconData enter = _TIcons(0xe04b);
+  static const IconData enter = _TIcons(0xe04f);
 
   /// <icon name="error-circle-filled" /> or <ErrorCircleFilledIcon />
-  static const IconData errorCircleFilled = _TIcons(0xe04c);
+  static const IconData errorCircleFilled = _TIcons(0xe050);
 
   /// <icon name="error-circle" /> or <ErrorCircleIcon />
-  static const IconData errorCircle = _TIcons(0xe04d);
+  static const IconData errorCircle = _TIcons(0xe051);
 
   /// <icon name="error" /> or <ErrorIcon />
-  static const IconData error = _TIcons(0xe04e);
+  static const IconData error = _TIcons(0xe052);
 
   /// <icon name="file-add" /> or <FileAddIcon />
-  static const IconData fileAdd = _TIcons(0xe04f);
+  static const IconData fileAdd = _TIcons(0xe053);
 
   /// <icon name="file-copy" /> or <FileCopyIcon />
-  static const IconData fileCopy = _TIcons(0xe050);
+  static const IconData fileCopy = _TIcons(0xe054);
 
   /// <icon name="file-excel" /> or <FileExcelIcon />
-  static const IconData fileExcel = _TIcons(0xe051);
+  static const IconData fileExcel = _TIcons(0xe055);
 
   /// <icon name="file-icon" /> or <FileIconIcon />
-  static const IconData fileIcon = _TIcons(0xe052);
+  static const IconData fileIcon = _TIcons(0xe056);
 
   /// <icon name="file-image" /> or <FileImageIcon />
-  static const IconData fileImage = _TIcons(0xe053);
+  static const IconData fileImage = _TIcons(0xe057);
 
   /// <icon name="file-paste" /> or <FilePasteIcon />
-  static const IconData filePaste = _TIcons(0xe054);
+  static const IconData filePaste = _TIcons(0xe058);
 
   /// <icon name="file-pdf" /> or <FilePdfIcon />
-  static const IconData filePdf = _TIcons(0xe055);
+  static const IconData filePdf = _TIcons(0xe059);
 
   /// <icon name="file-powerpoint" /> or <FilePowerpointIcon />
-  static const IconData filePowerpoint = _TIcons(0xe056);
+  static const IconData filePowerpoint = _TIcons(0xe05a);
 
   /// <icon name="file-unknown" /> or <FileUnknownIcon />
-  static const IconData fileUnknown = _TIcons(0xe057);
+  static const IconData fileUnknown = _TIcons(0xe05b);
 
   /// <icon name="file-word" /> or <FileWordIcon />
-  static const IconData fileWord = _TIcons(0xe058);
+  static const IconData fileWord = _TIcons(0xe05c);
 
   /// <icon name="file" /> or <FileIcon />
-  static const IconData file = _TIcons(0xe059);
+  static const IconData file = _TIcons(0xe05d);
 
   /// <icon name="filter-clear" /> or <FilterClearIcon />
-  static const IconData filterClear = _TIcons(0xe05a);
+  static const IconData filterClear = _TIcons(0xe05e);
 
   /// <icon name="filter" /> or <FilterIcon />
-  static const IconData filter = _TIcons(0xe05b);
+  static const IconData filter = _TIcons(0xe05f);
 
   /// <icon name="flag" /> or <FlagIcon />
-  static const IconData flag = _TIcons(0xe05c);
+  static const IconData flag = _TIcons(0xe060);
 
   /// <icon name="folder-add" /> or <FolderAddIcon />
-  static const IconData folderAdd = _TIcons(0xe05d);
+  static const IconData folderAdd = _TIcons(0xe061);
 
   /// <icon name="folder-open" /> or <FolderOpenIcon />
-  static const IconData folderOpen = _TIcons(0xe05e);
+  static const IconData folderOpen = _TIcons(0xe062);
 
   /// <icon name="folder" /> or <FolderIcon />
-  static const IconData folder = _TIcons(0xe05f);
+  static const IconData folder = _TIcons(0xe063);
 
   /// <icon name="fork" /> or <ForkIcon />
-  static const IconData fork = _TIcons(0xe060);
+  static const IconData fork = _TIcons(0xe064);
 
   /// <icon name="format-horizontal-align-bottom" /> or <FormatHorizontalAlignBottomIcon />
-  static const IconData formatHorizontalAlignBottom = _TIcons(0xe061);
+  static const IconData formatHorizontalAlignBottom = _TIcons(0xe065);
 
   /// <icon name="format-horizontal-align-center" /> or <FormatHorizontalAlignCenterIcon />
-  static const IconData formatHorizontalAlignCenter = _TIcons(0xe062);
+  static const IconData formatHorizontalAlignCenter = _TIcons(0xe066);
 
   /// <icon name="format-horizontal-align-top" /> or <FormatHorizontalAlignTopIcon />
-  static const IconData formatHorizontalAlignTop = _TIcons(0xe063);
+  static const IconData formatHorizontalAlignTop = _TIcons(0xe067);
 
   /// <icon name="format-vertical-align-center" /> or <FormatVerticalAlignCenterIcon />
-  static const IconData formatVerticalAlignCenter = _TIcons(0xe064);
+  static const IconData formatVerticalAlignCenter = _TIcons(0xe068);
 
   /// <icon name="format-vertical-align-left" /> or <FormatVerticalAlignLeftIcon />
-  static const IconData formatVerticalAlignLeft = _TIcons(0xe065);
+  static const IconData formatVerticalAlignLeft = _TIcons(0xe069);
 
   /// <icon name="format-vertical-align-right" /> or <FormatVerticalAlignRightIcon />
-  static const IconData formatVerticalAlignRight = _TIcons(0xe066);
+  static const IconData formatVerticalAlignRight = _TIcons(0xe06a);
 
   /// <icon name="forward" /> or <ForwardIcon />
-  static const IconData forward = _TIcons(0xe067);
+  static const IconData forward = _TIcons(0xe06b);
 
   /// <icon name="fullscreen-exit" /> or <FullscreenExitIcon />
-  static const IconData fullscreenExit = _TIcons(0xe068);
+  static const IconData fullscreenExit = _TIcons(0xe06c);
 
   /// <icon name="fullscreen" /> or <FullscreenIcon />
-  static const IconData fullscreen = _TIcons(0xe069);
+  static const IconData fullscreen = _TIcons(0xe06d);
 
   /// <icon name="gender-female" /> or <GenderFemaleIcon />
-  static const IconData genderFemale = _TIcons(0xe06a);
+  static const IconData genderFemale = _TIcons(0xe06e);
 
   /// <icon name="gender-male" /> or <GenderMaleIcon />
-  static const IconData genderMale = _TIcons(0xe06b);
+  static const IconData genderMale = _TIcons(0xe06f);
 
   /// <icon name="gift" /> or <GiftIcon />
-  static const IconData gift = _TIcons(0xe06c);
+  static const IconData gift = _TIcons(0xe070);
 
   /// <icon name="heart-filled" /> or <HeartFilledIcon />
-  static const IconData heartFilled = _TIcons(0xe06d);
+  static const IconData heartFilled = _TIcons(0xe071);
 
   /// <icon name="heart" /> or <HeartIcon />
-  static const IconData heart = _TIcons(0xe06e);
+  static const IconData heart = _TIcons(0xe072);
 
   /// <icon name="help-circle-filled" /> or <HelpCircleFilledIcon />
-  static const IconData helpCircleFilled = _TIcons(0xe06f);
+  static const IconData helpCircleFilled = _TIcons(0xe073);
 
   /// <icon name="help-circle" /> or <HelpCircleIcon />
-  static const IconData helpCircle = _TIcons(0xe070);
+  static const IconData helpCircle = _TIcons(0xe074);
 
   /// <icon name="help" /> or <HelpIcon />
-  static const IconData help = _TIcons(0xe071);
+  static const IconData help = _TIcons(0xe075);
 
   /// <icon name="history" /> or <HistoryIcon />
-  static const IconData history = _TIcons(0xe072);
+  static const IconData history = _TIcons(0xe076);
 
   /// <icon name="home" /> or <HomeIcon />
-  static const IconData home = _TIcons(0xe073);
+  static const IconData home = _TIcons(0xe077);
 
   /// <icon name="hourglass" /> or <HourglassIcon />
-  static const IconData hourglass = _TIcons(0xe074);
+  static const IconData hourglass = _TIcons(0xe078);
 
   /// <icon name="image-error" /> or <ImageErrorIcon />
-  static const IconData imageError = _TIcons(0xe075);
+  static const IconData imageError = _TIcons(0xe079);
 
   /// <icon name="image" /> or <ImageIcon />
-  static const IconData image = _TIcons(0xe076);
+  static const IconData image = _TIcons(0xe07a);
 
   /// <icon name="info-circle-filled" /> or <InfoCircleFilledIcon />
-  static const IconData infoCircleFilled = _TIcons(0xe077);
+  static const IconData infoCircleFilled = _TIcons(0xe07b);
 
   /// <icon name="info-circle" /> or <InfoCircleIcon />
-  static const IconData infoCircle = _TIcons(0xe078);
+  static const IconData infoCircle = _TIcons(0xe07c);
 
   /// <icon name="internet" /> or <InternetIcon />
-  static const IconData internet = _TIcons(0xe079);
+  static const IconData internet = _TIcons(0xe07d);
 
   /// <icon name="jump" /> or <JumpIcon />
-  static const IconData jump = _TIcons(0xe07a);
+  static const IconData jump = _TIcons(0xe07e);
 
   /// <icon name="laptop" /> or <LaptopIcon />
-  static const IconData laptop = _TIcons(0xe07b);
+  static const IconData laptop = _TIcons(0xe07f);
 
   /// <icon name="layers" /> or <LayersIcon />
-  static const IconData layers = _TIcons(0xe07c);
+  static const IconData layers = _TIcons(0xe080);
 
   /// <icon name="link-unlink" /> or <LinkUnlinkIcon />
-  static const IconData linkUnlink = _TIcons(0xe07d);
+  static const IconData linkUnlink = _TIcons(0xe081);
 
   /// <icon name="link" /> or <LinkIcon />
-  static const IconData link = _TIcons(0xe07e);
+  static const IconData link = _TIcons(0xe082);
 
   /// <icon name="loading" /> or <LoadingIcon />
-  static const IconData loading = _TIcons(0xe07f);
+  static const IconData loading = _TIcons(0xe083);
 
   /// <icon name="location" /> or <LocationIcon />
-  static const IconData location = _TIcons(0xe080);
+  static const IconData location = _TIcons(0xe084);
 
   /// <icon name="lock-off" /> or <LockOffIcon />
-  static const IconData lockOff = _TIcons(0xe081);
+  static const IconData lockOff = _TIcons(0xe085);
 
   /// <icon name="lock-on" /> or <LockOnIcon />
-  static const IconData lockOn = _TIcons(0xe082);
+  static const IconData lockOn = _TIcons(0xe086);
 
   /// <icon name="login" /> or <LoginIcon />
-  static const IconData login = _TIcons(0xe083);
+  static const IconData login = _TIcons(0xe087);
 
   /// <icon name="logo-android" /> or <LogoAndroidIcon />
-  static const IconData logoAndroid = _TIcons(0xe084);
+  static const IconData logoAndroid = _TIcons(0xe088);
 
   /// <icon name="logo-apple-filled" /> or <LogoAppleFilledIcon />
-  static const IconData logoAppleFilled = _TIcons(0xe085);
+  static const IconData logoAppleFilled = _TIcons(0xe089);
 
   /// <icon name="logo-apple" /> or <LogoAppleIcon />
-  static const IconData logoApple = _TIcons(0xe086);
+  static const IconData logoApple = _TIcons(0xe08a);
 
   /// <icon name="logo-chrome-filled" /> or <LogoChromeFilledIcon />
-  static const IconData logoChromeFilled = _TIcons(0xe087);
+  static const IconData logoChromeFilled = _TIcons(0xe08b);
 
   /// <icon name="logo-chrome" /> or <LogoChromeIcon />
-  static const IconData logoChrome = _TIcons(0xe088);
+  static const IconData logoChrome = _TIcons(0xe08c);
 
   /// <icon name="logo-codepen" /> or <LogoCodepenIcon />
-  static const IconData logoCodepen = _TIcons(0xe089);
+  static const IconData logoCodepen = _TIcons(0xe08d);
 
   /// <icon name="logo-github-filled" /> or <LogoGithubFilledIcon />
-  static const IconData logoGithubFilled = _TIcons(0xe08a);
+  static const IconData logoGithubFilled = _TIcons(0xe08e);
 
   /// <icon name="logo-github" /> or <LogoGithubIcon />
-  static const IconData logoGithub = _TIcons(0xe08b);
+  static const IconData logoGithub = _TIcons(0xe08f);
 
   /// <icon name="logo-ie-filled" /> or <LogoIeFilledIcon />
-  static const IconData logoIeFilled = _TIcons(0xe08c);
+  static const IconData logoIeFilled = _TIcons(0xe090);
 
   /// <icon name="logo-ie" /> or <LogoIeIcon />
-  static const IconData logoIe = _TIcons(0xe08d);
+  static const IconData logoIe = _TIcons(0xe091);
 
   /// <icon name="logo-qq" /> or <LogoQqIcon />
-  static const IconData logoQq = _TIcons(0xe08e);
+  static const IconData logoQq = _TIcons(0xe092);
 
   /// <icon name="logo-wechat" /> or <LogoWechatIcon />
-  static const IconData logoWechat = _TIcons(0xe08f);
+  static const IconData logoWechat = _TIcons(0xe093);
 
   /// <icon name="logo-wecom" /> or <LogoWecomIcon />
-  static const IconData logoWecom = _TIcons(0xe090);
+  static const IconData logoWecom = _TIcons(0xe094);
 
   /// <icon name="logo-windows-filled" /> or <LogoWindowsFilledIcon />
-  static const IconData logoWindowsFilled = _TIcons(0xe091);
+  static const IconData logoWindowsFilled = _TIcons(0xe095);
 
   /// <icon name="logo-windows" /> or <LogoWindowsIcon />
-  static const IconData logoWindows = _TIcons(0xe092);
+  static const IconData logoWindows = _TIcons(0xe096);
 
   /// <icon name="logout" /> or <LogoutIcon />
-  static const IconData logout = _TIcons(0xe093);
+  static const IconData logout = _TIcons(0xe097);
 
   /// <icon name="mail" /> or <MailIcon />
-  static const IconData mail = _TIcons(0xe094);
+  static const IconData mail = _TIcons(0xe098);
 
   /// <icon name="menu-fold" /> or <MenuFoldIcon />
-  static const IconData menuFold = _TIcons(0xe095);
+  static const IconData menuFold = _TIcons(0xe099);
 
   /// <icon name="menu-unfold" /> or <MenuUnfoldIcon />
-  static const IconData menuUnfold = _TIcons(0xe096);
+  static const IconData menuUnfold = _TIcons(0xe09a);
 
   /// <icon name="minus-circle-filled" /> or <MinusCircleFilledIcon />
-  static const IconData minusCircleFilled = _TIcons(0xe097);
+  static const IconData minusCircleFilled = _TIcons(0xe09b);
 
   /// <icon name="minus-circle" /> or <MinusCircleIcon />
-  static const IconData minusCircle = _TIcons(0xe098);
+  static const IconData minusCircle = _TIcons(0xe09c);
+
+  /// <icon name="minus-rectangle-filled" /> or <MinusRectangleFilledIcon />
+  static const IconData minusRectangleFilled = _TIcons(0xe09d);
 
   /// <icon name="minus-rectangle" /> or <MinusRectangleIcon />
-  static const IconData minusRectangle = _TIcons(0xe099);
+  static const IconData minusRectangle = _TIcons(0xe09e);
 
   /// <icon name="mirror" /> or <MirrorIcon />
-  static const IconData mirror = _TIcons(0xe09a);
+  static const IconData mirror = _TIcons(0xe09f);
 
   /// <icon name="mobile-vibrate" /> or <MobileVibrateIcon />
-  static const IconData mobileVibrate = _TIcons(0xe09b);
+  static const IconData mobileVibrate = _TIcons(0xe0a0);
 
   /// <icon name="mobile" /> or <MobileIcon />
-  static const IconData mobile = _TIcons(0xe09c);
+  static const IconData mobile = _TIcons(0xe0a1);
 
   /// <icon name="money-circle" /> or <MoneyCircleIcon />
-  static const IconData moneyCircle = _TIcons(0xe09d);
+  static const IconData moneyCircle = _TIcons(0xe0a2);
 
   /// <icon name="more" /> or <MoreIcon />
-  static const IconData more = _TIcons(0xe09e);
+  static const IconData more = _TIcons(0xe0a3);
 
   /// <icon name="move" /> or <MoveIcon />
-  static const IconData move = _TIcons(0xe09f);
+  static const IconData move = _TIcons(0xe0a4);
 
   /// <icon name="next" /> or <NextIcon />
-  static const IconData next = _TIcons(0xe0a0);
+  static const IconData next = _TIcons(0xe0a5);
 
   /// <icon name="notification-filled" /> or <NotificationFilledIcon />
-  static const IconData notificationFilled = _TIcons(0xe0a1);
+  static const IconData notificationFilled = _TIcons(0xe0a6);
 
   /// <icon name="notification" /> or <NotificationIcon />
-  static const IconData notification = _TIcons(0xe0a2);
+  static const IconData notification = _TIcons(0xe0a7);
 
   /// <icon name="order-adjustment-column" /> or <OrderAdjustmentColumnIcon />
-  static const IconData orderAdjustmentColumn = _TIcons(0xe0a3);
+  static const IconData orderAdjustmentColumn = _TIcons(0xe0a8);
 
   /// <icon name="order-ascending" /> or <OrderAscendingIcon />
-  static const IconData orderAscending = _TIcons(0xe0a4);
+  static const IconData orderAscending = _TIcons(0xe0a9);
 
   /// <icon name="order-descending" /> or <OrderDescendingIcon />
-  static const IconData orderDescending = _TIcons(0xe0a5);
+  static const IconData orderDescending = _TIcons(0xe0aa);
 
   /// <icon name="page-first" /> or <PageFirstIcon />
-  static const IconData pageFirst = _TIcons(0xe0a6);
+  static const IconData pageFirst = _TIcons(0xe0ab);
 
   /// <icon name="page-last" /> or <PageLastIcon />
-  static const IconData pageLast = _TIcons(0xe0a7);
+  static const IconData pageLast = _TIcons(0xe0ac);
 
   /// <icon name="pause-circle-filled" /> or <PauseCircleFilledIcon />
-  static const IconData pauseCircleFilled = _TIcons(0xe0a8);
+  static const IconData pauseCircleFilled = _TIcons(0xe0ad);
 
   /// <icon name="photo" /> or <PhotoIcon />
-  static const IconData photo = _TIcons(0xe0a9);
+  static const IconData photo = _TIcons(0xe0ae);
 
   /// <icon name="pin-filled" /> or <PinFilledIcon />
-  static const IconData pinFilled = _TIcons(0xe0aa);
+  static const IconData pinFilled = _TIcons(0xe0af);
 
   /// <icon name="pin" /> or <PinIcon />
-  static const IconData pin = _TIcons(0xe0ab);
+  static const IconData pin = _TIcons(0xe0b0);
 
   /// <icon name="play-circle-filled" /> or <PlayCircleFilledIcon />
-  static const IconData playCircleFilled = _TIcons(0xe0ac);
+  static const IconData playCircleFilled = _TIcons(0xe0b1);
 
   /// <icon name="play-circle-stroke" /> or <PlayCircleStrokeIcon />
-  static const IconData playCircleStroke = _TIcons(0xe0ad);
+  static const IconData playCircleStroke = _TIcons(0xe0b2);
 
   /// <icon name="play-circle" /> or <PlayCircleIcon />
-  static const IconData playCircle = _TIcons(0xe0ae);
+  static const IconData playCircle = _TIcons(0xe0b3);
 
   /// <icon name="play" /> or <PlayIcon />
-  static const IconData play = _TIcons(0xe0af);
+  static const IconData play = _TIcons(0xe0b4);
 
   /// <icon name="poweroff" /> or <PoweroffIcon />
-  static const IconData poweroff = _TIcons(0xe0b0);
+  static const IconData poweroff = _TIcons(0xe0b5);
 
   /// <icon name="precise-monitor" /> or <PreciseMonitorIcon />
-  static const IconData preciseMonitor = _TIcons(0xe0b1);
+  static const IconData preciseMonitor = _TIcons(0xe0b6);
 
   /// <icon name="previous" /> or <PreviousIcon />
-  static const IconData previous = _TIcons(0xe0b2);
+  static const IconData previous = _TIcons(0xe0b7);
 
   /// <icon name="print" /> or <PrintIcon />
-  static const IconData print = _TIcons(0xe0b3);
+  static const IconData print = _TIcons(0xe0b8);
 
   /// <icon name="qrcode" /> or <QrcodeIcon />
-  static const IconData qrcode = _TIcons(0xe0b4);
+  static const IconData qrcode = _TIcons(0xe0b9);
 
   /// <icon name="queue" /> or <QueueIcon />
-  static const IconData queue = _TIcons(0xe0b5);
+  static const IconData queue = _TIcons(0xe0ba);
 
   /// <icon name="rectangle" /> or <RectangleIcon />
-  static const IconData rectangle = _TIcons(0xe0b6);
+  static const IconData rectangle = _TIcons(0xe0bb);
 
   /// <icon name="refresh" /> or <RefreshIcon />
-  static const IconData refresh = _TIcons(0xe0b7);
+  static const IconData refresh = _TIcons(0xe0bc);
 
   /// <icon name="relativity" /> or <RelativityIcon />
-  static const IconData relativity = _TIcons(0xe0b8);
+  static const IconData relativity = _TIcons(0xe0bd);
 
   /// <icon name="remove" /> or <RemoveIcon />
-  static const IconData remove = _TIcons(0xe0b9);
+  static const IconData remove = _TIcons(0xe0be);
 
   /// <icon name="rollback" /> or <RollbackIcon />
-  static const IconData rollback = _TIcons(0xe0ba);
+  static const IconData rollback = _TIcons(0xe0bf);
 
   /// <icon name="rollfront" /> or <RollfrontIcon />
-  static const IconData rollfront = _TIcons(0xe0bb);
+  static const IconData rollfront = _TIcons(0xe0c0);
 
   /// <icon name="root-list" /> or <RootListIcon />
-  static const IconData rootList = _TIcons(0xe0bc);
+  static const IconData rootList = _TIcons(0xe0c1);
 
   /// <icon name="rotation" /> or <RotationIcon />
-  static const IconData rotation = _TIcons(0xe0bd);
+  static const IconData rotation = _TIcons(0xe0c2);
 
   /// <icon name="round" /> or <RoundIcon />
-  static const IconData round = _TIcons(0xe0be);
+  static const IconData round = _TIcons(0xe0c3);
 
   /// <icon name="save" /> or <SaveIcon />
-  static const IconData save = _TIcons(0xe0bf);
+  static const IconData save = _TIcons(0xe0c4);
 
   /// <icon name="scan" /> or <ScanIcon />
-  static const IconData scan = _TIcons(0xe0c0);
+  static const IconData scan = _TIcons(0xe0c5);
 
   /// <icon name="search" /> or <SearchIcon />
-  static const IconData search = _TIcons(0xe0c1);
+  static const IconData search = _TIcons(0xe0c6);
 
   /// <icon name="secured" /> or <SecuredIcon />
-  static const IconData secured = _TIcons(0xe0c2);
+  static const IconData secured = _TIcons(0xe0c7);
 
   /// <icon name="server" /> or <ServerIcon />
-  static const IconData server = _TIcons(0xe0c3);
+  static const IconData server = _TIcons(0xe0c8);
 
   /// <icon name="service" /> or <ServiceIcon />
-  static const IconData service = _TIcons(0xe0c4);
+  static const IconData service = _TIcons(0xe0c9);
 
   /// <icon name="setting" /> or <SettingIcon />
-  static const IconData setting = _TIcons(0xe0c5);
+  static const IconData setting = _TIcons(0xe0ca);
 
   /// <icon name="share" /> or <ShareIcon />
-  static const IconData share = _TIcons(0xe0c6);
+  static const IconData share = _TIcons(0xe0cb);
 
   /// <icon name="shop" /> or <ShopIcon />
-  static const IconData shop = _TIcons(0xe0c7);
+  static const IconData shop = _TIcons(0xe0cc);
 
   /// <icon name="slash" /> or <SlashIcon />
-  static const IconData slash = _TIcons(0xe0c8);
+  static const IconData slash = _TIcons(0xe0cd);
 
   /// <icon name="sound" /> or <SoundIcon />
-  static const IconData sound = _TIcons(0xe0c9);
+  static const IconData sound = _TIcons(0xe0ce);
 
   /// <icon name="star-filled" /> or <StarFilledIcon />
-  static const IconData starFilled = _TIcons(0xe0ca);
+  static const IconData starFilled = _TIcons(0xe0cf);
 
   /// <icon name="star" /> or <StarIcon />
-  static const IconData star = _TIcons(0xe0cb);
+  static const IconData star = _TIcons(0xe0d0);
 
   /// <icon name="stop-circle-1" /> or <StopCircle1Icon />
-  static const IconData stopCircle1 = _TIcons(0xe0cc);
+  static const IconData stopCircle1 = _TIcons(0xe0d1);
 
   /// <icon name="stop-circle-filled" /> or <StopCircleFilledIcon />
-  static const IconData stopCircleFilled = _TIcons(0xe0cd);
+  static const IconData stopCircleFilled = _TIcons(0xe0d2);
 
   /// <icon name="stop-circle" /> or <StopCircleIcon />
-  static const IconData stopCircle = _TIcons(0xe0ce);
+  static const IconData stopCircle = _TIcons(0xe0d3);
 
   /// <icon name="stop" /> or <StopIcon />
-  static const IconData stop = _TIcons(0xe0cf);
+  static const IconData stop = _TIcons(0xe0d4);
 
   /// <icon name="swap-left" /> or <SwapLeftIcon />
-  static const IconData swapLeft = _TIcons(0xe0d0);
+  static const IconData swapLeft = _TIcons(0xe0d5);
 
   /// <icon name="swap-right" /> or <SwapRightIcon />
-  static const IconData swapRight = _TIcons(0xe0d1);
+  static const IconData swapRight = _TIcons(0xe0d6);
 
   /// <icon name="swap" /> or <SwapIcon />
-  static const IconData swap = _TIcons(0xe0d2);
+  static const IconData swap = _TIcons(0xe0d7);
 
   /// <icon name="thumb-down" /> or <ThumbDownIcon />
-  static const IconData thumbDown = _TIcons(0xe0d3);
+  static const IconData thumbDown = _TIcons(0xe0d8);
 
   /// <icon name="thumb-up" /> or <ThumbUpIcon />
-  static const IconData thumbUp = _TIcons(0xe0d4);
+  static const IconData thumbUp = _TIcons(0xe0d9);
 
   /// <icon name="time-filled" /> or <TimeFilledIcon />
-  static const IconData timeFilled = _TIcons(0xe0d5);
+  static const IconData timeFilled = _TIcons(0xe0da);
 
   /// <icon name="time" /> or <TimeIcon />
-  static const IconData time = _TIcons(0xe0d6);
+  static const IconData time = _TIcons(0xe0db);
 
   /// <icon name="tips" /> or <TipsIcon />
-  static const IconData tips = _TIcons(0xe0d7);
+  static const IconData tips = _TIcons(0xe0dc);
 
   /// <icon name="tools" /> or <ToolsIcon />
-  static const IconData tools = _TIcons(0xe0d8);
+  static const IconData tools = _TIcons(0xe0dd);
+
+  /// <icon name="translate-1" /> or <Translate1Icon />
+  static const IconData translate1 = _TIcons(0xe0de);
+
+  /// <icon name="translate" /> or <TranslateIcon />
+  static const IconData translate = _TIcons(0xe0df);
 
   /// <icon name="unfold-less" /> or <UnfoldLessIcon />
-  static const IconData unfoldLess = _TIcons(0xe0d9);
+  static const IconData unfoldLess = _TIcons(0xe0e0);
 
   /// <icon name="unfold-more" /> or <UnfoldMoreIcon />
-  static const IconData unfoldMore = _TIcons(0xe0da);
+  static const IconData unfoldMore = _TIcons(0xe0e1);
 
   /// <icon name="upload" /> or <UploadIcon />
-  static const IconData upload = _TIcons(0xe0db);
+  static const IconData upload = _TIcons(0xe0e2);
 
   /// <icon name="usb" /> or <UsbIcon />
-  static const IconData usb = _TIcons(0xe0dc);
+  static const IconData usb = _TIcons(0xe0e3);
 
   /// <icon name="user-add" /> or <UserAddIcon />
-  static const IconData userAdd = _TIcons(0xe0dd);
+  static const IconData userAdd = _TIcons(0xe0e4);
 
   /// <icon name="user-avatar" /> or <UserAvatarIcon />
-  static const IconData userAvatar = _TIcons(0xe0de);
+  static const IconData userAvatar = _TIcons(0xe0e5);
 
   /// <icon name="user-circle" /> or <UserCircleIcon />
-  static const IconData userCircle = _TIcons(0xe0df);
+  static const IconData userCircle = _TIcons(0xe0e6);
 
   /// <icon name="user-clear" /> or <UserClearIcon />
-  static const IconData userClear = _TIcons(0xe0e0);
+  static const IconData userClear = _TIcons(0xe0e7);
 
   /// <icon name="user-talk" /> or <UserTalkIcon />
-  static const IconData userTalk = _TIcons(0xe0e1);
+  static const IconData userTalk = _TIcons(0xe0e8);
 
   /// <icon name="user" /> or <UserIcon />
-  static const IconData user = _TIcons(0xe0e2);
+  static const IconData user = _TIcons(0xe0e9);
 
   /// <icon name="usergroup-add" /> or <UsergroupAddIcon />
-  static const IconData usergroupAdd = _TIcons(0xe0e3);
+  static const IconData usergroupAdd = _TIcons(0xe0ea);
 
   /// <icon name="usergroup-clear" /> or <UsergroupClearIcon />
-  static const IconData usergroupClear = _TIcons(0xe0e4);
+  static const IconData usergroupClear = _TIcons(0xe0eb);
 
   /// <icon name="usergroup" /> or <UsergroupIcon />
-  static const IconData usergroup = _TIcons(0xe0e5);
+  static const IconData usergroup = _TIcons(0xe0ec);
 
   /// <icon name="video" /> or <VideoIcon />
-  static const IconData video = _TIcons(0xe0e6);
+  static const IconData video = _TIcons(0xe0ed);
 
   /// <icon name="view-column" /> or <ViewColumnIcon />
-  static const IconData viewColumn = _TIcons(0xe0e7);
+  static const IconData viewColumn = _TIcons(0xe0ee);
 
   /// <icon name="view-list" /> or <ViewListIcon />
-  static const IconData viewList = _TIcons(0xe0e8);
+  static const IconData viewList = _TIcons(0xe0ef);
 
   /// <icon name="view-module" /> or <ViewModuleIcon />
-  static const IconData viewModule = _TIcons(0xe0e9);
+  static const IconData viewModule = _TIcons(0xe0f0);
 
   /// <icon name="wallet" /> or <WalletIcon />
-  static const IconData wallet = _TIcons(0xe0ea);
+  static const IconData wallet = _TIcons(0xe0f1);
 
   /// <icon name="wifi" /> or <WifiIcon />
-  static const IconData wifi = _TIcons(0xe0eb);
+  static const IconData wifi = _TIcons(0xe0f2);
 
   /// <icon name="zoom-in" /> or <ZoomInIcon />
-  static const IconData zoomIn = _TIcons(0xe0ec);
+  static const IconData zoomIn = _TIcons(0xe0f3);
 
   /// <icon name="zoom-out" /> or <ZoomOutIcon />
-  static const IconData zoomOut = _TIcons(0xe0ed);
+  static const IconData zoomOut = _TIcons(0xe0f4);
 
   static const Map<String, IconData> allIcons = {
     'addCircle': addCircle,
@@ -751,6 +772,10 @@ class TIcons {
     'arrowDown': arrowDown,
     'arrowLeft': arrowLeft,
     'arrowRight': arrowRight,
+    'arrowTriangleDownFilled': arrowTriangleDownFilled,
+    'arrowTriangleDown': arrowTriangleDown,
+    'arrowTriangleUpFilled': arrowTriangleUpFilled,
+    'arrowTriangleUp': arrowTriangleUp,
     'arrowUp': arrowUp,
     'attach': attach,
     'backtopRectangle': backtopRectangle,
@@ -895,6 +920,7 @@ class TIcons {
     'menuUnfold': menuUnfold,
     'minusCircleFilled': minusCircleFilled,
     'minusCircle': minusCircle,
+    'minusRectangleFilled': minusRectangleFilled,
     'minusRectangle': minusRectangle,
     'mirror': mirror,
     'mobileVibrate': mobileVibrate,
@@ -959,6 +985,8 @@ class TIcons {
     'time': time,
     'tips': tips,
     'tools': tools,
+    'translate1': translate1,
+    'translate': translate,
     'unfoldLess': unfoldLess,
     'unfoldMore': unfoldMore,
     'upload': upload,
