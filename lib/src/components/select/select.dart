@@ -368,7 +368,7 @@ class _TSelectState extends TFormItemValidateState<TSelect> {
     if (widget.multiple) {
       return (value as List).map((e) => optionMap[e]).toList();
     } else {
-      if (value == null) {
+      if (value == null || optionMap[value] == null) {
         return [];
       } else {
         return [optionMap[value]];

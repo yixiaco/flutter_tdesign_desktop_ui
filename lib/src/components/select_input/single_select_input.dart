@@ -242,8 +242,14 @@ class _TSingleSelectInputState<T extends SelectInputValue> extends State<TSingle
       disabled: widget.disabled || widget.readonly,
       showDuration: widget.showDuration,
       hideDuration: widget.hideDuration,
-      onOpen: widget.onOpen,
-      onClose: widget.onClose,
+      onOpen: () {
+        widget.onOpen?.call();
+        widget.onPopupVisibleChange?.call(true);
+      },
+      onClose: () {
+        widget.onClose?.call();
+        widget.onPopupVisibleChange?.call(false);
+      },
       destroyOnClose: widget.destroyOnClose,
       visible: widget.popupVisible,
       style: TPopupStyle(

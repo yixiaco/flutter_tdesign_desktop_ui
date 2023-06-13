@@ -13,6 +13,10 @@ class _Theme extends StateNotifier<TThemeData> {
     state = brightness == Brightness.light ? TThemeData.light() : TThemeData.dark();
   }
 
+  void setThemeData(TThemeData themeData){
+    state = themeData;
+  }
+
   void toggle() {
     setBrightness(state.brightness == Brightness.light ? Brightness.dark : Brightness.light);
   }

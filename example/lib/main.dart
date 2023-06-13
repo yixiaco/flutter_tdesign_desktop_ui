@@ -365,10 +365,46 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
     )
   ];
 
+  late List<TOption> themeOptions;
+  static final TThemeData cyan =
+      TThemeData(brightness: Brightness.light, colorScheme: TColorScheme.lightOf(TColors.cyan));
+  static final TThemeData purple =
+      TThemeData(brightness: Brightness.light, colorScheme: TColorScheme.lightOf(TColors.purple));
+  static final TThemeData yellow =
+      TThemeData(brightness: Brightness.light, colorScheme: TColorScheme.lightOf(TColors.yellow));
+  static final TThemeData pink =
+      TThemeData(brightness: Brightness.light, colorScheme: TColorScheme.lightOf(TColors.pink));
+  static final TThemeData cyanDark =
+      TThemeData(brightness: Brightness.dark, colorScheme: TColorScheme.darkOf(TColors.cyanDark));
+  static final TThemeData purpleDark =
+      TThemeData(brightness: Brightness.dark, colorScheme: TColorScheme.darkOf(TColors.purpleDark));
+  static final TThemeData yellowDark =
+      TThemeData(brightness: Brightness.dark, colorScheme: TColorScheme.darkOf(TColors.yellowDark));
+  static final TThemeData pinkDark =
+      TThemeData(brightness: Brightness.dark, colorScheme: TColorScheme.darkOf(TColors.pinkDark));
+
   @override
   void initState() {
     super.initState();
     menuController = TMenuController();
+    themeOptions = [
+      TSelectOptionGroup(group: '默认主题', children: [
+        TSelectOption(label: '亮主题', value: TThemeData.light()),
+        TSelectOption(label: '暗主题', value: TThemeData.dark()),
+      ]),
+      TSelectOptionGroup(group: '亮主题', children: [
+        TSelectOption(label: '天蓝色', value: cyan),
+        TSelectOption(label: '紫色', value: purple),
+        TSelectOption(label: '黄色', value: yellow),
+        TSelectOption(label: '粉红色', value: pink),
+      ]),
+      TSelectOptionGroup(group: '暗主题', children: [
+        TSelectOption(label: '天蓝色', value: cyanDark),
+        TSelectOption(label: '紫色', value: purpleDark),
+        TSelectOption(label: '黄色', value: yellowDark),
+        TSelectOption(label: '粉红色', value: pinkDark),
+      ]),
+    ];
   }
 
   @override
@@ -413,74 +449,85 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
       child: TSingleChildScrollView(
         scrollDirection: Axis.horizontal,
         primary: false,
-        child: TSpace(
-          children: [
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text('主题：'),
-                TButton(
-                  onPressed: () => ref.read(themeProvider.notifier).toggle(),
-                  child: Text(theme.brightness == Brightness.light ? '亮' : '暗'),
-                ),
-              ],
-            ),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text('语义：'),
-                TButton(
-                  onPressed: () => ref.read(semanticsProvider.notifier).update((state) => !state),
-                  child: Text(semantics ? '隐藏语义' : '显示语义'),
-                ),
-              ],
-            ),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text('布局大小：'),
-                TRadioGroup<TComponentSize>(
-                  variant: TRadioVariant.defaultFilled,
-                  options: [
-                    TRadioOption<TComponentSize>(label: const Text('小'), value: TComponentSize.small),
-                    TRadioOption<TComponentSize>(label: const Text('中'), value: TComponentSize.medium),
-                    TRadioOption<TComponentSize>(label: const Text('大'), value: TComponentSize.large),
-                  ],
-                  value: size,
-                  onChange: (value) => ref.read(sizeProvider.notifier).state = value!,
-                ),
-              ],
-            ),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text('国际化：'),
-                TSelect(
-                  value: locale,
-                  autoWidth: true,
-                  options: const [
-                    TSelectOption(label: '中文', value: Locale('zh', 'CN')),
-                    TSelectOption(label: 'English', value: Locale('en', 'US')),
-                    TSelectOption(label: '日本語', value: Locale('ja', 'JP')),
-                    TSelectOption(label: '한글', value: Locale('ko', 'KR')),
-                  ],
-                  onChange: (value, changeContext) {
-                    ref.read(localeProvider.state).state = value!;
-                  },
-                ),
-              ],
-            ),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text('FPS：'),
-                TButton(
-                  onPressed: () => ref.read(fpsProvider.notifier).update((state) => !state),
-                  child: Text(fps ? '关' : '开'),
-                ),
-              ],
-            ),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.only(top: 2.0, left: 2.0),
+          child: TSpace(
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('主题：'),
+                  TSelect(
+                    value: theme,
+                    autoWidth: true,
+                    options: themeOptions,
+                    onChange: (value, changeContext) {
+                      ref.read(themeProvider.notifier).setThemeData(value!);
+                    },
+                  ),
+                  // TButton(
+                  //   onPressed: () => ref.read(themeProvider.notifier).toggle(),
+                  //   child: Text(theme.brightness == Brightness.light ? '亮' : '暗'),
+                  // ),
+                ],
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('语义：'),
+                  TButton(
+                    onPressed: () => ref.read(semanticsProvider.notifier).update((state) => !state),
+                    child: Text(semantics ? '隐藏语义' : '显示语义'),
+                  ),
+                ],
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('布局大小：'),
+                  TRadioGroup<TComponentSize>(
+                    variant: TRadioVariant.defaultFilled,
+                    options: [
+                      TRadioOption<TComponentSize>(label: const Text('小'), value: TComponentSize.small),
+                      TRadioOption<TComponentSize>(label: const Text('中'), value: TComponentSize.medium),
+                      TRadioOption<TComponentSize>(label: const Text('大'), value: TComponentSize.large),
+                    ],
+                    value: size,
+                    onChange: (value) => ref.read(sizeProvider.notifier).state = value!,
+                  ),
+                ],
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('国际化：'),
+                  TSelect(
+                    value: locale,
+                    autoWidth: true,
+                    options: const [
+                      TSelectOption(label: '中文', value: Locale('zh', 'CN')),
+                      TSelectOption(label: 'English', value: Locale('en', 'US')),
+                      TSelectOption(label: '日本語', value: Locale('ja', 'JP')),
+                      TSelectOption(label: '한글', value: Locale('ko', 'KR')),
+                    ],
+                    onChange: (value, changeContext) {
+                      ref.read(localeProvider.state).state = value!;
+                    },
+                  ),
+                ],
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('FPS：'),
+                  TButton(
+                    onPressed: () => ref.read(fpsProvider.notifier).update((state) => !state),
+                    child: Text(fps ? '关' : '开'),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

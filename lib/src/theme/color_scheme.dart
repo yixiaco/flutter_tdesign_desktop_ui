@@ -340,8 +340,13 @@ class TColorScheme with Diagnosticable {
   /// 滚动条轨道颜色，不能是带透明度，否则纵向滚动时，横向滚动条会穿透
   final Color scrollTrackColor;
 
-  /// 亮色模式
+  /// 默认亮色模式
   static TColorScheme get light {
+    return lightOf(TColors.blue);
+  }
+
+  /// 亮色模式-主色
+  static TColorScheme lightOf(MaterialColor brandColor) {
     var fontWhite1 = TColors.white;
     const fontWhite2 = Color(0x8CFFFFFF);
     const fontWhite3 = Color(0x59FFFFFF);
@@ -350,7 +355,6 @@ class TColorScheme with Diagnosticable {
     const fontGray2 = Color(0x99000000);
     const fontGray3 = Color(0x66000000);
     const fontGray4 = Color(0x42000000);
-    var brandColor = TColors.blue;
     return TColorScheme(
       brandColor: brandColor,
       warningColor: TColors.orange,
@@ -450,8 +454,13 @@ class TColorScheme with Diagnosticable {
     );
   }
 
-  /// 暗黑模式
+  /// 默认暗黑模式
   static TColorScheme get dark {
+    return darkOf(TColors.blueDark1);
+  }
+
+  /// 暗黑模式-主色
+  static TColorScheme darkOf(MaterialColor brandColor) {
     const fontWhite1 = Color(0xE5FFFFFF);
     const fontWhite2 = Color(0x8CFFFFFF);
     const fontWhite3 = Color(0x59FFFFFF);
@@ -460,7 +469,6 @@ class TColorScheme with Diagnosticable {
     const fontGray2 = Color(0x99000000);
     const fontGray3 = Color(0x66000000);
     const fontGray4 = Color(0x42000000);
-    var brandColor = TColors.blueDark1;
     var warningColor = TColors.orangeDark1;
     var errorColor = TColors.redDark1;
     var successColor = TColors.greenDark1;
