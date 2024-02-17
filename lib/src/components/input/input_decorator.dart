@@ -39,10 +39,8 @@ class _TDecoratorData extends ParentDataWidget<_TDecoratorParentData> {
       needsLayout = true;
     }
     if (needsLayout) {
-      final AbstractNode? targetParent = renderObject.parent;
-      if (targetParent is RenderObject) {
-        targetParent.markNeedsLayout();
-      }
+      final RenderObject? targetParent = renderObject.parent;
+      targetParent?.markNeedsLayout();
     }
   }
 

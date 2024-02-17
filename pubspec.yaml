@@ -1,11 +1,11 @@
 name: tdesign_desktop_ui
 description: TDesign的Flutter实现,适配桌面端的组件库
-version: 0.0.1
+version: 0.1.0
 homepage: https://github.com/yixiaco/flutter_tdesign_desktop_ui
 
 environment:
-  sdk: ">=3.0.0 <4.0.0"
-  flutter: ">=3.10.0"
+  sdk: ">=3.3.0 <4.0.0"
+  flutter: ">=3.16.0"
 
 dependencies:
   flutter:

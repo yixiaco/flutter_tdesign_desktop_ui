@@ -375,40 +375,20 @@ class _TButton extends StatelessWidget {
           case TButtonThemeStyle.defaultStyle:
             break;
           case TButtonThemeStyle.primary:
-            if (isGhost) {
-              foregroundColor = foregroundColorResolve('primary', ghost: true);
-              borderSide = borderSideResolve('primary', ghost: true);
-            } else {
-              foregroundColor = foregroundColorResolve('primary');
-              borderSide = borderSideResolve('primary');
-            }
+            foregroundColor = foregroundColorResolve('primary', ghost: isGhost);
+            borderSide = borderSideResolve('primary', ghost: isGhost);
             break;
           case TButtonThemeStyle.danger:
-            if (isGhost) {
-              foregroundColor = foregroundColorResolve('danger', ghost: true);
-              borderSide = borderSideResolve('danger', ghost: true);
-            } else {
-              foregroundColor = foregroundColorResolve('danger');
-              borderSide = borderSideResolve('danger');
-            }
+            foregroundColor = foregroundColorResolve('danger', ghost: isGhost);
+            borderSide = borderSideResolve('danger', ghost: isGhost);
             break;
           case TButtonThemeStyle.warning:
-            if (isGhost) {
-              foregroundColor = foregroundColorResolve('warning', ghost: true);
-              borderSide = borderSideResolve('warning', ghost: true);
-            } else {
-              foregroundColor = foregroundColorResolve('warning');
-              borderSide = borderSideResolve('warning');
-            }
+            foregroundColor = foregroundColorResolve('warning', ghost: isGhost);
+            borderSide = borderSideResolve('warning', ghost: isGhost);
             break;
           case TButtonThemeStyle.success:
-            if (isGhost) {
-              foregroundColor = foregroundColorResolve('success', ghost: true);
-              borderSide = borderSideResolve('success', ghost: true);
-            } else {
-              foregroundColor = foregroundColorResolve('success');
-              borderSide = borderSideResolve('success');
-            }
+            foregroundColor = foregroundColorResolve('success', ghost: isGhost);
+            borderSide = borderSideResolve('success', ghost: isGhost);
             break;
         }
         break;
@@ -427,40 +407,20 @@ class _TButton extends StatelessWidget {
           case TButtonThemeStyle.defaultStyle:
             break;
           case TButtonThemeStyle.primary:
-            if (isGhost) {
-              foregroundColor = foregroundColorResolve('primary', ghost: true);
-              borderSide = borderSideResolve('primary', ghost: true);
-            } else {
-              foregroundColor = foregroundColorResolve('primary');
-              borderSide = borderSideResolve('primary');
-            }
+            foregroundColor = foregroundColorResolve('primary', ghost: isGhost);
+            borderSide = borderSideResolve('primary', ghost: isGhost);
             break;
           case TButtonThemeStyle.danger:
-            if (isGhost) {
-              foregroundColor = foregroundColorResolve('danger', ghost: true);
-              borderSide = borderSideResolve('danger', ghost: true);
-            } else {
-              foregroundColor = foregroundColorResolve('danger');
-              borderSide = borderSideResolve('danger');
-            }
+            foregroundColor = foregroundColorResolve('danger', ghost: isGhost);
+            borderSide = borderSideResolve('danger', ghost: isGhost);
             break;
           case TButtonThemeStyle.warning:
-            if (isGhost) {
-              foregroundColor = foregroundColorResolve('warning', ghost: true);
-              borderSide = borderSideResolve('warning', ghost: true);
-            } else {
-              foregroundColor = foregroundColorResolve('warning');
-              borderSide = borderSideResolve('warning');
-            }
+            foregroundColor = foregroundColorResolve('warning', ghost: isGhost);
+            borderSide = borderSideResolve('warning', ghost: isGhost);
             break;
           case TButtonThemeStyle.success:
-            if (isGhost) {
-              foregroundColor = foregroundColorResolve('success', ghost: true);
-              borderSide = borderSideResolve('success', ghost: true);
-            } else {
-              foregroundColor = foregroundColorResolve('success');
-              borderSide = borderSideResolve('success');
-            }
+            foregroundColor = foregroundColorResolve('success', ghost: isGhost);
+            borderSide = borderSideResolve('success', ghost: isGhost);
             break;
         }
         break;
@@ -478,32 +438,16 @@ class _TButton extends StatelessWidget {
           case TButtonThemeStyle.defaultStyle:
             break;
           case TButtonThemeStyle.primary:
-            if (isGhost) {
-              foregroundColor = foregroundColorResolve('primary', ghost: true);
-            } else {
-              foregroundColor = foregroundColorResolve('primary');
-            }
+            foregroundColor = foregroundColorResolve('primary', ghost: isGhost);
             break;
           case TButtonThemeStyle.danger:
-            if (isGhost) {
-              foregroundColor = foregroundColorResolve('danger', ghost: true);
-            } else {
-              foregroundColor = foregroundColorResolve('danger');
-            }
+            foregroundColor = foregroundColorResolve('danger', ghost: isGhost);
             break;
           case TButtonThemeStyle.warning:
-            if (isGhost) {
-              foregroundColor = foregroundColorResolve('warning', ghost: true);
-            } else {
-              foregroundColor = foregroundColorResolve('warning');
-            }
+            foregroundColor = foregroundColorResolve('warning', ghost: isGhost);
             break;
           case TButtonThemeStyle.success:
-            if (isGhost) {
-              foregroundColor = foregroundColorResolve('success', ghost: true);
-            } else {
-              foregroundColor = foregroundColorResolve('success');
-            }
+            foregroundColor = foregroundColorResolve('success', ghost: isGhost);
             break;
         }
         break;
@@ -574,7 +518,7 @@ class _TButton extends StatelessWidget {
       EdgeInsets.symmetric(horizontal: horizontal),
       EdgeInsets.symmetric(horizontal: horizontal),
       EdgeInsets.symmetric(horizontal: horizontal / 2),
-      MediaQuery.maybeOf(context)?.textScaleFactor ?? 1,
+      MediaQuery.maybeOf(context)?.textScaler.scale(1) ?? 1,
     );
   }
 

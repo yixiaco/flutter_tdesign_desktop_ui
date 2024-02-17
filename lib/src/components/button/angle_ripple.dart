@@ -109,7 +109,7 @@ class TRipple extends StatefulWidget {
   final RippleFactory? splashFactory;
 
   /// 圆角
-  final BorderRadius? radius;
+  final BorderRadiusGeometry? radius;
 
   /// 形状剪切
   final ShapeBorder? shape;
@@ -213,7 +213,7 @@ class _TRippleState extends State<TRipple> with TickerProviderStateMixin {
             }
             if (widget.radius != null) {
               child = ClipRRect(
-                borderRadius: widget.radius,
+                borderRadius: widget.radius!,
                 child: child,
               );
             }

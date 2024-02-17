@@ -366,22 +366,30 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
   ];
 
   late List<TOption> themeOptions;
-  static final TThemeData cyan =
-      TThemeData(brightness: Brightness.light, colorScheme: TColorScheme.lightOf(TColors.cyan));
-  static final TThemeData purple =
-      TThemeData(brightness: Brightness.light, colorScheme: TColorScheme.lightOf(TColors.purple));
-  static final TThemeData yellow =
-      TThemeData(brightness: Brightness.light, colorScheme: TColorScheme.lightOf(TColors.yellow));
-  static final TThemeData pink =
-      TThemeData(brightness: Brightness.light, colorScheme: TColorScheme.lightOf(TColors.pink));
-  static final TThemeData cyanDark =
-      TThemeData(brightness: Brightness.dark, colorScheme: TColorScheme.darkOf(TColors.cyanDark));
-  static final TThemeData purpleDark =
-      TThemeData(brightness: Brightness.dark, colorScheme: TColorScheme.darkOf(TColors.purpleDark));
-  static final TThemeData yellowDark =
-      TThemeData(brightness: Brightness.dark, colorScheme: TColorScheme.darkOf(TColors.yellowDark));
-  static final TThemeData pinkDark =
-      TThemeData(brightness: Brightness.dark, colorScheme: TColorScheme.darkOf(TColors.pinkDark));
+  static final TThemeData cyan = TThemeData(
+      brightness: Brightness.light,
+      colorScheme: TColorScheme.lightOf(TColors.cyan));
+  static final TThemeData purple = TThemeData(
+      brightness: Brightness.light,
+      colorScheme: TColorScheme.lightOf(TColors.purple));
+  static final TThemeData yellow = TThemeData(
+      brightness: Brightness.light,
+      colorScheme: TColorScheme.lightOf(TColors.yellow));
+  static final TThemeData pink = TThemeData(
+      brightness: Brightness.light,
+      colorScheme: TColorScheme.lightOf(TColors.pink));
+  static final TThemeData cyanDark = TThemeData(
+      brightness: Brightness.dark,
+      colorScheme: TColorScheme.darkOf(TColors.cyanDark));
+  static final TThemeData purpleDark = TThemeData(
+      brightness: Brightness.dark,
+      colorScheme: TColorScheme.darkOf(TColors.purpleDark));
+  static final TThemeData yellowDark = TThemeData(
+      brightness: Brightness.dark,
+      colorScheme: TColorScheme.darkOf(TColors.yellowDark));
+  static final TThemeData pinkDark = TThemeData(
+      brightness: Brightness.dark,
+      colorScheme: TColorScheme.darkOf(TColors.pinkDark));
 
   @override
   void initState() {
@@ -420,30 +428,34 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
     var size = ref.watch(sizeProvider);
     var locale = ref.watch(localeProvider);
 
-    Widget child = Scaffold(
+    Widget child = TContent(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: content,
+      ),
+    );
+
+    if (semantics) {
+      child = SemanticsDebugger(
+        child: child,
+      );
+    }
+
+    return Scaffold(
       // backgroundColor: theme.brightness == Brightness.light ? const Color(0xFFEEEEEE) : Colors.black,
-      backgroundColor: theme.brightness == Brightness.light ? Colors.white : Colors.black,
+      backgroundColor:
+          theme.brightness == Brightness.light ? Colors.white : Colors.black,
       body: TLayout(
         aside: _buildAside(theme),
         header: _buildHeader(theme, semantics, size, locale),
         footer: const TFooter(child: Text('Flutter TDesign Desktop UI')),
-        content: TContent(
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: content,
-          ),
-        ),
+        content: child,
       ),
     );
-    if (semantics) {
-      return SemanticsDebugger(
-        child: child,
-      );
-    }
-    return child;
   }
 
-  Widget _buildHeader(TThemeData theme, bool semantics, TComponentSize size, Locale locale) {
+  Widget _buildHeader(
+      TThemeData theme, bool semantics, TComponentSize size, Locale locale) {
     var fps = ref.watch(fpsProvider);
     return THeader(
       child: TSingleChildScrollView(
@@ -465,10 +477,6 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                       ref.read(themeProvider.notifier).setThemeData(value!);
                     },
                   ),
-                  // TButton(
-                  //   onPressed: () => ref.read(themeProvider.notifier).toggle(),
-                  //   child: Text(theme.brightness == Brightness.light ? '亮' : '暗'),
-                  // ),
                 ],
               ),
               Row(
@@ -476,7 +484,9 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                 children: [
                   const Text('语义：'),
                   TButton(
-                    onPressed: () => ref.read(semanticsProvider.notifier).update((state) => !state),
+                    onPressed: () => ref
+                        .read(semanticsProvider.notifier)
+                        .update((state) => !state),
                     child: Text(semantics ? '隐藏语义' : '显示语义'),
                   ),
                 ],
@@ -488,12 +498,16 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                   TRadioGroup<TComponentSize>(
                     variant: TRadioVariant.defaultFilled,
                     options: [
-                      TRadioOption<TComponentSize>(label: const Text('小'), value: TComponentSize.small),
-                      TRadioOption<TComponentSize>(label: const Text('中'), value: TComponentSize.medium),
-                      TRadioOption<TComponentSize>(label: const Text('大'), value: TComponentSize.large),
+                      TRadioOption<TComponentSize>(
+                          label: const Text('小'), value: TComponentSize.small),
+                      TRadioOption<TComponentSize>(
+                          label: const Text('中'), value: TComponentSize.medium),
+                      TRadioOption<TComponentSize>(
+                          label: const Text('大'), value: TComponentSize.large),
                     ],
                     value: size,
-                    onChange: (value) => ref.read(sizeProvider.notifier).state = value!,
+                    onChange: (value) =>
+                        ref.read(sizeProvider.notifier).state = value!,
                   ),
                 ],
               ),
@@ -506,7 +520,8 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                     autoWidth: true,
                     options: const [
                       TSelectOption(label: '中文', value: Locale('zh', 'CN')),
-                      TSelectOption(label: 'English', value: Locale('en', 'US')),
+                      TSelectOption(
+                          label: 'English', value: Locale('en', 'US')),
                       TSelectOption(label: '日本語', value: Locale('ja', 'JP')),
                       TSelectOption(label: '한글', value: Locale('ko', 'KR')),
                     ],
@@ -521,7 +536,9 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                 children: [
                   const Text('FPS：'),
                   TButton(
-                    onPressed: () => ref.read(fpsProvider.notifier).update((state) => !state),
+                    onPressed: () => ref
+                        .read(fpsProvider.notifier)
+                        .update((state) => !state),
                     child: Text(fps ? '关' : '开'),
                   ),
                 ],
@@ -556,7 +573,8 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
     }
     return Container(
       decoration: BoxDecoration(
-        border: Border(right: BorderSide(color: theme.colorScheme.borderLevel2Color)),
+        border: Border(
+            right: BorderSide(color: theme.colorScheme.borderLevel2Color)),
       ),
       child: FractionallySizedBox(
         heightFactor: 1,
@@ -572,7 +590,10 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                 collapsed = !collapsed;
               });
             },
-            child: TFakeArrow(placement: collapsed ? TFakeArrowPlacement.right : TFakeArrowPlacement.left),
+            child: TFakeArrow(
+                placement: collapsed
+                    ? TFakeArrowPlacement.right
+                    : TFakeArrowPlacement.left),
             // child: Icon(collapsed ? TIcons.chevronRight : TIcons.chevronLeft),
           ),
         ),
