@@ -59,7 +59,7 @@ import 'package:flutter/widgets.dart';
 class _TIconsData extends IconData {
   const _TIconsData(super.codePoint, this.name)
       : super(
-          fontFamily: 'TIcons',
+          fontFamily: 't',
           fontPackage: 'tdesign_desktop_ui',
         );
 
