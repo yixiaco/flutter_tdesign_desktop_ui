@@ -26,8 +26,8 @@ const _darkColorMap = [
 ];
 
 /// RGB转为HSV
-HSVColor rgbToHsv(int r, int g, int b) {
-  return HSVColor.fromColor(Color.fromRGBO(r, g, b, 1));
+HSVColor rgbToHsv(double r, double g, double b) {
+  return HSVColor.fromColor(Color.from(red: r, green: g, blue: b, alpha: 1));
 }
 
 /// RGB转为HEX，遵循CSS样式风格
@@ -62,9 +62,9 @@ String toHex(Color color) {
 Color mix(Color rgb1, Color rgb2, double amount) {
   final p = amount / 100;
   var rgb = Color.fromRGBO(
-    ((rgb2.red - rgb1.red) * p + rgb1.red).round(),
-    ((rgb2.green - rgb1.green) * p + rgb1.green).round(),
-    ((rgb2.blue - rgb1.blue) * p + rgb1.blue).round(),
+    ((rgb2.r - rgb1.r) * p + rgb1.r).round(),
+    ((rgb2.g - rgb1.g) * p + rgb1.g).round(),
+    ((rgb2.b - rgb1.b) * p + rgb1.b).round(),
     1,
   );
   return rgb;
@@ -135,7 +135,7 @@ List<String> generateOfCssColor(String color, {bool light = true, String? backgr
 List<Color> generate(Color color, {bool light = true, Color? backgroundColor}) {
   var patterns = <Color>[];
   for (var i = _lightColorCount; i > 0; i -= 1) {
-    final hsv = rgbToHsv(color.red, color.green, color.blue);
+    final hsv = rgbToHsv(color.r, color.g, color.b);
     var rgb = hsvToRGB(
       h: _getHue(hsv, i, true),
       s: _getSaturation(hsv, i, true),
@@ -145,7 +145,7 @@ List<Color> generate(Color color, {bool light = true, Color? backgroundColor}) {
   }
   patterns.add(color);
   for (var i = 1; i <= _darkColorCount; i += 1) {
-    final hsv = rgbToHsv(color.red, color.green, color.blue);
+    final hsv = rgbToHsv(color.r, color.g, color.b);
     var rgb = hsvToRGB(
       h: _getHue(hsv, i),
       s: _getSaturation(hsv, i),

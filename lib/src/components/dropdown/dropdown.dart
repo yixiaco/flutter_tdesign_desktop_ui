@@ -353,7 +353,7 @@ class _TDropdownItem<T> extends StatelessWidget {
             Widget? suffix;
             if (option.children?.isNotEmpty ?? false) {
               suffix = Icon(
-                TIcons.chevronRight,
+                TIcons.chevron_right,
                 size: theme.fontData.fontSizeL,
                 color: effectiveTextColor.resolve(states),
               );

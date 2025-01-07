@@ -737,16 +737,16 @@ class _TRawDialogState extends State<TRawDialog> {
       case TDialogTheme.defaultTheme:
         break;
       case TDialogTheme.info:
-        icon = Icon(TIcons.infoCircleFilled, size: iconSize, color: colorScheme.brandColor);
+        icon = Icon(TIcons.info_circle_filled, size: iconSize, color: colorScheme.brandColor);
         break;
       case TDialogTheme.warning:
-        icon = Icon(TIcons.errorCircleFilled, size: iconSize, color: colorScheme.warningColor);
+        icon = Icon(TIcons.error_circle_filled, size: iconSize, color: colorScheme.warningColor);
         break;
       case TDialogTheme.danger:
-        icon = Icon(TIcons.errorCircleFilled, size: iconSize, color: colorScheme.errorColor);
+        icon = Icon(TIcons.error_circle_filled, size: iconSize, color: colorScheme.errorColor);
         break;
       case TDialogTheme.success:
-        icon = Icon(TIcons.checkCircleFilled, size: iconSize, color: colorScheme.successColor);
+        icon = Icon(TIcons.check_circle_filled, size: iconSize, color: colorScheme.successColor);
         break;
     }
 

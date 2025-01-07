@@ -72,7 +72,7 @@ class TBreadcrumb extends StatelessWidget {
         child: TSpace(
           spacing: TVar.spacer * .5,
           crossAxisAlignment: CrossAxisAlignment.center,
-          separator: separator ?? const Icon(TIcons.chevronRight),
+          separator: separator ?? const Icon(TIcons.chevron_right),
           breakLine: true,
           children: children,
         ),

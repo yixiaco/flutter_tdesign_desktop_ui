@@ -119,21 +119,21 @@ class _TProgressState extends AnimatedWidgetBaseState<TProgress> {
               color: colorScheme.successColor,
               size: iconSize,
             );
-            label ??= const Icon(TIcons.checkCircleFilled);
+            label ??= const Icon(TIcons.check_circle_filled);
             break;
           case TProgressStatus.error:
             iconThemeData = IconThemeData(
               color: colorScheme.errorColor,
               size: iconSize,
             );
-            label ??= const Icon(TIcons.closeCircleFilled);
+            label ??= const Icon(TIcons.close_circle_filled);
             break;
           case TProgressStatus.warning:
             iconThemeData = IconThemeData(
               color: colorScheme.warningColor,
               size: iconSize,
             );
-            label ??= const Icon(TIcons.errorCircleFilled);
+            label ??= const Icon(TIcons.error_circle_filled);
             break;
           default:
             label ??= Text('${(percentage).round()}%');

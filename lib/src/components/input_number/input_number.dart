@@ -289,7 +289,7 @@ class _TInputNumberState<T> extends TFormItemValidateState<TInputNumber<T>> {
                 radius: const BorderRadius.only(topRight: Radius.circular(2)),
                 softWrap: true,
                 onPressed: _handleAdd,
-                child: _buildRightIcon(colorScheme, size, theme, TIcons.chevronUp),
+                child: _buildRightIcon(colorScheme, size, theme, TIcons.chevron_up),
               ),
               const SizedBox(height: 2),
               TButton(
@@ -298,7 +298,7 @@ class _TInputNumberState<T> extends TFormItemValidateState<TInputNumber<T>> {
                 radius: const BorderRadius.only(bottomRight: Radius.circular(2)),
                 softWrap: true,
                 onPressed: _handleRemove,
-                child: _buildRightIcon(colorScheme, size, theme, TIcons.chevronDown),
+                child: _buildRightIcon(colorScheme, size, theme, TIcons.chevron_down),
               ),
             ],
           ),

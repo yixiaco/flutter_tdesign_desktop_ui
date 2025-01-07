@@ -719,7 +719,7 @@ class _TInputState extends TFormItemValidateState<TInput> {
       if (widget.prefixIcon == null) {
         prefixIconList.add(Padding(
           padding: EdgeInsets.only(right: TVar.spacer),
-          child: Icon(TIcons.lockOn, color: iconColor),
+          child: Icon(TIcons.lock_on, color: iconColor),
         ));
       }
       suffixIconList.add(
@@ -729,7 +729,7 @@ class _TInputState extends TFormItemValidateState<TInput> {
             onTap: () => setState(() {
               look = !look;
             }),
-            child: Icon(look ? TIcons.browse : TIcons.browseOff, color: colorScheme.textColorPlaceholder),
+            child: Icon(look ? TIcons.browse : TIcons.browse_off, color: colorScheme.textColorPlaceholder),
           ),
         ),
       );
@@ -1112,7 +1112,7 @@ class TClearIcon extends StatelessWidget {
             onTap: onClick,
             child: Visibility(
               visible: value,
-              child: Icon(TIcons.closeCircleFilled, color: colorScheme.textColorPlaceholder),
+              child: Icon(TIcons.close_circle_filled, color: colorScheme.textColorPlaceholder),
             ),
           ),
         );

@@ -93,22 +93,22 @@ class _TAlertState extends State<TAlert> {
       case TAlertTheme.success:
         backgroundColor = colorScheme.successColor2;
         iconColor = colorScheme.successColor;
-        icon ??= const Icon(TIcons.checkCircleFilled);
+        icon ??= const Icon(TIcons.check_circle_filled);
         break;
       case TAlertTheme.info:
         backgroundColor = colorScheme.brandColorFocus;
         iconColor = colorScheme.brandColor;
-        icon ??= const Icon(TIcons.infoCircleFilled);
+        icon ??= const Icon(TIcons.info_circle_filled);
         break;
       case TAlertTheme.warning:
         backgroundColor = colorScheme.warningColor2;
         iconColor = colorScheme.warningColor;
-        icon ??= const Icon(TIcons.errorCircleFilled);
+        icon ??= const Icon(TIcons.error_circle_filled);
         break;
       case TAlertTheme.error:
         backgroundColor = colorScheme.errorColor2;
         iconColor = colorScheme.errorColor;
-        icon ??= const Icon(TIcons.errorCircleFilled);
+        icon ??= const Icon(TIcons.error_circle_filled);
         break;
     }
     // 操作按钮

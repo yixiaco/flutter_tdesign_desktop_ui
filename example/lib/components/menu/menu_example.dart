@@ -127,13 +127,13 @@ class _TMenuExampleState extends State<TMenuExample> {
     ),
     const TMenuItemProps(
       value: 'user-circle',
-      icon: Icon(TIcons.userCircle),
+      icon: Icon(TIcons.user_circle),
       content: Text('个人中心'),
     ),
     const TSubMenuProps<String>(
       value: '4',
       title: Text('视频区'),
-      icon: Icon(TIcons.playCircle),
+      icon: Icon(TIcons.play_circle),
       children: [
         TMenuItemProps(
           value: '4-1',
@@ -153,12 +153,12 @@ class _TMenuExampleState extends State<TMenuExample> {
       TMenuItemProps(
         value: 'edit1',
         disabled: true,
-        icon: Icon(TIcons.edit1),
+        icon: Icon(TIcons.edit_1),
         content: Text('资源编辑1'),
       ),
       TMenuItemProps(
         value: 'edit2',
-        icon: Icon(TIcons.edit1),
+        icon: Icon(TIcons.edit_1),
         content: Text('资源编辑2'),
       ),
     ]),
@@ -220,7 +220,7 @@ class _TMenuExampleState extends State<TMenuExample> {
                             collapsed = !collapsed;
                           });
                         },
-                        child: Icon(collapsed ? TIcons.chevronRight : TIcons.chevronLeft),
+                        child: Icon(collapsed ? TIcons.chevron_right : TIcons.chevron_left),
                       ),
                     ),
                   ),
@@ -239,7 +239,7 @@ class _TMenuExampleState extends State<TMenuExample> {
                       collapsed = !collapsed;
                     });
                   },
-                  child: Icon(collapsed ? TIcons.chevronRight : TIcons.chevronLeft),
+                  child: Icon(collapsed ? TIcons.chevron_right : TIcons.chevron_left),
                 ),
               )
             ],

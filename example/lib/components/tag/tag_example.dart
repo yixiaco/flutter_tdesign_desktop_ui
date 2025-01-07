@@ -20,7 +20,7 @@ class _TTagExampleState extends State<TTagExample> {
         const TSpace(
           children: [
             TTag(
-              icon: Icon(TIcons.discountFilled),
+              icon: Icon(TIcons.discount_filled),
               child: Text('标签'),
             ),
             TTag(
@@ -50,7 +50,7 @@ class _TTagExampleState extends State<TTagExample> {
             TTag(
               closable: true,
               theme: TTagTheme.link,
-              icon: Icon(TIcons.logoWecom),
+              icon: Icon(TIcons.logo_wecom),
               child: Text('标签'),
             ),
           ],

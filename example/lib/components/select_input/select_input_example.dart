@@ -52,7 +52,7 @@ class _TSelectInputExampleState extends State<TSelectInputExample> {
           focusNode: singleFocusNode,
           // allowInput: true,
           clearable: true,
-          suffixIcon: const Icon(TIcons.chevronDown),
+          suffixIcon: const Icon(TIcons.chevron_down),
           popupStyle: const TPopupStyle(constraints: BoxConstraints(maxHeight: 280)),
           popupVisible: _singlePopupVisible,
           singleValueDisplay: (value) => value != null ? '${value.label} Student' : '',
@@ -93,7 +93,7 @@ class _TSelectInputExampleState extends State<TSelectInputExample> {
             // readonly: true,
             clearable: true,
             popupVisible: _multiplePopupVisible,
-            suffixIcon: const Icon(TIcons.chevronDown),
+            suffixIcon: const Icon(TIcons.chevron_down),
             onTagChange: (value, context) {
               if (context.trigger == TagInputTriggerSource.clear || context.trigger == TagInputTriggerSource.reset) {
                 setState(() {

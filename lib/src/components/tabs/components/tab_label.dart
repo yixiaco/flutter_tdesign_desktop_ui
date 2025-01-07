@@ -312,7 +312,7 @@ class _TabsLabelState<T> extends State<_TabsLabel<T>> with SingleTickerProviderS
                 children: [
                   _TabIconButton(
                     size: widget.size,
-                    icon: TIcons.chevronLeft,
+                    icon: TIcons.chevron_left,
                     right: false,
                     showShadow: true,
                     onTap: () {
@@ -339,7 +339,7 @@ class _TabsLabelState<T> extends State<_TabsLabel<T>> with SingleTickerProviderS
                   children: [
                     _TabIconButton(
                       size: widget.size,
-                      icon: TIcons.chevronRight,
+                      icon: TIcons.chevron_right,
                       showShadow: true,
                       onTap: () {
                         var offset = min(

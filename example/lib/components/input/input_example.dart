@@ -66,7 +66,7 @@ class TInputExample extends StatelessWidget {
           suffix: Text('元'),
           obscuringCharacter: '*',
           showLimitNumber: true,
-          prefixIcon: Icon(TIcons.lockOn),
+          prefixIcon: Icon(TIcons.lock_on),
         ),
         TInput(
           showClearIconOnEmpty: true,

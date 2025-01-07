@@ -31,7 +31,7 @@ class TIconExample extends StatelessWidget {
         itemBuilder: (context, index) {
           return TMaterialStateButton(
             builder: (context, states) {
-              var entry = TIcons.allIcons.entries.elementAt(index);
+              var entry = TIcons.all.entries.elementAt(index);
               var icon = entry.value;
 
               var component = MaterialStateProperty.resolveWith((states) {
@@ -47,7 +47,7 @@ class TIconExample extends StatelessWidget {
                           },
                           builder: (context, states) {
                             return Icon(
-                              TIcons.fileCopy,
+                              TIcons.file_copy,
                               size: 16,
                               color: iconColor.resolve(states),
                             );
@@ -60,7 +60,7 @@ class TIconExample extends StatelessWidget {
                           },
                           builder: (context, states) {
                             return Icon(
-                              TIcons.fileIcon,
+                              TIcons.file_icon,
                               size: 16,
                               color: iconColor.resolve(states),
                             );
@@ -98,7 +98,7 @@ class TIconExample extends StatelessWidget {
             },
           );
         },
-        itemCount: TIcons.allIcons.length,
+        itemCount: TIcons.all.length,
       ),
     );
   }

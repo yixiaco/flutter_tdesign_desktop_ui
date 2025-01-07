@@ -250,21 +250,21 @@ class TFormItemState extends State<TFormItem> {
       switch (_currentStatus!) {
         case TFormItemStatus.success:
           defaultStatusIcon = Icon(
-            TIcons.checkCircleFilled,
+            TIcons.check_circle_filled,
             size: TVar.lineHeightS,
             color: colorScheme.successColor,
           );
           break;
         case TFormItemStatus.error:
           defaultStatusIcon = Icon(
-            TIcons.closeCircleFilled,
+            TIcons.close_circle_filled,
             size: TVar.lineHeightS,
             color: colorScheme.errorColor,
           );
           break;
         case TFormItemStatus.warning:
           defaultStatusIcon = Icon(
-            TIcons.errorCircleFilled,
+            TIcons.error_circle_filled,
             size: TVar.lineHeightS,
             color: colorScheme.warningColor,
           );

@@ -16,7 +16,7 @@ class TBreadcrumbExample extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(TIcons.books),
+                  Icon(TIcons.link),
                   Text('页面1'),
                 ],
               ),
