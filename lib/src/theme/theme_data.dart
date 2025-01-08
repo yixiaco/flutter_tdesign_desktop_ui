@@ -1,8 +1,7 @@
 import 'dart:ui';
 
-import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
+import 'package:flutter/widgets.dart';
 import 'package:tdesign_desktop_ui/tdesign_desktop_ui.dart';
 
 /// 主题常量
@@ -163,11 +162,21 @@ class TThemeData with Diagnosticable {
 
   List<BoxShadow> get shadow3Inset => [...shadow3, ...shadowInset];
 
+  /// 根据主题颜色创建主题
+  factory TThemeData.formBrightness(Brightness brightness) => brightness == Brightness.light ? TThemeData.light() : TThemeData.dark();
+
   /// 默认的亮色样式
   factory TThemeData.light() => TThemeData(brightness: Brightness.light);
 
   /// 默认的暗黑样式
   factory TThemeData.dark() => TThemeData(brightness: Brightness.dark);
+
+  /// 根据平台自动选择主题
+  ///
+  /// [context] 构建上下文
+  factory TThemeData.auto(BuildContext context) {
+    return TThemeData.formBrightness(MediaQuery.platformBrightnessOf(context));
+  }
 
   /// 通用字体大小
   double get fontSize => size.lazySizeOf(

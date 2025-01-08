@@ -1,7 +1,7 @@
 import 'dart:core';
 
 import 'package:dartx/dartx.dart';
-import 'package:flutter/painting.dart';
+import 'package:flutter/material.dart';
 
 const _hueStep = 2; // 色相阶梯
 const _saturationStep = 0.16; // 饱和度阶梯，浅色部分
@@ -165,4 +165,21 @@ List<Color> generate(Color color, {bool light = true, Color? backgroundColor}) {
     }).toList();
   }
   return patterns;
+}
+
+/// 生成 MaterialColor
+MaterialColor generateMaterialColor(Color color, {bool light = true, Color? backgroundColor}) {
+  var colors = generate(color, light: light, backgroundColor: backgroundColor);
+  return MaterialColor(color.value, {
+    50: colors[0],
+    100: colors[1],
+    200: colors[2],
+    300: colors[3],
+    400: colors[4],
+    500: colors[5],
+    600: colors[6],
+    700: colors[7],
+    800: colors[8],
+    900: colors[9],
+  });
 }
