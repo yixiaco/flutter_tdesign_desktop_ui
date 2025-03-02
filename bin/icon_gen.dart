@@ -66,9 +66,7 @@ class _TIconsData extends IconData {
   final String name;
 }
 
-
 class TIcons {
-
   /// 私有构造方法，不支持外部创建，仅提供静态常量给外部使用
   const TIcons._();
 ''';

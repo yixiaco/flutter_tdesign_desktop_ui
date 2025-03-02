@@ -526,7 +526,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> {
                       TSelectOption(label: '한글', value: Locale('ko', 'KR')),
                     ],
                     onChange: (value, changeContext) {
-                      ref.read(localeProvider.state).state = value!;
+                      ref.read(localeProvider.notifier).state = value!;
                     },
                   ),
                 ],

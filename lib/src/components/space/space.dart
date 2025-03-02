@@ -125,18 +125,6 @@ class TSpace extends StatelessWidget {
             ),
           );
         } else {
-          var children = list;
-          // 间距
-          if (children.isNotEmpty && space > 0) {
-            Widget sizedBox;
-            if (direction == Axis.horizontal) {
-              sizedBox = SizedBox(width: space);
-            } else {
-              sizedBox = SizedBox(height: space);
-            }
-            children = list.expand((element) => [element, sizedBox]).toList();
-            children.removeLast();
-          }
           return Flex(
             direction: direction,
             mainAxisAlignment: align,
@@ -146,7 +134,8 @@ class TSpace extends StatelessWidget {
             verticalDirection: verticalDirection,
             clipBehavior: clipBehavior,
             textBaseline: textBaseline,
-            children: children,
+            spacing: space,
+            children: list,
           );
         }
       },
